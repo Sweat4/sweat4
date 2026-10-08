@@ -12,7 +12,7 @@
 <meta name="apple-mobile-web-app-title" content="SWEAT4">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20400%20400%22%3E%3Ccircle%20cx%3D%22200%22%20cy%3D%22200%22%20r%3D%22200%22%20fill%3D%22%23111111%22/%3E%3Cpath%20fill%3D%22%23BE9B5C%22%20transform%3D%22translate%28-23%2C-23%29%22%20d%3D%22M212.5%2C70%20L247%2C70%20L170%2C224%20L286.3%2C224%20L286.3%2C254%20L136.3%2C254%20L136.3%2C224%20Z%20M194.2%2C226%20C194.4%2C223.6%20194.0%2C217.1%20195.4%2C212.0%20C196.7%2C206.8%20198.8%2C201.1%20202.5%2C195.0%20C206.1%2C188.8%20212.0%2C181.6%20217.5%2C175.0%20C223.0%2C168.3%20230.7%2C161.3%20235.5%2C155.0%20C240.3%2C148.6%20243.7%2C141.8%20246.3%2C137.0%20C248.8%2C132.1%20249.8%2C127.8%20250.6%2C126.0%20C251.0%2C128.0%20253.0%2C133.5%20253.0%2C138.0%20C253.0%2C142.5%20252.1%2C147.1%20250.6%2C153.0%20C249.0%2C158.8%20246.8%2C166.3%20243.6%2C173.0%20C240.3%2C179.6%20235.3%2C186.6%20231.0%2C193.0%20C226.6%2C199.3%20220.5%2C205.5%20217.4%2C211.0%20C214.2%2C216.5%20213.1%2C223.5%20212.3%2C226.0%20Z%20M229.0%2C226%20C229.7%2C224.0%20230.3%2C218.1%20233.2%2C214.0%20C236.0%2C209.8%20242.3%2C205.5%20246.0%2C201.0%20C249.6%2C196.5%20253.0%2C191.6%20255.3%2C187.0%20C257.6%2C182.3%20259.0%2C175.3%20259.8%2C173.0%20C260.6%2C174.6%20263.4%2C179.0%20264.6%2C183.0%20C265.8%2C187.0%20267.3%2C192.1%20267.0%2C197.0%20C266.6%2C201.8%20264.0%2C207.1%20262.6%2C212.0%20C261.1%2C216.8%20259.0%2C223.6%20258.3%2C226.0%20Z%20M163.3%2C257.5%20H274.3%20Q277.3%2C257.5%20277.3%2C260.5%20V264.5%20Q277.3%2C267.5%20274.3%2C267.5%20H163.3%20Q160.3%2C267.5%20160.3%2C264.5%20V260.5%20Q160.3%2C257.5%20163.3%2C257.5%20Z%20M202.0%2C271%20H244.0%20Q245.5%2C271%20245.5%2C272.5%20V351.0%20Q245.5%2C352.5%20244.0%2C352.5%20H202.0%20Q200.5%2C352.5%20200.5%2C351.0%20V272.5%20Q200.5%2C271%20202.0%2C271%20Z%20M184.3%2C352.5%20H261.3%20Q264.3%2C352.5%20264.3%2C355.5%20V360%20Q264.3%2C363%20261.3%2C363%20H184.3%20Q181.3%2C363%20181.3%2C360%20V355.5%20Q181.3%2C352.5%20184.3%2C352.5%20Z%22/%3E%3C/svg%3E">
 <!-- Datenschutz: Diese Richtlinie verbietet der App technisch jede Netzwerkverbindung. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data: blob:; manifest-src 'self'; worker-src 'self'; connect-src 'none'; base-uri 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; manifest-src 'self'; worker-src 'self'; connect-src 'none'; base-uri 'none'">
 <title>SWEAT4 – Trainer-Logbuch</title>
 <style>
 :root{
@@ -562,6 +562,14 @@ img.ld{opacity:1!important}
 .sheet{animation:slide var(--t-mid) var(--ease)}
 .view{animation:fade var(--t-mid) var(--ease)}
 @media (prefers-reduced-motion:reduce){.thumb-img,.tap,.fchip{transition:none}.xprev.is-loading::after{animation:none}}
+
+/* Figurwahl & Video */
+.figsw{display:inline-flex;padding:3px;border-radius:999px;background:var(--surface-2);border:1px solid var(--border);flex:none}
+.figsw button{border:none;background:none;color:var(--muted);font:inherit;font-size:13px;font-weight:700;min-height:30px;padding:0 14px;border-radius:999px;cursor:pointer;transition:background var(--t-fast) var(--ease),color var(--t-fast)}
+.figsw button.on{background:var(--gold);color:#111}
+.kat-figrow{display:flex;align-items:center;gap:10px}
+.ud-tags{align-items:center}
+.ud-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#0e0e0e}
 </style>
 </head>
 <body>
@@ -571,6 +579,7 @@ img.ld{opacity:1!important}
 <div id="rest-timer" role="timer" aria-live="polite"></div>
 
 <script src="uebungen-katalog.js"></script>
+<script src="uebungen-medien.js"></script>
 <script>
 'use strict';
 /* =====================================================================
@@ -1185,7 +1194,7 @@ function viewPlan(c) {
           <button class="icon-btn sm danger" data-action="del-day" data-id="${d.id}" aria-label="Trainingstag löschen">${ic('trash', 18)}</button>
         </div>
         ${exs.map((e, j) => `<div class="ex-row"><span class="ex-idx">${j + 1}.</span>
-          <div class="grow" data-action="edit-ex" data-did="${d.id}" data-id="${e.id}" style="cursor:pointer"><div style="font-weight:600">${esc(e.name)}${(k3 => k3 ? ` <button class="chip3d" data-action="open3d" data-id="${k3.id}" aria-label="3D-Ausführung">${ic('cube', 13)} 3D</button>` : '')(katFind(e.name, e.catalogId))}</div>
+          <div class="grow" data-action="edit-ex" data-did="${d.id}" data-id="${e.id}" style="cursor:pointer"><div style="font-weight:600">${esc(e.name)}${(k3 => k3 ? ` <button class="chip3d" data-action="open3d" data-id="${k3.id}" data-fig="${figureForClient(c) || ''}" aria-label="3D-Ausführung">${ic('cube', 13)} 3D</button>` : '')(katFind(e.name, e.catalogId))}</div>
             <div class="ex-meta">${(si => si ? `<span class="tag ss-tag">${si.kind} ${si.label}</span> ` : '')(ssInfo(exs, j))}${esc(planSummary(e))}${(pg => (pg.auto ? ` · <span class="accent">↗ +${fmtNum(pg.step)} kg</span>` : e.step > 0 ? ` · Schritt ${fmtNum(pg.step)} kg` : '') + (hasVal(pg.goal) ? ` · Ziel ${hasVal(pg.start) ? fmtNum(pg.start) + ' → ' : ''}${fmtNum(pg.goal)} kg` : ''))(progOfPlan(e))}${e.note ? ' · 📝 ' + esc(e.note) : ''}</div></div>
           <button class="icon-btn sm" data-action="ex-move" data-id="${e.id}" data-dir="-1" ${j === 0 ? 'disabled' : ''} aria-label="Nach oben">${ic('up')}</button>
           <button class="icon-btn sm" data-action="ex-move" data-id="${e.id}" data-dir="1" ${j === exs.length - 1 ? 'disabled' : ''} aria-label="Nach unten">${ic('down')}</button>
@@ -1266,7 +1275,7 @@ function viewTrain(sess) {
           <button class="btn btn-sm btn-ghost" data-action="add-set" data-ei="${ei}" ${e.sets.length >= CONFIG.MAX_SETS ? 'disabled' : ''}>${ic('plus', 16)} Satz</button>
           <button class="btn btn-sm btn-ghost" data-action="rm-set" data-ei="${ei}" ${e.sets.length <= 1 ? 'disabled' : ''}>– Satz</button>
           ${last ? `<button class="btn btn-sm btn-ghost" data-action="copy-last" data-ei="${ei}">Letzte Werte übernehmen</button>` : ''}
-          ${(k3 => k3 ? `<button class="btn btn-sm btn-ghost" data-action="open3d" data-id="${k3.id}">${ic('cube', 16)} Technik & 3D</button>` : '')(katForSessionEx(e))}
+          ${(k3 => k3 ? `<button class="btn btn-sm btn-ghost" data-action="open3d" data-id="${k3.id}" data-fig="${figureForClient(c) || ''}">${ic('cube', 16)} Technik & 3D</button>` : '')(katForSessionEx(e))}
           ${ei < sess.exercises.length - 1 ? `<button class="btn btn-sm btn-text" data-action="next-ex" data-ei="${ei}">Nächste Übung ${ic('down', 16)}</button>` : ''}
         </div>
         <textarea class="ex-note" data-tf="exnote" data-ei="${ei}" rows="1" placeholder="Notiz zur Übung">${esc(e.note)}</textarea>
@@ -1995,6 +2004,31 @@ function infoHtml(e) {
    Vorschaubilder sind echte Standbilder aus der 3D-Engine (uebungen3d.js):
    einmal erzeugt, im Cache-Speicher des Browsers abgelegt, danach sofort da.
    ===================================================================== */
+/* ---------- Trainingsfigur: zentrale Zuordnung ----------
+   Eine Übung existiert nur einmal im Katalog. Welche Figur sie zeigt, entscheidet allein diese Konfiguration. */
+const FIGURE_CONFIG = {
+  byTemplate: { 'w-def-3': 'w', 'w-mass-3': 'w', 'm-def-3': 'm', 'm-mass-3': 'm' }, // SWEAT4-Programm → Figur
+  bySex: { w: 'w', m: 'm' },                                                       // Geschlecht im Kundenprofil → Figur
+  fallback: 'm',
+};
+const FIG_LABEL = { w: 'Frau', m: 'Mann' };
+function figurePref() { try { const v = localStorage.getItem('sw-figure'); return v === 'm' || v === 'w' ? v : null; } catch (e) { return null; } }
+function setFigurePref(v) { try { localStorage.setItem('sw-figure', v); } catch (e) {} }
+function figureForClient(c) {
+  if (!c) return null;
+  const plan = planOf(c.id), t = plan && FIGURE_CONFIG.byTemplate[plan.templateId];
+  return t || FIGURE_CONFIG.bySex[c.sex] || null;
+}
+function figureDefault() { // eigene Auswahl > eigener Kundenzugang > Standard
+  const p = figurePref(); if (p) return p;
+  if (isClientMode()) { const f = figureForClient(S.clients.get(roleInfo().clientId)); if (f) return f; }
+  return FIGURE_CONFIG.fallback;
+}
+const curFig = () => UI.fig || figureDefault();
+const FigureSwitch = fig => `<div class="figsw" role="group" aria-label="Trainingsfigur">${['w', 'm'].map(v => `<button class="${v === fig ? 'on' : ''}" data-action="fig-set" data-v="${v}" aria-pressed="${v === fig}">${FIG_LABEL[v]}</button>`).join('')}</div>`;
+/* Echte Videos (optional): window.SW_MEDIA aus uebungen-medien.js – ersetzt die 3D-Figur, sobald vorhanden */
+function mediaFor(id, fig) { const m = (window.SW_MEDIA || {})[id]; return m ? (m[fig] || m.any || null) : null; }
+
 const REDUCED_MOTION = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ---------- Equipment-Kategorien (aus dem freien Text im Katalog abgeleitet) ---------- */
@@ -2010,8 +2044,10 @@ const eqShort = e => String(e.eq || '').split(',')[0].replace(/\s*\(.*?\)\s*/g, 
 
 /* ---------- Vorschaubilder ---------- */
 const THUMB = { mem: new Map(), queue: [], queued: new Set(), busy: false, viewer: null, io: null, failed: false };
-const THUMB_CACHE = 'sweat4-thumbs-v1';
-const thumbKey = id => new URL('thumb/' + id + '.jpg', location.href).href;
+const THUMB_CACHE = 'sweat4-thumbs-v2';
+const thumbKey = key => new URL('thumb/' + key.replace('|', '-') + '.jpg', location.href).href;
+const tkey = (id, fig) => id + '|' + (fig || 'm');
+const thumbSel = key => { const [id, fig] = key.split('|'); return `[data-thumb="${id}"][data-fig="${fig}"]`; };
 async function thumbFromCache(id) {
   try { if (!('caches' in window)) return null; const r = await (await caches.open(THUMB_CACHE)).match(thumbKey(id)); return r ? URL.createObjectURL(await r.blob()) : null; } catch (e) { return null; }
 }
@@ -2019,7 +2055,7 @@ function thumbToCache(id, blob) { try { if ('caches' in window) caches.open(THUM
 function dataUrlBlob(u) { const [h, b] = u.split(','), bin = atob(b), a = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i); return new Blob([a], { type: h.slice(5, h.indexOf(';')) }); }
 function paintThumb(id) {
   const url = THUMB.mem.get(id); if (!url) return;
-  document.querySelectorAll(`[data-thumb="${id}"]`).forEach(el => {
+  document.querySelectorAll(thumbSel(id)).forEach(el => {
     el.classList.remove('is-loading');
     if (el.querySelector('img.thumb-img')) return;
     const img = new Image(); img.className = 'thumb-img'; img.alt = ''; img.decoding = 'async';
@@ -2043,13 +2079,13 @@ async function thumbWorker() {
     while (THUMB.queue.length) {
       const id = THUMB.queue.shift(); THUMB.queued.delete(id);
       if (THUMB.mem.has(id)) { paintThumb(id); continue; }
-      const e = KAT().find(x => x.id === id); if (!e) continue;
+      const [exId, fig] = id.split('|'), e = KAT().find(x => x.id === exId); if (!e) continue;
       try {
-        v.load({ ...e, primary: e.prim, secondary: e.sec }); v.playing = false; v.setMuscles(true);
+        v.setFigure(fig); v.load({ ...e, primary: e.prim, secondary: e.sec }); v.playing = false; v.setMuscles(true);
         if (v.tpl.custom) v.showAt(0, .9); else v.showAt(.62); // Standbild nahe der Endposition
         const blob = dataUrlBlob(v.renderer.domElement.toDataURL('image/jpeg', .82));
         THUMB.mem.set(id, URL.createObjectURL(blob)); thumbToCache(id, blob); paintThumb(id);
-      } catch (err) { console.warn('Vorschau', id, err); document.querySelectorAll(`[data-thumb="${id}"]`).forEach(el => el.classList.remove('is-loading')); }
+      } catch (err) { console.warn('Vorschau', id, err); document.querySelectorAll(thumbSel(id)).forEach(el => el.classList.remove('is-loading')); }
       await new Promise(r => setTimeout(r, 0)); // UI bleibt bedienbar
     }
   } catch (err) { console.warn(err); thumbFail(); }
@@ -2066,10 +2102,11 @@ async function wantThumb(id) {
 function hydrateThumbs(root = document) {
   const els = [...root.querySelectorAll('[data-thumb]')]; if (!els.length) return;
   if (THUMB.failed) return thumbFail();
-  els.forEach(el => { if (THUMB.mem.has(el.dataset.thumb)) paintThumb(el.dataset.thumb); else el.classList.add('is-loading'); });
-  if (!('IntersectionObserver' in window)) return els.forEach(el => wantThumb(el.dataset.thumb));
-  if (!THUMB.io) THUMB.io = new IntersectionObserver(ents => ents.forEach(en => { if (en.isIntersecting) { THUMB.io.unobserve(en.target); wantThumb(en.target.dataset.thumb); } }), { rootMargin: '300px 0px' });
-  els.forEach(el => { if (!THUMB.mem.has(el.dataset.thumb)) THUMB.io.observe(el); });
+  const K = el => tkey(el.dataset.thumb, el.dataset.fig);
+  els.forEach(el => { if (THUMB.mem.has(K(el))) paintThumb(K(el)); else el.classList.add('is-loading'); });
+  if (!('IntersectionObserver' in window)) return els.forEach(el => wantThumb(K(el)));
+  if (!THUMB.io) THUMB.io = new IntersectionObserver(ents => ents.forEach(en => { if (en.isIntersecting) { THUMB.io.unobserve(en.target); wantThumb(tkey(en.target.dataset.thumb, en.target.dataset.fig)); } }), { rootMargin: '300px 0px' });
+  els.forEach(el => { if (!THUMB.mem.has(K(el))) THUMB.io.observe(el); });
 }
 
 /* ---------- Kleine Bausteine ---------- */
@@ -2078,7 +2115,7 @@ const FilterChip = (label, on, action, value, count) =>
 const SectionHeader = (title, meta = '') => `<div class="sh"><h2>${esc(title)}</h2>${meta ? `<span class="sh-meta">${meta}</span>` : ''}</div>`;
 const EmptyState = (title, text, action = '') => `<div class="empty-state"><div class="es-ic">${ic('search', 26)}</div><div class="es-t">${esc(title)}</div><div class="es-x">${esc(text)}</div>${action}</div>`;
 const LoadingState = text => `<div class="loading-state"><span class="spin" aria-hidden="true"></span>${esc(text)}</div>`;
-const ExercisePreview = (id, cls = '') => `<div class="xprev ${cls}" data-thumb="${esc(id)}"><span class="xprev-ph" aria-hidden="true">${ic('dumbbell', 30)}</span></div>`;
+const ExercisePreview = (id, cls = '', fig = curFig()) => `<div class="xprev ${cls}" data-thumb="${esc(id)}" data-fig="${fig}"><span class="xprev-ph" aria-hidden="true">${ic('dumbbell', 30)}</span></div>`;
 function ExerciseCard(e) {
   return `<a class="xcard tap" href="#/uebung/${e.id}" aria-label="${esc(e.n)} – Details und 3D-Ausführung">
     <div class="xcard-media">${ExercisePreview(e.id)}<span class="xcard-group">${esc(e.g)}</span><span class="xcard-play" aria-hidden="true">${ic('play', 14)}</span></div>
@@ -2121,6 +2158,7 @@ function viewKatalog() {
   return topbar({ back: '/', title: 'Übungskatalog', sub: `${L.length} Übungen · 3D-Ausführung` }) +
   `<main class="wrap view wrap-wide">
     <div class="kat-tools">
+      <div class="kat-figrow"><span class="frow-l">Figur</span>${FigureSwitch(curFig())}</div>
       <label class="search">${ic('search')}<input id="katsearch" type="search" placeholder="Übung, Muskel oder Gerät suchen" value="${esc(UI.katSearch || '')}" autocomplete="off" aria-label="Übungen durchsuchen"></label>
       <div class="frow" role="group" aria-label="Muskelgruppe">${FilterChip('Alle', g === 'Alle', 'kat-group', 'Alle', L.length)}${groups.map(x => FilterChip(x, x === g, 'kat-group', x, cnt(x))).join('')}</div>
       <div class="frow frow-sub" role="group" aria-label="Equipment"><span class="frow-l">Gerät</span>${FilterChip('Alle', eq === 'Alle', 'kat-eq', 'Alle')}${eqNames.map(x => FilterChip(x, x === eq, 'kat-eq', x)).join('')}</div>
@@ -2142,7 +2180,7 @@ async function mountDetail3D(id) {
     await load3D();
     if (document.getElementById('ud-stage') !== host) return;
     disposeDetail3D();
-    VD = new SW3D.Viewer(host);
+    VD = new SW3D.Viewer(host, { figure: curFig() });
     VD.onPhase = l => { const p = document.getElementById('ud-phase'); if (p) p.textContent = l || ''; };
     VD.load({ ...e, primary: e.prim, secondary: e.sec }); VD.setMuscles(true);
     if (REDUCED_MOTION()) { VD.playing = false; VD.showAt(.62); }
@@ -2157,13 +2195,14 @@ function ExerciseDetailView(e) {
   const li = (a, cls, icn) => `<ul class="ud-list ${cls}">${a.map(x => `<li><span class="ud-li-ic">${icn}</span><span>${esc(x)}</span></li>`).join('')}</ul>`;
   return `<div class="ud">
     <div class="ud-hero">
-      <div class="ud-stage" id="ud-stage">${ExercisePreview(e.id, 'ud-poster')}<div class="ud-load">${LoadingState('3D-Bewegung wird geladen …')}</div></div>
+      ${(md => md ? `<video class="ud-video" src="${esc(md.src)}" ${md.poster ? `poster="${esc(md.poster)}"` : ''} muted loop playsinline ${REDUCED_MOTION() ? '' : 'autoplay'} preload="metadata" aria-label="Video: ${esc(e.n)}"></video>`
+        : `<div class="ud-stage" id="ud-stage">${ExercisePreview(e.id, 'ud-poster')}<div class="ud-load">${LoadingState('3D-Bewegung wird geladen …')}</div></div>`)(mediaFor(e.id, curFig()))}
       <div class="ud-phase" id="ud-phase" aria-live="polite"></div>
       <div class="ud-ctrl"><button class="icon-btn glass" id="ud-play" data-action="ud-play" aria-label="Animation anhalten">${ic('pause', 18)}</button>
         <button class="icon-btn glass" data-action="open3d" data-id="${e.id}" aria-label="Vollbild mit Ansichten, Tempo und Technik">${ic('expand', 18)}</button></div>
     </div>
     <div class="ud-head">
-      <div class="ud-tags"><span class="pill pill-gold">${esc(e.g)}</span><span class="pill">${esc(eqShort(e))}</span></div>
+      <div class="ud-tags"><span class="pill pill-gold">${esc(e.g)}</span><span class="pill">${esc(eqShort(e))}</span><span class="grow"></span>${FigureSwitch(curFig())}</div>
       <h1 class="ud-title" lang="de">${esc(e.n)}</h1>
       <div class="ud-sub">${esc(e.sub)}</div>
     </div>
@@ -2224,7 +2263,7 @@ const tplSummary = x => planSummary({ targetSets: x.sets.length, sets: x.sets.ma
 function WorkoutPlanCard(t, cid, active) {
   const m = progMeta(t);
   return `<button class="pcard tap ${active ? 'on' : ''}" data-action="prog-open" data-cid="${cid}" data-tpl="${t.id}" aria-pressed="${active ? 'true' : 'false'}" aria-label="${esc(m.who + ' ' + m.goal)} – Plan ansehen">
-    <div class="pcard-media">${m.img ? ExercisePreview(m.img, 'pcard-prev') : ''}<span class="pcard-who">${esc(m.who)}</span>${active ? `<span class="pcard-check" aria-hidden="true">${ic('check', 16)}</span>` : ''}</div>
+    <div class="pcard-media">${m.img ? ExercisePreview(m.img, 'pcard-prev', FIGURE_CONFIG.byTemplate[t.id] || 'm') : ''}<span class="pcard-who">${esc(m.who)}</span>${active ? `<span class="pcard-check" aria-hidden="true">${ic('check', 16)}</span>` : ''}</div>
     <div class="pcard-body">
       <div class="pcard-title">${esc(m.goal)}</div>
       <div class="pcard-meta">${t.days.length} Tage · ${tplDur(t)}</div>
@@ -2266,6 +2305,17 @@ Object.assign(A, {
   'ud-add-day': el => addCatalogExercise(el.dataset.id, el.dataset.did),
   'prog-open': el => openProgram(el.dataset.cid, el.dataset.tpl),
   'modal-go': el => { closeModal(null); go(el.dataset.href); },
+  'fig-set': el => {
+    const v = el.dataset.v; UI.fig = v; setFigurePref(v);
+    document.querySelectorAll('[data-action="fig-set"]').forEach(b => { const on = b.dataset.v === v; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
+    const p = location.hash.slice(1).split('/').filter(Boolean);
+    if (p[0] === 'uebungen') return refreshKat();
+    if (p[0] === 'uebung') {
+      if (mediaFor(p[1], 'w') || mediaFor(p[1], 'm')) return render();
+      document.querySelectorAll('.ud-poster').forEach(x => { x.dataset.fig = v; x.querySelectorAll('img').forEach(i => i.remove()); });
+      if (VD) { VD.setFigure(v); VD.setMuscles(true); } else hydrateThumbs();
+    }
+  },
 });
 
 /* ---------- 3D laden (Lazy Loading) ---------- */
@@ -2279,7 +2329,7 @@ function load3D() {
 }
 function webglOk() { try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch (e) { return false; } }
 
-async function open3D(id) {
+async function open3D(id, fig) {
   const e = KAT().find(x => x.id === id); if (!e) return;
   flushSave(); close3D(); disposeDetail3D();
   const root = document.createElement('div'); root.id = 'v3d'; root.className = 'v3d'; root.setAttribute('role', 'dialog'); root.setAttribute('aria-modal', 'true'); root.setAttribute('aria-label', '3D-Ausführung ' + e.n);
@@ -2311,7 +2361,7 @@ async function open3D(id) {
   try {
     await load3D();
     if (document.getElementById('v3d') !== root) return;
-    V3 = new SW3D.Viewer(root.querySelector('#v3-stage'));
+    V3 = new SW3D.Viewer(root.querySelector('#v3-stage'), { figure: fig || curFig() });
     V3.onPhase = label => { const el = document.getElementById('v3-phase'); if (el) el.textContent = label; };
     V3.onStop = () => setPlayBtn(false);
     V3.load({ ...e, primary: e.prim, secondary: e.sec }); loadEl.remove(); // Katalog nutzt prim/sec, die Engine primary/secondary
@@ -2327,7 +2377,7 @@ function close3D() {
 }
 function setPlayBtn(playing) { const b = document.getElementById('v3-play'); if (b) { b.innerHTML = playing ? `${ic('pause', 16)} Pause` : `${ic('play', 16)} Abspielen`; b.setAttribute('aria-label', playing ? 'Pause' : 'Abspielen'); } }
 Object.assign(A, {
-  open3d: el => open3D(el.dataset.id),
+  open3d: el => open3D(el.dataset.id, el.dataset.fig),
   'v3-close': () => { close3D(); const p = location.hash.slice(1).split('/').filter(Boolean); if (p[0] === 'uebung') mountDetail3D(p[1]); },
   'v3-play': () => { if (!V3) return; if (V3._done) V3.reset(); V3.playing = !V3.playing; setPlayBtn(V3.playing); },
   'v3-reset': () => { if (!V3) return; V3.reset(); V3.playing = true; setPlayBtn(true); },
@@ -2921,7 +2971,7 @@ function viewPlanRO(c) {
   const days = clientDays(c.id), plan = planOf(c.id);
   return topbar({ back: '/', title: 'Trainingsplan', sub: esc(plan ? plan.name : '') }) + `<main class="wrap view"><div class="stack">${days.map((d, i) => `<div class="card day-card">
     <div class="day-head"><span class="day-no">${i + 1}</span><b class="grow" style="font-size:17px">${esc(d.name)}</b></div>
-    ${(exs => exs.map((e, j) => `<div class="ex-row"><span class="ex-idx">${j + 1}.</span><div class="grow"><div style="font-weight:600">${esc(e.name)}${(k3 => k3 ? ` <button class="chip3d" data-action="open3d" data-id="${k3.id}">${ic('cube', 13)} 3D</button>` : '')(katFind(e.name, e.catalogId))}</div>
+    ${(exs => exs.map((e, j) => `<div class="ex-row"><span class="ex-idx">${j + 1}.</span><div class="grow"><div style="font-weight:600">${esc(e.name)}${(k3 => k3 ? ` <button class="chip3d" data-action="open3d" data-id="${k3.id}" data-fig="${figureForClient(c) || ''}">${ic('cube', 13)} 3D</button>` : '')(katFind(e.name, e.catalogId))}</div>
       <div class="ex-meta">${(si => si ? `<span class="tag ss-tag">${si.kind} ${si.label}</span> ` : '')(ssInfo(exs, j))}${esc(planSummary(e))}${e.note ? ' · 📝 ' + esc(e.note) : ''}</div></div></div>`).join(''))(exercisesOf(d.id)) || '<div class="ex-row muted">Keine Übungen.</div>'}
     <div class="day-foot"><button class="btn btn-primary btn-block" data-action="start-day" data-cid="${c.id}" data-did="${d.id}">${ic('play')} Dieses Workout starten</button></div></div>`).join('') || '<div class="card empty">Noch kein Plan vorhanden.</div>'}</div></main>`;
 }

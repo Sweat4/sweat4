@@ -108,7 +108,8 @@
   function mats() {
     const M = (c, r = .7, m = 0) => new T.MeshStandardMaterial({ color: c, roughness: r, metalness: m });
     return {
-      skin: M(0x5a3a28, .58), shirt: M(0x2a2a2a, .85), shorts: M(0x181818, .9), shoe: M(0xd6d0c6, .6), hair: M(0x0d0d0d, .95), sole: M(0x222222, .8),
+      skin: M(0x5a3a28, .74), shirt: M(0x2a2a2a, .92), shorts: M(0x181818, .94), shoe: M(0xd6d0c6, .7), hair: M(0x0d0d0d, .95), sole: M(0x222222, .85),
+      skinW: M(0xd6a184, .76), hairW: M(0xd8b26a, .82), topW: M(0x151515, .9), legW: M(0x111111, .93), shoeW: M(0xe8e3da, .7),
       steel: M(0xa0a0a0, .3, .85), dark: M(0x1b1b1b, .55, .3), pad: M(0x2e2e2e, .75), frame: M(0x3c3c3c, .5, .5),
       gold: M(0xbe9b5c, .4, .7), cable: M(0x909090, .35, .7), box: M(0x3a2f24, .85), mat: M(0x2a2420, .95),
       prim: new T.MeshStandardMaterial({ color: 0xd9a744, roughness: .45, emissive: 0x8a5a10, emissiveIntensity: .7 }),
@@ -117,13 +118,35 @@
   }
 
   /* ---------- Figur ---------- */
+  /* Figurstile: gleiche Gelenklängen (Bewegung & Geräte bleiben identisch), andere Statur, Materialien und Haare */
+  const FIG_STYLES = {
+    m: { mat: {}, k: {} },
+    w: {
+      mat: { skin: 'skinW', hair: 'hairW', shirt: 'topW', shorts: 'legW', shoe: 'shoeW',
+        abdomen: 'skinW', abs: 'skinW', obl: 'skinW', lowBack: 'skinW',
+        thigh: 'legW', quad: 'legW', ham: 'legW', add: 'legW', knJ: 'legW', shin: 'legW', calf: 'legW', short: 'legW' },
+      k: { chest: [.88, .95, .92], pec: [.82, .86, .98], traps: [.7, .7, .7], upBack: [.85, .9, .9], lat: [.74, .9, .8],
+        abdomen: [.88, 1, .9], abs: [.84, 1, .8], obl: [.82, 1, .84], lowBack: [.88, 1, .9],
+        pelvis: [1.08, 1, 1.05], glute: [1.13, 1.08, 1.14], abd: [1.05, 1, 1.05],
+        shJ: [.84, .84, .84], dF: [.8, .9, .8], dS: [.8, .9, .8], dR: [.8, .9, .8], uArm: [.8, 1, .8], bic: [.74, .9, .74], tri: [.8, .95, .8],
+        elJ: [.85, .85, .85], fArm: [.82, 1, .82], fMus: [.78, .95, .78], hand: [.88, .92, .88],
+        thigh: [.97, 1, .97], quad: [.92, 1, .92], ham: [.96, 1, .96], knJ: [.9, .9, .9], shin: [.86, 1, .86], calf: [.88, .95, .88],
+        neck: [.82, 1, .82], head: [.94, .95, .94], jaw: [.86, .9, .9], nose: [.85, .85, .85], hair: [1.05, 1.06, 1.07] },
+      ponytail: true,
+    },
+  };
   class Figure {
-    constructor(scene, MT) {
+    constructor(scene, MT, style = 'm') {
       this.g = new T.Group(); scene.add(this.g); this.MT = MT;
+      this.style = FIG_STYLES[style] ? style : 'm'; const ST = FIG_STYLES[this.style];
+      const baseOf = n => n.replace(/[LR]$/, '');
+      const matFor = (name, mat) => { const k = ST.mat[baseOf(name)]; if (k) return MT[k]; const key = Object.keys(MT).find(x => MT[x] === mat); return ST.mat[key] ? MT[ST.mat[key]] : mat; };
+      this.kOf = name => ST.k[baseOf(name)];
       this.sph = new T.SphereGeometry(1, 18, 14);
       this.cylT = new T.CylinderGeometry(.8, 1, 1, 14, 1, true);
       this.m = {}; this.muscles = {};
       const add = (name, geo, mat, muscle) => {
+        mat = matFor(name, mat);
         const me = new T.Mesh(geo, mat); me.castShadow = true; this.g.add(me); this.m[name] = me; me.userData.base = mat;
         if (muscle) (this.muscles[muscle] = this.muscles[muscle] || []).push(me); return me;
       };
@@ -140,6 +163,7 @@
         add('thigh' + s, C, MT.skin); add('short' + s, C, MT.shorts); add('quad' + s, S, MT.skin, 'quads'); add('ham' + s, S, MT.skin, 'hamstrings'); add('add' + s, S, MT.skin, 'adductors');
         add('knJ' + s, S, MT.skin); add('shin' + s, C, MT.skin); add('calf' + s, S, MT.skin, 'calves'); add('shoe' + s, S, MT.shoe); add('sole' + s, S, MT.sole);
       }
+      if (ST.ponytail) { add('tail1', S, MT.hair); add('tail2', S, MT.hair); add('tail3', S, MT.hair); add('tie', S, MT.gold); }
     }
     highlight(prim, sec, on) {
       for (const [id, arr] of Object.entries(this.muscles)) {
@@ -217,6 +241,13 @@
         place(m['shoe' + side], fc, fb, .05, .045, .13);
         place(m['sole' + side], fc.clone().addScaledVector(fu, -.032), fb, .052, .014, .132);
       }
+      if (m.tail1) { // Pferdeschwanz, hängt am Hinterkopf
+        place(m.tie, hc.clone().addScaledVector(hd, .035).addScaledVector(hf, -.1), hb, .02, .02, .02);
+        place(m.tail1, hc.clone().addScaledVector(hd, .02).addScaledVector(hf, -.118), hb, .036, .05, .036);
+        place(m.tail2, hc.clone().addScaledVector(hd, -.05).addScaledVector(hf, -.128), hb, .032, .07, .032);
+        place(m.tail3, hc.clone().addScaledVector(hd, -.125).addScaledVector(hf, -.122), hb, .022, .055, .024);
+      }
+      for (const [name, me] of Object.entries(m)) { const k = this.kOf(name); if (k) { me.scale.x *= k[0]; me.scale.y *= k[1]; me.scale.z *= k[2]; } }
     }
     dispose() { this.sph.dispose(); this.cylT.dispose(); this.g.parent && this.g.parent.remove(this.g); }
   }
@@ -1304,7 +1335,7 @@
       const fill = new T.DirectionalLight(0xffffff, .35); fill.position.set(-2, 1.5, 3); S.add(fill);
       const floor = new T.Mesh(new T.CircleGeometry(5, 48), new T.MeshStandardMaterial({ color: 0x141414, roughness: .95 })); floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; S.add(floor);
       this.grid = new T.GridHelper(8, 32, 0x2c2823, 0x1e1b18); this.grid.position.y = .002; S.add(this.grid);
-      this.MT = mats(); this.fig = new Figure(S, this.MT);
+      this.MT = mats(); this.fig = new Figure(S, this.MT, opts.figure || 'm');
       this.az = 30; this.el = 12; this.dist = 3; this.target = V(0, .9, 0); this.goal = null;
       this.t = 0; this.speed = 1; this.playing = true; this.loop = true; this.muscleOn = false;
       this._bindInput(); this._loop = this._loop.bind(this); this.last = performance.now(); this.raf = requestAnimationFrame(this._loop);
@@ -1321,6 +1352,12 @@
       this.fig.highlight(ex.primary || [], ex.secondary || [], this.muscleOn);
       this.period = this.tpl.custom ? null : this.tpl.timing.dur.reduce((a, b) => a + b, 0);
       this.t = 0; this._done = false; this._frame(0); this.render();
+    }
+    setFigure(style) {
+      if (this.fig && this.fig.style === style) return;
+      this.fig.dispose(); this.fig = new Figure(this.scene, this.MT, style);
+      if (this.ex) { this.fig.highlight(this.ex.primary || [], this.ex.secondary || [], this.muscleOn); this._frame(0); }
+      this.render();
     }
     setMuscles(on) { this.muscleOn = on; if (this.ex) this.fig.highlight(this.ex.primary || [], this.ex.secondary || [], on); this.render(); }
     setView(v) {
@@ -1385,5 +1422,5 @@
     }
   }
 
-  window.SW3D = { Viewer, TPL, version: 2 };
+  window.SW3D = { Viewer, TPL, FIG_STYLES, version: 3 };
 })();
