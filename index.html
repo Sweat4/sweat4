@@ -155,6 +155,31 @@ select.input{appearance:none;-webkit-appearance:none;background-image:linear-gra
 .radio-seg input:checked+span{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .target-row{display:grid;grid-template-columns:60px 1fr 1fr;gap:8px;align-items:center;margin-bottom:8px}
 .target-row input{text-align:center}
+.step-seg span{font-size:16px}
+.step-custom{display:flex;align-items:center;gap:10px;margin-top:8px}.step-custom .input{width:120px;text-align:center}
+.toggle{display:flex;gap:12px;align-items:flex-start;margin:14px 0 12px;cursor:pointer;font-weight:600;font-size:15px;color:var(--text)}
+.toggle input{position:absolute;opacity:0;pointer-events:none}
+.toggle .tg{flex:none;width:46px;height:28px;border-radius:999px;background:var(--surface-3);border:1px solid var(--border);position:relative;transition:background .2s}
+.toggle .tg::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--muted);transition:transform .2s,background .2s}
+.toggle input:checked+.tg{background:var(--accent-soft);border-color:var(--accent)}
+.toggle input:checked+.tg::after{transform:translateX(18px);background:var(--accent)}
+.toggle small{display:block;font-weight:400;font-size:12.5px;color:var(--muted);margin-top:3px;line-height:1.4}
+.goal-in{display:grid;grid-template-columns:1fr 1fr;gap:10px}.goal-in label{display:grid;gap:4px;font-size:13px}.goal-in .input{text-align:center}
+.prog{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;align-items:center;background:var(--accent-soft);border:1px solid rgba(190,155,92,.4);border-radius:12px;padding:10px 12px;margin-bottom:12px}
+.prog-main{font-size:16px}.prog-main b{color:var(--accent);font-size:18px;font-variant-numeric:tabular-nums}
+.prog-l{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+.prog-d{display:inline-block;font-size:13px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--accent);color:var(--accent-ink);margin-left:4px}
+.prog-d.hold{background:var(--surface-3);color:var(--muted)}
+.prog-r{grid-column:1/-1;font-size:12.5px;color:var(--muted);line-height:1.4}
+.prog-hold,.prog-goal{background:var(--surface-2);border-color:var(--border)}
+.goal-box{background:var(--surface-2);border-radius:12px;padding:10px 12px;margin-bottom:12px}
+.gb-h{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px}
+.gbar{display:flex;align-items:center;gap:10px}
+.gb-v{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.gb-track{flex:1;height:6px;border-radius:999px;background:var(--surface-3);position:relative}
+.gb-track i{position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:var(--accent)}
+.gb-track b{position:absolute;top:50%;width:16px;height:16px;border-radius:50%;background:var(--accent);border:3px solid var(--bg);transform:translate(-50%,-50%);box-shadow:0 0 0 1px var(--accent)}
+.gb-cur{font-size:13px;color:var(--muted);margin-top:6px}.gb-cur b{color:var(--text)}
 .photo-pick{display:flex;align-items:center;gap:14px;margin-bottom:16px}
 
 /* Modal */
@@ -473,6 +498,61 @@ function exerciseNames(cid) {
   return [...m.values()].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'de'));
 }
 
+/* ---------------- Gewichtsstufen & Progression (optional, nur Vorschlag) ---------------- */
+const STEP_PRESETS = [1.25, 2.5, 5];
+const r3 = v => Math.round(v * 1000) / 1000; // nur gegen Fließkomma-Rauschen (z. B. 0,1-Schritte) – keine Rundung auf ganze kg
+function defaultStep(name, catalogId) {
+  const k = typeof katFind === 'function' ? katFind(name, catalogId) : null;
+  return /kurzhantel|\bkh\b|dumbbell/i.test(String(name || '') + ' ' + (k ? k.eq || '' : '')) ? 1.25 : 2.5;
+}
+function progOfPlan(pe) {
+  return { step: pe.step > 0 ? pe.step : defaultStep(pe.name, pe.catalogId), auto: !!pe.autoSuggest,
+    start: hasVal(pe.startWeight) ? pe.startWeight : null, goal: hasVal(pe.goalWeight) ? pe.goalWeight : null };
+}
+function progOf(sessEx) {
+  const pe = sessEx.exerciseId && S.exercises.get(sessEx.exerciseId);
+  if (pe) return progOfPlan(pe);
+  if (sessEx.prog) return sessEx.prog;
+  return { step: defaultStep(sessEx.name), auto: false, start: null, goal: null };
+}
+const topWeight = sets => { const ws = sets.filter(s => hasVal(s.weight)).map(s => s.weight); return ws.length ? Math.max(...ws) : null; };
+function suggestFor(sessEx, last, prog) {
+  if (!prog || !prog.auto) return null;
+  const top = last ? topWeight(last.sets) : null;
+  if (top == null) return hasVal(prog.start) ? { weight: prog.start, delta: null, kind: 'start', reason: 'Startgewicht laut Plan' } : null;
+  if (hasVal(prog.goal) && top >= prog.goal) return { weight: top, delta: 0, kind: 'goal', reason: `Ziel ${fmtNum(prog.goal)} kg erreicht 🎉 – Gewicht halten oder neues Ziel setzen` };
+  const n = (sessEx.target && sessEx.target.length) || sessEx.sets.length || 1;
+  const atTop = last.sets.filter(s => s.weight === top);
+  const withReps = last.sets.filter(s => hasVal(s.reps));
+  if (!withReps.length) return { weight: top, delta: 0, kind: 'hold', reason: 'Keine Wiederholungen erfasst – Gewicht halten' };
+  const ref = atTop.length && hasVal(atTop[0].reps) ? atTop[0].reps : 0;
+  const ok = last.sets.length >= n && last.sets.every((s, i) => {
+    if (!hasVal(s.reps)) return false;
+    const t = sessEx.target && sessEx.target[i];
+    if (t && hasVal(t.reps)) return s.reps >= t.reps;
+    return s.weight !== top || s.reps >= ref;
+  });
+  if (!ok) return { weight: top, delta: 0, kind: 'hold', reason: last.sets.length < n ? `Letztes Mal nur ${last.sets.length} von ${n} Sätzen – Gewicht halten` : 'Letztes Mal noch nicht alle Wiederholungen geschafft – Gewicht halten' };
+  let next = r3(top + prog.step);
+  if (hasVal(prog.goal) && next > prog.goal) next = prog.goal;
+  return { weight: next, delta: r3(next - top), kind: 'up', reason: `Letztes Mal alle Sätze mit ${fmtNum(top)} kg geschafft (${last.sets.map(s => fmtNum(s.reps)).join(' / ')} Wdh.)` };
+}
+function goalBar(start, goal, cur) {
+  if (!hasVal(goal)) return '';
+  const s0 = hasVal(start) ? start : (hasVal(cur) ? Math.min(cur, goal) : 0);
+  const span = goal - s0, c = hasVal(cur) ? cur : s0;
+  const pct = span > 0 ? Math.max(0, Math.min(100, (c - s0) / span * 100)) : (c >= goal ? 100 : 0);
+  const rest = r3(goal - c);
+  return `<div class="gbar" role="img" aria-label="Ziel ${fmtNum(goal)} kg, aktuell ${fmtNum(c)} kg">
+    <span class="gb-v">${fmtNum(s0)} kg</span><div class="gb-track"><i style="width:${pct}%"></i><b style="left:${pct}%"></b></div><span class="gb-v">${fmtNum(goal)} kg</span></div>
+    <div class="gb-cur">Aktuell: <b>${hasVal(cur) ? fmtNum(cur) + ' kg' : '–'}</b>${rest > 0 && hasVal(cur) ? ` · noch ${fmtNum(rest)} kg bis zum Ziel` : hasVal(cur) && rest <= 0 ? ' · Ziel erreicht 🎉' : ''}</div>`;
+}
+function planExByName(cid, name) {
+  const n = norm(name);
+  for (const d of clientDays(cid)) for (const e of exercisesOf(d.id)) if (norm(e.name) === n) return e;
+  return null;
+}
+
 /* ---------------- Modal / Dialoge ---------------- */
 let modalResolve = null;
 function modal(title, body, onMount) {
@@ -630,7 +710,7 @@ function viewPlan(c) {
         </div>
         ${exs.map((e, j) => `<div class="ex-row"><span class="ex-idx">${j + 1}.</span>
           <div class="grow" data-action="edit-ex" data-did="${d.id}" data-id="${e.id}" style="cursor:pointer"><div style="font-weight:600">${esc(e.name)}${(k3 => k3 ? ` <button class="chip3d" data-action="open3d" data-id="${k3.id}" aria-label="3D-Ausführung">${ic('cube', 13)} 3D</button>` : '')(katFind(e.name, e.catalogId))}</div>
-            <div class="ex-meta">${e.targetSets || CONFIG.DEFAULT_SETS} Sätze${(e.sets || []).some(s => hasVal(s.weight) || hasVal(s.reps)) ? ' · Plan: ' + e.sets.map(fmtSet).join(', ') : ''}${e.note ? ' · 📝 ' + esc(e.note) : ''}</div></div>
+            <div class="ex-meta">${e.targetSets || CONFIG.DEFAULT_SETS} Sätze${(e.sets || []).some(s => hasVal(s.weight) || hasVal(s.reps)) ? ' · Plan: ' + e.sets.map(fmtSet).join(', ') : ''}${(pg => (pg.auto ? ` · <span class="accent">↗ +${fmtNum(pg.step)} kg</span>` : e.step > 0 ? ` · Schritt ${fmtNum(pg.step)} kg` : '') + (hasVal(pg.goal) ? ` · Ziel ${hasVal(pg.start) ? fmtNum(pg.start) + ' → ' : ''}${fmtNum(pg.goal)} kg` : ''))(progOfPlan(e))}${e.note ? ' · 📝 ' + esc(e.note) : ''}</div></div>
           <button class="icon-btn sm" data-action="ex-move" data-id="${e.id}" data-dir="-1" ${j === 0 ? 'disabled' : ''} aria-label="Nach oben">${ic('up')}</button>
           <button class="icon-btn sm" data-action="ex-move" data-id="${e.id}" data-dir="1" ${j === exs.length - 1 ? 'disabled' : ''} aria-label="Nach unten">${ic('down')}</button>
           <button class="icon-btn sm" data-action="edit-ex" data-did="${d.id}" data-id="${e.id}" aria-label="Bearbeiten">${ic('edit', 18)}</button>
@@ -643,19 +723,21 @@ function viewPlan(c) {
   </main>`;
 }
 
-function phFor(e, i, last) {
+function phFor(e, i, last, sug) {
   let w = null, r = null;
   const t = e.target && e.target[i];
   if (last && last.sets.length) { const s = last.sets[Math.min(i, last.sets.length - 1)]; w = s.weight; r = s.reps; }
   if (t && hasVal(t.weight)) w = t.weight;
+  // Aktivierter Progressions-Vorschlag ersetzt den Platzhalter nur, wenn zuletzt einheitlich mit einem Gewicht trainiert wurde
+  if (sug && hasVal(sug.weight) && (!last || new Set(last.sets.filter(s => hasVal(s.weight)).map(s => s.weight)).size <= 1)) w = sug.weight;
   if (t && hasVal(t.reps)) r = t.reps;
   return { w: hasVal(w) ? w : null, r: hasVal(r) ? r : null };
 }
 const exComplete = e => e.sets.length > 0 && e.sets.every(s => s.done);
 const exSummary = e => e.sets.filter(s => s.done).map(fmtSet).join(' · ');
 
-function setRowHtml(e, ei, si, last) {
-  const s = e.sets[si], ph = phFor(e, si, last), extra = hasVal(s.rpe) || hasVal(s.note);
+function setRowHtml(e, ei, si, last, sug) {
+  const s = e.sets[si], ph = phFor(e, si, last, sug), extra = hasVal(s.rpe) || hasVal(s.note);
   return `<div class="set-row ${s.done ? 'done' : ''}" id="sr-${ei}-${si}">
     <button class="check" data-action="check" data-ei="${ei}" data-si="${si}" aria-label="Satz ${si + 1} abhaken">${ic('check', 26)}</button>
     <span class="set-n">${si + 1}</span>
@@ -681,6 +763,12 @@ function viewTrain(sess) {
     const lastHtml = last ? `<div class="last"><div class="last-h">Letztes Training · ${fmtDate(last.session.date)}${norm(last.name) !== norm(e.name) ? ` (als „${esc(last.name)}“)` : ''}</div>
         <div class="chips">${last.sets.map((s, i) => `<span class="chip">${i + 1}: ${fmtSet(s)}${hasVal(s.rpe) ? ' @' + esc(s.rpe) : ''}</span>`).join('')}</div>${last.note ? `<div class="last-note">„${esc(last.note)}“</div>` : ''}</div>`
       : `<div class="last empty">Noch kein vorheriges Training für diese Übung.</div>`;
+    const pg = progOf(e), sug = editing ? null : suggestFor(e, last, pg);
+    const sugHtml = sug ? `<div class="prog prog-${sug.kind}">
+        <div class="prog-main"><span class="prog-l">Vorschlag</span> <b>${fmtNum(sug.weight)} kg</b>${sug.delta > 0 ? ` <span class="prog-d">+${fmtNum(sug.delta)} kg</span>` : sug.kind === 'hold' ? ' <span class="prog-d hold">halten</span>' : ''}</div>
+        <button class="btn btn-sm btn-ghost" data-action="sug-apply" data-ei="${ei}" data-w="${sug.weight}">Übernehmen</button>
+        <div class="prog-r">${esc(sug.reason)} · Schritt ${fmtNum(pg.step)} kg · frei änderbar</div></div>` : '';
+    const goalHtml = hasVal(pg.goal) ? `<div class="goal-box">${goalBar(pg.start, pg.goal, last ? topWeight(last.sets) : null)}</div>` : '';
     return `<div class="ex-card ${open.has(ei) ? 'open' : ''} ${exComplete(e) ? 'complete' : ''}" id="ex-${ei}">
       <button class="ex-head" data-action="toggle-ex" data-ei="${ei}">
         <span class="ex-num">${ei + 1}</span>
@@ -689,8 +777,9 @@ function viewTrain(sess) {
       </button>
       <div class="ex-body">
         ${lastHtml}
+        ${sugHtml}${goalHtml}
         ${e.planNote ? `<div class="plan-note">📝 ${esc(e.planNote)}</div>` : ''}
-        <div id="sets-${ei}">${e.sets.map((_, si) => setRowHtml(e, ei, si, last)).join('')}</div>
+        <div id="sets-${ei}">${e.sets.map((_, si) => setRowHtml(e, ei, si, last, sug)).join('')}</div>
         <div class="ex-actions">
           <button class="btn btn-sm btn-ghost" data-action="add-set" data-ei="${ei}" ${e.sets.length >= CONFIG.MAX_SETS ? 'disabled' : ''}>${ic('plus', 16)} Satz</button>
           <button class="btn btn-sm btn-ghost" data-action="rm-set" data-ei="${ei}" ${e.sets.length <= 1 ? 'disabled' : ''}>– Satz</button>
@@ -764,17 +853,27 @@ function viewHistory(c) {
 }
 
 let chartN = 0;
+function niceTick(raw) {
+  if (!(raw > 0)) return 1;
+  const p = Math.pow(10, Math.floor(Math.log10(raw)));
+  for (const m of [1, 1.25, 2, 2.5, 5, 10]) if (m * p >= raw) return r3(m * p) || m * p;
+  return 10 * p;
+}
 function lineChart(points, unit = '') {
   if (!points.length) return '<div class="empty">Noch keine Daten.</div>';
   const W = Math.max(300, Math.min(748, (document.getElementById('app').clientWidth || 360) - 66)), H = 220, pl = 58, pr = 18, pt = 18, pb = 30;
   const ys = points.map(p => p.y); let mn = Math.min(...ys), mx = Math.max(...ys);
   if (mn === mx) { mn -= Math.max(1, Math.abs(mn) * 0.1); mx += Math.max(1, Math.abs(mx) * 0.1); }
   const pad = (mx - mn) * 0.12; mn = Math.max(mn - pad, Math.min(...ys) >= 0 ? 0 : -Infinity); mx += pad;
+  // „Schöne“ Achsenschritte inkl. 1,25 / 2,5 kg – Dezimalwerte werden exakt beschriftet
+  const tick = niceTick((mx - mn) / 3);
+  mn = r3(Math.floor(mn / tick) * tick); mx = r3(Math.ceil(mx / tick) * tick); if (mx <= mn) mx = r3(mn + tick);
+  const ticks = []; for (let v = mn; v <= mx + tick / 1e6 && ticks.length < 9; v = r3(v + tick)) ticks.push(v);
   const X = i => points.length === 1 ? pl + (W - pl - pr) / 2 : pl + i * (W - pl - pr) / (points.length - 1);
   const Y = v => pt + (H - pt - pb) * (1 - (v - mn) / (mx - mn));
   const id = 'g' + (++chartN);
   let grid = '';
-  for (let k = 0; k <= 3; k++) { const v = mn + (mx - mn) * k / 3, y = Y(v); grid += `<line x1="${pl}" x2="${W - pr}" y1="${y}" y2="${y}" stroke="var(--border)" stroke-dasharray="${k ? '3 4' : ''}"/><text x="${pl - 8}" y="${y + 4}" text-anchor="end">${fmtNum(mx - mn > 50 ? Math.round(v) : Math.round(v * 10) / 10)}</text>`; }
+  ticks.forEach((v, k) => { const y = Y(v); grid += `<line x1="${pl}" x2="${W - pr}" y1="${y}" y2="${y}" stroke="var(--border)" stroke-dasharray="${k ? '3 4' : ''}"/><text x="${pl - 8}" y="${y + 4}" text-anchor="end">${fmtNum(v)}</text>`; });
   const d = points.map((p, i) => `${i ? 'L' : 'M'}${X(i).toFixed(1)},${Y(p.y).toFixed(1)}`).join('');
   const area = points.length > 1 ? `<path d="${d}L${X(points.length - 1)},${H - pb}L${X(0)},${H - pb}Z" fill="url(#${id})"/>` : '';
   const labelIdx = points.length <= 4 ? points.map((_, i) => i) : [0, Math.floor((points.length - 1) / 2), points.length - 1];
@@ -784,7 +883,7 @@ function lineChart(points, unit = '') {
     <defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#be9b5c" stop-opacity=".28"/><stop offset="1" stop-color="#be9b5c" stop-opacity="0"/></linearGradient></defs>
     ${grid}${area}<path class="ln" d="${d}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
     ${points.map((p, i) => `<circle cx="${X(i)}" cy="${Y(p.y)}" r="${i === li ? 5 : 3.5}" fill="${i === li ? 'var(--accent)' : 'var(--bg)'}" stroke="var(--accent)" stroke-width="2"><title>${esc(p.label)}: ${fmtNum(p.y)} ${unit}</title></circle>`).join('')}
-    <text class="vl" x="${Math.min(X(li), W - pr)}" y="${Math.max(12, Y(points[li].y) - 12)}" text-anchor="${points.length > 1 ? 'end' : 'middle'}">${fmtNum(Math.round(points[li].y * 10) / 10)} ${unit}</text>
+    <text class="vl" x="${Math.min(X(li), W - pr)}" y="${Math.max(12, Y(points[li].y) - 12)}" text-anchor="${points.length > 1 ? 'end' : 'middle'}">${fmtNum(points[li].y)} ${unit}</text>
     ${xl}</svg>`;
 }
 
@@ -792,7 +891,7 @@ const METRICS = {
   weight: { label: 'Gewicht', title: 'Top-Gewicht pro Training', unit: 'kg', get: p => hasVal(p.top.weight) ? p.top.weight : null },
   reps: { label: 'Wiederholungen', title: 'Wiederholungen gesamt pro Training', unit: 'Wdh.', get: p => p.reps },
   volume: { label: 'Volumen', title: 'Volumen (Gewicht × Wdh.) pro Training', unit: 'kg', get: p => p.vol || null },
-  e1rm: { label: '1RM (geschätzt)', title: 'Geschätztes Maximalgewicht (Epley)', unit: 'kg', get: p => p.e1rm ? Math.round(p.e1rm * 10) / 10 : null },
+  e1rm: { label: '1RM (geschätzt)', title: 'Geschätztes Maximalgewicht (Epley)', unit: 'kg', get: p => p.e1rm ? Math.round(p.e1rm * 100) / 100 : null },
 };
 function viewProgress(c) {
   const done = sessionsOf(c.id, true), names = exerciseNames(c.id);
@@ -822,6 +921,9 @@ function viewProgress(c) {
       <div class="card">
         <select class="input" id="ex-select" data-cid="${c.id}" aria-label="Übung wählen">${names.map(n => `<option ${norm(n.name) === norm(sel) ? 'selected' : ''}>${esc(n.name)}</option>`).join('')}</select>
         <div class="seg" style="margin:12px 0 6px">${Object.entries(METRICS).map(([k, m]) => `<button class="${UI.metric === k ? 'on' : ''}" data-action="metric" data-v="${k}">${m.label}</button>`).join('')}</div>
+${(pe => { if (!pe) return ''; const pg = progOfPlan(pe); if (!hasVal(pg.goal) && !pg.auto) return '';
+          const cur = series.length && hasVal(series[series.length - 1].top.weight) ? series[series.length - 1].top.weight : null;
+          return `<div class="goal-box" style="margin:10px 0 12px">${hasVal(pg.goal) ? `<div class="gb-h">Trainingsziel</div>${goalBar(pg.start, pg.goal, cur)}` : ''}<div class="gb-cur" style="margin-top:${hasVal(pg.goal) ? 4 : 0}px">Steigerung: ${fmtNum(pg.step)} kg${pg.auto ? ' · automatischer Vorschlag aktiv' : ''}</div></div>`; })(sel ? planExByName(c.id, sel) : null)}
         <div class="muted" style="font-size:13px;margin-bottom:6px">${M.title}</div>
         ${lineChart(pts, M.unit)}
         ${series.length ? `<table class="table" style="margin-top:10px"><thead><tr><th>Datum</th><th>Bester Satz</th><th class="r">Sätze</th><th class="r">Volumen</th></tr></thead><tbody>
@@ -957,6 +1059,13 @@ function openExModal(dayId, exId) {
       ${Array.from({ length: CONFIG.MAX_SETS }, (_, i) => `<div class="target-row ${i >= n ? 'hidden' : ''}" data-tr="${i}"><span class="muted">Satz ${i + 1}</span>
         <input class="input" name="w${i}" inputmode="decimal" placeholder="kg" value="${fmtIn(sets[i] && sets[i].weight)}" autocomplete="off">
         <input class="input" name="r${i}" inputmode="numeric" placeholder="Wdh." value="${fmtIn(sets[i] && sets[i].reps)}" autocomplete="off"></div>`).join('')}</div>
+    ${(() => { const pg = e ? progOfPlan(e) : { step: 2.5, auto: false, start: null, goal: null }, preset = STEP_PRESETS.includes(pg.step);
+      return `<div class="field prog-field"><span>Gewichtssteigerung (Schritt)</span>
+      <div class="radio-seg step-seg">${STEP_PRESETS.map(v => `<label><input type="radio" name="stepSel" value="${v}" ${preset && pg.step === v ? 'checked' : ''}><span>${fmtNum(v)}</span></label>`).join('')}<label><input type="radio" name="stepSel" value="custom" ${!preset ? 'checked' : ''}><span>Eigene</span></label></div>
+      <div class="step-custom ${preset ? 'hidden' : ''}"><input class="input" name="stepCustom" inputmode="decimal" placeholder="z. B. 1,5" value="${preset ? '' : fmtIn(pg.step)}" autocomplete="off"><span class="muted">kg pro Schritt</span></div>
+      <label class="toggle"><input type="checkbox" name="autoSuggest" ${pg.auto ? 'checked' : ''}><span class="tg"></span><span>Nächstes Gewicht automatisch vorschlagen<small>Wurden letztes Mal alle Sätze &amp; Wiederholungen geschafft, schlägt die App „+ Schritt“ vor. Nur ein Vorschlag – du entscheidest.</small></span></label>
+      <div class="goal-in"><label><span class="muted">Startgewicht</span><input class="input" name="startWeight" inputmode="decimal" placeholder="kg" value="${fmtIn(pg.start)}" autocomplete="off"></label>
+        <label><span class="muted">Ziel (optional)</span><input class="input" name="goalWeight" inputmode="decimal" placeholder="kg" value="${fmtIn(pg.goal)}" autocomplete="off"></label></div></div>`; })()}
     <label class="field"><span>Übungsnotiz</span><textarea name="note" rows="2" placeholder="z. B. Technik verbessern">${esc(e ? e.note : '')}</textarea></label>
     <div class="sheet-actions"><button type="button" class="btn btn-ghost" data-action="modal-close">Abbrechen</button><button class="btn btn-primary">Speichern</button></div></form>`,
     el => { if (!e) el.querySelector('[name=name]').focus(); });
@@ -971,6 +1080,7 @@ function createSession(cid, dayId) {
   const exercises = exercisesOf(dayId).map(e => ({
     id: uid(), exerciseId: e.id, name: e.name, planNote: e.note || '', note: '',
     target: (e.sets || []).map(s => ({ weight: s.weight ?? null, reps: s.reps ?? null })),
+    prog: progOfPlan(e),
     sets: Array.from({ length: Math.max(1, Math.min(CONFIG.MAX_SETS, e.targetSets || CONFIG.DEFAULT_SETS)) }, blankSet),
   }));
   const s = { id: uid(), clientId: cid, planId: plan ? plan.id : null, dayId, dayName: day.name, dayIndex: days.findIndex(d => d.id === dayId),
@@ -1159,6 +1269,12 @@ const A = {
     e.sets.forEach((s, i) => { const l = last.sets[i]; if (!l || s.done) return; if (!hasVal(s.weight)) s.weight = l.weight; if (!hasVal(s.reps)) s.reps = l.reps; });
     saveSessionSoon(sess); rerender(); toast('Werte übernommen – jetzt anpassen & abhaken');
   },
+  'sug-apply': el => {
+    const sess = curSession(), e = sess.exercises[+el.dataset.ei], w = parseNum(el.dataset.w); if (w == null) return;
+    let n = 0; e.sets.forEach(s => { if (!s.done) { s.weight = w; n++; } });
+    if (!n) return toast('Alle Sätze sind bereits abgehakt');
+    saveSessionSoon(sess); rerender(); toast(`${fmtNum(w)} kg eingetragen – jederzeit änderbar`);
+  },
   'add-adhoc': async () => {
     const sess = curSession(); const name = await promptDialog('Übung hinzufügen', { label: 'Name der Übung (nur für dieses Training)', placeholder: 'z. B. Face Pulls', ok: 'Hinzufügen' });
     if (!name || !name.trim()) return;
@@ -1223,12 +1339,23 @@ document.addEventListener('submit', async ev => {
     if (!e) { if (exercisesOf(did).length >= CONFIG.MAX_EXERCISES) return toast('Maximum erreicht'); e = { id: uid(), dayId: did, order: exercisesOf(did).length, createdAt: Date.now() }; }
     Object.assign(e, { name, targetSets: n, sets, note: String(fd.get('note') || '').trim() });
     const k3 = katFind(name); e.catalogId = k3 ? k3.id : null;
+    // Progression – Werte exakt speichern (keine Rundung)
+    const ss = fd.get('stepSel');
+    let step = ss === 'custom' ? parseNum(fd.get('stepCustom')) : parseNum(ss);
+    if (!(step > 0) || step > 100) step = null;
+    if (!f.dataset.stepTouched && !(e.step > 0)) step = null; // unverändert → Standard je nach Übung (Kurzhantel 1,25 kg, sonst 2,5 kg)
+    const sw = parseNum(fd.get('startWeight')), gw = parseNum(fd.get('goalWeight'));
+    Object.assign(e, { step, autoSuggest: fd.get('autoSuggest') === 'on', startWeight: sw, goalWeight: gw });
     put('exercises', e); closeModal(null); render();
   }
 });
 document.addEventListener('input', ev => {
   const t = ev.target;
   if (t.id === 'search') return filterClients(t.value);
+  if (t.name === 'name' && t.form && t.form.dataset.form === 'exercise' && !t.form.dataset.stepTouched) {
+    const ex = t.form.dataset.id && S.exercises.get(t.form.dataset.id);
+    if (!(ex && ex.step > 0)) { const r = t.form.querySelector(`[name=stepSel][value="${defaultStep(t.value)}"]`); if (r) { r.checked = true; t.form.querySelector('.step-custom').classList.add('hidden'); } }
+  }
   const f = t.dataset.tf; if (!f) return;
   const sess = curSession(); if (!sess) return;
   if (f === 'date') { if (t.value) { sess.date = t.value; saveSessionSoon(sess); } return; }
@@ -1253,6 +1380,10 @@ document.addEventListener('change', async ev => {
     catch (e) { toast(e.message); }
   } else if (t.name === 'targetSets') {
     const n = +t.value; document.querySelectorAll('[data-tr]').forEach(r => r.classList.toggle('hidden', +r.dataset.tr >= n));
+  } else if (t.name === 'stepSel' || t.name === 'stepCustom') {
+    const f = t.form; f.dataset.stepTouched = '1';
+    const cu = f.querySelector('.step-custom'); const isC = f.querySelector('[name=stepSel]:checked')?.value === 'custom';
+    cu.classList.toggle('hidden', !isC); if (isC && t.name === 'stepSel') cu.querySelector('input').focus();
   }
 });
 document.addEventListener('keydown', ev => {
