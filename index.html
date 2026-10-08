@@ -263,6 +263,7 @@ select.input{appearance:none;-webkit-appearance:none;background-image:linear-gra
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 #rest-timer{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(140%);width:min(440px,calc(100vw - 24px));background:var(--surface);border:1px solid rgba(190,155,92,.55);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.45);padding:12px 12px 12px 16px;z-index:70;transition:transform .25s;overflow:hidden}
 #rest-timer.show{transform:translateX(-50%) translateY(0)}
+#rest-timer:not(.show){visibility:hidden;transition:transform .25s,visibility 0s .25s}
 body.resting .view{padding-bottom:110px}
 #rest-timer .rt-row{display:flex;align-items:center;gap:10px}
 #rest-timer .rt-time{font-size:30px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--accent);min-width:84px}
@@ -406,6 +407,161 @@ img.ld{opacity:1!important}
 .p3-posrow{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}.p3-posrow .btn{padding:0 12px;min-height:38px;font-size:14px}
 .quick .btn{min-width:0}
 .lockv{max-width:420px;padding-top:max(40px,env(safe-area-inset-top))}
+/* ===================== REDESIGN · Design-Tokens ===================== */
+/* Layout: dunkle Flächen mit feinem Verlauf, Gold nur für Aktives und Wichtiges */
+:root{
+  --bg:#090909; --surface:#141414; --surface-2:#1b1b1a; --surface-3:#262523; --border:#2a2826; --border-strong:#3a3631;
+  --gold:#c7a46a; --gold-deep:#9c7b45; --gold-line:rgba(199,164,106,.45); --gold-glow:rgba(199,164,106,.22);
+  --accent:#c7a46a; --accent-soft:rgba(199,164,106,.13);
+  --card-grad:linear-gradient(180deg,#171716 0%,#111110 100%);
+  --r-sm:10px; --r-md:14px; --r-lg:20px; --radius:16px;
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px;
+  --ease:cubic-bezier(.2,.7,.2,1); --t-fast:.14s; --t-mid:.24s;
+  --shadow:0 1px 0 rgba(255,255,255,.03) inset,0 8px 24px rgba(0,0,0,.35);
+  --font-display:"SF Pro Display",system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+.card,.ex-card,.client-card,.day-btn{background:var(--card-grad);box-shadow:var(--shadow)}
+.wrap-wide{max-width:1180px}
+
+/* Bedienung: Press-Zustand mobil, goldener Rand am Desktop */
+.tap{transition:transform var(--t-fast) var(--ease),border-color var(--t-mid) var(--ease),box-shadow var(--t-mid) var(--ease);-webkit-user-select:none;user-select:none}
+.tap:active{transform:scale(.975)}
+@media (hover:hover){
+  .tap:hover,.client-card:hover,.day-btn:hover{border-color:var(--gold-line)}
+  .xcard:hover .thumb-img{transform:scale(1.04)}
+}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:8px}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;letter-spacing:.02em;padding:4px 10px;border-radius:999px;background:var(--surface-3);color:var(--text);white-space:nowrap}
+.pill-gold{background:var(--accent-soft);color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold-line)}
+
+/* SectionHeader */
+.sh{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 12px}
+.sh h2{margin:0;font:800 13px/1.2 var(--font-display);letter-spacing:.12em;text-transform:uppercase;color:var(--text)}
+.sh-meta{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* FilterChip */
+.kat-tools{display:grid;gap:10px;margin-bottom:14px}
+.frow{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:2px 16px;scroll-padding:16px;align-items:center}
+.frow::-webkit-scrollbar{display:none}
+.frow-l{flex:none;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-right:2px}
+.fchip{flex:none;display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-weight:650;font-size:14px;cursor:pointer;transition:all var(--t-fast) var(--ease)}
+.fchip:active{transform:scale(.96)}
+.fchip.on{background:var(--gold);border-color:var(--gold);color:#111}
+.fchip-n{font-size:11px;font-weight:800;opacity:.65;font-variant-numeric:tabular-nums}
+.frow-sub .fchip{min-height:32px;font-size:13px;padding:0 12px}
+.frow-sub .fchip.on{background:var(--accent-soft);color:var(--gold);border-color:var(--gold-line)}
+@media (hover:hover){.fchip:not(.on):hover{border-color:var(--gold-line);color:var(--text)}}
+.kat-status{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:36px;margin-bottom:6px;font-size:14px;color:var(--muted)}
+.kat-status b{color:var(--text);font-variant-numeric:tabular-nums}
+.kat-reset{display:inline-flex;align-items:center;gap:4px;min-height:36px;border:none;cursor:pointer;font-weight:650;color:var(--gold)}
+.kat-sec{margin-top:22px}
+
+/* ExerciseCard + ExercisePreview */
+.xgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media(min-width:640px){.xgrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}}
+@media(min-width:960px){.xgrid{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}.xcard-media{aspect-ratio:4/3}}
+@media(max-width:340px){.xgrid{grid-template-columns:1fr}}
+.xcard{display:flex;flex-direction:column;min-width:0;background:var(--card-grad);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow)}
+.xcard-media{position:relative;aspect-ratio:1/1;max-width:100%}
+.xprev{position:absolute;inset:0;overflow:hidden;background:radial-gradient(120% 90% at 50% 20%,#1f1d1a 0%,#0e0e0e 70%)}
+.xprev-ph{position:absolute;inset:0;display:grid;place-items:center;color:rgba(199,164,106,.28)}
+.xprev.is-loading::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(199,164,106,.08) 50%,transparent 70%);background-size:220% 100%;animation:shimmer 1.3s linear infinite}
+@keyframes shimmer{from{background-position:120% 0}to{background-position:-120% 0}}
+.thumb-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .35s var(--ease),transform .5s var(--ease)}
+.thumb-img.in{opacity:1}
+.xcard-group{position:absolute;left:8px;top:8px;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;border-radius:999px;background:rgba(9,9,9,.72);color:var(--gold);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.xcard-play{position:absolute;right:8px;bottom:8px;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:rgba(9,9,9,.72);color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold-line);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.xcard-play svg{margin-left:2px}
+.xcard-body{display:grid;gap:4px;padding:10px 12px 12px;min-width:0}
+.xcard-name{font:700 15px/1.25 var(--font-display);overflow-wrap:break-word;hyphens:auto}
+.xcard-meta{font-size:12.5px;color:var(--muted);line-height:1.3}
+.xcard-eq{font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--gold-deep);text-transform:uppercase;margin-top:2px}
+
+/* EmptyState · LoadingState */
+.empty-state{display:grid;justify-items:center;gap:8px;text-align:center;padding:36px 16px;color:var(--muted)}
+.es-ic{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:var(--surface-2);color:var(--gold)}
+.es-t{font-weight:750;color:var(--text);font-size:17px}
+.es-x{max-width:36ch;font-size:14px}
+.empty-state .btn{margin-top:6px}
+.loading-state{display:inline-flex;align-items:center;gap:10px;font-size:14px;color:var(--muted)}
+.spin{width:18px;height:18px;border-radius:50%;border:2px solid var(--border-strong);border-top-color:var(--gold);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ExerciseDetailView */
+.ud{display:grid;gap:18px}
+.ud-hero{position:relative;border-radius:var(--r-lg);overflow:hidden;border:1px solid var(--border);background:#0e0e0e;aspect-ratio:4/3;max-width:100%}
+@media(min-width:900px){.ud-hero{aspect-ratio:16/8}}
+.ud-stage{position:absolute;inset:0}
+.ud-stage canvas{position:relative;z-index:1}
+.ud-stage.ready .ud-poster{opacity:0;transition:opacity .4s}
+.ud-load{position:absolute;left:0;right:0;bottom:16px;z-index:2;display:flex;justify-content:center}
+.ud-load .loading-state{background:rgba(9,9,9,.75);padding:8px 14px;border-radius:999px}
+.ud-phase{position:absolute;left:12px;top:12px;max-width:calc(100% - 24px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;z-index:3;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);background:rgba(9,9,9,.72);padding:5px 10px;border-radius:999px;pointer-events:none}
+.ud-phase:empty{display:none}
+.ud-ctrl{position:absolute;right:10px;bottom:10px;z-index:3;display:flex;gap:8px}
+.icon-btn.glass{background:rgba(9,9,9,.72);color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold-line);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border-radius:50%}
+.ud-head{display:grid;gap:8px}
+.ud-tags{display:flex;flex-wrap:wrap;gap:6px}
+.ud-title{margin:0;font:800 clamp(24px,6vw,34px)/1.12 var(--font-display);letter-spacing:-.01em;text-wrap:balance;overflow-wrap:break-word;hyphens:auto}
+.ud-sub{color:var(--muted)}
+.ud-grid{display:grid;gap:12px}
+@media(min-width:800px){.ud-grid{grid-template-columns:1fr 1fr}}
+.ud-card{background:var(--card-grad);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;min-width:0}
+.ud-mus{display:grid;gap:6px;padding:10px 0;border-top:1px solid var(--border)}
+.ud-mus:first-of-type{border-top:none;padding-top:0}
+.ud-mus-l{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.ud-steps{margin:0;padding:0;list-style:none;counter-reset:st;display:grid;gap:14px}
+.ud-steps li{counter-increment:st;display:grid;grid-template-columns:28px 1fr;column-gap:12px;row-gap:2px}
+.ud-steps li::before{content:counter(st);grid-row:span 2;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--accent-soft);color:var(--gold);font-weight:800;font-size:13px}
+.ud-steps b{font-size:14px}.ud-steps span{color:#cfc9bf;font-size:15px;line-height:1.5}
+.ud-list{margin:0;padding:0;list-style:none;display:grid;gap:10px}
+.ud-list li{display:grid;grid-template-columns:24px 1fr;gap:10px;line-height:1.45}
+.ud-li-ic{width:24px;height:24px;border-radius:50%;display:grid;place-items:center}
+.ud-list.ok .ud-li-ic{background:rgba(74,222,128,.12);color:var(--ok)}
+.ud-list.bad .ud-li-ic{background:var(--danger-soft);color:var(--danger)}
+.ud-cta{position:sticky;bottom:calc(10px + env(safe-area-inset-bottom));z-index:5}
+.ud-cta .btn{box-shadow:0 10px 30px rgba(0,0,0,.55)}
+
+/* SWEAT4 Control System + WorkoutPlanCard */
+.cs-card{position:relative;margin-bottom:20px;padding:16px;border-radius:var(--r-lg);border:1px solid var(--gold-line);background:radial-gradient(140% 120% at 100% 0%,rgba(199,164,106,.12) 0%,rgba(199,164,106,0) 55%),var(--card-grad);box-shadow:var(--shadow)}
+.cs-head{display:flex;gap:12px;align-items:center}
+.cs-mark{flex:none;width:78px}.cs-mark svg{display:block;width:100%;height:auto}
+.cs-eyebrow{font:800 12px/1 var(--font-display);letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
+.cs-desc{margin-top:6px;font-size:14px;color:#cfc9bf;line-height:1.4}
+.cs-active{display:inline-flex;align-items:center;gap:6px;margin-top:12px;font-size:13px;font-weight:700;color:var(--gold)}
+.pgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
+@media(min-width:900px){.pgrid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.pcard{display:flex;flex-direction:column;text-align:left;min-width:0;padding:0;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;font:inherit}
+.pcard-media{position:relative;aspect-ratio:16/11;max-width:100%}
+.pcard .thumb-img{object-position:50% 30%}
+.pcard-who{position:absolute;left:8px;top:8px;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:4px 8px;border-radius:999px;background:rgba(9,9,9,.72);color:var(--text)}
+.pcard-check{position:absolute;right:8px;top:8px;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--gold);color:#111;animation:pop .28s var(--ease)}
+@keyframes pop{from{transform:scale(.4);opacity:0}}
+.pcard-body{display:grid;gap:3px;padding:10px 12px 12px}
+.pcard-title{font:800 17px/1.15 var(--font-display)}
+.pcard-meta{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.pcard-focus{font-size:12px;color:var(--gold-deep);font-weight:700}
+.pcard-cta{display:inline-flex;align-items:center;gap:4px;margin-top:6px;font-size:13px;font-weight:750;color:var(--gold)}
+.pcard.on{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold),0 0 28px var(--gold-glow)}
+
+/* Programm-Detail (Sheet) + TrainingDayCard */
+.prog-sheet-meta{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px}
+.tday{border:1px solid var(--border);border-radius:var(--r-md);background:var(--surface-2);overflow:hidden}
+.tday-h{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--border)}
+.tday-h .day-no{width:30px;height:30px;font-size:14px}
+.tday-h b{flex:1;min-width:0}
+.tday-n{font-size:12px;color:var(--muted)}
+.tday-list{margin:0;padding:4px 0;list-style:none}
+.tday-list li{display:grid;gap:2px;padding:8px 12px;border-top:1px solid rgba(255,255,255,.03)}
+.tday-list li:first-child{border-top:none}
+.tday-x{font-weight:600;font-size:14.5px;overflow-wrap:break-word}
+.tday-s{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.sticky-actions{flex-wrap:nowrap;position:sticky;bottom:calc(-18px - env(safe-area-inset-bottom));background:var(--surface);padding:12px 0 6px;margin-top:14px}
+
+/* Sanfte Übergänge */
+.sheet{animation:slide var(--t-mid) var(--ease)}
+.view{animation:fade var(--t-mid) var(--ease)}
+@media (prefers-reduced-motion:reduce){.thumb-img,.tap,.fchip{transition:none}.xprev.is-loading::after{animation:none}}
 </style>
 </head>
 <body>
@@ -556,7 +712,7 @@ function download(name, text, mime) {
 }
 
 const ICONS = {
-  back: 'M15 18l-6-6 6-6', plus: 'M12 5v14M5 12h14', edit: 'M4 20h4L19 9l-4-4L4 16v4z', trash: 'M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13',
+  back: 'M15 18l-6-6 6-6', expand: 'M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5', arrow: 'M5 12h14M13 6l6 6-6 6', plus: 'M12 5v14M5 12h14', edit: 'M4 20h4L19 9l-4-4L4 16v4z', trash: 'M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13',
   up: 'M6 15l6-6 6 6', down: 'M6 9l6 6 6-6', check: 'M5 12.5l4.5 4.5L19 7.5', chart: 'M4 19V11M10 19V5M16 19v-6M2 21h20',
   history: 'M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 3', cube: 'M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3zM12 12l8-4.5M12 12v9M12 12L4 7.5', book: 'M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4zM5 17a3 3 0 0 1 3-3h11', pause: 'M8 5v14M16 5v14', reset: 'M4 12a8 8 0 1 0 2.4-5.7L4 8.5M4 4v4.5h4.5', lock: 'M6 11h12v10H6zM8 11V7a4 4 0 0 1 8 0v4',
   db: 'M4 6c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3zM4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3',
@@ -1017,13 +1173,7 @@ function viewPlan(c) {
   const plan = ensurePlan(c.id), days = daysOf(plan.id);
   return topbar({ back: '/client/' + c.id, title: 'Trainingsplan', sub: esc(c.name) }) +
   `<main class="wrap view">
-    <div class="card s4-card">
-      <div class="row" style="gap:10px;align-items:flex-start"><span class="s4-mark">${LOGO_MARK}</span>
-        <div class="grow"><div style="font-weight:800">SWEAT4 Control System</div>
-        <div class="muted" style="font-size:13px;margin-top:2px">${plan.templateId ? 'Aktiv: ' + esc((SWEAT4_SYSTEM.find(t => t.id === plan.templateId) || {}).title || '') + '. ' : ''}Fertigen Plan nach der Sweat4-Methode laden – mit Supersätzen, Pyramide und automatischer Gewichtssteigerung.</div></div></div>
-      <div class="stack" style="margin-top:10px">${SWEAT4_SYSTEM.map(t => `<button class="day-btn" data-action="tpl-apply" data-cid="${c.id}" data-tpl="${t.id}">
-        <span class="grow"><span class="day-name">${esc(t.title)}</span><br><span class="muted" style="font-size:13px">${esc(t.sub)}</span></span>${plan.templateId === t.id ? '<span class="tag">Aktiv</span>' : ''}</button>`).join('')}</div>
-    </div>
+    ${ControlSystemCard(c, plan)}
     <label class="field"><span>Name des Plans</span><input class="input" data-plan-name="${plan.id}" value="${esc(plan.name)}" maxlength="80"></label>
     <div class="stack">${days.map((d, i) => {
       const exs = exercisesOf(d.id);
@@ -1336,6 +1486,7 @@ function render() {
   if (lockGate()) return;
   const route = location.hash.slice(1) || '/', p = route.split('/').filter(Boolean);
   const app = document.getElementById('app'); let html = null;
+  disposeDetail3D();
   const redir = routeGuard(p); if (redir) return go(redir);
   const ext = routeExtra(p);
   if (ext !== undefined) html = ext;
@@ -1356,7 +1507,8 @@ function render() {
   UI.lastRoute = route;
   if (!p.length && UI.search) filterClients(UI.search);
   if (p[0] === 'data') fillStorageInfo();
-  if (p[0] === 'uebungen' && UI.katSearch) filterKat(UI.katSearch);
+  hydrateThumbs(app);
+  if (p[0] === 'uebung') mountDetail3D(p[1]);
   hydratePhotos(app);
 }
 const curSession = () => { const p = location.hash.slice(1).split('/').filter(Boolean); return p[0] === 'train' ? S.sessions.get(p[1]) : null; };
@@ -1823,29 +1975,6 @@ function katFind(name, id) {
 }
 function katForSessionEx(e) { const pe = e.exerciseId && S.exercises.get(e.exerciseId); return katFind(e.name, pe && pe.catalogId); }
 
-function viewKatalog() {
-  const L = KAT(), groups = window.SW_GRUPPEN || [];
-  const g = UI.katGroup || 'Alle';
-  const list = L.filter(e => g === 'Alle' || e.g === g);
-  const sections = (g === 'Alle' ? groups : [g]).map(gr => {
-    const items = list.filter(e => e.g === gr); if (!items.length) return '';
-    return `<section class="section kat-sec"><div class="section-h"><h2>${esc(gr)} <span class="muted">(${items.length})</span></h2></div>
-      <div class="card list-card">${items.map(e => `<a class="list-link kat-item" href="#/uebung/${e.id}" data-name="${esc(normK(e.n + ' ' + e.sub + ' ' + e.eq + ' ' + (e.alias || []).join(' ')))}">
-        <div class="grow"><div style="font-weight:600">${esc(e.n)}</div><div class="muted" style="font-size:13px">${esc(e.sub)} · ${esc(e.eq)}</div></div><span class="t3d">3D</span></a>`).join('')}</div></section>`;
-  }).join('');
-  return topbar({ back: '/', title: 'Übungskatalog', sub: `${L.length} Übungen mit 3D-Ausführung` }) +
-  `<main class="wrap view">
-    ${L.length ? `<label class="search">${ic('search')}<input id="katsearch" type="search" placeholder="Übung suchen …" value="${esc(UI.katSearch || '')}" autocomplete="off"></label>
-    <div class="kat-chips">${['Alle', ...groups].map(x => `<button class="${x === g ? 'on' : ''}" data-action="kat-group" data-v="${esc(x)}">${esc(x)}</button>`).join('')}</div>
-    ${sections}<div id="kat-none" class="empty hidden">Keine Übung gefunden.</div>` : '<div class="card empty">Der Übungskatalog konnte nicht geladen werden (Datei uebungen-katalog.js fehlt).</div>'}
-  </main>`;
-}
-function filterKat(q) {
-  UI.katSearch = q; const n = normK(q); let shown = 0;
-  document.querySelectorAll('.kat-item').forEach(el => { const ok = !n || n.split(' ').every(w => el.dataset.name.includes(w)); el.classList.toggle('hidden', !ok); if (ok) shown++; });
-  document.querySelectorAll('.kat-sec').forEach(sec => sec.classList.toggle('hidden', !sec.querySelector('.kat-item:not(.hidden)')));
-  const nn = document.getElementById('kat-none'); if (nn) nn.classList.toggle('hidden', shown > 0);
-}
 function infoHtml(e) {
   const li = a => `<ul class="ul">${a.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`;
   return `<table class="table"><tbody>
@@ -1858,14 +1987,286 @@ function infoHtml(e) {
     <h3>Beanspruchte Muskulatur</h3><div class="mchips">${e.prim.map(m => `<span class="mchip p">${esc(MUSKEL(m))}</span>`).join('')}${e.sec.map(m => `<span class="mchip">${esc(MUSKEL(m))}</span>`).join('')}</div>
     <div class="muted" style="font-size:12px;margin-top:6px">Gold = primär, grau = sekundär</div>`;
 }
-function viewUebung(id) {
-  const e = KAT().find(x => x.id === id); if (!e) return null;
-  return topbar({ back: '/uebungen', title: esc(e.n), sub: `${esc(e.g)} · ${esc(e.sub)}` }) +
-  `<main class="wrap view">
-    <button class="btn btn-primary btn-big" data-action="open3d" data-id="${e.id}">${ic('cube', 22)} 3D-Ausführung ansehen</button>
-    <div class="card v3d-info-static" style="margin-top:16px">${infoHtml(e)}</div>
+/* =====================================================================
+   REDESIGN – Übungskatalog, Detailansicht, Programm-Cards
+   Komponenten (als Funktionen, die HTML liefern):
+     ExerciseCard · ExercisePreview · ExerciseDetailView · WorkoutPlanCard ·
+     TrainingDayCard · FilterChip · SectionHeader · LoadingState · EmptyState
+   Vorschaubilder sind echte Standbilder aus der 3D-Engine (uebungen3d.js):
+   einmal erzeugt, im Cache-Speicher des Browsers abgelegt, danach sofort da.
+   ===================================================================== */
+const REDUCED_MOTION = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- Equipment-Kategorien (aus dem freien Text im Katalog abgeleitet) ---------- */
+const EQ_CATS = [
+  ['Langhantel', /langhantel|sz-stange|t-bar/i],
+  ['Kurzhantel', /kurzhantel/i],
+  ['Kabelzug', /kabel/i],
+  ['Maschine', /maschine|multipresse|presse|latzug|hyperextension|hackenschmidt/i],
+  ['Körpergewicht', /körpergewicht|matte|barren|dip|klimmzug|plyo/i],
+];
+const eqCats = e => { const c = EQ_CATS.filter(([, re]) => re.test(e.eq)).map(([n]) => n); return c.length ? c : ['Sonstiges']; };
+const eqShort = e => String(e.eq || '').split(',')[0].replace(/\s*\(.*?\)\s*/g, ' ').trim();
+
+/* ---------- Vorschaubilder ---------- */
+const THUMB = { mem: new Map(), queue: [], queued: new Set(), busy: false, viewer: null, io: null, failed: false };
+const THUMB_CACHE = 'sweat4-thumbs-v1';
+const thumbKey = id => new URL('thumb/' + id + '.jpg', location.href).href;
+async function thumbFromCache(id) {
+  try { if (!('caches' in window)) return null; const r = await (await caches.open(THUMB_CACHE)).match(thumbKey(id)); return r ? URL.createObjectURL(await r.blob()) : null; } catch (e) { return null; }
+}
+function thumbToCache(id, blob) { try { if ('caches' in window) caches.open(THUMB_CACHE).then(c => c.put(thumbKey(id), new Response(blob, { headers: { 'Content-Type': 'image/jpeg' } }))).catch(() => {}); } catch (e) {} }
+function dataUrlBlob(u) { const [h, b] = u.split(','), bin = atob(b), a = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i); return new Blob([a], { type: h.slice(5, h.indexOf(';')) }); }
+function paintThumb(id) {
+  const url = THUMB.mem.get(id); if (!url) return;
+  document.querySelectorAll(`[data-thumb="${id}"]`).forEach(el => {
+    el.classList.remove('is-loading');
+    if (el.querySelector('img.thumb-img')) return;
+    const img = new Image(); img.className = 'thumb-img'; img.alt = ''; img.decoding = 'async';
+    img.onload = () => img.classList.add('in'); img.src = url; el.prepend(img);
+  });
+}
+function thumbFail() { THUMB.failed = true; document.querySelectorAll('[data-thumb].is-loading').forEach(el => el.classList.remove('is-loading')); }
+async function thumbWorker() {
+  if (THUMB.busy || THUMB.failed) return; THUMB.busy = true;
+  try {
+    if (!webglOk()) return thumbFail();
+    await load3D();
+    if (!THUMB.viewer) {
+      const h = document.createElement('div'); h.setAttribute('aria-hidden', 'true');
+      h.style.cssText = 'position:fixed;left:-10000px;top:0;width:300px;height:300px;pointer-events:none';
+      document.body.appendChild(h);
+      THUMB.viewer = new SW3D.Viewer(h); // position:fixed → der Viewer rendert nur, wenn wir ihn darum bitten
+      THUMB.viewer.playing = false; THUMB.viewer.loop = false;
+    }
+    const v = THUMB.viewer;
+    while (THUMB.queue.length) {
+      const id = THUMB.queue.shift(); THUMB.queued.delete(id);
+      if (THUMB.mem.has(id)) { paintThumb(id); continue; }
+      const e = KAT().find(x => x.id === id); if (!e) continue;
+      try {
+        v.load({ ...e, primary: e.prim, secondary: e.sec }); v.playing = false; v.setMuscles(true);
+        if (v.tpl.custom) v.showAt(0, .9); else v.showAt(.62); // Standbild nahe der Endposition
+        const blob = dataUrlBlob(v.renderer.domElement.toDataURL('image/jpeg', .82));
+        THUMB.mem.set(id, URL.createObjectURL(blob)); thumbToCache(id, blob); paintThumb(id);
+      } catch (err) { console.warn('Vorschau', id, err); document.querySelectorAll(`[data-thumb="${id}"]`).forEach(el => el.classList.remove('is-loading')); }
+      await new Promise(r => setTimeout(r, 0)); // UI bleibt bedienbar
+    }
+  } catch (err) { console.warn(err); thumbFail(); }
+  finally { THUMB.busy = false; }
+}
+async function wantThumb(id) {
+  if (THUMB.mem.has(id)) return paintThumb(id);
+  if (THUMB.failed || THUMB.queued.has(id)) return;
+  THUMB.queued.add(id);
+  const cached = await thumbFromCache(id);
+  if (cached) { THUMB.queued.delete(id); THUMB.mem.set(id, cached); return paintThumb(id); }
+  THUMB.queue.push(id); thumbWorker();
+}
+function hydrateThumbs(root = document) {
+  const els = [...root.querySelectorAll('[data-thumb]')]; if (!els.length) return;
+  if (THUMB.failed) return thumbFail();
+  els.forEach(el => { if (THUMB.mem.has(el.dataset.thumb)) paintThumb(el.dataset.thumb); else el.classList.add('is-loading'); });
+  if (!('IntersectionObserver' in window)) return els.forEach(el => wantThumb(el.dataset.thumb));
+  if (!THUMB.io) THUMB.io = new IntersectionObserver(ents => ents.forEach(en => { if (en.isIntersecting) { THUMB.io.unobserve(en.target); wantThumb(en.target.dataset.thumb); } }), { rootMargin: '300px 0px' });
+  els.forEach(el => { if (!THUMB.mem.has(el.dataset.thumb)) THUMB.io.observe(el); });
+}
+
+/* ---------- Kleine Bausteine ---------- */
+const FilterChip = (label, on, action, value, count) =>
+  `<button class="fchip ${on ? 'on' : ''}" data-action="${action}" data-v="${esc(value)}" aria-pressed="${on ? 'true' : 'false'}">${esc(label)}${count != null ? ` <span class="fchip-n">${count}</span>` : ''}</button>`;
+const SectionHeader = (title, meta = '') => `<div class="sh"><h2>${esc(title)}</h2>${meta ? `<span class="sh-meta">${meta}</span>` : ''}</div>`;
+const EmptyState = (title, text, action = '') => `<div class="empty-state"><div class="es-ic">${ic('search', 26)}</div><div class="es-t">${esc(title)}</div><div class="es-x">${esc(text)}</div>${action}</div>`;
+const LoadingState = text => `<div class="loading-state"><span class="spin" aria-hidden="true"></span>${esc(text)}</div>`;
+const ExercisePreview = (id, cls = '') => `<div class="xprev ${cls}" data-thumb="${esc(id)}"><span class="xprev-ph" aria-hidden="true">${ic('dumbbell', 30)}</span></div>`;
+function ExerciseCard(e) {
+  return `<a class="xcard tap" href="#/uebung/${e.id}" aria-label="${esc(e.n)} – Details und 3D-Ausführung">
+    <div class="xcard-media">${ExercisePreview(e.id)}<span class="xcard-group">${esc(e.g)}</span><span class="xcard-play" aria-hidden="true">${ic('play', 14)}</span></div>
+    <div class="xcard-body"><div class="xcard-name" lang="de">${esc(e.n)}</div>
+      <div class="xcard-meta"><span>${esc(e.sub)}</span></div>
+      <div class="xcard-eq">${esc(eqShort(e))}</div></div></a>`;
+}
+
+/* ---------- Übungskatalog ---------- */
+function katFiltered() {
+  const g = UI.katGroup || 'Alle', eq = UI.katEq || 'Alle', n = normK(UI.katSearch || '');
+  return KAT().filter(e => (g === 'Alle' || e.g === g) && (eq === 'Alle' || eqCats(e).includes(eq))
+    && (!n || n.split(' ').every(w => normK(e.n + ' ' + e.sub + ' ' + e.eq + ' ' + e.g + ' ' + (e.alias || []).join(' ') + ' ' + e.prim.map(MUSKEL).join(' ')).includes(w))));
+}
+function katResultsHtml() {
+  const L = katFiltered(), g = UI.katGroup || 'Alle', eq = UI.katEq || 'Alle', q = (UI.katSearch || '').trim();
+  const active = [g !== 'Alle' ? g : null, eq !== 'Alle' ? eq : null, q ? `„${q}“` : null].filter(Boolean);
+  const bar = `<div class="kat-status"><span><b>${L.length}</b> ${L.length === 1 ? 'Übung' : 'Übungen'}${active.length ? ' · ' + active.map(esc).join(' · ') : ''}</span>
+    ${active.length ? `<button class="btn-text kat-reset" data-action="kat-reset">${ic('x', 14)} Zurücksetzen</button>` : ''}</div>`;
+  if (!L.length) return bar + EmptyState('Keine passende Übung', 'Ändere die Suche oder setze die Filter zurück.', `<button class="btn btn-ghost" data-action="kat-reset">Filter zurücksetzen</button>`);
+  const groups = (window.SW_GRUPPEN || []).filter(x => L.some(e => e.g === x));
+  const sectioned = g === 'Alle' && !q && groups.length > 1;
+  const grid = items => `<div class="xgrid">${items.map(ExerciseCard).join('')}</div>`;
+  return bar + (sectioned
+    ? groups.map(gr => { const it = L.filter(e => e.g === gr); return `<section class="kat-sec">${SectionHeader(gr, it.length + ' Übungen')}${grid(it)}</section>`; }).join('')
+    : grid(L));
+}
+function refreshKat() {
+  const r = document.getElementById('kat-results'); if (!r) return;
+  r.innerHTML = katResultsHtml(); hydrateThumbs(r);
+  document.querySelectorAll('[data-action="kat-group"]').forEach(b => { const on = b.dataset.v === (UI.katGroup || 'Alle'); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
+  document.querySelectorAll('[data-action="kat-eq"]').forEach(b => { const on = b.dataset.v === (UI.katEq || 'Alle'); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
+}
+function viewKatalog() {
+  const L = KAT(), groups = window.SW_GRUPPEN || [];
+  if (!L.length) return topbar({ back: '/', title: 'Übungskatalog' }) + `<main class="wrap view">${EmptyState('Katalog nicht gefunden', 'Die Datei uebungen-katalog.js fehlt. Lade sie zusammen mit der App hoch.')}</main>`;
+  const g = UI.katGroup || 'Alle', eq = UI.katEq || 'Alle';
+  const cnt = gr => L.filter(e => e.g === gr).length;
+  const eqNames = EQ_CATS.map(([n]) => n).filter(n => L.some(e => eqCats(e).includes(n)));
+  return topbar({ back: '/', title: 'Übungskatalog', sub: `${L.length} Übungen · 3D-Ausführung` }) +
+  `<main class="wrap view wrap-wide">
+    <div class="kat-tools">
+      <label class="search">${ic('search')}<input id="katsearch" type="search" placeholder="Übung, Muskel oder Gerät suchen" value="${esc(UI.katSearch || '')}" autocomplete="off" aria-label="Übungen durchsuchen"></label>
+      <div class="frow" role="group" aria-label="Muskelgruppe">${FilterChip('Alle', g === 'Alle', 'kat-group', 'Alle', L.length)}${groups.map(x => FilterChip(x, x === g, 'kat-group', x, cnt(x))).join('')}</div>
+      <div class="frow frow-sub" role="group" aria-label="Equipment"><span class="frow-l">Gerät</span>${FilterChip('Alle', eq === 'Alle', 'kat-eq', 'Alle')}${eqNames.map(x => FilterChip(x, x === eq, 'kat-eq', x)).join('')}</div>
+    </div>
+    <div id="kat-results">${katResultsHtml()}</div>
   </main>`;
 }
+function filterKat(q) { UI.katSearch = q; refreshKat(); }
+
+/* ---------- Übungsdetail ---------- */
+let VD = null; // Inline-3D der Detailansicht
+function disposeDetail3D() { if (VD) { try { VD.dispose(); } catch (e) {} VD = null; } }
+async function mountDetail3D(id) {
+  const host = document.getElementById('ud-stage'); if (!host) return;
+  const e = KAT().find(x => x.id === id); if (!e) return;
+  const note = host.querySelector('.ud-load');
+  if (!webglOk()) { if (note) note.innerHTML = '3D wird auf diesem Gerät nicht unterstützt. Die Anleitung steht unten.'; return; }
+  try {
+    await load3D();
+    if (document.getElementById('ud-stage') !== host) return;
+    disposeDetail3D();
+    VD = new SW3D.Viewer(host);
+    VD.onPhase = l => { const p = document.getElementById('ud-phase'); if (p) p.textContent = l || ''; };
+    VD.load({ ...e, primary: e.prim, secondary: e.sec }); VD.setMuscles(true);
+    if (REDUCED_MOTION()) { VD.playing = false; VD.showAt(.62); }
+    udPlayBtn();
+    if (note) note.remove();
+    host.classList.add('ready');
+  } catch (err) { console.error(err); if (note) note.innerHTML = '3D-Ansicht konnte nicht geladen werden.'; }
+}
+function udPlayBtn() { const b = document.getElementById('ud-play'); if (b && VD) { b.innerHTML = VD.playing ? ic('pause', 18) : ic('play', 18); b.setAttribute('aria-label', VD.playing ? 'Animation anhalten' : 'Animation abspielen'); } }
+function ExerciseDetailView(e) {
+  const trainer = !isClientMode();
+  const li = (a, cls, icn) => `<ul class="ud-list ${cls}">${a.map(x => `<li><span class="ud-li-ic">${icn}</span><span>${esc(x)}</span></li>`).join('')}</ul>`;
+  return `<div class="ud">
+    <div class="ud-hero">
+      <div class="ud-stage" id="ud-stage">${ExercisePreview(e.id, 'ud-poster')}<div class="ud-load">${LoadingState('3D-Bewegung wird geladen …')}</div></div>
+      <div class="ud-phase" id="ud-phase" aria-live="polite"></div>
+      <div class="ud-ctrl"><button class="icon-btn glass" id="ud-play" data-action="ud-play" aria-label="Animation anhalten">${ic('pause', 18)}</button>
+        <button class="icon-btn glass" data-action="open3d" data-id="${e.id}" aria-label="Vollbild mit Ansichten, Tempo und Technik">${ic('expand', 18)}</button></div>
+    </div>
+    <div class="ud-head">
+      <div class="ud-tags"><span class="pill pill-gold">${esc(e.g)}</span><span class="pill">${esc(eqShort(e))}</span></div>
+      <h1 class="ud-title" lang="de">${esc(e.n)}</h1>
+      <div class="ud-sub">${esc(e.sub)}</div>
+    </div>
+    <div class="ud-grid">
+      <section class="ud-card">${SectionHeader('Muskulatur')}
+        <div class="ud-mus"><div class="ud-mus-l">Primär</div><div class="mchips">${e.prim.map(m => `<span class="mchip p">${esc(MUSKEL(m))}</span>`).join('')}</div></div>
+        ${e.sec.length ? `<div class="ud-mus"><div class="ud-mus-l">Sekundär</div><div class="mchips">${e.sec.map(m => `<span class="mchip">${esc(MUSKEL(m))}</span>`).join('')}</div></div>` : ''}
+        <div class="ud-mus"><div class="ud-mus-l">Equipment</div><div>${esc(e.eq)}</div></div>
+      </section>
+      <section class="ud-card">${SectionHeader('Ausführung')}
+        <ol class="ud-steps">
+          <li><b>Ausgangsposition</b><span>${esc(e.start)}</span></li>
+          <li><b>Bewegung</b><span>${esc(e.exec)}</span></li>
+          <li><b>Bewegungsrichtung</b><span>${esc(e.dir)}</span></li>
+        </ol>
+      </section>
+      <section class="ud-card">${SectionHeader('Technik')}${li(e.tips, 'ok', ic('check', 16))}</section>
+      <section class="ud-card">${SectionHeader('Häufige Fehler')}${li(e.errs, 'bad', ic('x', 16))}</section>
+    </div>
+    ${trainer ? `<div class="ud-cta"><button class="btn btn-primary btn-big" data-action="ud-add" data-id="${e.id}">${ic('plus', 20)} Zum Trainingsplan hinzufügen</button></div>` : ''}
+  </div>`;
+}
+function viewUebung(id) {
+  const e = KAT().find(x => x.id === id); if (!e) return null;
+  return topbar({ back: '/uebungen', title: esc(e.n), sub: esc(e.g) }) + `<main class="wrap view wrap-wide">${ExerciseDetailView(e)}</main>`;
+}
+
+/* Übung einem Kundenplan hinzufügen – nutzt die vorhandenen Datenstrukturen (plans/days/exercises) */
+function openAddToPlan(exId, cid) {
+  const e = KAT().find(x => x.id === exId); if (!e) return;
+  const clients = all('clients').sort((a, b) => a.name.localeCompare(b.name, 'de'));
+  if (!clients.length) return modal('Zum Trainingsplan hinzufügen', `${EmptyState('Noch keine Kunden', 'Lege zuerst einen Kunden an, dann kannst du Übungen in seinen Plan legen.')}<div class="sheet-actions"><button class="btn btn-primary" data-action="modal-go" data-href="/">Zur Kundenliste</button></div>`);
+  if (!cid) return modal('Für wen?', `<p class="muted" style="margin:0 0 12px">${esc(e.n)}</p><div class="pick-list">${clients.map(c => `<button class="day-btn tap" data-action="ud-add-client" data-id="${e.id}" data-cid="${c.id}">${avatar(c, 'sm')}<span class="grow"><span class="day-name">${esc(c.name)}</span><br><span class="muted" style="font-size:13px">${clientDays(c.id).length} Trainingstage</span></span>${ic('back', 18).replace('<svg', '<svg style="transform:scaleX(-1)"')}</button>`).join('')}</div>`);
+  const c = S.clients.get(cid), days = clientDays(cid);
+  if (!days.length) return modal('Noch kein Plan', `${EmptyState('Kein Trainingstag vorhanden', `${c.name} hat noch keinen Trainingsplan. Lade einen SWEAT4-Plan oder lege einen Trainingstag an.`)}<div class="sheet-actions"><button class="btn btn-primary" data-action="modal-go" data-href="/client/${cid}/plan">Zum Trainingsplan</button></div>`);
+  modal('Welcher Trainingstag?', `<p class="muted" style="margin:0 0 12px">${esc(e.n)} → ${esc(c.name)}</p><div class="pick-list">${days.map((d, i) => { const n = exercisesOf(d.id).length, full = n >= CONFIG.MAX_EXERCISES, has = exercisesOf(d.id).some(x => x.catalogId === e.id || norm(x.name) === norm(e.n));
+    return `<button class="day-btn tap" data-action="ud-add-day" data-id="${e.id}" data-did="${d.id}" ${full ? 'disabled' : ''}><span class="day-no">${i + 1}</span><span class="grow"><span class="day-name">${esc(d.name)}</span><br><span class="muted" style="font-size:13px">${n} Übungen${has ? ' · bereits enthalten' : ''}${full ? ' · voll' : ''}</span></span>${ic('plus', 20)}</button>`; }).join('')}</div>`);
+}
+function addCatalogExercise(exId, dayId) {
+  const e = KAT().find(x => x.id === exId), d = S.days.get(dayId); if (!e || !d) return;
+  const list = exercisesOf(dayId); if (list.length >= CONFIG.MAX_EXERCISES) return toast('Dieser Tag ist voll');
+  put('exercises', { id: uid(), dayId, name: e.n, order: list.length, createdAt: Date.now(), targetSets: CONFIG.DEFAULT_SETS, sets: [], note: '', catalogId: e.id,
+    ss: null, amrap: false, unit: null, rest: null, step: null, autoSuggest: e.eq !== 'Körpergewicht', startWeight: null, goalWeight: null });
+  const plan = S.plans.get(d.planId), c = plan && S.clients.get(plan.clientId);
+  closeModal(null); toast(`Hinzugefügt: ${d.name}${c ? ' · ' + c.name : ''}`);
+}
+
+/* ---------- SWEAT4 Programme ---------- */
+const PROG_META = {
+  'm-def-3':  { who: 'Männer', goal: 'Definition',  img: 'bankdruecken-lh', focus: 'Supersätze' },
+  'm-mass-3': { who: 'Männer', goal: 'Muskelaufbau', img: 'kniebeuge',       focus: 'Hardgainer' },
+  'w-def-3':  { who: 'Frauen', goal: 'Definition',  img: 'box-jumps',       focus: 'Athletikzirkel' },
+  'w-mass-3': { who: 'Frauen', goal: 'Muskelaufbau', img: 'hip-thrust',      focus: 'Grundübungen' },
+};
+const progMeta = t => PROG_META[t.id] || { who: '', goal: t.title, img: null, focus: '' };
+const tplDur = () => '60–70 Min.';
+const tplSummary = x => planSummary({ targetSets: x.sets.length, sets: x.sets.map(r => ({ reps: r ? r[0] : null, repsMax: r ? r[1] : null })), amrap: x.amrap, unit: x.unit });
+function WorkoutPlanCard(t, cid, active) {
+  const m = progMeta(t);
+  return `<button class="pcard tap ${active ? 'on' : ''}" data-action="prog-open" data-cid="${cid}" data-tpl="${t.id}" aria-pressed="${active ? 'true' : 'false'}" aria-label="${esc(m.who + ' ' + m.goal)} – Plan ansehen">
+    <div class="pcard-media">${m.img ? ExercisePreview(m.img, 'pcard-prev') : ''}<span class="pcard-who">${esc(m.who)}</span>${active ? `<span class="pcard-check" aria-hidden="true">${ic('check', 16)}</span>` : ''}</div>
+    <div class="pcard-body">
+      <div class="pcard-title">${esc(m.goal)}</div>
+      <div class="pcard-meta">${t.days.length} Tage · ${tplDur(t)}</div>
+      <div class="pcard-focus">${esc(m.focus)}</div>
+      <div class="pcard-cta">${active ? 'Aktiv · ansehen' : 'Plan ansehen'} ${ic('arrow', 15)}</div>
+    </div></button>`;
+}
+function TrainingDayCard(name, exs, i) {
+  return `<div class="tday"><div class="tday-h"><span class="day-no">${i + 1}</span><b>${esc(name)}</b><span class="tday-n">${exs.length} Übungen</span></div>
+    <ol class="tday-list">${exs.map((x, j) => { const si = ssInfo(exs, j); return `<li><span class="tday-x">${esc(x.name)}</span><span class="tday-s">${si ? `<span class="tag ss-tag">${si.kind} ${si.label}</span>` : ''}${esc(tplSummary(x))}</span></li>`; }).join('')}</ol></div>`;
+}
+function openProgram(cid, tplId) {
+  const t = SWEAT4_SYSTEM.find(x => x.id === tplId); if (!t) return;
+  const m = progMeta(t), plan = planOf(cid), active = plan && plan.templateId === t.id;
+  modal(`${esc(m.who)} · ${esc(m.goal)}`, `
+    <div class="prog-sheet-meta"><span class="pill pill-gold">${esc(m.goal)}</span><span class="pill">3er-Split</span><span class="pill">${t.days.length} Tage</span><span class="pill">${tplDur(t)}</span>${t.rest ? `<span class="pill">${t.rest / 60} Min. Pause</span>` : ''}</div>
+    <div class="stack">${t.days.map(([n, exs], i) => TrainingDayCard(n, exs, i)).join('')}</div>
+    <div class="sheet-actions sticky-actions">
+      <button class="btn btn-primary" data-action="tpl-apply" data-cid="${cid}" data-tpl="${t.id}">${active ? `${ic('reset', 18)} Plan neu laden` : `${ic('check', 18)} Diesen Plan übernehmen`}</button></div>`,
+    el => hydrateThumbs(el));
+}
+function ControlSystemCard(c, plan) {
+  const act = plan && plan.templateId && SWEAT4_SYSTEM.find(t => t.id === plan.templateId);
+  return `<section class="cs-card" aria-label="SWEAT4 Control System">
+    <div class="cs-head"><span class="cs-mark">${LOGO_MARK}</span><div class="grow"><div class="cs-eyebrow">Control System</div>
+      <div class="cs-desc">Fertige Pläne nach der Sweat4-Methode. Gewichte steigen automatisch mit.</div></div></div>
+    ${act ? `<div class="cs-active">${ic('check', 15)} Aktiv: ${esc(progMeta(act).who)} · ${esc(progMeta(act).goal)}</div>` : ''}
+    <div class="pgrid">${SWEAT4_SYSTEM.map(t => WorkoutPlanCard(t, c.id, plan && plan.templateId === t.id)).join('')}</div>
+  </section>`;
+}
+
+Object.assign(A, {
+  'kat-group': el => { UI.katGroup = el.dataset.v; refreshKat(); },
+  'kat-eq': el => { UI.katEq = el.dataset.v; refreshKat(); },
+  'kat-reset': () => { UI.katGroup = 'Alle'; UI.katEq = 'Alle'; UI.katSearch = ''; const s = document.getElementById('katsearch'); if (s) s.value = ''; refreshKat(); },
+  'ud-play': () => { if (!VD) return; if (VD._done) VD.reset(); VD.playing = !VD.playing; udPlayBtn(); },
+  'ud-add': el => openAddToPlan(el.dataset.id),
+  'ud-add-client': el => openAddToPlan(el.dataset.id, el.dataset.cid),
+  'ud-add-day': el => addCatalogExercise(el.dataset.id, el.dataset.did),
+  'prog-open': el => openProgram(el.dataset.cid, el.dataset.tpl),
+  'modal-go': el => { closeModal(null); go(el.dataset.href); },
+});
 
 /* ---------- 3D laden (Lazy Loading) ---------- */
 let _3dPromise = null, V3 = null;
@@ -1880,7 +2281,7 @@ function webglOk() { try { const c = document.createElement('canvas'); return !!
 
 async function open3D(id) {
   const e = KAT().find(x => x.id === id); if (!e) return;
-  flushSave(); close3D();
+  flushSave(); close3D(); disposeDetail3D();
   const root = document.createElement('div'); root.id = 'v3d'; root.className = 'v3d'; root.setAttribute('role', 'dialog'); root.setAttribute('aria-modal', 'true'); root.setAttribute('aria-label', '3D-Ausführung ' + e.n);
   const views = [['auto', 'Auto'], ['front', 'Vorne'], ['side', 'Seite'], ['back', 'Hinten'], ['diag', 'Schräg']];
   root.innerHTML = `
@@ -1913,7 +2314,7 @@ async function open3D(id) {
     V3 = new SW3D.Viewer(root.querySelector('#v3-stage'));
     V3.onPhase = label => { const el = document.getElementById('v3-phase'); if (el) el.textContent = label; };
     V3.onStop = () => setPlayBtn(false);
-    V3.load(e); loadEl.remove();
+    V3.load({ ...e, primary: e.prim, secondary: e.sec }); loadEl.remove(); // Katalog nutzt prim/sec, die Engine primary/secondary
   } catch (err) {
     console.error(err);
     loadEl.innerHTML = '3D-Ansicht konnte nicht geladen werden.<br><span style="font-size:13px">' + esc(err.message) + '</span>';
@@ -1927,7 +2328,7 @@ function close3D() {
 function setPlayBtn(playing) { const b = document.getElementById('v3-play'); if (b) { b.innerHTML = playing ? `${ic('pause', 16)} Pause` : `${ic('play', 16)} Abspielen`; b.setAttribute('aria-label', playing ? 'Pause' : 'Abspielen'); } }
 Object.assign(A, {
   open3d: el => open3D(el.dataset.id),
-  'v3-close': () => close3D(),
+  'v3-close': () => { close3D(); const p = location.hash.slice(1).split('/').filter(Boolean); if (p[0] === 'uebung') mountDetail3D(p[1]); },
   'v3-play': () => { if (!V3) return; if (V3._done) V3.reset(); V3.playing = !V3.playing; setPlayBtn(V3.playing); },
   'v3-reset': () => { if (!V3) return; V3.reset(); V3.playing = true; setPlayBtn(true); },
   'v3-speed': el => { if (!V3) return; const sp = V3.speed === 1 ? .5 : V3.speed === .5 ? .25 : 1; V3.speed = sp; el.textContent = 'Tempo ' + String(sp).replace('.', ',') + '×'; el.classList.toggle('on', sp !== 1); },
@@ -1936,7 +2337,6 @@ Object.assign(A, {
   'v3-zoom': el => { if (V3) V3.zoom(el.dataset.v === 'in' ? .85 : 1.18); },
   'v3-muscles': el => { if (!V3) return; const on = !V3.muscleOn; V3.setMuscles(on); el.classList.toggle('on', on); document.getElementById('v3-legend').classList.toggle('hidden', !on); },
   'v3-info': el => { const p = document.getElementById('v3-info'); const show = p.classList.contains('hidden'); p.classList.toggle('hidden', !show); el.classList.toggle('on', show); },
-  'kat-group': el => { UI.katGroup = el.dataset.v; render(); },
 });
 document.addEventListener('input', ev => { if (ev.target.id === 'katsearch') filterKat(ev.target.value); });
 document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && document.getElementById('v3d') && !document.getElementById('modal-root').innerHTML) close3D(); });
@@ -2714,7 +3114,7 @@ function lockGate() {
 }
 
 /* ---------- Aktionen ---------- */
-const TRAINER_ONLY = new Set(['new-client', 'edit-client', 'del-client', 'photo-remove', 'add-day', 'del-day', 'day-move', 'add-ex', 'edit-ex', 'del-ex', 'tpl-apply', 'ex-move', 'demo', 'wipe', 'backup', 'import', 'check-del', 'pkg-make', 'ret-import', 'lock-set', 'lock-off', 'pslot-rm']);
+const TRAINER_ONLY = new Set(['new-client', 'edit-client', 'del-client', 'photo-remove', 'add-day', 'del-day', 'day-move', 'add-ex', 'edit-ex', 'del-ex', 'tpl-apply', 'ud-add', 'ud-add-client', 'ud-add-day', 'ex-move', 'demo', 'wipe', 'backup', 'import', 'check-del', 'pkg-make', 'ret-import', 'lock-set', 'lock-off', 'pslot-rm']);
 document.addEventListener('click', ev => {
   const el = ev.target.closest('[data-action]');
   if (el && isClientMode() && TRAINER_ONLY.has(el.dataset.action)) { ev.preventDefault(); ev.stopImmediatePropagation(); toast('Nur für den Trainer verfügbar'); }
