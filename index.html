@@ -153,7 +153,11 @@ select.input{appearance:none;-webkit-appearance:none;background-image:linear-gra
 .radio-seg input{position:absolute;opacity:0;pointer-events:none}
 .radio-seg span{display:grid;place-items:center;height:48px;border-radius:12px;background:var(--bg);border:1px solid var(--border);font-weight:700;font-size:18px;cursor:pointer}
 .radio-seg input:checked+span{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
-.target-row{display:grid;grid-template-columns:60px 1fr 1fr;gap:8px;align-items:center;margin-bottom:8px}
+.target-row{display:grid;grid-template-columns:52px 1fr 1fr 1fr;gap:6px;align-items:center;margin-bottom:8px}
+.s4-card{margin-bottom:16px;border-color:rgba(190,155,92,.45)}.s4-mark{flex:none;width:58px;display:block;margin-top:3px}.s4-mark svg{width:100%;height:auto;display:block}
+.s4-plan{background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin-bottom:10px}.s4-plan .chip{font-size:13px;margin:4px 4px 0 0;display:inline-block}
+.ss-tag{font-size:10px;padding:2px 7px;margin-right:4px;vertical-align:1px}
+.ex-card.is-ss .ex-num{font-size:13px;background:var(--accent-soft);color:var(--accent)}.ex-card.is-ss.complete .ex-num{background:var(--accent);color:var(--accent-ink)}
 .target-row input{text-align:center}
 .step-seg span{font-size:16px}
 .step-custom{display:flex;align-items:center;gap:10px;margin-top:8px}.step-custom .input{width:120px;text-align:center}
@@ -257,6 +261,14 @@ select.input{appearance:none;-webkit-appearance:none;background-image:linear-gra
 
 #toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);background:var(--text);color:var(--bg);padding:12px 18px;border-radius:12px;font-weight:600;opacity:0;pointer-events:none;transition:all .25s;z-index:80;max-width:90vw;text-align:center}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#rest-timer{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(140%);width:min(440px,calc(100vw - 24px));background:var(--surface);border:1px solid rgba(190,155,92,.55);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.45);padding:12px 12px 12px 16px;z-index:70;transition:transform .25s;overflow:hidden}
+#rest-timer.show{transform:translateX(-50%) translateY(0)}
+body.resting .view{padding-bottom:110px}
+#rest-timer .rt-row{display:flex;align-items:center;gap:10px}
+#rest-timer .rt-time{font-size:30px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--accent);min-width:84px}
+#rest-timer .rt-l{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+#rest-timer .rt-bar{position:absolute;left:0;bottom:0;height:4px;background:var(--accent);transition:width .25s linear}
+#rest-timer.done{border-color:var(--ok)}#rest-timer.done .rt-time{color:var(--ok)}
 @media(max-width:420px){.hide-xs{display:none}}
 /* ---------- Übungskatalog & 3D ---------- */
 .chip3d{display:inline-flex;align-items:center;gap:3px;margin-left:6px;padding:2px 7px;border-radius:999px;border:1px solid rgba(190,155,92,.5);background:var(--accent-soft);color:var(--accent);font-size:11px;font-weight:800;letter-spacing:.04em;cursor:pointer;vertical-align:2px}
@@ -400,6 +412,7 @@ img.ld{opacity:1!important}
 <div id="app"><div class="empty">Lade …</div></div>
 <div id="modal-root"></div>
 <div id="toast"></div>
+<div id="rest-timer" role="timer" aria-live="polite"></div>
 
 <script src="uebungen-katalog.js"></script>
 <script>
@@ -504,6 +517,28 @@ function fmtSet(s) {
   if (w) return `${fmtNum(s.weight)} kg`;
   if (r) return `${fmtNum(s.reps)} Wdh.`;
   return '–';
+}
+/* Planvorgabe eines Satzes: Wiederholungsbereich (z. B. 10–12) oder „max.“ bei Körpergewicht */
+function repsLabel(t, amrap) {
+  if (amrap) return 'max.';
+  if (!t) return '';
+  if (hasVal(t.reps) && hasVal(t.repsMax) && t.repsMax > t.reps) return `${fmtNum(t.reps)}–${fmtNum(t.repsMax)}`;
+  return hasVal(t.reps) ? fmtNum(t.reps) : hasVal(t.repsMax) ? fmtNum(t.repsMax) : '';
+}
+/* Kompakte Planzeile: „4 × 10–12“ oder „10–12 / 8–10 / 6–8 / 8–10“ */
+function planSummary(e) {
+  const n = e.targetSets || CONFIG.DEFAULT_SETS;
+  if (e.amrap) return `${n} × max. Wdh.`;
+  const sets = (e.sets || []).slice(0, n);
+  if (!sets.some(s => hasVal(s.weight) || hasVal(s.reps) || hasVal(s.repsMax))) return `${n} Sätze`;
+  const parts = sets.map(s => fmtTarget(s).replace(' Wdh.', '')), u = e.unit === 's' ? ' Sek.' : '';
+  return (new Set(parts).size === 1 ? `${n} × ${parts[0]}` : parts.join(' / ')) + u;
+}
+function fmtTarget(t, amrap) {
+  const r = repsLabel(t, amrap), w = t && hasVal(t.weight);
+  if (w && r) return `${fmtNum(t.weight)} kg × ${r}`;
+  if (w) return `${fmtNum(t.weight)} kg`;
+  return r ? `${r} Wdh.` : '–';
 }
 const isoOf = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 const today = () => isoOf(new Date());
@@ -620,7 +655,7 @@ function progOf(sessEx) {
 }
 const topWeight = sets => { const ws = sets.filter(s => hasVal(s.weight)).map(s => s.weight); return ws.length ? Math.max(...ws) : null; };
 function suggestFor(sessEx, last, prog) {
-  if (!prog || !prog.auto) return null;
+  if (!prog || !prog.auto || sessEx.amrap) return null;
   const top = last ? topWeight(last.sets) : null;
   if (top == null) return hasVal(prog.start) ? { weight: prog.start, delta: null, kind: 'start', reason: 'Startgewicht laut Plan' } : null;
   if (hasVal(prog.goal) && top >= prog.goal) return { weight: top, delta: 0, kind: 'goal', reason: `Ziel ${fmtNum(prog.goal)} kg erreicht 🎉 – Gewicht halten oder neues Ziel setzen` };
@@ -632,7 +667,9 @@ function suggestFor(sessEx, last, prog) {
   const ok = last.sets.length >= n && last.sets.every((s, i) => {
     if (!hasVal(s.reps)) return false;
     const t = sessEx.target && sessEx.target[i];
-    if (t && hasVal(t.reps)) return s.reps >= t.reps;
+    // Sweat4-Regel: Gewicht erst erhöhen, wenn die OBERE Grenze des Bereichs (z. B. 12 bei 10–12) geschafft ist
+    const need = t ? (hasVal(t.repsMax) ? t.repsMax : t.reps) : null;
+    if (hasVal(need)) return s.reps >= need;
     return s.weight !== top || s.reps >= ref;
   });
   if (!ok) return { weight: top, delta: 0, kind: 'hold', reason: last.sets.length < n ? `Letztes Mal nur ${last.sets.length} von ${n} Sätzen – Gewicht halten` : 'Letztes Mal noch nicht alle Wiederholungen geschafft – Gewicht halten' };
@@ -654,6 +691,180 @@ function planExByName(cid, name) {
   const n = norm(name);
   for (const d of clientDays(cid)) for (const e of exercisesOf(d.id)) if (norm(e.name) === n) return e;
   return null;
+}
+
+/* ---------------- Supersätze ----------------
+   Übungen mit gleichem Buchstaben (ss: 'A', 'B' …), die direkt aufeinander folgen, bilden einen Supersatz. */
+const SS_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+function ssInfo(list, i) {
+  const e = list[i], L = e && e.ss; if (!L) return null;
+  let a = i, b = i;
+  while (a > 0 && list[a - 1].ss === L) a--;
+  while (b < list.length - 1 && list[b + 1].ss === L) b++;
+  if (a === b) return null; // allein → kein Supersatz
+  const size = b - a + 1, circuit = size > 2, pos = i - a + 1;
+  return { a, b, size, circuit, pos, label: circuit ? `${pos}/${size}` : L + pos, kind: circuit ? 'Zirkel' : 'Supersatz', letter: L,
+    next: list[i < b ? i + 1 : a].name, partners: list.slice(a, b + 1).filter((_, k) => a + k !== i).map(x => x.name), first: i === a };
+}
+
+/* ---------------- SWEAT4 Control System – Vorlagen ----------------
+   Die Methode von Khosro Talee als feste Vorlagen. Neue Vorlagen (Frauen, 4er-Split, Muskelaufbau …)
+   einfach unten in SWEAT4_SYSTEM ergänzen – die App bietet sie automatisch an. */
+const PYR = [[10, 12], [8, 10], [6, 8], [8, 10]];             // Pyramide für schwere Grundübungen
+const ISO = n => Array.from({ length: n }, () => [10, 12]);     // Isolation 10–12
+const MAX = n => Array.from({ length: n }, () => null);          // Körpergewicht: so viele wie möglich
+const X = (name, sets, opt = {}) => ({ name, sets, ...opt });   // opt: ss (Supersatz/Zirkel), note, amrap, bw (Körpergewicht, feste Wdh.), unit ('s' = Sekunden)
+const PYR_W = [[10, 12], [8, 10], [6, 8], [6, 8]];             // Frauen: Pyramide mit zwei schweren Sätzen am Ende
+const PYR_H5 = [[8, 10], [6, 8], [4, 6], [6, 8], [8, 10]];     // Muskelaufbau: schwere Pyramide, Mitte am schwersten
+const PYR_H4 = [[8, 10], [6, 8], [4, 6], [6, 8]];
+const PYR_M5 = [[8, 10], [6, 8], [6, 8], [6, 8], [8, 10]];     // Frauen Muskelaufbau: 5 schwere Sätze
+const R = (n, lo, hi = lo) => Array.from({ length: n }, () => [lo, hi]);   // n Sätze mit festem Bereich
+const ZIRKEL = (name, lo, hi, opt = {}) => X(name, R(2, lo, hi), { ss: 'Z', bw: true, rest: 30, ...opt });  // Athletikzirkel: 2 Runden (Fortgeschrittene 3)
+const W_OBERKOERPER = [
+        X('Schulterdrücken sitzend (Kurzhantel)', R(4, 8, 10)),
+        X('Seitheben stehend (Kurzhantel)', ISO(4)),
+        X('Hintere Schulter über Kreuz am Turm', ISO(4), { note: 'Alternativ Face Pulls' }),
+        X('Latziehen breit', R(4, 8, 10)),
+        X('Langhantelrudern', R(4, 8, 10)),
+        X('Fliegende am Turm', ISO(4)),
+        X('Beinheben liegend', MAX(4), { ss: 'A', amrap: true }), X('Crunches am Turm', ISO(4), { ss: 'A' }),
+      ];
+const W_BEINE = [
+        X('Back Squats', PYR_W, { note: 'Normale Tiefe, schwer' }),
+        X('Einbeinige Ausfallschritte (Kurzhantel)', R(4, 10), { note: '10 pro Seite' }),
+        X('Rumänisches Kreuzheben (Langhantel)', PYR_W, { note: 'Genauso schwer wie die Kniebeuge' }),
+        X('Beinpresse', R(4, 8, 10), { note: 'Alternativ Hackenschmidt' }),
+        X('Beinbeuger', ISO(4), { ss: 'A' }), X('Beinstrecker', ISO(4), { ss: 'A' }),
+        X('Po-Kickbacks am Turm', ISO(4), { note: 'Bein gestreckt nach hinten oben' }),
+      ];
+const W_CORE = (rest) => [
+        X('Seitstütz mit Becken heben', R(3, 12), { bw: true, rest, note: 'Core-Teil (10–15 Min.) · 12 pro Seite' }),
+        X('Plank mit Beinheben', R(3, 12), { bw: true, rest, note: '12 pro Bein' }),
+        X('Seitstütz mit seitlichem Beinheben', R(3, 12), { bw: true, rest, note: '12 pro Seite' }),
+];
+/* Muskelaufbau-Variante eines Tages: schwere Grundübungen als Pyramide bis 4–6, sonst maximal 10 Wdh. (10–12 → 8–10) */
+const HEAVY_LEAD = ['Schulterdrücken sitzend (Kurzhantel)', 'Back Squats', 'Rumänisches Kreuzheben (Langhantel)'];
+const heavier = list => list.map(x => HEAVY_LEAD.includes(x.name) ? { ...x, sets: PYR_H4 }
+  : x.amrap ? x : { ...x, sets: x.sets.map(r => r && r[1] > 10 ? [8, 10] : r) });
+const SWEAT4_SYSTEM = [
+  {
+    id: 'm-def-3', title: 'Männer · Definition · 3er-Split', sub: 'Mo Brust & Rücken · Mi Beine · Fr Schulter & Arme · 60–70 Min.',
+    days: [
+      ['Brust & Rücken (Mo)', [
+        X('Bankdrücken (Langhantel)', PYR, { ss: 'A' }), X('Langhantelrudern', PYR, { ss: 'A' }),
+        X('Schrägbankdrücken (Kurzhantel)', PYR, { ss: 'B' }), X('Kurzhantelrudern auf der Schrägbank', PYR, { ss: 'B' }),
+        X('Brustmaschine', ISO(4), { ss: 'C' }), X('Latziehen breit', ISO(4), { ss: 'C' }),
+        X('Klimmzüge', MAX(3), { ss: 'D', amrap: true }), X('Dips', MAX(3), { ss: 'D', amrap: true }),
+        X('Butterfly-Maschine', ISO(4), { ss: 'E' }), X('Rudern sitzend', ISO(4), { ss: 'E' }),
+        X('Rückenstrecker', ISO(4), { ss: 'F' }), X('Crunches am Turm', ISO(4), { ss: 'F' }),
+      ]],
+      ['Beine (Mi)', [
+        X('Back Squats', PYR, { note: 'Schwer. Optional ein zusätzlicher Satz 6–8 Wdh.' }),
+        X('Ausfallschritte im Gehen (Kurzhantel)', ISO(4)),
+        X('Hackenschmidt-Kniebeuge', ISO(4), { note: 'Alternativ Beinpresse' }),
+        X('Rumänisches Kreuzheben (Langhantel)', ISO(4)),
+        X('Beinbeuger', ISO(4), { ss: 'A' }), X('Beinstrecker', ISO(4), { ss: 'A' }),
+        X('Wadenheben sitzend', ISO(4)),
+      ]],
+      ['Schulter & Arme (Fr)', [
+        X('Schulterdrücken sitzend (Kurzhantel)', PYR),
+        X('Seitheben stehend (Kurzhantel)', ISO(4)),
+        X('Frontheben (Kurzhantel, Rücken an der Wand)', ISO(4)),
+        X('Hintere Schulter über Kreuz am Turm', ISO(4), { note: 'Wie Facepulls, aber breit' }),
+        X('SZ-Curls', ISO(4), { ss: 'A' }), X('French Press', ISO(4), { ss: 'A' }),
+        X('Hammer Curls (Kurzhantel)', ISO(3), { ss: 'B' }), X('Trizepsdrücken hinter dem Kopf (Kurzhantel)', ISO(3), { ss: 'B' }),
+        X('Konzentrationscurls am Turm', ISO(3), { ss: 'C' }), X('Trizeps reverse über Kreuz am Turm', ISO(3), { ss: 'C' }),
+        X('Beinheben liegend', MAX(4), { ss: 'D', amrap: true }), X('Crunches am Turm', ISO(4), { ss: 'D' }),
+      ]],
+    ],
+  },
+  {
+    id: 'm-mass-3', title: 'Männer · Muskelaufbau (Hardgainer) · 3er-Split', sub: 'Mo Brust & Rücken · Mi Beine · Fr Schulter & Arme · schwer, ohne Supersätze, 2 Min. Pause', rest: 120,
+    days: [
+      ['Brust & Rücken (Mo)', [
+        X('Schrägbankdrücken (Kurzhantel)', PYR_H5, { note: 'Vorher 1 Aufwärmsatz. Keine Supersätze – 2 Min. Pause zwischen den Sätzen' }),
+        X('Bankdrücken (Langhantel)', PYR_H5, { note: 'Vorher 1 Aufwärmsatz' }),
+        X('Brustmaschine', [[8, 10], [6, 8], [8, 10], [8, 10]]),
+        X('Butterfly / Fliegende am Kabelzug', ISO(4)),
+        X('Latziehen zur Brust', R(4, 8, 10)),
+        X('Langhantelrudern', [[8, 10], [6, 8], [6, 8], [8, 10]]),
+        X('Einarmiges Kurzhantelrudern', R(3, 8, 10), { note: 'Pro Seite' }),
+        X('Rudern sitzend am Turm', R(4, 8, 10)),
+        X('Beinheben hängend', MAX(4), { ss: 'A', amrap: true }), X('Crunches am Turm', ISO(4), { ss: 'A' }),
+      ]],
+      ['Beine (Mi)', [
+        X('Back Squats', PYR_H4, { note: 'Keine Supersätze – 2 Min. Pause. Maximal 10 Wdh.' }),
+        X('Ausfallschritte im Gehen (Kurzhantel)', R(4, 8, 10)),
+        X('Hackenschmidt-Kniebeuge', R(4, 8, 10), { note: 'Alternativ Beinpresse' }),
+        X('Rumänisches Kreuzheben (Langhantel)', R(4, 8, 10)),
+        X('Beinbeuger', R(4, 8, 10)),
+        X('Beinstrecker', R(4, 8, 10)),
+        X('Wadenheben sitzend', R(4, 8, 10)),
+      ]],
+      ['Schulter & Arme (Fr)', [
+        X('Schulterdrücken sitzend (Kurzhantel)', PYR_H4, { note: 'Keine Supersätze – 2 Min. Pause' }),
+        X('Seitheben stehend (Kurzhantel)', R(4, 8, 10)),
+        X('Frontheben (Kurzhantel, Rücken an der Wand)', R(4, 8, 10)),
+        X('Hintere Schulter über Kreuz am Turm', R(4, 8, 10)),
+        X('SZ-Curls', R(4, 8, 10)), X('French Press', R(4, 8, 10)),
+        X('Hammer Curls (Kurzhantel)', R(3, 8, 10)), X('Trizepsdrücken hinter dem Kopf (Kurzhantel)', R(3, 8, 10)),
+        X('Konzentrationscurls am Turm', R(3, 8, 10)), X('Trizeps reverse über Kreuz am Turm', R(3, 8, 10)),
+        X('Beinheben liegend', MAX(4), { ss: 'A', amrap: true }), X('Crunches am Turm', ISO(4), { ss: 'A' }),
+      ]],
+    ],
+  },
+  {
+    id: 'w-def-3', title: 'Frauen · Definition · 3er-Split', sub: 'Oberkörper · Beine & Po · Core & Athletikzirkel · 60–70 Min.',
+    days: [
+      ['Oberkörper', W_OBERKOERPER],
+      ['Beine & Po', W_BEINE],
+      ['Core & Athletik', [
+        ...W_CORE(),
+        ZIRKEL('Burpees', 15, 15, { note: 'Athletikzirkel: 10 Stationen, 30 Sek. Pause dazwischen. Anfänger 2 Runden, Fortgeschrittene 3 (+ Satz)' }),
+        ZIRKEL('Klappmesser', 12, 15),
+        ZIRKEL('Knie-Hock-Sprünge', 12, 15, { note: 'Knie zu den Ellbogen' }),
+        ZIRKEL('Crunches gestreckt', 15, 15),
+        ZIRKEL('Sprung-Ausfallschritte', 12, 12, { note: '12 pro Seite, explosiv' }),
+        ZIRKEL('Hüftheben (Füße auf der Bank)', 15, 15),
+        ZIRKEL('Box Jumps (60–70 cm)', 12, 12, { note: 'Beidbeinig hoch, einbeinig runter' }),
+        ZIRKEL('Russian Twist', 20, 20, { note: '10 pro Seite' }),
+        ZIRKEL('Squat-Sprünge (Mitte · rechts · Mitte · links)', 15, 15),
+        ZIRKEL('Plank halten', 60, 60, { unit: 's', note: 'Mindestens 60 Sekunden' }),
+      ]],
+    ],
+  },
+  {
+    id: 'w-mass-3', title: 'Frauen · Muskelaufbau · 3er-Split', sub: 'Oberkörper · Beine & Po · Core & 5 Grundübungen · 2 Min. Pause', rest: 120,
+    days: [
+      ['Oberkörper', heavier(W_OBERKOERPER)],
+      ['Beine & Po', heavier(W_BEINE)],
+      ['Core & Grundübungen', [
+        ...W_CORE(0),
+        X('Frontkniebeuge', PYR_M5, { note: 'Schwer · 2 Min. Pause' }),
+        X('Kreuzheben', PYR_M5, { note: 'Schwer, gleicher Ablauf wie Kniebeuge' }),
+        X('Schulterdrücken (Langhantel)', PYR_M5),
+        X('Langhantelrudern', PYR_M5),
+        X('Hip Thrust', PYR_M5),
+        X('Beinheben liegend', R(4, 10), { bw: true, rest: 0 }),
+      ]],
+    ],
+  },
+];
+function applyTemplate(cid, tplId) {
+  const tpl = SWEAT4_SYSTEM.find(t => t.id === tplId); if (!tpl) return;
+  const plan = ensurePlan(cid);
+  daysOf(plan.id).forEach(d => { exercisesOf(d.id).forEach(e => del('exercises', e.id)); del('days', d.id); });
+  Object.assign(plan, { name: 'SWEAT4 · ' + tpl.title, templateId: tpl.id }); put('plans', plan);
+  tpl.days.slice(0, CONFIG.MAX_DAYS).forEach(([dayName, exs], i) => {
+    const day = { id: uid(), planId: plan.id, name: dayName, order: i }; put('days', day);
+    exs.slice(0, CONFIG.MAX_EXERCISES).forEach((x, j) => {
+      const k3 = katFind(x.name);
+      put('exercises', { id: uid(), dayId: day.id, name: x.name, order: j, createdAt: Date.now(),
+        targetSets: x.sets.length, note: x.note || '', rest: (x.rest ?? tpl.rest) || null, ss: x.ss || null, amrap: !!x.amrap, unit: x.unit || null, catalogId: k3 ? k3.id : null,
+        sets: x.sets.map(r => ({ weight: null, reps: r ? r[0] : null, repsMax: r ? r[1] : null })),
+        step: null, autoSuggest: !x.amrap && !x.bw, startWeight: null, goalWeight: null });
+    });
+  });
 }
 
 /* ---------------- Modal / Dialoge ---------------- */
@@ -806,6 +1017,13 @@ function viewPlan(c) {
   const plan = ensurePlan(c.id), days = daysOf(plan.id);
   return topbar({ back: '/client/' + c.id, title: 'Trainingsplan', sub: esc(c.name) }) +
   `<main class="wrap view">
+    <div class="card s4-card">
+      <div class="row" style="gap:10px;align-items:flex-start"><span class="s4-mark">${LOGO_MARK}</span>
+        <div class="grow"><div style="font-weight:800">SWEAT4 Control System</div>
+        <div class="muted" style="font-size:13px;margin-top:2px">${plan.templateId ? 'Aktiv: ' + esc((SWEAT4_SYSTEM.find(t => t.id === plan.templateId) || {}).title || '') + '. ' : ''}Fertigen Plan nach der Sweat4-Methode laden – mit Supersätzen, Pyramide und automatischer Gewichtssteigerung.</div></div></div>
+      <div class="stack" style="margin-top:10px">${SWEAT4_SYSTEM.map(t => `<button class="day-btn" data-action="tpl-apply" data-cid="${c.id}" data-tpl="${t.id}">
+        <span class="grow"><span class="day-name">${esc(t.title)}</span><br><span class="muted" style="font-size:13px">${esc(t.sub)}</span></span>${plan.templateId === t.id ? '<span class="tag">Aktiv</span>' : ''}</button>`).join('')}</div>
+    </div>
     <label class="field"><span>Name des Plans</span><input class="input" data-plan-name="${plan.id}" value="${esc(plan.name)}" maxlength="80"></label>
     <div class="stack">${days.map((d, i) => {
       const exs = exercisesOf(d.id);
@@ -818,7 +1036,7 @@ function viewPlan(c) {
         </div>
         ${exs.map((e, j) => `<div class="ex-row"><span class="ex-idx">${j + 1}.</span>
           <div class="grow" data-action="edit-ex" data-did="${d.id}" data-id="${e.id}" style="cursor:pointer"><div style="font-weight:600">${esc(e.name)}${(k3 => k3 ? ` <button class="chip3d" data-action="open3d" data-id="${k3.id}" aria-label="3D-Ausführung">${ic('cube', 13)} 3D</button>` : '')(katFind(e.name, e.catalogId))}</div>
-            <div class="ex-meta">${e.targetSets || CONFIG.DEFAULT_SETS} Sätze${(e.sets || []).some(s => hasVal(s.weight) || hasVal(s.reps)) ? ' · Plan: ' + e.sets.map(fmtSet).join(', ') : ''}${(pg => (pg.auto ? ` · <span class="accent">↗ +${fmtNum(pg.step)} kg</span>` : e.step > 0 ? ` · Schritt ${fmtNum(pg.step)} kg` : '') + (hasVal(pg.goal) ? ` · Ziel ${hasVal(pg.start) ? fmtNum(pg.start) + ' → ' : ''}${fmtNum(pg.goal)} kg` : ''))(progOfPlan(e))}${e.note ? ' · 📝 ' + esc(e.note) : ''}</div></div>
+            <div class="ex-meta">${(si => si ? `<span class="tag ss-tag">${si.kind} ${si.label}</span> ` : '')(ssInfo(exs, j))}${esc(planSummary(e))}${(pg => (pg.auto ? ` · <span class="accent">↗ +${fmtNum(pg.step)} kg</span>` : e.step > 0 ? ` · Schritt ${fmtNum(pg.step)} kg` : '') + (hasVal(pg.goal) ? ` · Ziel ${hasVal(pg.start) ? fmtNum(pg.start) + ' → ' : ''}${fmtNum(pg.goal)} kg` : ''))(progOfPlan(e))}${e.note ? ' · 📝 ' + esc(e.note) : ''}</div></div>
           <button class="icon-btn sm" data-action="ex-move" data-id="${e.id}" data-dir="-1" ${j === 0 ? 'disabled' : ''} aria-label="Nach oben">${ic('up')}</button>
           <button class="icon-btn sm" data-action="ex-move" data-id="${e.id}" data-dir="1" ${j === exs.length - 1 ? 'disabled' : ''} aria-label="Nach unten">${ic('down')}</button>
           <button class="icon-btn sm" data-action="edit-ex" data-did="${d.id}" data-id="${e.id}" aria-label="Bearbeiten">${ic('edit', 18)}</button>
@@ -838,11 +1056,11 @@ function phFor(e, i, last, sug) {
   if (t && hasVal(t.weight)) w = t.weight;
   // Aktivierter Progressions-Vorschlag ersetzt den Platzhalter nur, wenn zuletzt einheitlich mit einem Gewicht trainiert wurde
   if (sug && hasVal(sug.weight) && (!last || new Set(last.sets.filter(s => hasVal(s.weight)).map(s => s.weight)).size <= 1)) w = sug.weight;
-  if (t && hasVal(t.reps)) r = t.reps;
+  if (t && (hasVal(t.repsMax) || hasVal(t.reps))) r = hasVal(t.repsMax) ? t.repsMax : t.reps;
   return { w: hasVal(w) ? w : null, r: hasVal(r) ? r : null };
 }
 const exComplete = e => e.sets.length > 0 && e.sets.every(s => s.done);
-const exSummary = e => e.sets.filter(s => s.done).map(fmtSet).join(' · ');
+const exSummary = e => e.sets.filter(s => s.done).map(x => e.unit === 's' ? fmtSet(x).replace('Wdh.', 'Sek.') : fmtSet(x)).join(' · ');
 
 function setRowHtml(e, ei, si, last, sug) {
   const s = e.sets[si], ph = phFor(e, si, last, sug), extra = hasVal(s.rpe) || hasVal(s.note);
@@ -851,7 +1069,7 @@ function setRowHtml(e, ei, si, last, sug) {
     <span class="set-n">${si + 1}</span>
     <label class="fld"><input data-tf="weight" data-ei="${ei}" data-si="${si}" inputmode="decimal" enterkeyhint="next" autocomplete="off" value="${fmtIn(s.weight)}" placeholder="${ph.w != null ? fmtIn(ph.w) : '–'}" data-ph="${ph.w ?? ''}" aria-label="Gewicht Satz ${si + 1}"><span class="unit">kg</span></label>
     <span class="x">×</span>
-    <label class="fld"><input data-tf="reps" data-ei="${ei}" data-si="${si}" inputmode="numeric" enterkeyhint="next" autocomplete="off" value="${fmtIn(s.reps)}" placeholder="${ph.r != null ? fmtIn(ph.r) : '–'}" data-ph="${ph.r ?? ''}" aria-label="Wiederholungen Satz ${si + 1}"><span class="unit">Wdh</span></label>
+    <label class="fld"><input data-tf="reps" data-ei="${ei}" data-si="${si}" inputmode="numeric" enterkeyhint="next" autocomplete="off" value="${fmtIn(s.reps)}" placeholder="${ph.r != null ? fmtIn(ph.r) : '–'}" data-ph="${ph.r ?? ''}" aria-label="Wiederholungen Satz ${si + 1}"><span class="unit">${e.unit === 's' ? 'Sek' : 'Wdh'}</span></label>
     <button class="icon-btn more ${extra ? 'has' : ''}" data-action="set-more" data-ei="${ei}" data-si="${si}" aria-label="RPE und Notiz">${ic('more')}</button>
   </div>
   <div class="set-extra ${extra ? 'show' : ''}" id="sx-${ei}-${si}">
@@ -877,13 +1095,19 @@ function viewTrain(sess) {
         <button class="btn btn-sm btn-ghost" data-action="sug-apply" data-ei="${ei}" data-w="${sug.weight}">Übernehmen</button>
         <div class="prog-r">${esc(sug.reason)} · Schritt ${fmtNum(pg.step)} kg · frei änderbar</div></div>` : '';
     const goalHtml = hasVal(pg.goal) ? `<div class="goal-box">${goalBar(pg.start, pg.goal, last ? topWeight(last.sets) : null)}</div>` : '';
-    return `<div class="ex-card ${open.has(ei) ? 'open' : ''} ${exComplete(e) ? 'complete' : ''}" id="ex-${ei}">
+    const si = ssInfo(sess.exercises, ei);
+    const tg = e.amrap ? e.sets.map(() => 'max.') : (e.target || []).map(t => repsLabel(t)).filter(Boolean), unitL = e.unit === 's' ? 'Sek.' : 'Wdh.';
+    const restHtml = e.rest && !si ? `<div class="muted" style="font-size:13px;margin-top:6px">⏱ ${e.rest % 60 ? e.rest + ' Sek.' : e.rest / 60 + ' Min.'} Pause zwischen den Sätzen</div>` : '';
+    const planHtml = (tg.length || si || restHtml) ? `<div class="s4-plan">${tg.length ? `<div><span class="prog-l">Vorgabe</span> ${tg.map((r, i) => `<span class="chip">${i + 1}: ${esc(r)} ${unitL}</span>`).join('')}</div>` : ''}
+        ${restHtml}${si ? `<div class="muted" style="font-size:13px;margin-top:6px">${si.circuit ? `🔁 Zirkel – Station ${si.pos} von ${si.size}. Danach: <b>${esc(si.next)}</b>. Zwischen den Stationen nur 30 Sek. Pause.` : `🔁 Supersatz ${si.label}: im Wechsel mit <b>${si.partners.map(esc).join(', ')}</b> – Satz hier, dann direkt rüber, danach kurze Pause.`}</div>` : ''}</div>` : '';
+    return `<div class="ex-card ${open.has(ei) ? 'open' : ''} ${exComplete(e) ? 'complete' : ''} ${si ? 'is-ss' : ''}" id="ex-${ei}">
       <button class="ex-head" data-action="toggle-ex" data-ei="${ei}">
-        <span class="ex-num">${ei + 1}</span>
+        <span class="ex-num">${si ? (si.circuit ? 'Z' + si.pos : si.label) : ei + 1}</span>
         <span class="ex-title"><span class="ex-name">${esc(e.name)}</span><span class="ex-sum" id="exs-${ei}">${exSummary(e) || (last ? 'Zuletzt: ' + last.sets.map(fmtSet).join(' · ') : '')}</span></span>
         <span class="ex-count" id="exc-${ei}">${e.sets.filter(s => s.done).length}/${e.sets.length}</span><span class="chev">${ic('down')}</span>
       </button>
       <div class="ex-body">
+        ${planHtml}
         ${lastHtml}
         ${sugHtml}${goalHtml}
         ${e.planNote ? `<div class="plan-note">📝 ${esc(e.planNote)}</div>` : ''}
@@ -1173,7 +1397,13 @@ function openExModal(dayId, exId) {
     <div class="field"><span>Planwerte (optional – erscheinen im Training als Vorschlag)</span>
       ${Array.from({ length: CONFIG.MAX_SETS }, (_, i) => `<div class="target-row ${i >= n ? 'hidden' : ''}" data-tr="${i}"><span class="muted">Satz ${i + 1}</span>
         <input class="input" name="w${i}" inputmode="decimal" placeholder="kg" value="${fmtIn(sets[i] && sets[i].weight)}" autocomplete="off">
-        <input class="input" name="r${i}" inputmode="numeric" placeholder="Wdh." value="${fmtIn(sets[i] && sets[i].reps)}" autocomplete="off"></div>`).join('')}</div>
+        <input class="input" name="r${i}" inputmode="numeric" placeholder="Wdh. von" value="${fmtIn(sets[i] && sets[i].reps)}" autocomplete="off">
+        <input class="input" name="rm${i}" inputmode="numeric" placeholder="bis" value="${fmtIn(sets[i] && sets[i].repsMax)}" autocomplete="off"></div>`).join('')}
+      <div class="muted" style="font-size:12px">Bereich z. B. 10 bis 12: Das Gewicht steigt erst, wenn die obere Zahl in allen Sätzen geschafft ist.</div></div>
+    <div class="field"><span>Supersatz</span><div class="radio-seg">${['', ...SS_LETTERS.slice(0, 6)].map(L => `<label><input type="radio" name="ss" value="${L}" ${((e && e.ss) || '') === L ? 'checked' : ''}><span>${L || '–'}</span></label>`).join('')}</div>
+      <div class="muted" style="font-size:12px;margin-top:6px">Gleicher Buchstabe bei direkt aufeinanderfolgenden Übungen = Supersatz.</div></div>
+    <label class="field"><span>Pause zwischen den Sätzen (Sekunden, optional)</span><input class="input" name="rest" inputmode="numeric" placeholder="z. B. 120 – startet den Pausen-Timer" value="${fmtIn(e && e.rest)}" autocomplete="off"></label>
+    <label class="toggle" style="margin-bottom:14px"><input type="checkbox" name="amrap" ${e && e.amrap ? 'checked' : ''}><span class="tg"></span><span>Körpergewicht – so viele Wiederholungen wie möglich<small>z. B. Klimmzüge, Dips, Beinheben</small></span></label>
     ${(() => { const pg = e ? progOfPlan(e) : { step: 2.5, auto: false, start: null, goal: null }, preset = STEP_PRESETS.includes(pg.step);
       return `<div class="field prog-field"><span>Gewichtssteigerung (Schritt)</span>
       <div class="radio-seg step-seg">${STEP_PRESETS.map(v => `<label><input type="radio" name="stepSel" value="${v}" ${preset && pg.step === v ? 'checked' : ''}><span>${fmtNum(v)}</span></label>`).join('')}<label><input type="radio" name="stepSel" value="custom" ${!preset ? 'checked' : ''}><span>Eigene</span></label></div>
@@ -1194,7 +1424,8 @@ function createSession(cid, dayId) {
   const days = clientDays(cid), day = S.days.get(dayId), plan = planOf(cid);
   const exercises = exercisesOf(dayId).map(e => ({
     id: uid(), exerciseId: e.id, name: e.name, planNote: e.note || '', note: '',
-    target: (e.sets || []).map(s => ({ weight: s.weight ?? null, reps: s.reps ?? null })),
+    target: (e.sets || []).map(s => ({ weight: s.weight ?? null, reps: s.reps ?? null, repsMax: s.repsMax ?? null })),
+    ss: e.ss || null, amrap: !!e.amrap, unit: e.unit || null, rest: e.rest || null,
     prog: progOfPlan(e),
     sets: Array.from({ length: Math.max(1, Math.min(CONFIG.MAX_SETS, e.targetSets || CONFIG.DEFAULT_SETS)) }, blankSet),
   }));
@@ -1297,6 +1528,42 @@ function loadDemo() {
   toast('Beispieldaten geladen'); render(); demoBody();
 }
 
+/* ---------------- Pausen-Timer ----------------
+   Startet nach jedem abgehakten Satz, wenn die Übung eine Pause hat (z. B. 2 Min. beim Muskelaufbau,
+   30 Sek. im Athletikzirkel). Rechnet mit der Uhrzeit, läuft also auch weiter, wenn das Handy kurz gesperrt ist. */
+const RT = { end: 0, total: 0, iv: 0, ac: null, label: '' };
+const mmss = sec => `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`;
+function beep() {
+  try {
+    const ac = RT.ac; if (!ac) return;
+    [0, 0.28].forEach(t => { const o = ac.createOscillator(), g = ac.createGain(); o.frequency.value = 880; o.connect(g); g.connect(ac.destination);
+      g.gain.setValueAtTime(0.0001, ac.currentTime + t); g.gain.exponentialRampToValueAtTime(0.3, ac.currentTime + t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + t + 0.22);
+      o.start(ac.currentTime + t); o.stop(ac.currentTime + t + 0.25); });
+  } catch (e) {}
+}
+function restStart(sec, label) {
+  if (!(sec > 0)) return;
+  try { RT.ac = RT.ac || new (window.AudioContext || window.webkitAudioContext)(); if (RT.ac.state === 'suspended') RT.ac.resume(); } catch (e) {} // beim Antippen freischalten (iOS)
+  RT.total = sec; RT.end = Date.now() + sec * 1000; RT.label = label || 'Pause';
+  const el = document.getElementById('rest-timer'); el.classList.remove('done'); el.classList.add('show'); document.body.classList.add('resting');
+  clearInterval(RT.iv); RT.iv = setInterval(restTick, 250); restTick();
+}
+function restTick() {
+  const el = document.getElementById('rest-timer');
+  if (!curSession()) return restStop();
+  const left = Math.max(0, Math.ceil((RT.end - Date.now()) / 1000));
+  if (left <= 0 && !el.classList.contains('done')) {
+    el.classList.add('done'); clearInterval(RT.iv); RT.iv = 0;
+    if (navigator.vibrate) navigator.vibrate([200, 100, 200]); beep();
+    setTimeout(() => { if (el.classList.contains('done')) restStop(); }, 4000);
+  }
+  el.innerHTML = `<div class="rt-row"><div class="rt-time">${left > 0 ? mmss(left) : 'Los!'}</div>
+    <div class="grow"></div>
+    ${left > 0 ? `<button class="btn btn-sm btn-ghost" data-action="rest-add">+30 s</button>` : ''}<button class="btn btn-sm btn-ghost" data-action="rest-stop">${left > 0 ? 'Überspringen' : 'OK'}</button></div>
+    <div class="rt-bar" style="width:${RT.total ? Math.max(0, left / RT.total * 100) : 0}%"></div>`;
+}
+function restStop() { clearInterval(RT.iv); RT.iv = 0; const el = document.getElementById('rest-timer'); if (el) el.classList.remove('show', 'done'); document.body.classList.remove('resting'); }
+
 const A = {
   'modal-bg': (el, ev) => { if (ev.target === el) closeModal(null); },
   'modal-close': () => closeModal(null),
@@ -1343,6 +1610,13 @@ const A = {
   'day-move': el => { const d = S.days.get(el.dataset.id); moveIn(daysOf(d.planId), d.id, +el.dataset.dir, 'days'); render(); },
   'add-ex': el => { if (exercisesOf(el.dataset.did).length >= CONFIG.MAX_EXERCISES) return toast(`Maximal ${CONFIG.MAX_EXERCISES} Übungen pro Tag`); openExModal(el.dataset.did); },
   'edit-ex': el => openExModal(el.dataset.did, el.dataset.id),
+  'rest-add': () => { RT.end += 30000; RT.total += 30; restTick(); },
+  'rest-stop': () => restStop(),
+  'tpl-apply': async el => {
+    const cid = el.dataset.cid, tpl = SWEAT4_SYSTEM.find(t => t.id === el.dataset.tpl), has = clientDays(cid).length;
+    if (!await confirmDialog('SWEAT4-Plan laden?', `<b>${esc(tpl.title)}</b> wird als Trainingsplan angelegt.${has ? '<br><br>Der bisherige Plan wird dabei <b>ersetzt</b>. Bereits dokumentierte Trainings bleiben in der Historie erhalten.' : ''}`, { ok: 'Plan laden', danger: !!has })) return;
+    applyTemplate(cid, tpl.id); toast('SWEAT4-Plan geladen'); render();
+  },
   'del-ex': async el => {
     const e = S.exercises.get(el.dataset.id);
     if (!await confirmDialog('Übung entfernen?', `<b>${esc(e.name)}</b> wird aus dem Plan entfernt. Die Historie bleibt erhalten.`, { ok: 'Entfernen', danger: true })) return;
@@ -1363,9 +1637,22 @@ const A = {
       if (pv && !hasVal(st.weight) && hasVal(pv.weight)) { st.weight = pv.weight; w.value = fmtIn(st.weight); }
       if (pv && !hasVal(st.reps) && hasVal(pv.reps)) { st.reps = pv.reps; r.value = fmtIn(st.reps); }
       st.done = true; if (navigator.vibrate) navigator.vibrate(12);
+      const isLast = sess.exercises.every(x => x.sets.every(y => y.done));
+      // Supersatz: Pause erst, wenn alle Partner diesen Satz haben · Zirkel: kurze Pause nach jeder Station
+      const sg = ssInfo(sess.exercises, ei);
+      const roundDone = !sg || sg.circuit || sess.exercises.slice(sg.a, sg.b + 1).every(x => !x.sets[si] || x.sets[si].done);
+      if (ex.rest && !isLast && roundDone) restStart(ex.rest, ex.rest <= 45 ? 'Kurze Pause' : 'Satzpause');
     } else st.done = false;
     row.classList.toggle('done', st.done);
     refreshExHead(sess, ei); refreshTrainHead(sess); saveSessionSoon(sess); flushSave();
+    // Supersatz: nach dem Satz direkt zur Partnerübung (gleiche Satznummer), danach zurück
+    const ssi = st.done ? ssInfo(sess.exercises, ei) : null;
+    if (ssi) {
+      const grp = []; for (let k = ssi.a; k <= ssi.b; k++) grp.push(k);
+      const after = grp.slice(grp.indexOf(ei) + 1).concat(grp.slice(0, grp.indexOf(ei)));
+      const nx = after.find(k => sess.exercises[k].sets.some(x => !x.done));
+      if (nx != null) { setTimeout(() => { closeEx(sess, ei); openEx(sess, nx, true); }, 350); return; }
+    }
     if (st.done && exComplete(ex)) {
       const nx = sess.exercises.findIndex((x, i) => i > ei && !exComplete(x));
       setTimeout(() => { closeEx(sess, ei); if (nx >= 0) openEx(sess, nx, true); }, 350);
@@ -1450,10 +1737,10 @@ document.addEventListener('submit', async ev => {
   if (f.dataset.form === 'exercise') {
     const name = String(fd.get('name') || '').trim(); if (!name) return;
     const n = +fd.get('targetSets') || CONFIG.DEFAULT_SETS, did = f.dataset.did;
-    const sets = Array.from({ length: n }, (_, i) => ({ weight: parseNum(fd.get('w' + i)), reps: parseNum(fd.get('r' + i)) }));
+    const sets = Array.from({ length: n }, (_, i) => ({ weight: parseNum(fd.get('w' + i)), reps: parseNum(fd.get('r' + i)), repsMax: parseNum(fd.get('rm' + i)) }));
     let e = f.dataset.id ? S.exercises.get(f.dataset.id) : null;
     if (!e) { if (exercisesOf(did).length >= CONFIG.MAX_EXERCISES) return toast('Maximum erreicht'); e = { id: uid(), dayId: did, order: exercisesOf(did).length, createdAt: Date.now() }; }
-    Object.assign(e, { name, targetSets: n, sets, note: String(fd.get('note') || '').trim() });
+    Object.assign(e, { name, targetSets: n, sets, note: String(fd.get('note') || '').trim(), ss: String(fd.get('ss') || '') || null, amrap: fd.get('amrap') === 'on', rest: (r => r > 0 && r <= 600 ? Math.round(r) : null)(parseNum(fd.get('rest'))) });
     const k3 = katFind(name); e.catalogId = k3 ? k3.id : null;
     // Progression – Werte exakt speichern (keine Rundung)
     const ss = fd.get('stepSel');
@@ -2234,8 +2521,8 @@ function viewPlanRO(c) {
   const days = clientDays(c.id), plan = planOf(c.id);
   return topbar({ back: '/', title: 'Trainingsplan', sub: esc(plan ? plan.name : '') }) + `<main class="wrap view"><div class="stack">${days.map((d, i) => `<div class="card day-card">
     <div class="day-head"><span class="day-no">${i + 1}</span><b class="grow" style="font-size:17px">${esc(d.name)}</b></div>
-    ${exercisesOf(d.id).map((e, j) => `<div class="ex-row"><span class="ex-idx">${j + 1}.</span><div class="grow"><div style="font-weight:600">${esc(e.name)}${(k3 => k3 ? ` <button class="chip3d" data-action="open3d" data-id="${k3.id}">${ic('cube', 13)} 3D</button>` : '')(katFind(e.name, e.catalogId))}</div>
-      <div class="ex-meta">${e.targetSets || CONFIG.DEFAULT_SETS} Sätze${(e.sets || []).some(s => hasVal(s.weight) || hasVal(s.reps)) ? ' · ' + e.sets.map(fmtSet).join(', ') : ''}${e.note ? ' · 📝 ' + esc(e.note) : ''}</div></div></div>`).join('') || '<div class="ex-row muted">Keine Übungen.</div>'}
+    ${(exs => exs.map((e, j) => `<div class="ex-row"><span class="ex-idx">${j + 1}.</span><div class="grow"><div style="font-weight:600">${esc(e.name)}${(k3 => k3 ? ` <button class="chip3d" data-action="open3d" data-id="${k3.id}">${ic('cube', 13)} 3D</button>` : '')(katFind(e.name, e.catalogId))}</div>
+      <div class="ex-meta">${(si => si ? `<span class="tag ss-tag">${si.kind} ${si.label}</span> ` : '')(ssInfo(exs, j))}${esc(planSummary(e))}${e.note ? ' · 📝 ' + esc(e.note) : ''}</div></div></div>`).join(''))(exercisesOf(d.id)) || '<div class="ex-row muted">Keine Übungen.</div>'}
     <div class="day-foot"><button class="btn btn-primary btn-block" data-action="start-day" data-cid="${c.id}" data-did="${d.id}">${ic('play')} Dieses Workout starten</button></div></div>`).join('') || '<div class="card empty">Noch kein Plan vorhanden.</div>'}</div></main>`;
 }
 
@@ -2427,7 +2714,7 @@ function lockGate() {
 }
 
 /* ---------- Aktionen ---------- */
-const TRAINER_ONLY = new Set(['new-client', 'edit-client', 'del-client', 'photo-remove', 'add-day', 'del-day', 'day-move', 'add-ex', 'edit-ex', 'del-ex', 'ex-move', 'demo', 'wipe', 'backup', 'import', 'check-del', 'pkg-make', 'ret-import', 'lock-set', 'lock-off', 'pslot-rm']);
+const TRAINER_ONLY = new Set(['new-client', 'edit-client', 'del-client', 'photo-remove', 'add-day', 'del-day', 'day-move', 'add-ex', 'edit-ex', 'del-ex', 'tpl-apply', 'ex-move', 'demo', 'wipe', 'backup', 'import', 'check-del', 'pkg-make', 'ret-import', 'lock-set', 'lock-off', 'pslot-rm']);
 document.addEventListener('click', ev => {
   const el = ev.target.closest('[data-action]');
   if (el && isClientMode() && TRAINER_ONLY.has(el.dataset.action)) { ev.preventDefault(); ev.stopImmediatePropagation(); toast('Nur für den Trainer verfügbar'); }
