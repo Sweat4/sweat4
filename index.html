@@ -292,6 +292,108 @@ select.input{appearance:none;-webkit-appearance:none;background-image:linear-gra
 .v3d-info h3:first-child{margin-top:0}
 .v3d-info-static h3{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:16px 0 6px}
 
+/* ---------- Coaching-Erweiterung ---------- */
+.avatar.sm{width:38px;height:38px;font-size:14px}
+.tag.warn{background:rgba(251,191,36,.14);color:var(--warn)}
+.tag.off{background:var(--surface-3);color:var(--muted)}
+.client-card.inactive{opacity:.55}
+.cc-tags{display:flex;flex-direction:column;gap:4px;align-items:flex-end}
+.stat-v.warn-t{color:var(--warn)}
+a.stat{display:block;color:inherit;text-decoration:none}
+.coach{margin-bottom:18px}
+.acts{display:flex;flex-direction:column}
+.act{display:flex;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--border);font-size:14px;color:inherit;text-decoration:none}
+.act:first-child{border-top:none;padding-top:0}
+button.list-link{width:100%;background:none;border:none;border-bottom:1px solid var(--border);color:inherit;font:inherit;cursor:pointer;text-align:left}
+.list-card>.list-link:last-child{border-bottom:none}
+.due{background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3);color:var(--warn);border-radius:12px;padding:9px 12px;font-size:14px;font-weight:600;margin-bottom:12px}
+.mini-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.mini{background:var(--surface-2);border-radius:12px;padding:9px 10px;min-width:0}
+.mini-l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+.mini-v{font-size:18px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}.mini-v small{font-size:12px;color:var(--muted);font-weight:600}
+.mini-d{font-size:12px;color:var(--accent);font-weight:700}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 10px}
+.mgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media(min-width:640px){.mgrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.mcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:13px 14px;text-align:left;color:var(--text);font:inherit;min-width:0}
+button.mcard{cursor:pointer}
+.mcard.on{border-color:var(--accent);background:linear-gradient(180deg,rgba(190,155,92,.12),rgba(190,155,92,.02))}
+.mc-l{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+.mc-v{font-size:26px;font-weight:800;margin-top:2px;font-variant-numeric:tabular-nums;white-space:nowrap}.mc-v small{font-size:14px;color:var(--muted);font-weight:600}
+.mc-s{font-size:12.5px;color:var(--muted);margin-top:2px}.mc-s b{color:var(--accent)}
+.seg-scroll{display:flex;flex-wrap:nowrap;overflow-x:auto;max-width:100%;scrollbar-width:none}.seg-scroll::-webkit-scrollbar{display:none}.seg-scroll button{flex:none}
+.rstats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
+.rstats>div{background:var(--surface-2);border-radius:12px;padding:9px 10px;min-width:0}
+.rstats span{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+.rstats b{font-size:16px;font-variant-numeric:tabular-nums}.rstats small{font-size:12px}
+.ba-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.ba{position:relative;border-radius:14px;overflow:hidden;background:var(--surface-2);aspect-ratio:3/4}
+.ba img{width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .3s}
+.ba span{position:absolute;left:8px;bottom:8px;font-size:12px;font-weight:700;background:rgba(11,11,11,.72);border-radius:8px;padding:4px 8px}
+img.ld{opacity:1!important}
+.tl{position:relative;padding-left:22px}
+.tl::before{content:"";position:absolute;left:6px;top:8px;bottom:8px;width:2px;background:linear-gradient(var(--accent),rgba(190,155,92,.15))}
+.tl-item{position:relative;display:block;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:10px;color:inherit;text-decoration:none}
+.tl-dot{position:absolute;left:-21px;top:16px;width:12px;height:12px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px var(--bg)}
+.tl-date{font-size:12px;color:var(--muted);font-weight:700;letter-spacing:.05em}
+.tl-title{font-weight:700;font-size:16px;margin:2px 0 4px}
+.tl-vals{font-size:14px;color:var(--muted);line-height:1.6}.tl-vals b{color:var(--text);font-weight:600}
+.tl-photo{font-size:13px;color:var(--accent);margin-top:6px;font-weight:600}
+.tl-note{font-size:13px;color:var(--muted);margin-top:6px;font-style:italic}
+.hscroll{overflow-x:auto}
+.mtable th,.mtable td{white-space:nowrap}
+.pgrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.pcell{min-width:0;text-align:center}
+.pcell button{display:block;width:100%;padding:0;border:none;background:var(--surface-2);border-radius:10px;overflow:hidden;aspect-ratio:3/4;cursor:pointer}
+.pcell img{width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .3s}
+.pcell span{display:block;font-size:11px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcell.miss span{color:var(--danger)}
+.pmiss{aspect-ratio:3/4;border-radius:10px;border:1.5px dashed rgba(255,107,107,.45);display:grid;place-items:center;color:var(--danger);font-size:20px}
+.mform{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.mform label,.sfgrid label{display:block;min-width:0}
+.mform label>span,.sfgrid label>span{display:block;font-size:13px;color:var(--muted);font-weight:600;margin-bottom:5px}
+.sfgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.sfgrid small{display:block;font-weight:400;font-size:11px;line-height:1.3;min-height:28px}
+.bf-live{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.bf-live>div:not(.bf-why){background:var(--surface-2);border-radius:12px;padding:10px 12px}
+.bf-live span{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+.bf-live b{font-size:20px;font-variant-numeric:tabular-nums}
+.bf-why{grid-column:1/-1;font-size:13px;color:var(--warn)}
+.pslots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+@media(min-width:560px){.pslots{grid-template-columns:repeat(5,minmax(0,1fr))}}
+.pslot-w{position:relative;min-width:0}
+.pslot{display:block;position:relative;aspect-ratio:3/4;border-radius:12px;border:1.5px dashed var(--border);background:var(--surface-2);overflow:hidden;cursor:pointer}
+.pslot.has{border-style:solid;border-color:rgba(190,155,92,.5)}
+.pslot img{width:100%;height:100%;object-fit:cover;opacity:0}
+.pslot-add{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted);font-size:13px;font-weight:600;text-align:center}
+.pslot-l{position:absolute;left:0;right:0;bottom:0;font-size:11.5px;font-weight:700;padding:16px 6px 6px;background:linear-gradient(transparent,rgba(0,0,0,.8));text-align:center}
+.pslot-x{position:absolute;top:5px;right:5px;width:28px;height:28px;border-radius:50%;border:none;background:rgba(11,11,11,.8);color:#fff;display:grid;place-items:center;cursor:pointer}
+.p360{position:fixed;inset:0;z-index:62;background:#0b0b0b;display:flex;flex-direction:column;animation:fade .2s ease-out}
+.p3-ctl{padding:10px 12px 0;display:flex;flex-direction:column;gap:8px;align-items:center}
+.p3-sels{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:8px;align-items:center;width:100%}
+.p3sel{padding:8px 30px 8px 10px;font-size:13px;height:auto}
+.p3-stage{position:relative;flex:1;min-height:0;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;margin:10px 0 0}
+.p3-stage:active{cursor:grabbing}
+.p3-set{position:absolute;inset:0;transition:opacity .35s ease}
+.p3-stage.mode-side{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.p3-stage.mode-side .p3-set{position:relative;inset:auto}
+.p3-set img,.pview .p3-stage img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;will-change:opacity,transform;pointer-events:none}
+.p3-cap{position:absolute;left:50%;top:8px;transform:translateX(-50%);z-index:5;font-size:11.5px;font-weight:800;letter-spacing:.06em;background:rgba(11,11,11,.75);border:1px solid var(--border);color:var(--accent);border-radius:999px;padding:4px 10px;white-space:nowrap}
+.p3-stage.mode-slider .p3-set[data-set="1"] .p3-cap{left:auto;right:8px;transform:none}
+.p3-stage.mode-slider .p3-set[data-set="0"] .p3-cap{left:8px;transform:none}
+.p3-handle{display:none;position:absolute;top:0;bottom:0;width:44px;margin-left:-22px;z-index:6;cursor:ew-resize}
+.p3-handle::before{content:"";position:absolute;left:21px;top:0;bottom:0;width:2px;background:var(--accent)}
+.p3-handle span{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:38px;height:38px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-weight:800}
+.p3-stage.mode-slider .p3-handle{display:block}
+.p3-load{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);z-index:7;background:#0b0b0b}
+.p3-toggle{align-self:center}
+.p3-toggle button{padding:8px 18px;letter-spacing:.06em}
+.p3-toggle button.on{background:var(--accent);color:var(--accent-ink)}
+.p3-pos.on{background:var(--accent-soft);color:var(--accent);border-color:rgba(190,155,92,.5)}
+.pview .p3-stage{cursor:default;margin:0}
+.p3-posrow{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}.p3-posrow .btn{padding:0 12px;min-height:38px;font-size:14px}
+.quick .btn{min-width:0}
+.lockv{max-width:420px;padding-top:max(40px,env(safe-area-inset-top))}
 </style>
 </head>
 <body>
@@ -315,7 +417,7 @@ const CONFIG = {
   MAX_SETS: 5,          // max. Sätze pro Übung
   DEFAULT_SETS: 3,
   DB_NAME: 'trainer-logbuch',
-  DB_VERSION: 1,
+  DB_VERSION: 2,          // 2: Fortschrittschecks + Fotos
   APP_ID: 'trainer-logbuch',
   BACKUP_VERSION: 1,
   BACKUP_REMINDER_DAYS: 14,
@@ -323,7 +425,7 @@ const CONFIG = {
 /* SWEAT4-Logo (Vektor, eingebettet – funktioniert offline) */
 const LOGO_MARK = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="16 -57 2680 815" class="logo-mark" role="img" aria-label="SWEAT4"><path fill="#BE9B5C" d="M316.0 714.0Q230.0 714.0 150.0 693.0Q70.0 672.0 21.0 637.0L86.0 491.0Q133.0 522.0 195.0 541.0Q257.0 560.0 317.0 560.0Q378.0 560.0 404.5 544.0Q431.0 528.0 431.0 503.0Q431.0 479.0 409.5 465.0Q388.0 451.0 352.5 442.0Q317.0 433.0 274.5 424.0Q232.0 415.0 189.5 401.5Q147.0 388.0 111.5 365.0Q76.0 342.0 54.5 305.0Q33.0 268.0 33.0 213.0Q33.0 151.0 67.5 99.5Q102.0 48.0 170.5 17.0Q239.0 -14.0 343.0 -14.0Q411.0 -14.0 478.0 1.5Q545.0 17.0 597.0 47.0L536.0 194.0Q486.0 167.0 437.0 153.5Q388.0 140.0 342.0 140.0Q280.0 140.0 254.5 158.5Q229.0 177.0 229.0 203.0Q229.0 226.0 250.5 239.0Q272.0 252.0 307.5 261.0Q343.0 270.0 385.5 279.0Q428.0 288.0 470.0 301.5Q512.0 315.0 547.5 337.5Q583.0 360.0 604.5 396.5Q626.0 433.0 626.0 488.0Q626.0 549.0 592.0 600.5Q558.0 652.0 489.0 683.0Q420.0 714.0 316.0 714.0Z M890.0 700.0 663.0 0.0H867.0L1008.0 447.0L1156.0 0.0H1338.0L1480.0 452.0L1626.0 0.0H1815.0L1588.0 700.0H1376.0L1242.0 274.0L1102.0 700.0Z"/><circle cx="2288.5" cy="350.0" r="402.5" fill="#BE9B5C"/><path fill="#111111" transform="translate(1839.7,-98.7) scale(2.0)" d="M212.5,70 L247,70 L170,224 L286.3,224 L286.3,254 L136.3,254 L136.3,224 Z M194.2,226 C194.4,223.6 194.0,217.1 195.4,212.0 C196.7,206.8 198.8,201.1 202.5,195.0 C206.1,188.8 212.0,181.6 217.5,175.0 C223.0,168.3 230.7,161.3 235.5,155.0 C240.3,148.6 243.7,141.8 246.3,137.0 C248.8,132.1 249.8,127.8 250.6,126.0 C251.0,128.0 253.0,133.5 253.0,138.0 C253.0,142.5 252.1,147.1 250.6,153.0 C249.0,158.8 246.8,166.3 243.6,173.0 C240.3,179.6 235.3,186.6 231.0,193.0 C226.6,199.3 220.5,205.5 217.4,211.0 C214.2,216.5 213.1,223.5 212.3,226.0 Z M229.0,226 C229.7,224.0 230.3,218.1 233.2,214.0 C236.0,209.8 242.3,205.5 246.0,201.0 C249.6,196.5 253.0,191.6 255.3,187.0 C257.6,182.3 259.0,175.3 259.8,173.0 C260.6,174.6 263.4,179.0 264.6,183.0 C265.8,187.0 267.3,192.1 267.0,197.0 C266.6,201.8 264.0,207.1 262.6,212.0 C261.1,216.8 259.0,223.6 258.3,226.0 Z M163.3,257.5 H274.3 Q277.3,257.5 277.3,260.5 V264.5 Q277.3,267.5 274.3,267.5 H163.3 Q160.3,267.5 160.3,264.5 V260.5 Q160.3,257.5 163.3,257.5 Z M202.0,271 H244.0 Q245.5,271 245.5,272.5 V351.0 Q245.5,352.5 244.0,352.5 H202.0 Q200.5,352.5 200.5,351.0 V272.5 Q200.5,271 202.0,271 Z M184.3,352.5 H261.3 Q264.3,352.5 264.3,355.5 V360 Q264.3,363 261.3,363 H184.3 Q181.3,363 181.3,360 V355.5 Q181.3,352.5 184.3,352.5 Z"/></svg>';
 const LOGO_FULL = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="-20 -20 2731 1106" class="logo-full" role="img" aria-label="SWEAT4 – The Sweat4 Control System"><g transform="translate(0,52.5)"><path fill="#BE9B5C" d="M316.0 714.0Q230.0 714.0 150.0 693.0Q70.0 672.0 21.0 637.0L86.0 491.0Q133.0 522.0 195.0 541.0Q257.0 560.0 317.0 560.0Q378.0 560.0 404.5 544.0Q431.0 528.0 431.0 503.0Q431.0 479.0 409.5 465.0Q388.0 451.0 352.5 442.0Q317.0 433.0 274.5 424.0Q232.0 415.0 189.5 401.5Q147.0 388.0 111.5 365.0Q76.0 342.0 54.5 305.0Q33.0 268.0 33.0 213.0Q33.0 151.0 67.5 99.5Q102.0 48.0 170.5 17.0Q239.0 -14.0 343.0 -14.0Q411.0 -14.0 478.0 1.5Q545.0 17.0 597.0 47.0L536.0 194.0Q486.0 167.0 437.0 153.5Q388.0 140.0 342.0 140.0Q280.0 140.0 254.5 158.5Q229.0 177.0 229.0 203.0Q229.0 226.0 250.5 239.0Q272.0 252.0 307.5 261.0Q343.0 270.0 385.5 279.0Q428.0 288.0 470.0 301.5Q512.0 315.0 547.5 337.5Q583.0 360.0 604.5 396.5Q626.0 433.0 626.0 488.0Q626.0 549.0 592.0 600.5Q558.0 652.0 489.0 683.0Q420.0 714.0 316.0 714.0Z M890.0 700.0 663.0 0.0H867.0L1008.0 447.0L1156.0 0.0H1338.0L1480.0 452.0L1626.0 0.0H1815.0L1588.0 700.0H1376.0L1242.0 274.0L1102.0 700.0Z"/><circle cx="2288.5" cy="350.0" r="402.5" fill="#BE9B5C"/><path fill="#111111" transform="translate(1839.7,-98.7) scale(2.0)" d="M212.5,70 L247,70 L170,224 L286.3,224 L286.3,254 L136.3,254 L136.3,224 Z M194.2,226 C194.4,223.6 194.0,217.1 195.4,212.0 C196.7,206.8 198.8,201.1 202.5,195.0 C206.1,188.8 212.0,181.6 217.5,175.0 C223.0,168.3 230.7,161.3 235.5,155.0 C240.3,148.6 243.7,141.8 246.3,137.0 C248.8,132.1 249.8,127.8 250.6,126.0 C251.0,128.0 253.0,133.5 253.0,138.0 C253.0,142.5 252.1,147.1 250.6,153.0 C249.0,158.8 246.8,166.3 243.6,173.0 C240.3,179.6 235.3,186.6 231.0,193.0 C226.6,199.3 220.5,205.5 217.4,211.0 C214.2,216.5 213.1,223.5 212.3,226.0 Z M229.0,226 C229.7,224.0 230.3,218.1 233.2,214.0 C236.0,209.8 242.3,205.5 246.0,201.0 C249.6,196.5 253.0,191.6 255.3,187.0 C257.6,182.3 259.0,175.3 259.8,173.0 C260.6,174.6 263.4,179.0 264.6,183.0 C265.8,187.0 267.3,192.1 267.0,197.0 C266.6,201.8 264.0,207.1 262.6,212.0 C261.1,216.8 259.0,223.6 258.3,226.0 Z M163.3,257.5 H274.3 Q277.3,257.5 277.3,260.5 V264.5 Q277.3,267.5 274.3,267.5 H163.3 Q160.3,267.5 160.3,264.5 V260.5 Q160.3,257.5 163.3,257.5 Z M202.0,271 H244.0 Q245.5,271 245.5,272.5 V351.0 Q245.5,352.5 244.0,352.5 H202.0 Q200.5,352.5 200.5,351.0 V272.5 Q200.5,271 202.0,271 Z M184.3,352.5 H261.3 Q264.3,352.5 264.3,355.5 V360 Q264.3,363 261.3,363 H184.3 Q181.3,363 181.3,360 V355.5 Q181.3,352.5 184.3,352.5 Z"/><path fill="#BE9B5C" d="M159.7 993.5V910.8H127.8V902.4H201.4V910.8H169.4V993.5Z M298.9 993.5V951.5H241.9V993.5H232.3V902.4H241.9V943.0H298.9V902.4H308.4V993.5Z M353.7 993.5V902.4H416.1V910.8H363.3V943.2H410.4V951.4H363.3V985.2H418.0V993.5Z  M531.1 994.3Q520.8 994.3 511.6 991.0Q502.3 987.6 497.2 982.4L501.0 975.0Q505.8 979.8 514.0 983.0Q522.1 986.1 531.1 986.1Q543.8 986.1 549.7 981.4Q555.5 976.7 555.5 969.9Q555.5 964.6 552.5 961.4Q549.5 958.2 544.5 956.4Q539.5 954.5 533.5 953.0Q527.5 951.6 521.6 950.0Q515.6 948.4 510.6 945.6Q505.6 942.9 502.5 938.4Q499.5 933.9 499.5 926.6Q499.5 920.0 503.0 914.3Q506.6 908.6 514.0 905.1Q521.4 901.7 533.0 901.7Q540.7 901.7 548.2 903.8Q555.8 906.0 561.2 909.7L558.0 917.4Q552.1 913.5 545.6 911.7Q539.0 909.9 533.0 909.9Q520.5 909.9 514.7 914.7Q508.9 919.5 508.9 926.4Q508.9 931.7 512.0 934.9Q515.1 938.1 520.1 940.0Q525.1 942.0 531.1 943.4Q537.0 944.7 543.0 946.4Q548.9 948.1 553.9 950.8Q558.9 953.4 561.9 957.9Q565.0 962.3 565.0 969.4Q565.0 976.1 561.4 981.7Q557.7 987.4 550.2 990.8Q542.8 994.3 531.1 994.3Z M622.2 993.5 591.5 902.4H601.4L627.7 980.7L654.9 902.4H663.8L690.6 981.1L717.3 902.4H726.5L695.8 993.5H685.7L659.0 916.0L632.2 993.5Z M759.7 993.5V902.4H822.1V910.8H769.3V943.2H816.4V951.4H769.3V985.2H824.1V993.5Z M847.7 993.5 889.4 902.4H898.9L940.5 993.5H930.3L919.5 969.2H868.7L857.8 993.5ZM872.2 961.4H916.0L894.1 912.5Z M984.3 993.5V910.8H952.3V902.4H1025.9V910.8H993.9V993.5Z M1035.8 969.6V962.8L1084.1 902.4H1094.5L1047.9 961.2H1087.4V940.2H1096.5V961.2H1114.8V969.6H1096.5V993.5H1087.2V969.6Z  M1236.2 994.3Q1226.0 994.3 1217.3 990.8Q1208.7 987.4 1202.2 981.1Q1195.8 974.9 1192.2 966.4Q1188.6 958.0 1188.6 948.0Q1188.6 938.0 1192.2 929.5Q1195.8 921.0 1202.2 914.8Q1208.7 908.6 1217.4 905.1Q1226.1 901.7 1236.4 901.7Q1246.4 901.7 1255.0 905.0Q1263.7 908.3 1269.7 914.9L1263.5 921.0Q1258.0 915.3 1251.2 912.8Q1244.4 910.3 1236.6 910.3Q1225.7 910.3 1217.0 915.2Q1208.3 920.1 1203.2 928.7Q1198.1 937.2 1198.1 948.0Q1198.1 958.8 1203.2 967.3Q1208.3 975.8 1217.0 980.7Q1225.7 985.7 1236.6 985.7Q1244.4 985.7 1251.2 983.1Q1258.0 980.5 1263.5 974.8L1269.7 980.9Q1263.7 987.5 1255.0 990.9Q1246.2 994.3 1236.2 994.3Z M1339.8 994.3Q1329.4 994.3 1320.6 990.8Q1311.9 987.4 1305.5 981.1Q1299.0 974.9 1295.5 966.4Q1291.9 958.0 1291.9 948.0Q1291.9 938.0 1295.5 929.5Q1299.0 921.0 1305.5 914.8Q1311.9 908.6 1320.6 905.1Q1329.4 901.7 1339.8 901.7Q1350.0 901.7 1358.7 905.1Q1367.5 908.6 1373.9 914.8Q1380.3 921.0 1383.9 929.5Q1387.5 938.0 1387.5 948.0Q1387.5 958.0 1383.9 966.4Q1380.3 974.9 1373.9 981.1Q1367.5 987.4 1358.7 990.8Q1350.0 994.3 1339.8 994.3ZM1339.8 985.7Q1350.7 985.7 1359.3 980.8Q1368.0 975.9 1372.9 967.3Q1377.9 958.8 1377.9 948.0Q1377.9 937.2 1372.9 928.6Q1368.0 920.0 1359.3 915.1Q1350.7 910.3 1339.8 910.3Q1328.7 910.3 1320.1 915.1Q1311.4 920.0 1306.4 928.6Q1301.4 937.2 1301.4 948.0Q1301.4 958.8 1306.4 967.3Q1311.4 975.9 1320.1 980.8Q1328.7 985.7 1339.8 985.7Z M1424.7 993.5V902.4H1432.6L1491.3 976.3V902.4H1500.8V993.5H1492.8L1434.3 919.6V993.5Z M1563.7 993.5V910.8H1531.7V902.4H1605.3V910.8H1573.3V993.5Z M1636.3 993.5V902.4H1670.4Q1687.7 902.4 1697.6 910.7Q1707.6 919.0 1707.6 933.7Q1707.6 944.3 1702.1 951.7Q1696.6 959.0 1686.8 962.3L1709.0 993.5H1698.5L1677.6 964.2Q1674.1 964.6 1670.4 964.6H1645.9V993.5ZM1645.9 956.4H1670.1Q1683.8 956.4 1690.8 950.4Q1697.9 944.5 1697.9 933.7Q1697.9 922.7 1690.8 916.8Q1683.8 910.8 1670.1 910.8H1645.9Z M1785.7 994.3Q1775.3 994.3 1766.6 990.8Q1757.9 987.4 1751.5 981.1Q1745.0 974.9 1741.4 966.4Q1737.9 958.0 1737.9 948.0Q1737.9 938.0 1741.4 929.5Q1745.0 921.0 1751.5 914.8Q1757.9 908.6 1766.6 905.1Q1775.3 901.7 1785.7 901.7Q1796.0 901.7 1804.7 905.1Q1813.4 908.6 1819.9 914.8Q1826.3 921.0 1829.9 929.5Q1833.5 938.0 1833.5 948.0Q1833.5 958.0 1829.9 966.4Q1826.3 974.9 1819.9 981.1Q1813.4 987.4 1804.7 990.8Q1796.0 994.3 1785.7 994.3ZM1785.7 985.7Q1796.7 985.7 1805.3 980.8Q1813.9 975.9 1818.9 967.3Q1823.8 958.8 1823.8 948.0Q1823.8 937.2 1818.9 928.6Q1813.9 920.0 1805.3 915.1Q1796.7 910.3 1785.7 910.3Q1774.7 910.3 1766.0 915.1Q1757.4 920.0 1752.4 928.6Q1747.4 937.2 1747.4 948.0Q1747.4 958.8 1752.4 967.3Q1757.4 975.9 1766.0 980.8Q1774.7 985.7 1785.7 985.7Z M1870.7 993.5V902.4H1880.3V985.2H1931.3V993.5Z  M2037.6 994.3Q2027.4 994.3 2018.1 991.0Q2008.9 987.6 2003.8 982.4L2007.6 975.0Q2012.4 979.8 2020.5 983.0Q2028.7 986.1 2037.6 986.1Q2050.4 986.1 2056.2 981.4Q2062.1 976.7 2062.1 969.9Q2062.1 964.6 2059.1 961.4Q2056.1 958.2 2051.1 956.4Q2046.1 954.5 2040.1 953.0Q2034.1 951.6 2028.2 950.0Q2022.2 948.4 2017.2 945.6Q2012.2 942.9 2009.1 938.4Q2006.0 933.9 2006.0 926.6Q2006.0 920.0 2009.6 914.3Q2013.2 908.6 2020.6 905.1Q2028.0 901.7 2039.6 901.7Q2047.3 901.7 2054.8 903.8Q2062.4 906.0 2067.8 909.7L2064.6 917.4Q2058.7 913.5 2052.1 911.7Q2045.6 909.9 2039.6 909.9Q2027.1 909.9 2021.3 914.7Q2015.5 919.5 2015.5 926.4Q2015.5 931.7 2018.6 934.9Q2021.7 938.1 2026.7 940.0Q2031.7 942.0 2037.6 943.4Q2043.6 944.7 2049.5 946.4Q2055.5 948.1 2060.5 950.8Q2065.5 953.4 2068.5 957.9Q2071.6 962.3 2071.6 969.4Q2071.6 976.1 2068.0 981.7Q2064.3 987.4 2056.8 990.8Q2049.4 994.3 2037.6 994.3Z M2127.9 993.5V962.0L2091.5 902.4H2101.8L2133.0 953.4L2164.2 902.4H2173.8L2137.4 962.0V993.5Z M2227.5 994.3Q2217.3 994.3 2208.0 991.0Q2198.8 987.6 2193.7 982.4L2197.5 975.0Q2202.3 979.8 2210.4 983.0Q2218.6 986.1 2227.5 986.1Q2240.3 986.1 2246.1 981.4Q2252.0 976.7 2252.0 969.9Q2252.0 964.6 2249.0 961.4Q2246.0 958.2 2241.0 956.4Q2236.0 954.5 2230.0 953.0Q2224.0 951.6 2218.0 950.0Q2212.1 948.4 2207.0 945.6Q2202.0 942.9 2199.0 938.4Q2195.9 933.9 2195.9 926.6Q2195.9 920.0 2199.5 914.3Q2203.1 908.6 2210.5 905.1Q2217.9 901.7 2229.5 901.7Q2237.2 901.7 2244.7 903.8Q2252.2 906.0 2257.7 909.7L2254.5 917.4Q2248.6 913.5 2242.0 911.7Q2235.5 909.9 2229.5 909.9Q2217.0 909.9 2211.2 914.7Q2205.4 919.5 2205.4 926.4Q2205.4 931.7 2208.5 934.9Q2211.5 938.1 2216.5 940.0Q2221.5 942.0 2227.5 943.4Q2233.5 944.7 2239.4 946.4Q2245.3 948.1 2250.4 950.8Q2255.4 953.4 2258.4 957.9Q2261.5 962.3 2261.5 969.4Q2261.5 976.1 2257.8 981.7Q2254.2 987.4 2246.7 990.8Q2239.2 994.3 2227.5 994.3Z M2314.4 993.5V910.8H2282.4V902.4H2356.0V910.8H2324.0V993.5Z M2387.0 993.5V902.4H2449.4V910.8H2396.6V943.2H2443.7V951.4H2396.6V985.2H2451.4V993.5Z M2489.6 993.5V902.4H2497.5L2537.1 969.9L2576.2 902.4H2584.2V993.5H2574.9V920.8L2539.2 981.9H2534.6L2498.8 921.3V993.5Z"/></g></svg>';
-const STORES = ['clients', 'plans', 'days', 'exercises', 'sessions', 'meta'];
+const STORES = ['clients', 'plans', 'days', 'exercises', 'sessions', 'meta', 'checks'];  // 'photos' liegt separat (groß, wird bei Bedarf geladen)
 
 /* Datenmodell (Kurzfassung)
    client   {id, name, notes, goals, photo, createdAt}
@@ -346,6 +448,7 @@ const DB = {
       r.onupgradeneeded = () => {
         const db = r.result;
         for (const s of STORES) if (!db.objectStoreNames.contains(s)) db.createObjectStore(s, { keyPath: 'id' });
+        if (!db.objectStoreNames.contains('photos')) { const ps = db.createObjectStore('photos', { keyPath: 'id' }); ps.createIndex('clientId', 'clientId'); ps.createIndex('checkId', 'checkId'); }
       };
       r.onsuccess = () => { this.db = r.result; res(); };
       r.onerror = () => rej(r.error);
@@ -362,8 +465,8 @@ const DB = {
   del(s, id) { return this.req(s, 'readwrite', st => st.delete(id)); },
   replaceAll(data) {
     return new Promise((res, rej) => {
-      const tx = this.db.transaction(STORES, 'readwrite');
-      for (const s of STORES) {
+      const names = [...STORES, 'photos'], tx = this.db.transaction(names, 'readwrite');
+      for (const s of names) {
         const st = tx.objectStore(s); st.clear();
         (Array.isArray(data[s]) ? data[s] : []).forEach(o => { if (o && o.id != null) st.put(o); });
       }
@@ -594,23 +697,25 @@ function viewHome() {
   const rows = all('clients').map(c => ({ c, last: lastSession(c.id), days: clientDays(c.id), next: nextDay(c.id), active: activeSession(c.id) }));
   if (UI.sort === 'name') rows.sort((a, b) => a.c.name.localeCompare(b.c.name, 'de'));
   else rows.sort((a, b) => (b.last ? sessKey(b.last) : '').localeCompare(a.last ? sessKey(a.last) : '') || a.c.name.localeCompare(b.c.name, 'de'));
+  rows.sort((a, b) => (a.c.status === 'inactive') - (b.c.status === 'inactive'));
   const mostRecent = rows.filter(r => r.last).sort((a, b) => sessKey(b.last).localeCompare(sessKey(a.last)))[0];
   const lb = S.meta.get('lastBackup')?.value;
   const needBackup = rows.length && (!lb || Date.now() - lb > CONFIG.BACKUP_REMINDER_DAYS * 864e5);
   const cards = rows.map(({ c, last, days, next, active }) => `
-    <a class="client-card" href="#/client/${c.id}" data-name="${esc(norm(c.name))}">
+    <a class="client-card ${c.status === 'inactive' ? 'inactive' : ''}" href="#/client/${c.id}" data-name="${esc(norm(c.name))}">
       ${avatar(c)}
       <div class="grow">
         <div class="cc-name">${esc(c.name)}</div>
         <div class="cc-meta">Letztes Training: ${last ? `<b>${fmtDate(last.date)}</b> · ${relDays(last.date)}` : '<b>noch keins</b>'}</div>
         <div class="cc-meta">Plan: ${days.length ? `${days.length} ${days.length === 1 ? 'Tag' : 'Tage'}` : '–'}${next ? ` · Nächstes: <span class="accent">${esc(dayLabel(days.indexOf(next), next.name))}</span>` : ''}</div>
       </div>
-      <div class="cc-tags">${active ? '<span class="tag live">läuft</span>' : ''}${mostRecent && mostRecent.c.id === c.id ? '<span class="tag">Zuletzt</span>' : ''}</div>
+      <div class="cc-tags">${c.status === 'inactive' ? '<span class="tag off">inaktiv</span>' : checkDue(c) ? '<span class="tag warn">Check</span>' : ''}${active ? '<span class="tag live">läuft</span>' : ''}${mostRecent && mostRecent.c.id === c.id ? '<span class="tag">Zuletzt</span>' : ''}</div>
     </a>`).join('');
   return topbar({ title: 'Trainer-Logbuch', sub: `${rows.length} ${rows.length === 1 ? 'Kunde' : 'Kunden'}`, right: `<a class="icon-btn" href="#/uebungen" aria-label="Übungskatalog &amp; 3D">${ic('book', 22)}</a><a class="icon-btn" href="#/data" aria-label="Daten &amp; Backup">${ic('db', 22)}</a>` }) +
   `<main class="wrap view">
     <div class="home-logo">${LOGO_FULL}</div>
     ${needBackup ? `<div class="banner"><div><b>Backup empfohlen</b><div class="muted" style="font-size:14px">${lb ? 'Letztes Backup: ' + fmtDateTs(lb) : 'Noch kein Backup erstellt.'}</div></div><button class="btn btn-sm btn-primary" data-action="backup">Jetzt sichern</button></div>` : ''}
+    ${coachDash(rows)}
     <div class="search-row">
       <label class="search">${ic('search')}<input id="search" type="search" placeholder="Kunden suchen …" value="${esc(UI.search)}" autocomplete="off"></label>
       <button class="btn btn-primary" data-action="new-client">${ic('plus')}<span class="hide-xs">Kunde</span></button>
@@ -626,6 +731,7 @@ function viewHome() {
         <div style="margin-bottom:18px">Lege deinen ersten Kunden an, um loszulegen.</div>
         <button class="btn btn-primary btn-big" data-action="new-client">${ic('plus', 22)} Ersten Kunden anlegen</button>
         <button class="btn btn-text" style="margin-top:12px" data-action="demo">Beispieldaten laden (zum Ausprobieren)</button>
+        <a class="btn btn-ghost btn-block" style="margin-top:14px" href="#/kunde-setup">Ich bin Kunde – Zugang einrichten</a>
       </div>`}
     <a class="privacy-pill" href="#/data">${ic('lock', 16)} Daten bleiben lokal auf diesem Gerät</a>
   </main>`;
@@ -665,6 +771,7 @@ function viewClient(c) {
       <a class="btn btn-ghost" href="#/client/${c.id}/progress">${ic('chart')} Fortschritt</a>
       <a class="btn btn-ghost" href="#/client/${c.id}/history">${ic('history')} Historie</a>
     </div>
+    ${clientExtraSections(c, 'top')}
 
     <section class="section">
       <div class="section-h"><h2>Trainingspläne</h2><a class="btn btn-sm btn-ghost" href="#/client/${c.id}/plan">${ic('edit', 16)} Plan bearbeiten</a></div>
@@ -687,6 +794,7 @@ function viewClient(c) {
       <div class="section-h"><h2>Letzte Trainings</h2>${done.length > 5 ? `<a class="btn btn-sm btn-text" href="#/client/${c.id}/history">Alle (${done.length})</a>` : ''}</div>
       ${done.length ? `<div class="card list-card">${done.slice(0, 5).map(sessionLink).join('')}</div>` : '<div class="card empty">Noch keine Trainings dokumentiert.</div>'}
     </section>
+    ${clientExtraSections(c, 'bottom')}
   </main>`;
 }
 function sessionLink(s) {
@@ -950,7 +1058,7 @@ ${(pe => { if (!pe) return ''; const pg = progOfPlan(pe); if (!hasVal(pg.goal) &
 
 function viewData() {
   const lb = S.meta.get('lastBackup')?.value;
-  const counts = { Kunden: S.clients.size, Trainingstage: S.days.size, Übungen: S.exercises.size, Trainings: S.sessions.size };
+  const counts = { Kunden: S.clients.size, Trainingstage: S.days.size, Übungen: S.exercises.size, Trainings: S.sessions.size, Fortschrittschecks: S.checks.size };
   return topbar({ back: '/', title: 'Daten & Backup', sub: 'Speicherort, Sicherung, Export' }) +
   `<main class="wrap view">
     <div class="card" style="border-color:rgba(190,155,92,.45)">
@@ -973,7 +1081,7 @@ function viewData() {
         <button class="btn btn-primary btn-big" data-action="backup">${ic('download', 22)} Backup erstellen</button>
         <button class="btn btn-ghost btn-block" data-action="import">${ic('upload')} Backup importieren</button>
         <input type="file" id="import-file" accept=".json,application/json" hidden>
-        <div class="muted" style="font-size:13px">Das Backup ist eine JSON-Datei mit allen Kunden, Plänen, Übungen, Trainings und Notizen. Bewahre sie sicher auf – sie enthält vertrauliche Kundendaten. Mit „Backup importieren“ kannst du sie auch auf ein anderes Gerät übertragen.</div>
+        <div class="muted" style="font-size:13px">Das Backup ist eine JSON-Datei mit allen Kunden, Plänen, Übungen, Trainings, Notizen, Messungen und Fortschrittsbildern. Bewahre sie sicher auf – sie enthält vertrauliche Kundendaten. Mit „Backup importieren“ kannst du sie auch auf ein anderes Gerät übertragen.</div>
       </div>
     </section>
 
@@ -985,6 +1093,7 @@ function viewData() {
       </div>
     </section>
 
+    ${dataExtraTrainer()}
     <section class="section">
       <div class="section-h"><h2>Gefahrenzone</h2></div>
       <div class="card"><button class="btn btn-danger-ghost btn-block" data-action="wipe">${ic('trash')} Alle Daten löschen</button></div>
@@ -1000,9 +1109,13 @@ async function fillStorageInfo() {
 /* ---------------- Router ---------------- */
 function render() {
   flushSave();
+  if (lockGate()) return;
   const route = location.hash.slice(1) || '/', p = route.split('/').filter(Boolean);
   const app = document.getElementById('app'); let html = null;
-  if (!p.length) html = viewHome();
+  const redir = routeGuard(p); if (redir) return go(redir);
+  const ext = routeExtra(p);
+  if (ext !== undefined) html = ext;
+  else if (!p.length) html = viewHome();
   else if (p[0] === 'client') {
     const c = S.clients.get(p[1]); if (!c) return go('/');
     html = !p[2] ? viewClient(c) : p[2] === 'plan' ? viewPlan(c) : p[2] === 'history' ? viewHistory(c) : p[2] === 'progress' ? viewProgress(c) : null;
@@ -1020,6 +1133,7 @@ function render() {
   if (!p.length && UI.search) filterClients(UI.search);
   if (p[0] === 'data') fillStorageInfo();
   if (p[0] === 'uebungen' && UI.katSearch) filterKat(UI.katSearch);
+  hydratePhotos(app);
 }
 const curSession = () => { const p = location.hash.slice(1).split('/').filter(Boolean); return p[0] === 'train' ? S.sessions.get(p[1]) : null; };
 
@@ -1031,6 +1145,7 @@ function openClientModal(id) {
       <div><label class="btn btn-sm btn-ghost">Foto wählen<input type="file" id="photo-input" accept="image/*" hidden></label>
       <button type="button" class="btn btn-sm btn-text" data-action="photo-remove">Entfernen</button><div class="muted" style="font-size:12px;margin-top:4px">optional</div></div></div>
     <label class="field"><span>Name *</span><input name="name" required maxlength="80" autocomplete="off" value="${esc(c ? c.name : '')}" placeholder="z. B. Max Mustermann"></label>
+    ${clientExtraFields(c)}
     <label class="field"><span>Ziele</span><textarea name="goals" rows="2" placeholder="z. B. 100 kg Kniebeuge, 5 kg abnehmen">${esc(c ? c.goals : '')}</textarea></label>
     <label class="field"><span>Notizen</span><textarea name="notes" rows="3" placeholder="z. B. Linkes Knie beobachten.">${esc(c ? c.notes : '')}</textarea></label>
     <div class="sheet-actions">${c ? `<button type="button" class="btn btn-danger-ghost" data-action="del-client" data-id="${c.id}">${ic('trash', 18)} Löschen</button>` : ''}
@@ -1113,10 +1228,11 @@ function backupObject() {
   return { app: CONFIG.APP_ID, backupVersion: CONFIG.BACKUP_VERSION, exportedAt: new Date().toISOString(),
     counts: { clients: S.clients.size, sessions: S.sessions.size }, data };
 }
-function doBackup() {
+async function doBackup() {
   flushSave();
   put('meta', { id: 'lastBackup', value: Date.now() });
-  download(`training_backup_${today()}.json`, JSON.stringify(backupObject(), null, 1), 'application/json');
+  const obj = backupObject(); try { obj.data.photos = await DB.getAll('photos'); } catch (e) { obj.data.photos = []; }
+  download(`training_backup_${today()}.json`, JSON.stringify(obj), 'application/json');
   toast('Backup erstellt – Datei im Download-Ordner'); setTimeout(render, 300);
 }
 async function doImport(file) {
@@ -1127,7 +1243,7 @@ async function doImport(file) {
     `Backup vom <b>${esc(new Date(obj.exportedAt).toLocaleString('de-DE'))}</b> mit <b>${obj.data.clients.length}</b> Kunden und <b>${(obj.data.sessions || []).length}</b> Trainings.<br><br>Alle aktuellen Daten auf diesem Gerät (${S.clients.size} Kunden) werden dadurch <b>ersetzt</b>.`,
     { ok: 'Wiederherstellen', danger: true });
   if (!ok) return;
-  try { await DB.replaceAll(obj.data); await loadAll(); UI.open = {}; toast('Backup wiederhergestellt ✓'); go('/'); render(); }
+  try { await DB.replaceAll(obj.data); PH.clear(); await loadAll(); UI.open = {}; LOCK.init = false; toast('Backup wiederhergestellt ✓'); go('/'); render(); }
   catch (e) { dbError(e); }
 }
 function csvExport(cid) {
@@ -1178,7 +1294,7 @@ function loadDemo() {
     ['Pull', [['Kreuzheben', 4, 120], ['Klimmzüge', 4, 0]]],
     ['Beine', [['Kniebeugen', 4, 100], ['Beinpresse', 3, 180]]],
     ['Arme', [['Curls', 3, 16], ['Trizepsdrücken', 3, 25]]]], 5, 2);
-  toast('Beispieldaten geladen'); render();
+  toast('Beispieldaten geladen'); render(); demoBody();
 }
 
 const A = {
@@ -1307,7 +1423,7 @@ const A = {
   wipe: async () => {
     const v = await promptDialog('Alle Daten löschen', { label: 'Zum Bestätigen LÖSCHEN eintippen', placeholder: 'LÖSCHEN', ok: 'Alles löschen' });
     if (v == null || v.trim().toUpperCase() !== 'LÖSCHEN') { if (v != null) toast('Abgebrochen'); return; }
-    await DB.replaceAll({}); await loadAll(); UI.open = {}; toast('Alle Daten gelöscht'); go('/'); render();
+    await DB.replaceAll({}); PH.clear(); await loadAll(); UI.open = {}; LOCK.init = false; toast('Alle Daten gelöscht'); go('/'); render();
   },
 };
 
@@ -1326,7 +1442,7 @@ document.addEventListener('submit', async ev => {
     const name = String(fd.get('name') || '').trim(); if (!name) return;
     const isNew = !f.dataset.id;
     const c = isNew ? { id: uid(), createdAt: Date.now() } : S.clients.get(f.dataset.id);
-    Object.assign(c, { name, goals: String(fd.get('goals') || '').trim(), notes: String(fd.get('notes') || '').trim(), photo: UI.photoDraft || null });
+    Object.assign(c, { name, goals: String(fd.get('goals') || '').trim(), notes: String(fd.get('notes') || '').trim(), photo: UI.photoDraft || null }, clientExtraValues(fd));
     put('clients', c); if (isNew) { ensurePlan(c.id); requestPersist(); }
     closeModal(null); toast(isNew ? 'Kunde angelegt' : 'Gespeichert');
     if (isNew) go('/client/' + c.id); else render();
@@ -1537,6 +1653,902 @@ Object.assign(A, {
 });
 document.addEventListener('input', ev => { if (ev.target.id === 'katsearch') filterKat(ev.target.value); });
 document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && document.getElementById('v3d') && !document.getElementById('modal-root').innerHTML) close3D(); });
+
+/* =====================================================================
+   COACHING-ERWEITERUNG: Körperdaten, 7-Punkt-Messung, Fortschrittschecks,
+   360°-Ansicht, Vorher/Nachher, Timeline, Trainer-Dashboard, Kundenmodus.
+   Alles bleibt lokal (IndexedDB). Kunden erhalten eine verschlüsselte
+   Kundendatei, die NUR ihre eigenen Daten enthält.
+
+   Datenmodell (Erweiterung)
+   client  + {email, startDate, status:'active'|'inactive', sex:'m'|'w', birthDate, checkEvery, access:{code,lastExport}}
+   check   {id, clientId, date, note, m:{weight,chest,arm,leg,waist}, bf:null|{method,sites,sum,n,complete,sex,age,density,pct},
+            photos:[photoId|null ×5], createdAt, updatedAt}         ← Progress Check = Messung (+ optional Bilder & Fett)
+   photo   {id, clientId, checkId, pos:0..4, label, date, note, data(JPEG), thumb, w, h}  ← eigener Speicher, lazy geladen
+   meta    role {value:'trainer'|'client', clientId} · lock {salt, hash}
+   ===================================================================== */
+const MEASURES = [
+  { k: 'weight', l: 'Gewicht', s: 'Gewicht', u: 'kg' },
+  { k: 'chest', l: 'Brustumfang', s: 'Brust', u: 'cm' },
+  { k: 'arm', l: 'Armumfang', s: 'Arm', u: 'cm' },
+  { k: 'leg', l: 'Beinumfang', s: 'Bein', u: 'cm' },
+  { k: 'waist', l: 'Bauchumfang', s: 'Bauch', u: 'cm' },
+];
+const PHOTO_POS = ['Front', 'Rechts', 'Rücken', 'Links', 'Front'];
+const ROT_NAMES = ['Front', 'Rechts', 'Rücken', 'Links'];
+const SKINFOLDS = [
+  { k: 'chest', l: 'Brust', h: 'diagonal, zwischen Achselfalte und Brustwarze' },
+  { k: 'abdomen', l: 'Bauch', h: 'vertikal, ca. 2 cm neben dem Bauchnabel' },
+  { k: 'thigh', l: 'Oberschenkel', h: 'vertikal, Mitte Vorderseite' },
+  { k: 'triceps', l: 'Trizeps', h: 'vertikal, Mitte Oberarm-Rückseite' },
+  { k: 'subscapular', l: 'Subscapular', h: 'diagonal, unter dem Schulterblatt' },
+  { k: 'suprailiac', l: 'Suprailiac', h: 'diagonal, über dem Hüftknochen' },
+  { k: 'midaxillary', l: 'Achsel / Midaxillary', h: 'vertikal, mittlere Achsellinie auf Höhe Brustbein' },
+];
+/* Körperfett-Methoden: neue Formeln hier ergänzen. Die Methode wird mit jeder Messung gespeichert,
+   damit alte Werte nachvollziehbar bleiben, auch wenn später eine andere Formel verwendet wird. */
+const BF_METHODS = {
+  'jp7-siri': {
+    name: 'Jackson & Pollock 7-Punkt + Siri',
+    ref: 'Körperdichte nach Jackson & Pollock (1978, Männer) bzw. Jackson, Pollock & Ward (1980, Frauen); Umrechnung in Körperfett nach Siri (1956): KF % = 495 / Dichte − 450.',
+    sites: SKINFOLDS.map(s => s.k),
+    calc({ sum, sex, age }) {
+      const d = sex === 'm'
+        ? 1.112 - 0.00043499 * sum + 0.00000055 * sum * sum - 0.00028826 * age
+        : 1.097 - 0.00046971 * sum + 0.00000056 * sum * sum - 0.00012828 * age;
+      return { density: d, pct: 495 / d - 450 };
+    },
+  },
+};
+const BF_DEFAULT = 'jp7-siri';
+const CHECK_EVERY_DEFAULT = 28;
+
+/* ---------- Datenbank-Erweiterung (Fotos lazy, eigener Speicher) ---------- */
+Object.assign(DB, {
+  get(s, id) { return this.req(s, 'readonly', st => st.get(id)); },
+  photosOfClient(cid) { return this.req('photos', 'readonly', st => st.index('clientId').getAll(cid)); },
+});
+const PH = new Map();
+async function getPhoto(id) {
+  if (!id) return null;
+  if (PH.has(id)) return PH.get(id);
+  const r = await DB.get('photos', id).catch(() => null);
+  if (r) PH.set(id, r); return r || null;
+}
+function putPhoto(rec) { PH.set(rec.id, rec); return DB.put('photos', rec).catch(dbError); }
+function delPhoto(id) { PH.delete(id); return DB.del('photos', id).catch(dbError); }
+function hydratePhotos(root = document) {
+  root.querySelectorAll('img[data-src]').forEach(im => { im.src = im.dataset.src; im.removeAttribute('data-src'); im.classList.add('ld'); });
+  root.querySelectorAll('img[data-pid]').forEach(async im => {
+    const r = await getPhoto(im.dataset.pid); if (!r) return;
+    im.src = im.dataset.full ? r.data : (r.thumb || r.data); im.classList.add('ld');
+  });
+}
+
+/* ---------- Rollen & Sperre ---------- */
+const roleInfo = () => S.meta.get('role') || { value: 'trainer' };
+const isClientMode = () => roleInfo().value === 'client';
+const LOCK = { init: false, locked: false, hiddenAt: 0 };
+const te = new TextEncoder();
+const b64 = buf => { const b = buf instanceof Uint8Array ? buf : new Uint8Array(buf); let s = ''; for (let i = 0; i < b.length; i += 0x8000) s += String.fromCharCode.apply(null, b.subarray(i, i + 0x8000)); return btoa(s); };
+const unb64 = s => { const bin = atob(s), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u; };
+const rnd = n => crypto.getRandomValues(new Uint8Array(n));
+async function pbkdf(code, salt, usage) {
+  const base = await crypto.subtle.importKey('raw', te.encode(code), 'PBKDF2', false, usage === 'bits' ? ['deriveBits'] : ['deriveKey']);
+  const prm = { name: 'PBKDF2', salt, iterations: 150000, hash: 'SHA-256' };
+  return usage === 'bits' ? crypto.subtle.deriveBits(prm, base, 256) : crypto.subtle.deriveKey(prm, base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+}
+async function makeLock(code) { const salt = rnd(16); return { id: 'lock', salt: b64(salt), hash: b64(await pbkdf(code, salt, 'bits')) }; }
+async function verifyLock(code) { const l = S.meta.get('lock'); if (!l) return true; return b64(await pbkdf(code, unb64(l.salt), 'bits')) === l.hash; }
+async function encryptPayload(obj, code, header) {
+  const salt = rnd(16), iv = rnd(12), key = await pbkdf(code, salt, 'key');
+  const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, te.encode(JSON.stringify(obj)));
+  return JSON.stringify({ app: 'sweat4', ...header, enc: 'AES-GCM-256 / PBKDF2-SHA256 150000', salt: b64(salt), iv: b64(iv), ct: b64(ct), createdAt: new Date().toISOString() });
+}
+async function decryptPayload(hdr, code) {
+  const key = await pbkdf(code, unb64(hdr.salt), 'key');
+  let pt; try { pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(hdr.iv) }, key, unb64(hdr.ct)); }
+  catch { throw new Error('Falscher Zugangscode – oder die Datei ist beschädigt.'); }
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+async function readHeader(file) {
+  let h; try { h = JSON.parse(await file.text()); } catch { throw new Error('Die Datei konnte nicht gelesen werden.'); }
+  if (!h || h.app !== 'sweat4' || !h.kind || !h.ct) throw new Error('Das ist keine SWEAT4-Kundendatei.');
+  return h;
+}
+
+/* ---------- Abfragen ---------- */
+const checkCmp = (a, b) => a.date.localeCompare(b.date) || (a.createdAt || 0) - (b.createdAt || 0);
+const checksOf = cid => all('checks').filter(x => x.clientId === cid).sort(checkCmp);
+const photoIds = ch => { const a = (ch && ch.photos) || []; return [0, 1, 2, 3, 4].map(i => a[i] || null); };
+const photoCount = ch => photoIds(ch).filter(Boolean).length;
+const isComplete = ch => photoCount(ch) === 5;
+const missingText = n => n === 1 ? '1 Aufnahme fehlt' : `${n} Aufnahmen fehlen`;
+function checkLabel(ch, list) {
+  const i = (list || checksOf(ch.clientId)).findIndex(x => x.id === ch.id);
+  return i <= 0 ? 'Start' : `${i}. Fortschrittscheck`;
+}
+const valOf = (ch, k) => k === 'bf' ? (ch.bf && hasVal(ch.bf.pct) ? ch.bf.pct : null) : (ch.m && hasVal(ch.m[k]) ? ch.m[k] : null);
+const metricDefs = cl => [...MEASURES, ...(cl.some(x => valOf(x, 'bf') != null) ? [{ k: 'bf', l: 'Körperfett', s: 'Körperfett', u: '%' }] : [])];
+function firstLast(cl, k) {
+  const v = cl.filter(x => valOf(x, k) != null); if (!v.length) return null;
+  const a = v[0], b = v[v.length - 1], d = r3(valOf(b, k) - valOf(a, k));
+  return { start: valOf(a, k), cur: valOf(b, k), d, pct: valOf(a, k) ? Math.round(d / valOf(a, k) * 1000) / 10 : null, a, b, n: v.length };
+}
+const sgn = d => (d > 0 ? '+' : '') + fmtNum(d);
+function ageAt(birth, date) {
+  if (!birth) return null; const b = new Date(birth + 'T00:00:00'), d = new Date((date || today()) + 'T00:00:00');
+  let a = d.getFullYear() - b.getFullYear(); if (d < new Date(d.getFullYear(), b.getMonth(), b.getDate())) a--;
+  return a > 0 && a < 120 ? a : null;
+}
+function computeBF(sites, sex, age, method = BF_DEFAULT) {
+  const M = BF_METHODS[method], clean = {};
+  M.sites.forEach(k => { if (sites[k] > 0) clean[k] = sites[k]; });
+  const n = Object.keys(clean).length, sum = r3(Object.values(clean).reduce((a, v) => a + v, 0)), complete = n === M.sites.length;
+  let res = null, reason = '';
+  if (!complete) reason = `${M.sites.length - n} von ${M.sites.length} Messstellen fehlen`;
+  else if (sex !== 'm' && sex !== 'w') reason = 'Geschlecht im Kundenprofil fehlt';
+  else if (!age) reason = 'Geburtsdatum im Kundenprofil fehlt';
+  else res = M.calc({ sum, sex, age });
+  return { method, sites: clean, sum, n, complete, sex: sex || null, age: age || null,
+    density: res ? Math.round(res.density * 1e5) / 1e5 : null, pct: res ? Math.round(res.pct * 10) / 10 : null, reason };
+}
+function checkDue(c) {
+  if (c.status === 'inactive') return null;
+  const cl = checksOf(c.id), last = cl[cl.length - 1], every = c.checkEvery || CHECK_EVERY_DEFAULT;
+  if (!last) return { text: 'Startcheck fehlt', days: null };
+  const d = daysBetween(last.date, today());
+  return d >= every ? { text: `letzter Check vor ${d} Tagen`, days: d } : null;
+}
+
+/* ---------- Bilder verkleinern ---------- */
+function resizePhoto(file, max = 1400, tmax = 360) {
+  return new Promise((res, rej) => {
+    const url = URL.createObjectURL(file), img = new Image();
+    img.onload = () => {
+      const draw = m => { const k = Math.min(1, m / Math.max(img.width, img.height)), cv = document.createElement('canvas');
+        cv.width = Math.round(img.width * k); cv.height = Math.round(img.height * k); cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height); return cv; };
+      const big = draw(max), sm = draw(tmax);
+      URL.revokeObjectURL(url);
+      res({ data: big.toDataURL('image/jpeg', 0.85), thumb: sm.toDataURL('image/jpeg', 0.8), w: big.width, h: big.height });
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error('Bild konnte nicht gelesen werden')); };
+    img.src = url;
+  });
+}
+
+/* ---------- Trainer-Dashboard (Startseite) ---------- */
+function coachDash(rows) {
+  if (!rows.length) return '';
+  const active = rows.filter(r => r.c.status !== 'inactive');
+  const due = active.map(r => ({ c: r.c, d: checkDue(r.c) })).filter(x => x.d);
+  const n30 = all('sessions').filter(s => s.status === 'done' && daysBetween(s.date, today()) <= 30).length;
+  const name = id => S.clients.get(id)?.name || '–';
+  const acts = [
+    ...all('sessions').filter(s => s.status === 'done').map(s => ({ ts: s.finishedAt || s.startedAt || 0, t: `${esc(name(s.clientId))} – Workout abgeschlossen`, h: '#/session/' + s.id, i: '🏋️' })),
+    ...all('checks').map(x => { const n = photoCount(x); return { ts: x.createdAt || 0, t: `${esc(name(x.clientId))} – ${n ? `neue Fortschrittsbilder (${n}/5)` : 'neue Messung'}`, h: '#/check/' + x.id, i: n ? '📷' : '📏' }; }),
+  ].sort((a, b) => b.ts - a.ts).slice(0, 5);
+  return `<section class="coach">
+    <div class="section-h" style="margin-top:4px"><h2>Mein Coaching</h2></div>
+    <div class="stats">
+      <div class="stat"><div class="stat-l">Kunden</div><div class="stat-v">${active.length}</div><div class="stat-s">aktiv${rows.length - active.length ? ` · ${rows.length - active.length} inaktiv` : ''}</div></div>
+      <div class="stat"><div class="stat-l">Checks fällig</div><div class="stat-v ${due.length ? 'warn-t' : ''}">${due.length}</div><div class="stat-s">${due.length ? 'neuer Check nötig' : 'alles aktuell ✓'}</div></div>
+    </div>
+    ${due.length ? `<div class="card list-card" style="margin-top:10px">${due.slice(0, 6).map(x => `<a class="list-link" href="#/client/${x.c.id}/body">${avatar(x.c, 'sm')}<div class="grow"><div style="font-weight:600">${esc(x.c.name)}</div><div class="muted" style="font-size:13px">${esc(x.d.text)}</div></div><span class="tag warn">Check fällig</span></a>`).join('')}</div>` : ''}
+    ${acts.length ? `<div class="card" style="margin-top:10px"><div class="last-h" style="margin-bottom:8px">Letzte Aktivitäten · ${n30} Workouts in 30 Tagen</div>
+      <div class="acts">${acts.map(a => `<a href="${a.h}" class="act"><span>${a.i}</span><span class="grow">${a.t}</span><span class="muted">${fmtDateTs(a.ts).slice(0, 6)}</span></a>`).join('')}</div></div>` : ''}
+  </section>`;
+}
+
+/* ---------- Kundenprofil: Zusatzbereiche ---------- */
+function clientExtraSections(c, part) {
+  const cl = checksOf(c.id), last = cl[cl.length - 1], due = checkDue(c), age = ageAt(c.birthDate);
+  const vals = last ? MEASURES.map(m => { const fl = firstLast(cl, m.k); return fl ? `<div class="mini"><div class="mini-l">${m.s}</div><div class="mini-v">${fmtNum(fl.cur)} <small>${m.u}</small></div>${fl.n > 1 ? `<div class="mini-d">${sgn(fl.d)} ${m.u}</div>` : ''}</div>` : ''; }).join('') : '';
+  const lastBf = [...cl].reverse().find(x => valOf(x, 'bf') != null);
+  const body = `
+    <section class="section">
+      <div class="section-h"><h2>Körper &amp; Fortschritt</h2><a class="btn btn-sm btn-ghost" href="#/client/${c.id}/body">${ic('chart', 16)} Alle Daten</a></div>
+      <div class="card">
+        ${due ? `<div class="due">⏰ Fortschrittscheck fällig – ${esc(due.text)}</div>` : ''}
+        ${last ? `<div class="mini-grid">${vals}${lastBf ? `<div class="mini"><div class="mini-l">Körperfett</div><div class="mini-v">${fmtNum(lastBf.bf.pct)} <small>%</small></div></div>` : ''}</div>
+          <div class="muted" style="font-size:13px;margin:10px 0 12px">Letzter Check: ${fmtDate(last.date)} · ${cl.length} ${cl.length === 1 ? 'Check' : 'Checks'}${isComplete(last) ? ' · 📷 360° vorhanden' : photoCount(last) ? ' · 📷 ' + missingText(5 - photoCount(last)) : ''}</div>`
+        : '<div class="muted" style="margin-bottom:12px">Noch keine Messung. Lege den Startcheck an – mit Gewicht, Umfängen, optional 7-Punkt-Messung und 5 Fotos für die 360°-Ansicht.</div>'}
+        <a class="btn btn-primary btn-block" href="#/client/${c.id}/check">${ic('plus')} Neuen Fortschrittscheck hinzufügen</a>
+      </div>
+    </section>`;
+  if (part === 'top') return body;
+  return `
+    <section class="section">
+      <div class="section-h"><h2>Profil</h2><button class="btn btn-sm btn-ghost" data-action="edit-client" data-id="${c.id}">${ic('edit', 16)} Bearbeiten</button></div>
+      <div class="card"><table class="table"><tbody>
+        <tr><td class="muted">Status</td><td class="r">${c.status === 'inactive' ? '<span class="tag off">inaktiv</span>' : '<span class="tag live">aktiv</span>'}</td></tr>
+        <tr><td class="muted">E-Mail</td><td class="r">${c.email ? esc(c.email) : '–'}</td></tr>
+        <tr><td class="muted">Startdatum</td><td class="r">${c.startDate ? fmtDate(c.startDate) : '–'}</td></tr>
+        <tr><td class="muted">Geschlecht / Alter</td><td class="r">${c.sex === 'm' ? 'männlich' : c.sex === 'w' ? 'weiblich' : '–'} / ${age ? age + ' J.' : '–'}</td></tr>
+        <tr><td class="muted">Check-Rhythmus</td><td class="r">alle ${c.checkEvery || CHECK_EVERY_DEFAULT} Tage</td></tr>
+      </tbody></table></div>
+    </section>
+    <section class="section">
+      <div class="section-h"><h2>Kunden-App</h2></div>
+      <div class="card stack">
+        <div class="muted" style="font-size:14px">${c.access && c.access.lastExport ? `Zugangsdatei zuletzt erstellt am <b style="color:var(--text)">${fmtDateTs(c.access.lastExport)}</b>.` : 'Noch kein Kunden-Zugang erstellt.'} Die Kundendatei ist verschlüsselt und enthält <b>nur die Daten von ${esc(c.name)}</b> (ohne deine internen Notizen).</div>
+        <button class="btn btn-ghost btn-block" data-action="pkg-make" data-cid="${c.id}">${ic('upload')} ${c.access ? 'Kundendatei aktualisieren' : 'Kunden einladen (Zugangsdatei)'}</button>
+        <button class="btn btn-ghost btn-block" data-action="ret-import">${ic('download')} Trainings vom Kunden importieren</button>
+      </div>
+    </section>`;
+}
+function clientExtraFields(c) {
+  return `<div class="grid2">
+      <label class="field"><span>E-Mail</span><input name="email" type="email" maxlength="120" autocomplete="off" value="${esc(c ? c.email : '')}" placeholder="optional"></label>
+      <label class="field"><span>Startdatum</span><input name="startDate" type="date" class="input" value="${esc(c ? c.startDate || '' : today())}"></label>
+      <label class="field"><span>Geschlecht</span><select name="sex" class="input"><option value="">–</option><option value="m" ${c && c.sex === 'm' ? 'selected' : ''}>männlich</option><option value="w" ${c && c.sex === 'w' ? 'selected' : ''}>weiblich</option></select></label>
+      <label class="field"><span>Geburtsdatum</span><input name="birthDate" type="date" class="input" value="${esc(c ? c.birthDate || '' : '')}"></label>
+      <label class="field"><span>Check-Rhythmus (Tage)</span><input name="checkEvery" class="input" inputmode="numeric" value="${c && c.checkEvery ? c.checkEvery : CHECK_EVERY_DEFAULT}"></label>
+      <label class="field"><span>Status</span><select name="status" class="input"><option value="active">aktiv</option><option value="inactive" ${c && c.status === 'inactive' ? 'selected' : ''}>inaktiv</option></select></label>
+    </div><div class="muted" style="font-size:12px;margin:-6px 0 14px">Geschlecht &amp; Geburtsdatum werden nur für die Körperfett-Berechnung (7-Punkt-Messung) benötigt.</div>`;
+}
+function clientExtraValues(fd) {
+  const n = parseInt(fd.get('checkEvery'), 10);
+  return { email: String(fd.get('email') || '').trim(), startDate: fd.get('startDate') || '', sex: fd.get('sex') || '', birthDate: fd.get('birthDate') || '',
+    checkEvery: n > 0 && n < 400 ? n : CHECK_EVERY_DEFAULT, status: fd.get('status') === 'inactive' ? 'inactive' : 'active' };
+}
+
+/* ---------- Seite: Körper & Fortschritt ---------- */
+const RANGES = { '1m': ['1 Monat', 31], '3m': ['3 Monate', 92], '6m': ['6 Monate', 183], '1y': ['1 Jahr', 366], all: ['Gesamt', 0] };
+function viewBody(c) {
+  const cl = checksOf(c.id), trainer = !isClientMode(), back = trainer ? '/client/' + c.id : '/';
+  const head = topbar({ back, title: 'Körper & Fortschritt', sub: esc(c.name) });
+  const addBtn = trainer ? `<a class="btn btn-primary btn-big" href="#/client/${c.id}/check">${ic('plus', 22)} Neuen Fortschrittscheck hinzufügen</a>` : '';
+  if (!cl.length) return head + `<main class="wrap view"><div class="card empty">Noch keine Messungen vorhanden.${trainer ? '' : '<br>Dein Trainer trägt deine Messungen beim nächsten Fortschrittscheck ein.'}</div><div style="margin-top:14px">${addBtn}</div></main>`;
+  const defs = metricDefs(cl);
+  let mk = UI.bodyMetric; if (!defs.some(d => d.k === mk)) mk = 'weight';
+  const md = defs.find(d => d.k === mk), rk = UI.bodyRange || 'all', days = RANGES[rk][1];
+  const inR = cl.filter(x => !days || daysBetween(x.date, today()) <= days);
+  const pts = inR.filter(x => valOf(x, mk) != null).map(x => ({ label: fmtDate(x.date).slice(0, 6), y: valOf(x, mk) }));
+  const rs = firstLast(inR, mk);
+  const complete = cl.filter(isComplete), first = complete[0], lastC = complete[complete.length - 1];
+  const cards = defs.map(d => { const fl = firstLast(cl, d.k); if (!fl) return '';
+    return `<button class="mcard ${d.k === mk ? 'on' : ''}" data-action="body-metric" data-v="${d.k}"><div class="mc-l">${d.l}</div><div class="mc-v">${fmtNum(fl.cur)}<small> ${d.u}</small></div>
+      <div class="mc-s">${fl.n > 1 ? `Start ${fmtNum(fl.start)} · <b>${sgn(fl.d)} ${d.k === 'bf' ? '%-Pkt.' : d.u}</b>` : 'erste Messung'}</div></button>`; }).join('');
+  return head + `<main class="wrap view">
+    ${addBtn ? `<div style="margin-bottom:16px">${addBtn}</div>` : ''}
+    <div class="mgrid">${cards}</div>
+
+    <section class="section">
+      <div class="section-h"><h2>Entwicklung: ${md.l}</h2></div>
+      <div class="card">
+        <div class="seg seg-scroll" style="margin-bottom:10px">${Object.entries(RANGES).map(([k, r]) => `<button class="${rk === k ? 'on' : ''}" data-action="body-range" data-v="${k}">${r[0]}</button>`).join('')}</div>
+        ${pts.length ? lineChart(pts, md.u) : '<div class="empty">Keine Werte in diesem Zeitraum.</div>'}
+        ${rs ? `<div class="rstats"><div><span>Start</span><b>${fmtNum(rs.start)} ${md.u}</b></div><div><span>Aktuell</span><b>${fmtNum(rs.cur)} ${md.u}</b></div>
+          <div><span>Veränderung</span><b class="accent">${sgn(rs.d)} ${mk === 'bf' ? '%-Pkt.' : md.u}${rs.pct != null && mk !== 'bf' && rs.d ? ` <small>(${sgn(rs.pct)} %)</small>` : ''}</b></div></div>` : ''}
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-h"><h2>360° &amp; Vorher / Nachher</h2></div>
+      <div class="card">
+        ${complete.length ? `<div class="ba-row">
+            <div class="ba"><img data-pid="${photoIds(first)[0]}" alt=""><span>${complete.length > 1 ? 'Vorher' : 'Start'} · ${fmtDate(first.date)}</span></div>
+            ${complete.length > 1 ? `<div class="ba"><img data-pid="${photoIds(lastC)[0]}" alt=""><span>Aktuell · ${fmtDate(lastC.date)}</span></div>` : ''}</div>
+          <div class="quick" style="margin-top:12px">
+            <button class="btn btn-primary" data-action="p360-open" data-ids="${lastC.id}">${ic('reset', 18)} 360° ansehen</button>
+            <button class="btn btn-ghost" data-action="p360-open" data-ids="${first.id},${lastC.id}" ${complete.length < 2 ? 'disabled' : ''}>Vorher/Nachher</button></div>
+          ${complete.length < 2 ? '<div class="muted" style="font-size:13px;margin-top:8px">Der Vorher/Nachher-Vergleich ist verfügbar, sobald ein zweiter vollständiger Fotosatz existiert.</div>' : ''}`
+        : `<div class="muted">Noch kein vollständiger 5-Bilder-Satz. Die 360°-Ansicht wird aktiv, sobald alle fünf Aufnahmen (Front, Rechts, Rücken, Links, Front) eines Checks vorhanden sind.</div>`}
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-h"><h2>Fortschritts-Timeline</h2></div>
+      <div class="tl">${cl.map((x, i) => { const n = photoCount(x);
+        return `<a class="tl-item" href="#/check/${x.id}"><span class="tl-dot"></span>
+          <div class="tl-date">${fmtDate(x.date)}</div>
+          <div class="tl-title">🟢 ${i === 0 ? 'Coaching gestartet' : `${i}. Fortschrittscheck`}</div>
+          <div class="tl-vals">${MEASURES.filter(m => valOf(x, m.k) != null).map(m => `${m.s}: <b>${fmtNum(valOf(x, m.k))} ${m.u}</b>`).join(' · ') || '<span class="muted">keine Messwerte</span>'}${valOf(x, 'bf') != null ? ` · KF: <b>${fmtNum(x.bf.pct)} %</b>` : ''}</div>
+          ${n ? `<div class="tl-photo">📷 ${n === 5 ? (i === 0 ? '360° Startaufnahmen' : '360° Fortschrittsaufnahmen') : `${n}/5 Aufnahmen – ${missingText(5 - n)}`}</div>` : ''}
+          ${x.note ? `<div class="tl-note">„${esc(x.note)}“</div>` : ''}</a>`; }).join('')}</div>
+    </section>
+
+    <section class="section">
+      <div class="section-h"><h2>Messhistorie</h2></div>
+      <div class="card hscroll"><table class="table mtable"><thead><tr><th>Datum</th>${MEASURES.map(m => `<th class="r">${m.s}</th>`).join('')}<th class="r">KF %</th></tr></thead><tbody>
+        ${cl.slice().reverse().map(x => `<tr><td><a href="#/check/${x.id}">${fmtDate(x.date)}</a></td>${MEASURES.map(m => `<td class="r">${valOf(x, m.k) != null ? fmtNum(valOf(x, m.k)) : '–'}</td>`).join('')}<td class="r">${valOf(x, 'bf') != null ? fmtNum(x.bf.pct) : '–'}</td></tr>`).join('')}
+      </tbody></table><div class="muted" style="font-size:12px;margin-top:6px">Gewicht in kg, Umfänge in cm. Jede Messung bleibt als eigener Datensatz erhalten.</div></div>
+    </section>
+
+    ${cl.some(x => x.bf) ? `<section class="section">
+      <div class="section-h"><h2>7-Punkt-Körperfettmessung</h2></div>
+      <div class="card hscroll"><table class="table"><thead><tr><th>Datum</th><th class="r">Summe</th><th class="r">KF %</th><th>Methode</th></tr></thead><tbody>
+        ${cl.filter(x => x.bf).reverse().map(x => `<tr><td><a href="#/check/${x.id}">${fmtDate(x.date)}</a></td><td class="r">${fmtNum(x.bf.sum)} mm</td><td class="r">${x.bf.pct != null ? fmtNum(x.bf.pct) : '–'}</td><td class="muted" style="font-size:12px">${esc((BF_METHODS[x.bf.method] || {}).name || x.bf.method)}</td></tr>`).join('')}
+      </tbody></table></div>
+    </section>` : ''}
+  </main>`;
+}
+
+/* ---------- Seite: einzelner Check ---------- */
+function viewCheck(ch) {
+  const c = S.clients.get(ch.clientId), cl = checksOf(ch.clientId), i = cl.findIndex(x => x.id === ch.id), prev = i > 0 ? cl[i - 1] : null;
+  const trainer = !isClientMode(), ids = photoIds(ch), n = photoCount(ch), complete = cl.filter(isComplete);
+  const cmpBase = complete.find(x => x.id !== ch.id && checkCmp(x, ch) < 0) || null;
+  return topbar({ back: `/client/${ch.clientId}/body`, title: i === 0 ? 'Start' : `${i}. Fortschrittscheck`, sub: `${fmtDate(ch.date)} · ${esc(c ? c.name : '')}` }) +
+  `<main class="wrap view">
+    <div class="mgrid">${MEASURES.map(m => { const v = valOf(ch, m.k); if (v == null) return ''; const pv = prev ? valOf(prev, m.k) : null;
+      return `<div class="mcard"><div class="mc-l">${m.l}</div><div class="mc-v">${fmtNum(v)}<small> ${m.u}</small></div><div class="mc-s">${pv != null ? `<b>${sgn(r3(v - pv))} ${m.u}</b> seit ${fmtDate(prev.date).slice(0, 6)}` : i === 0 ? 'Startwert' : '–'}</div></div>`; }).join('') || '<div class="card muted">Keine Messwerte erfasst.</div>'}</div>
+
+    ${ch.bf ? `<section class="section"><div class="section-h"><h2>7-Punkt-Körperfettmessung</h2></div><div class="card">
+      <table class="table"><tbody>${SKINFOLDS.map(s => `<tr><td>${s.l}</td><td class="r">${hasVal(ch.bf.sites[s.k]) ? fmtNum(ch.bf.sites[s.k]) + ' mm' : '–'}</td></tr>`).join('')}
+        <tr><td><b>Summe</b></td><td class="r"><b>${fmtNum(ch.bf.sum)} mm</b></td></tr>
+        <tr><td><b>Körperfett</b></td><td class="r"><b class="accent">${ch.bf.pct != null ? fmtNum(ch.bf.pct) + ' %' : '–'}</b></td></tr></tbody></table>
+      <div class="muted" style="font-size:12px;margin-top:8px">${ch.bf.pct != null ? `Methode: ${esc((BF_METHODS[ch.bf.method] || {}).name || ch.bf.method)} · ${ch.bf.sex === 'm' ? 'männlich' : 'weiblich'}, ${ch.bf.age} J. · Körperdichte ${String(ch.bf.density).replace('.', ',')} g/cm³` : 'Nicht berechnet: ' + esc(ch.bf.reason || '')}</div>
+    </div></section>` : ''}
+
+    <section class="section">
+      <div class="section-h"><h2>Fortschrittsbilder</h2><span class="tag ${n === 5 ? 'live' : n ? 'warn' : ''}">${n}/5</span></div>
+      <div class="pgrid">${ids.map((id, k) => `<div class="pcell ${id ? '' : 'miss'}">${id ? `<button data-action="photo-view" data-pid="${id}" data-label="${esc(PHOTO_POS[k])}"><img data-pid="${id}" alt="${esc(PHOTO_POS[k])}"></button>` : '<div class="pmiss">✕</div>'}<span>${id ? '✓' : '✕'} ${PHOTO_POS[k]}</span></div>`).join('')}</div>
+      ${n === 5 ? `<div class="quick" style="margin-top:12px"><button class="btn btn-primary" data-action="p360-open" data-ids="${ch.id}">${ic('reset', 18)} 360° ansehen</button>
+          <button class="btn btn-ghost" data-action="p360-open" data-ids="${cmpBase ? cmpBase.id + ',' + ch.id : ''}" ${cmpBase ? '' : 'disabled'}>Vorher/Nachher</button></div>`
+        : n ? `<div class="banner" style="margin-top:12px"><div><b>${missingText(5 - n)}</b><div class="muted" style="font-size:13px">Die 360°-Ansicht wird erst mit allen fünf Bildern aktiviert.</div></div>${trainer ? `<a class="btn btn-sm btn-primary" href="#/check/${ch.id}/edit">Ergänzen</a>` : ''}</div>`
+        : '<div class="muted" style="font-size:14px;margin-top:8px">Zu diesem Check wurden keine Fotos gespeichert.</div>'}
+    </section>
+    ${ch.note ? `<section class="section"><div class="section-h"><h2>Notiz</h2></div><div class="card note-box">${esc(ch.note)}</div></section>` : ''}
+    ${trainer ? `<div class="quick" style="margin-top:18px"><a class="btn btn-ghost" href="#/check/${ch.id}/edit">${ic('edit')} Bearbeiten</a><button class="btn btn-danger-ghost" data-action="check-del" data-id="${ch.id}">${ic('trash')} Löschen</button></div>` : ''}
+  </main>`;
+}
+
+/* ---------- Formular: Fortschrittscheck (Messung + 7-Punkt + 5 Fotos + Notiz) ---------- */
+function pslotHtml(i) {
+  const s = UI.cd.photos[i];
+  return `<label class="pslot ${s ? 'has' : ''}"><input type="file" accept="image/*" data-pslot="${i}" hidden>
+      ${s ? (s.thumb ? `<img data-src="${s.thumb}" alt="">` : `<img data-pid="${s.id}" alt="">`) : `<span class="pslot-add">${ic('plus', 26)}<br>Foto</span>`}
+      <span class="pslot-l">${i + 1}. ${PHOTO_POS[i]}</span></label>
+    ${s ? `<button type="button" class="pslot-x" data-action="pslot-rm" data-i="${i}" aria-label="Foto entfernen">${ic('x', 16)}</button>` : ''}`;
+}
+function viewCheckForm(c, ch) {
+  const key = ch ? ch.id : 'new:' + c.id;
+  if (!UI.cd || UI.cd.key !== key) UI.cd = { key, photos: photoIds(ch).map(id => id ? { id } : null), removed: [], bfOn: !!(ch && ch.bf) };
+  const cl = checksOf(c.id), prev = ch ? cl[cl.findIndex(x => x.id === ch.id) - 1] : cl[cl.length - 1];
+  const needSex = c.sex !== 'm' && c.sex !== 'w', needAge = !c.birthDate;
+  const n = UI.cd.photos.filter(Boolean).length;
+  return topbar({ back: ch ? '/check/' + ch.id : '/client/' + c.id, title: ch ? 'Check bearbeiten' : 'Neuer Fortschrittscheck', sub: esc(c.name) }) +
+  `<main class="wrap view"><form data-form="check" data-cid="${c.id}" data-id="${ch ? ch.id : ''}">
+    <label class="row" style="margin-bottom:14px"><span class="muted" style="font-size:14px">Datum</span><input type="date" name="date" class="input" value="${esc(ch ? ch.date : today())}" style="width:auto;padding:8px 12px;font-size:16px" required></label>
+
+    <div class="card"><div class="last-h" style="margin-bottom:10px">Körperdaten</div>
+      <div class="mform">${MEASURES.map(m => `<label><span>${m.l}</span><div class="fld"><input name="m_${m.k}" inputmode="decimal" autocomplete="off" value="${ch ? fmtIn(valOf(ch, m.k)) : ''}" placeholder="${prev && valOf(prev, m.k) != null ? fmtIn(valOf(prev, m.k)) : '–'}"><span class="unit">${m.u}</span></div></label>`).join('')}</div>
+      <div class="muted" style="font-size:12px;margin-top:8px">Alle Felder optional · Kommawerte möglich (z. B. 82,4)${prev ? ' · grau = letzter Wert' : ''}</div>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <label class="toggle" style="margin:0"><input type="checkbox" name="bfOn" ${UI.cd.bfOn ? 'checked' : ''}><span class="tg"></span><span>7-Punkt-Körperfettmessung (optional)<small>Hautfalten mit dem Caliper in mm, rechte Körperseite, je 2–3 Messungen mitteln.</small></span></label>
+      <div id="bf-box" class="${UI.cd.bfOn ? '' : 'hidden'}" style="margin-top:12px">
+        <div class="sfgrid">${SKINFOLDS.map(s => `<label><span>${s.l}<small>${s.h}</small></span><div class="fld"><input name="sf_${s.k}" data-sf inputmode="decimal" autocomplete="off" value="${ch && ch.bf && hasVal(ch.bf.sites[s.k]) ? fmtIn(ch.bf.sites[s.k]) : ''}"><span class="unit">mm</span></div></label>`).join('')}</div>
+        ${needSex || needAge ? `<div class="grid2" style="margin-top:10px">
+          ${needSex ? `<label class="field"><span>Geschlecht (für die Formel)</span><select name="sex" class="input" data-sf><option value="">–</option><option value="m">männlich</option><option value="w">weiblich</option></select></label>` : ''}
+          ${needAge ? `<label class="field"><span>Geburtsdatum</span><input type="date" name="birthDate" class="input" data-sf></label>` : ''}</div>` : ''}
+        <div class="bf-live" id="bf-live">${bfLiveHtml(c)}</div>
+        <div class="muted" style="font-size:12px;margin-top:6px">Formel: ${esc(BF_METHODS[BF_DEFAULT].ref)}</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:12px"><div class="row" style="justify-content:space-between;margin-bottom:10px"><div class="last-h" style="margin:0">Fortschrittsbilder</div><span class="tag ${n === 5 ? 'live' : ''}" id="pcount">${n}/5</span></div>
+      <div class="pslots">${PHOTO_POS.map((_, i) => `<div class="pslot-w" id="pslot-${i}">${pslotHtml(i)}</div>`).join('')}</div>
+      <div class="muted" style="font-size:12px;margin-top:10px">Reihenfolge für die 360°-Ansicht: <b>Front → Rechts → Rücken → Links → Front</b>. Tipp: gleicher Ort, gleicher Abstand, Kamera auf Hüfthöhe, Kunde dreht sich jeweils um 90° nach links.</div>
+    </div>
+
+    <label class="field" style="margin-top:14px"><span>Notiz zum Fortschritt (optional)</span><textarea name="note" rows="3" placeholder="z. B. Taille deutlich schmaler, Schultern breiter.">${esc(ch ? ch.note : '')}</textarea></label>
+    <button class="btn btn-primary btn-big" style="margin-top:6px">${ic('check', 22)} Fortschrittscheck speichern</button>
+  </form></main>`;
+}
+function bfLiveHtml(c) {
+  const f = document.querySelector('[data-form=check]');
+  const sites = {}; SKINFOLDS.forEach(s => { sites[s.k] = f ? parseNum(f.querySelector(`[name=sf_${s.k}]`)?.value) : null; });
+  const sex = (f && f.querySelector('[name=sex]')?.value) || c.sex, birth = (f && f.querySelector('[name=birthDate]')?.value) || c.birthDate;
+  const date = (f && f.querySelector('[name=date]')?.value) || today();
+  const r = computeBF(sites, sex, ageAt(birth, date));
+  return `<div><span>Summe</span><b>${fmtNum(r.sum)} mm</b></div><div><span>Körperfett</span><b class="accent">${r.pct != null ? fmtNum(r.pct) + ' %' : '–'}</b></div>${r.pct == null ? `<div class="bf-why">${esc(r.reason)}</div>` : ''}`;
+}
+async function saveCheck(f) {
+  const fd = new FormData(f), c = S.clients.get(f.dataset.cid); if (!c) return;
+  const date = fd.get('date') || today();
+  const m = {}; MEASURES.forEach(x => { m[x.k] = parseNum(fd.get('m_' + x.k)); });
+  if (fd.get('sex')) c.sex = fd.get('sex');
+  if (fd.get('birthDate')) c.birthDate = fd.get('birthDate');
+  if (fd.get('sex') || fd.get('birthDate')) put('clients', c);
+  let bf = null;
+  if (fd.get('bfOn') === 'on') {
+    const sites = {}; SKINFOLDS.forEach(s => { sites[s.k] = parseNum(fd.get('sf_' + s.k)); });
+    bf = computeBF(sites, c.sex, ageAt(c.birthDate, date));
+    if (!bf.n) bf = null;
+  }
+  const hasPhoto = UI.cd.photos.some(Boolean);
+  if (!MEASURES.some(x => m[x.k] != null) && !bf && !hasPhoto && !String(fd.get('note') || '').trim()) return toast('Bitte mindestens einen Wert, ein Foto oder eine Notiz eintragen.');
+  let ch = f.dataset.id ? S.checks.get(f.dataset.id) : null;
+  if (!ch) ch = { id: uid(), clientId: c.id, createdAt: Date.now() };
+  const ids = [];
+  for (let i = 0; i < 5; i++) {
+    const s = UI.cd.photos[i];
+    if (!s) { ids.push(null); continue; }
+    if (s.data) { const id = uid(); await putPhoto({ id, clientId: c.id, checkId: ch.id, pos: i, label: PHOTO_POS[i], date, note: '', data: s.data, thumb: s.thumb, w: s.w, h: s.h, createdAt: Date.now() }); ids.push(id); }
+    else { ids.push(s.id); if (ch.date && ch.date !== date) { const r = await getPhoto(s.id); if (r) { r.date = date; putPhoto(r); } } }
+  }
+  for (const id of UI.cd.removed) await delPhoto(id);
+  Object.assign(ch, { date, m, bf, photos: ids, note: String(fd.get('note') || '').trim() });
+  put('checks', ch); UI.cd = null;
+  if (!c.startDate) { c.startDate = checksOf(c.id)[0].date; put('clients', c); }
+  toast('Fortschrittscheck gespeichert ✓'); go('/check/' + ch.id);
+}
+
+/* ---------- 360°-Ansicht & Vorher/Nachher ---------- */
+const P3 = { p: 0, ids: [], mode: 'side', cmpMode: 'side', show: 1, slider: 50, raf: 0, vel: 0, drag: null, play: false, last: 0 };
+async function open360(ids) {
+  ids = ids.filter(Boolean); const chs = ids.map(id => S.checks.get(id)).filter(Boolean);
+  if (!chs.length) return;
+  const bad = chs.find(x => !isComplete(x)); if (bad) return toast(missingText(5 - photoCount(bad)) + ' – 360° erst mit allen 5 Bildern');
+  close360();
+  Object.assign(P3, { p: 0, ids: chs.map(x => x.id), vel: 0, play: false, show: 1, slider: 50, mode: chs.length > 1 ? P3.cmpMode : 'single' });
+  const c = S.clients.get(chs[0].clientId), cl = checksOf(chs[0].clientId), complete = cl.filter(isComplete);
+  const cmp = chs.length > 1;
+  const sel = (k) => `<select class="input p3sel" data-p3sel="${k}">${complete.map(x => `<option value="${x.id}" ${x.id === chs[k].id ? 'selected' : ''}>${esc(checkLabel(x, cl))} · ${fmtDate(x.date)}</option>`).join('')}</select>`;
+  const el = document.createElement('div'); el.className = 'p360'; el.id = 'p360';
+  el.innerHTML = `<div class="v3d-top"><div class="grow" style="min-width:0"><div class="v3d-title">${cmp ? '360° Vorher / Nachher' : '360° Fortschrittsansicht'}</div><div class="v3d-sub">${esc(c ? c.name : '')}${cmp ? '' : ' · ' + esc(checkLabel(chs[0], cl)) + ' · ' + fmtDate(chs[0].date)}</div></div>
+      <button class="icon-btn" data-action="p360-close" aria-label="Schließen">${ic('x', 24)}</button></div>
+    ${cmp ? `<div class="p3-ctl"><div class="seg">${[['side', 'Nebeneinander'], ['toggle', 'Vorher | Nachher'], ['slider', 'Slider']].map(([k, l]) => `<button class="${P3.mode === k ? 'on' : ''}" data-action="p3-mode" data-v="${k}">${l}</button>`).join('')}</div>
+      <div class="p3-sels">${sel(0)}<span class="muted">vs.</span>${sel(1)}</div></div>` : ''}
+    <div class="p3-stage mode-${P3.mode}" id="p3-stage">
+      ${chs.map((x, k) => `<div class="p3-set" data-set="${k}">${[0, 1, 2, 3, 4].map(i => `<img alt="" draggable="false" data-i="${i}">`).join('')}<div class="p3-cap">${cmp ? (k ? 'NACHHER' : 'VORHER') + ' · ' : ''}${fmtDate(x.date)}</div></div>`).join('')}
+      ${cmp ? '<div class="p3-handle" id="p3-handle"><span>⟷</span></div>' : ''}
+      <div class="p3-load" id="p3-load">Bilder werden geladen …</div>
+    </div>
+    <div class="v3d-bar">
+      ${cmp ? `<div class="seg p3-toggle ${P3.mode === 'toggle' ? '' : 'hidden'}" id="p3-toggle"><button data-action="p3-show" data-v="0">VORHER</button><button class="on" data-action="p3-show" data-v="1">NACHHER</button></div>` : ''}
+      <div class="p3-posrow">${ROT_NAMES.map((n, i) => `<button class="btn btn-sm btn-ghost p3-pos ${i ? '' : 'on'}" data-action="p3-goto" data-v="${i}">${n}</button>`).join('')}
+        <button class="btn btn-sm btn-ghost" data-action="p3-play" id="p3-play">${ic('play', 14)} Drehen</button></div>
+      <div class="muted" style="text-align:center;font-size:12px">Nach links / rechts wischen, um die Person zu drehen</div>
+    </div>`;
+  document.body.appendChild(el); document.body.classList.add('modal-open');
+  await p3Load();
+  const stage = el.querySelector('#p3-stage');
+  stage.addEventListener('pointerdown', p3Down); stage.addEventListener('pointermove', p3Move);
+  stage.addEventListener('pointerup', p3Up); stage.addEventListener('pointercancel', p3Up);
+  p3Apply();
+}
+async function p3Load() {
+  const el = document.getElementById('p360'); if (!el) return;
+  await Promise.all(P3.ids.map(async (cid, k) => {
+    const ids = photoIds(S.checks.get(cid)), imgs = el.querySelectorAll(`.p3-set[data-set="${k}"] img`);
+    await Promise.all(ids.map(async (id, i) => { const r = await getPhoto(id); if (r) imgs[i].src = r.data; }));
+    await Promise.all([...imgs].map(im => im.decode ? im.decode().catch(() => {}) : null));
+  }));
+  const l = document.getElementById('p3-load'); if (l) l.remove();
+}
+function p3Apply() {
+  const el = document.getElementById('p360'); if (!el) return;
+  const p = ((P3.p % 4) + 4) % 4, i0 = Math.floor(p), f = p - i0;
+  el.querySelectorAll('.p3-set').forEach(set => set.querySelectorAll('img').forEach((im, i) => {
+    let o = 0, tx = 0, z = 0;
+    if (i === i0) { o = 1; tx = -f * 5; z = 1; } else if (i === i0 + 1) { o = f; tx = (1 - f) * 5; z = 2; }
+    im.style.opacity = o; im.style.zIndex = z; im.style.transform = `translate3d(${tx}%,0,0) scale(${1 - Math.abs(f - (i === i0 ? 0 : 1)) * 0.03})`;
+  }));
+  const near = Math.round(p) % 4;
+  el.querySelectorAll('.p3-pos').forEach(b => b.classList.toggle('on', +b.dataset.v === near));
+  const st = el.querySelector('#p3-stage');
+  if (P3.mode === 'toggle') el.querySelectorAll('.p3-set').forEach(s => s.style.opacity = +s.dataset.set === P3.show ? 1 : 0);
+  else el.querySelectorAll('.p3-set').forEach(s => s.style.opacity = '');
+  const s1 = el.querySelector('.p3-set[data-set="1"]'), h = el.querySelector('#p3-handle');
+  if (s1) s1.style.clipPath = P3.mode === 'slider' ? `inset(0 0 0 ${P3.slider}%)` : '';
+  if (h) h.style.left = P3.slider + '%';
+  st.className = 'p3-stage mode-' + P3.mode;
+}
+function p3Stop() { cancelAnimationFrame(P3.raf); P3.raf = 0; }
+function p3Down(e) {
+  const st = e.currentTarget; st.setPointerCapture(e.pointerId); p3Stop(); P3.play = false; p3PlayBtn();
+  const slider = P3.mode === 'slider' && e.target.closest('#p3-handle');
+  P3.drag = { x: e.clientX, p: P3.p, slider, w: st.clientWidth, left: st.getBoundingClientRect().left, lx: e.clientX, lt: performance.now() };
+  P3.vel = 0;
+}
+function p3Move(e) {
+  const d = P3.drag; if (!d) return;
+  if (d.slider) { P3.slider = Math.max(0, Math.min(100, (e.clientX - d.left) / d.w * 100)); return p3Apply(); }
+  const now = performance.now(), per = (P3.mode === 'side' ? d.w / 2 : d.w) * 0.55;
+  P3.p = d.p - (e.clientX - d.x) / per;
+  const dt = now - d.lt; if (dt > 0) P3.vel = Math.max(-0.003, Math.min(0.003, 0.8 * (-(e.clientX - d.lx) / per / dt) + 0.2 * P3.vel));
+  d.lx = e.clientX; d.lt = now; p3Apply();
+}
+function p3Up() {
+  const d = P3.drag; P3.drag = null; if (!d || d.slider) return;
+  let last = performance.now();
+  const step = t => {
+    const dt = Math.min(40, t - last); last = t;
+    if (Math.abs(P3.vel) > 0.0004) { P3.p += P3.vel * dt; P3.vel *= Math.pow(0.9, dt / 16); p3Apply(); P3.raf = requestAnimationFrame(step); }
+    else p3To(Math.round(P3.p));
+  };
+  P3.raf = requestAnimationFrame(step);
+}
+function p3To(target) {
+  p3Stop(); const from = P3.p, t0 = performance.now(), dur = 380;
+  const step = t => { const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3); P3.p = from + (target - from) * e; p3Apply(); if (k < 1) P3.raf = requestAnimationFrame(step); };
+  P3.raf = requestAnimationFrame(step);
+}
+function p3PlayBtn() { const b = document.getElementById('p3-play'); if (b) b.innerHTML = P3.play ? `${ic('pause', 14)} Stopp` : `${ic('play', 14)} Drehen`; }
+function p3Play() {
+  P3.play = !P3.play; p3PlayBtn(); p3Stop(); if (!P3.play) return p3To(Math.round(P3.p));
+  let last = performance.now();
+  const step = t => { if (!P3.play) return; P3.p += (t - last) * 0.0007; last = t; p3Apply(); P3.raf = requestAnimationFrame(step); };
+  P3.raf = requestAnimationFrame(step);
+}
+function close360() {
+  p3Stop(); P3.play = false; P3.drag = null;
+  const el = document.getElementById('p360'); if (el) { el.remove(); if (!document.getElementById('modal-root').innerHTML) document.body.classList.remove('modal-open'); }
+  const pv = document.getElementById('pview'); if (pv) { pv.remove(); document.body.classList.remove('modal-open'); }
+}
+async function openPhotoView(pid, label) {
+  const r = await getPhoto(pid); if (!r) return;
+  const el = document.createElement('div'); el.className = 'p360 pview'; el.id = 'pview';
+  el.innerHTML = `<div class="v3d-top"><div class="grow"><div class="v3d-title">${esc(label || r.label)}</div><div class="v3d-sub">${fmtDate(r.date)}</div></div><button class="icon-btn" data-action="p360-close" aria-label="Schließen">${ic('x', 24)}</button></div>
+    <div class="p3-stage"><img alt="" style="opacity:1"></div>`;
+  el.querySelector('.p3-stage img').src = r.data;
+  document.body.appendChild(el); document.body.classList.add('modal-open');
+}
+
+/* ---------- Kundenmodus: Dashboard & Plan-Ansicht ---------- */
+function viewClientHome() {
+  const cid = roleInfo().clientId, c = S.clients.get(cid);
+  if (!c) return `<main class="wrap view"><div class="card empty">Keine Daten gefunden. <a href="#/kunde-setup">Zugang neu einrichten</a></div></main>`;
+  const done = sessionsOf(cid, true), last = done[0], next = nextDay(cid), active = activeSession(cid), days = clientDays(cid);
+  const cl = checksOf(cid), first = (c.name || '').trim().split(/\s+/)[0];
+  const tile = k => { const d = MEASURES.find(m => m.k === k), fl = firstLast(cl, k); if (!fl) return '';
+    return `<a class="stat" href="#/client/${cid}/body"><div class="stat-l">${d.s}</div><div class="stat-v">${fmtNum(fl.cur)} <small style="font-size:14px">${d.u}</small></div><div class="stat-s">${fl.n > 1 ? `${sgn(fl.d)} ${d.u} seit Start` : 'Startwert'}</div></a>`; };
+  const complete = cl.filter(isComplete);
+  return topbar({ title: 'SWEAT4', sub: 'Mein Training', right: `<a class="icon-btn" href="#/uebungen" aria-label="Übungen">${ic('book', 22)}</a><a class="icon-btn" href="#/data" aria-label="Einstellungen">${ic('db', 22)}</a>` }) +
+  `<main class="wrap view">
+    <div class="hero">${avatar(c, 'xl')}<div class="grow"><h1>Willkommen zurück, ${esc(first)} 👋</h1>${c.goals ? `<div class="muted" style="margin-top:4px">🎯 ${esc(c.goals)}</div>` : ''}</div></div>
+    <div class="section-h" style="margin-top:6px"><h2>Dein Fortschritt</h2></div>
+    <div class="stats">${tile('weight')}${tile('waist')}${tile('chest')}
+      <a class="stat" href="#/client/${cid}/history"><div class="stat-l">Training</div><div class="stat-v">${done.length}</div><div class="stat-s">Workouts absolviert</div></a></div>
+
+    <section class="section"><div class="section-h"><h2>Dein Training</h2></div>
+      ${active ? `<a class="btn btn-primary btn-big" href="#/train/${active.id}">${ic('play', 22)} Workout fortsetzen</a>`
+        : next ? `<button class="btn btn-primary btn-big" data-action="start-day" data-cid="${cid}" data-did="${next.id}">${ic('play', 22)} Nächstes Workout: ${esc(dayLabel(days.indexOf(next), next.name))}</button>` : '<div class="card empty">Dein Trainer hat noch keinen Trainingsplan hinterlegt.</div>'}
+      <div class="card list-card" style="margin-top:12px">
+        <a class="list-link" href="#/client/${cid}/planview">${ic('list')}<div class="grow"><b>Aktueller Trainingsplan</b><div class="muted" style="font-size:13px">${days.length} ${days.length === 1 ? 'Trainingstag' : 'Trainingstage'}</div></div></a>
+        ${last ? `<a class="list-link" href="#/session/${last.id}">${ic('check')}<div class="grow"><b>Letztes Workout</b><div class="muted" style="font-size:13px">${fmtDate(last.date)} · ${esc(sessLabel(last))}</div></div></a>` : ''}
+        <a class="list-link" href="#/client/${cid}/history">${ic('history')}<div class="grow"><b>Trainingshistorie</b><div class="muted" style="font-size:13px">${done.length} Workouts</div></div></a>
+        <a class="list-link" href="#/client/${cid}/progress">${ic('chart')}<div class="grow"><b>Kraft-Fortschritt</b><div class="muted" style="font-size:13px">Gewichte &amp; Volumen je Übung</div></div></a>
+      </div>
+      ${days.length > 1 ? `<div class="day-grid" style="margin-top:12px">${days.map((d, i) => `<button class="day-btn ${next && next.id === d.id ? 'next' : ''}" data-action="start-day" data-cid="${cid}" data-did="${d.id}"><span class="day-no">${i + 1}</span><span class="grow"><span class="day-name">${esc(d.name)}</span><br><span class="muted" style="font-size:14px">${exercisesOf(d.id).length} Übungen</span></span><span class="muted">${ic('play', 16)}</span></button>`).join('')}</div>` : ''}
+    </section>
+
+    <section class="section"><div class="section-h"><h2>Deine Entwicklung</h2></div>
+      <div class="card list-card">
+        <a class="list-link" href="#/client/${cid}/body">${ic('chart')}<div class="grow"><b>Körpermessungen &amp; Gewicht</b><div class="muted" style="font-size:13px">${cl.length ? `${cl.length} Messungen · zuletzt ${fmtDate(cl[cl.length - 1].date)}` : 'noch keine Messung'}</div></div></a>
+        ${complete.length ? `<button class="list-link" data-action="p360-open" data-ids="${complete[complete.length - 1].id}">${ic('reset')}<div class="grow" style="text-align:left"><b>360° Ansicht</b><div class="muted" style="font-size:13px">Fortschrittsbilder vom ${fmtDate(complete[complete.length - 1].date)}</div></div></button>` : ''}
+        ${complete.length > 1 ? `<button class="list-link" data-action="p360-open" data-ids="${complete[0].id},${complete[complete.length - 1].id}">${ic('cube')}<div class="grow" style="text-align:left"><b>Vorher / Nachher</b><div class="muted" style="font-size:13px">Start vs. aktuell – rundherum</div></div></button>` : ''}
+        ${cl.some(x => x.bf && x.bf.pct != null) ? `<a class="list-link" href="#/client/${cid}/body">${ic('dumbbell')}<div class="grow"><b>Körperfett</b><div class="muted" style="font-size:13px">7-Punkt-Messung</div></div></a>` : ''}
+      </div>
+      ${complete.length ? `<div class="ba-row" style="margin-top:12px"><div class="ba"><img data-pid="${photoIds(complete[0])[0]}" alt=""><span>Start · ${fmtDate(complete[0].date)}</span></div>${complete.length > 1 ? `<div class="ba"><img data-pid="${photoIds(complete[complete.length - 1])[0]}" alt=""><span>Aktuell · ${fmtDate(complete[complete.length - 1].date)}</span></div>` : ''}</div>` : ''}
+    </section>
+    <a class="privacy-pill" href="#/data">${ic('lock', 16)} Nur deine Daten · verschlüsselt übertragen</a>
+  </main>`;
+}
+function viewPlanRO(c) {
+  const days = clientDays(c.id), plan = planOf(c.id);
+  return topbar({ back: '/', title: 'Trainingsplan', sub: esc(plan ? plan.name : '') }) + `<main class="wrap view"><div class="stack">${days.map((d, i) => `<div class="card day-card">
+    <div class="day-head"><span class="day-no">${i + 1}</span><b class="grow" style="font-size:17px">${esc(d.name)}</b></div>
+    ${exercisesOf(d.id).map((e, j) => `<div class="ex-row"><span class="ex-idx">${j + 1}.</span><div class="grow"><div style="font-weight:600">${esc(e.name)}${(k3 => k3 ? ` <button class="chip3d" data-action="open3d" data-id="${k3.id}">${ic('cube', 13)} 3D</button>` : '')(katFind(e.name, e.catalogId))}</div>
+      <div class="ex-meta">${e.targetSets || CONFIG.DEFAULT_SETS} Sätze${(e.sets || []).some(s => hasVal(s.weight) || hasVal(s.reps)) ? ' · ' + e.sets.map(fmtSet).join(', ') : ''}${e.note ? ' · 📝 ' + esc(e.note) : ''}</div></div></div>`).join('') || '<div class="ex-row muted">Keine Übungen.</div>'}
+    <div class="day-foot"><button class="btn btn-primary btn-block" data-action="start-day" data-cid="${c.id}" data-did="${d.id}">${ic('play')} Dieses Workout starten</button></div></div>`).join('') || '<div class="card empty">Noch kein Plan vorhanden.</div>'}</div></main>`;
+}
+
+/* ---------- Einstellungen (Datenseite) ---------- */
+function dataExtraTrainer() {
+  const lock = S.meta.get('lock');
+  return `<section class="section">
+      <div class="section-h"><h2>Kunden-Rückmeldungen</h2></div>
+      <div class="card stack"><button class="btn btn-ghost btn-block" data-action="ret-import">${ic('download')} Trainings eines Kunden importieren</button>
+        <div class="muted" style="font-size:13px">Kunden, die selbstständig trainieren, schicken dir ihre Trainings als verschlüsselte Datei. Sie wird hier eingelesen und dem richtigen Kunden zugeordnet – andere Daten bleiben unverändert.</div></div>
+    </section>
+    <section class="section">
+      <div class="section-h"><h2>App-Sperre (Trainer-Login)</h2></div>
+      <div class="card stack"><div class="muted" style="font-size:14px">${lock ? '🔒 Die App ist mit einem Code geschützt. Er wird beim Öffnen und nach 5 Minuten im Hintergrund abgefragt.' : 'Schütze die App mit einem Code, damit niemand ohne dich an Kundendaten kommt.'}</div>
+        <button class="btn btn-ghost btn-block" data-action="lock-set">${ic('lock')} ${lock ? 'Code ändern' : 'Code festlegen'}</button>
+        ${lock ? `<button class="btn btn-text btn-block" data-action="lock-off">Sperre entfernen</button>` : ''}</div>
+    </section>
+    ${S.clients.size ? '' : `<section class="section"><div class="section-h"><h2>Ich bin Kunde</h2></div><div class="card stack"><div class="muted" style="font-size:14px">Du hast von deinem Trainer eine Zugangsdatei bekommen? Dann richte hier deinen Kunden-Zugang ein.</div><a class="btn btn-primary btn-block" href="#/kunde-setup">Kunden-Zugang einrichten</a></div></section>`}
+    <input type="file" id="ret-file" accept=".json,application/json" hidden>`;
+}
+function viewDataClient() {
+  const c = S.clients.get(roleInfo().clientId), info = S.meta.get('pkgInfo');
+  return topbar({ back: '/', title: 'Einstellungen', sub: 'Kundenmodus' }) + `<main class="wrap view">
+    <div class="card" style="border-color:rgba(190,155,92,.45)"><div class="row" style="margin-bottom:10px"><span class="accent">${ic('lock', 22)}</span><h2 style="font-size:19px">Deine Daten</h2></div>
+      <div class="stack" style="font-size:15px"><div>👤 Angemeldet als <b>${esc(c ? c.name : '')}</b>. Auf diesem Gerät befinden sich ausschließlich deine eigenen Daten.</div>
+      <div>🔒 Die App ist mit deinem Zugangscode geschützt. Daten werden nur verschlüsselt zwischen dir und deinem Trainer ausgetauscht – ohne Cloud.</div>
+      ${info ? `<div class="muted" style="font-size:13px">Stand vom Trainer: ${esc(new Date(info.exportedAt).toLocaleString('de-DE'))}</div>` : ''}</div></div>
+    <section class="section"><div class="section-h"><h2>Mit deinem Trainer austauschen</h2></div>
+      <div class="card stack">
+        <button class="btn btn-primary btn-block" data-action="ret-make">${ic('upload')} Meine Trainings an Trainer senden</button>
+        <a class="btn btn-ghost btn-block" href="#/kunde-setup">${ic('download')} Update vom Trainer laden</a>
+        <div class="muted" style="font-size:13px">Neue Pläne, Messungen und Fortschrittsbilder bekommst du von deinem Trainer als Datei. Deine eigenen Trainings bleiben beim Update erhalten.</div>
+      </div></section>
+    <section class="section"><div class="section-h"><h2>Gerät</h2></div>
+      <div class="card stack"><button class="btn btn-ghost btn-block" data-action="lock-now">${ic('lock')} Jetzt sperren</button>
+        <button class="btn btn-danger-ghost btn-block" data-action="client-reset">${ic('trash')} Kundenmodus beenden &amp; Daten löschen</button></div></section>
+  </main>`;
+}
+function viewSetup() {
+  const cm = isClientMode();
+  return topbar({ back: cm ? '/data' : '/', title: cm ? 'Update laden' : 'Kunden-Zugang einrichten', sub: 'Datei von deinem Trainer' }) + `<main class="wrap view">
+    <form data-form="setup" class="card stack">
+      <div class="muted" style="font-size:14px">${cm ? 'Wähle die neue Datei deines Trainers und gib deinen Zugangscode ein.' : '1. Wähle die Datei, die du von deinem Trainer bekommen hast (z. B. per AirDrop, WhatsApp oder E-Mail – vorher in „Dateien“ sichern).<br>2. Gib den Zugangscode ein, den dir dein Trainer gesagt hat.'}</div>
+      <label class="btn btn-ghost btn-block" id="setup-pick">${ic('upload')} <span>Datei auswählen</span><input type="file" name="file" accept=".json,application/json" hidden></label>
+      <label class="field" style="margin:0"><span>Zugangscode</span><input name="code" type="password" class="input" autocomplete="current-password" required minlength="6"></label>
+      <button class="btn btn-primary btn-big">${cm ? 'Update laden' : 'Zugang einrichten'}</button>
+      <div class="muted" style="font-size:12px">Deine Daten bleiben ausschließlich auf diesem Gerät. Es werden keine Daten ins Internet übertragen.</div>
+    </form></main>`;
+}
+function viewLock() {
+  const cm = isClientMode();
+  return `<main class="wrap view lockv"><div class="home-logo">${LOGO_FULL}</div>
+    <form data-form="unlock" class="card stack"><div class="row"><span class="accent">${ic('lock', 22)}</span><h2 style="font-size:19px">${cm ? 'Dein Zugang' : 'App gesperrt'}</h2></div>
+      <input name="code" type="password" class="input" placeholder="Zugangscode" autocomplete="current-password" autofocus>
+      <button class="btn btn-primary btn-big">Entsperren</button><div id="lock-err" class="down" style="font-size:14px"></div></form>
+    <button class="btn btn-text btn-block" style="margin-top:10px" data-action="lock-forgot">Code vergessen?</button></main>`;
+}
+
+/* ---------- Kundendatei (Trainer → Kunde) & Rückmeldung (Kunde → Trainer) ---------- */
+async function clientPackage(cid) {
+  flushSave();
+  const c = S.clients.get(cid), plans = all('plans').filter(p => p.clientId === cid), pids = new Set(plans.map(p => p.id));
+  const days = all('days').filter(d => pids.has(d.planId)), dids = new Set(days.map(d => d.id));
+  const cc = { ...c, notes: '' }; delete cc.access;
+  const photos = (await DB.photosOfClient(cid)).filter(p => p.clientId === cid);
+  return { clientId: cid, clientName: c.name, exportedAt: new Date().toISOString(),
+    data: { clients: [cc], plans, days, exercises: all('exercises').filter(e => dids.has(e.dayId)), sessions: all('sessions').filter(s => s.clientId === cid), checks: all('checks').filter(x => x.clientId === cid) }, photos };
+}
+/* Datenebene: prüft, dass ein Paket ausschließlich Daten EINES Kunden enthält */
+function packageIsolated(pkg) {
+  const cid = pkg.clientId, d = pkg.data, pids = new Set(d.plans.map(p => p.id)), dids = new Set(d.days.map(x => x.id));
+  return d.clients.length === 1 && d.clients[0].id === cid && d.plans.every(p => p.clientId === cid) && d.days.every(x => pids.has(x.planId))
+    && d.exercises.every(e => dids.has(e.dayId)) && d.sessions.every(s => s.clientId === cid) && d.checks.every(x => x.clientId === cid)
+    && pkg.photos.every(p => p.clientId === cid && d.checks.some(x => x.id === p.checkId));
+}
+function fileReady(name, text, info) {
+  UI.readyFile = { name, text };
+  modal('Datei ist bereit', `<p class="muted" style="margin-top:0">${info}</p>
+    <div class="stack"><button class="btn btn-primary btn-big" data-action="file-share">${ic('upload', 22)} Teilen (AirDrop, WhatsApp, Mail …)</button>
+    <button class="btn btn-ghost btn-block" data-action="file-dl">${ic('download')} Herunterladen / in „Dateien“ sichern</button></div>`);
+}
+async function makePackage(cid, code) {
+  const c = S.clients.get(cid), pkg = await clientPackage(cid);
+  if (!packageIsolated(pkg)) throw new Error('Sicherheitsprüfung fehlgeschlagen – Datei wurde nicht erstellt.');
+  const text = await encryptPayload(pkg, code, { kind: 'client-package', v: 1, clientId: cid });
+  c.access = { code, lastExport: Date.now() }; put('clients', c);
+  return { name: `sweat4-zugang_${(c.name || 'kunde').replace(/[^\wäöüÄÖÜß-]+/g, '_')}_${today()}.json`, text, n: pkg.photos.length };
+}
+async function setupFromFile(file, code) {
+  const h = await readHeader(file);
+  if (h.kind !== 'client-package') throw new Error(h.kind === 'client-return' ? 'Das ist eine Rückmelde-Datei für den Trainer.' : 'Unbekannter Dateityp.');
+  const role = roleInfo();
+  if (role.value === 'client' && role.clientId !== h.clientId) throw new Error('Diese Datei gehört zu einem anderen Kunden.');
+  if (role.value !== 'client' && S.clients.size) throw new Error('Auf diesem Gerät sind Trainerdaten gespeichert. Der Kunden-Zugang kann nur auf einem eigenen Gerät (ohne Trainerdaten) eingerichtet werden.');
+  const pkg = await decryptPayload(h, code);
+  if (pkg.clientId !== h.clientId || !packageIsolated(pkg)) throw new Error('Die Datei ist ungültig.');
+  const map = new Map(pkg.data.sessions.map(s => [s.id, s]));
+  if (role.value === 'client') for (const s of all('sessions')) { const o = map.get(s.id); if (s.clientId === pkg.clientId && (!o || (s.updatedAt || 0) > (o.updatedAt || 0))) map.set(s.id, s); }
+  const lock = await makeLock(code);
+  const meta = [{ id: 'role', value: 'client', clientId: pkg.clientId, since: Date.now() }, lock, { id: 'pkgInfo', exportedAt: pkg.exportedAt }];
+  await DB.replaceAll({ ...pkg.data, sessions: [...map.values()], meta, photos: pkg.photos });
+  PH.clear(); await loadAll(); LOCK.init = true; LOCK.locked = false; UI.open = {};
+}
+async function makeReturn(code) {
+  if (!(await verifyLock(code))) throw new Error('Falscher Zugangscode.');
+  flushSave();
+  const cid = roleInfo().clientId, c = S.clients.get(cid);
+  const sessions = all('sessions').filter(s => s.clientId === cid && s.status === 'done');
+  const text = await encryptPayload({ clientId: cid, sessions, exportedAt: new Date().toISOString() }, code, { kind: 'client-return', v: 1, clientId: cid });
+  return { name: `sweat4-trainings_${(c.name || 'kunde').replace(/[^\wäöüÄÖÜß-]+/g, '_')}_${today()}.json`, text, n: sessions.length };
+}
+async function importReturn(file, codeIn) {
+  const h = await readHeader(file);
+  if (h.kind !== 'client-return') throw new Error(h.kind === 'client-package' ? 'Das ist eine Zugangsdatei für Kunden, keine Rückmeldung.' : 'Unbekannter Dateityp.');
+  const c = S.clients.get(h.clientId); if (!c) throw new Error('Dieser Kunde existiert auf diesem Gerät nicht.');
+  const code = codeIn || (c.access && c.access.code); if (!code) throw new Error('Kein Zugangscode für diesen Kunden hinterlegt.');
+  const p = await decryptPayload(h, code);
+  if (p.clientId !== c.id || !Array.isArray(p.sessions)) throw new Error('Die Datei ist ungültig.');
+  let neu = 0, upd = 0, rej = 0;
+  for (const s of p.sessions) {
+    if (!s || s.clientId !== c.id || !Array.isArray(s.exercises) || !s.id) { rej++; continue; } // Datenebene: fremde Datensätze werden abgewiesen
+    const ex = S.sessions.get(s.id);
+    if (ex && ex.clientId !== c.id) { rej++; continue; }
+    if (!ex) { put('sessions', s); neu++; } else if ((s.updatedAt || 0) > (ex.updatedAt || 0)) { put('sessions', s); upd++; }
+  }
+  return { c, neu, upd, rej };
+}
+
+/* ---------- Demo: Körperdaten & generierte Beispielbilder ---------- */
+function demoPhoto(pos, slim) {
+  const cv = document.createElement('canvas'); cv.width = 600; cv.height = 800; const g = cv.getContext('2d');
+  const bg = g.createLinearGradient(0, 0, 0, 800); bg.addColorStop(0, '#2a2622'); bg.addColorStop(1, '#141414'); g.fillStyle = bg; g.fillRect(0, 0, 600, 800);
+  const side = pos === 1 || pos === 3, k = 1 - slim * 0.12, cx = 300;
+  g.fillStyle = '#c9b08a'; g.strokeStyle = '#8f7650'; g.lineWidth = 3;
+  const ell = (x, y, rx, ry) => { g.beginPath(); g.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2); g.fill(); g.stroke(); };
+  ell(cx, 130, 42, 50);
+  if (side) { ell(cx + 6, 300, 70 * k + 8, 120); ell(cx, 300, 26, 110); ell(cx - 4, 560, 50, 170); ell(pos === 1 ? cx + 30 : cx - 30, 120, 10, 12); }
+  else { ell(cx, 290, 120 - slim * 6, 120); ell(cx, 410, 105 * k, 60); ell(cx - 150, 320, 26, 120); ell(cx + 150, 320, 26, 120); ell(cx - 50, 590, 42, 160); ell(cx + 50, 590, 42, 160); }
+  if (pos === 2) { g.fillStyle = '#7d6748'; g.fillRect(cx - 4, 190, 8, 220); }
+  if (pos === 0 || pos === 4) { g.fillStyle = '#3b3128'; ell(cx - 15, 125, 5, 5); ell(cx + 15, 125, 5, 5); }
+  g.fillStyle = '#be9b5c'; g.font = 'bold 34px sans-serif'; g.textAlign = 'center'; g.fillText('DEMO · ' + PHOTO_POS[pos].toUpperCase(), cx, 770);
+  const sm = document.createElement('canvas'); sm.width = 270; sm.height = 360; sm.getContext('2d').drawImage(cv, 0, 0, 270, 360);
+  return { data: cv.toDataURL('image/jpeg', 0.8), thumb: sm.toDataURL('image/jpeg', 0.75), w: 600, h: 800 };
+}
+async function demoBody() {
+  const max = all('clients').filter(c => c.name === 'Max Mustermann').sort((a, b) => b.createdAt - a.createdAt)[0];
+  if (!max) return;
+  Object.assign(max, { sex: 'm', birthDate: '1990-05-14', startDate: isoOf(new Date(Date.now() - 62 * 864e5)), email: 'max@example.com', status: 'active', checkEvery: 28 }); put('clients', max);
+  const vals = [[82.4, 102, 38, 61, 89, [18, 24, 20, 12, 17, 19, 15]], [81.2, 103, 39, 62, 86, [16, 21, 19, 11, 16, 17, 14]], [80.5, 104, 40, 63, 84, [15, 19, 18, 10.5, 15, 15, 13]]];
+  for (let j = 0; j < 3; j++) {
+    const date = isoOf(new Date(Date.now() - (62 - j * 31) * 864e5)), v = vals[j], id = uid();
+    const sites = {}; SKINFOLDS.forEach((s, i) => { sites[s.k] = v[5][i]; });
+    const photos = [];
+    for (let i = 0; i < 5; i++) { if (j === 1 && i === 4) { photos.push(null); continue; } const p = demoPhoto(i, j), pid = uid(); await putPhoto({ id: pid, clientId: max.id, checkId: id, pos: i, label: PHOTO_POS[i], date, note: '', ...p, createdAt: Date.now() }); photos.push(pid); }
+    put('checks', { id, clientId: max.id, date, createdAt: Date.now() - (62 - j * 31) * 864e5, note: j === 2 ? 'Bauch deutlich flacher, Schultern breiter.' : '', photos,
+      m: { weight: v[0], chest: v[1], arm: v[2], leg: v[3], waist: v[4] }, bf: computeBF(sites, 'm', ageAt(max.birthDate, date)) });
+  }
+  render();
+}
+
+/* ---------- Router-Erweiterung ---------- */
+function routeGuard(p) {
+  if (!isClientMode()) return null;
+  const cid = roleInfo().clientId;
+  if (p[0] === 'client') { if (p[1] !== cid || !p[2] || p[2] === 'check') return '/'; if (p[2] === 'plan') return `/client/${cid}/planview`; }
+  if ((p[0] === 'train' || p[0] === 'session') && S.sessions.get(p[1]) && S.sessions.get(p[1]).clientId !== cid) return '/';
+  if (p[0] === 'check' && (!S.checks.get(p[1]) || S.checks.get(p[1]).clientId !== cid || p[2] === 'edit')) return '/';
+  return null;
+}
+function routeExtra(p) {
+  if (!p.length && isClientMode()) return viewClientHome();
+  if (p[0] === 'client' && p[2]) {
+    const c = S.clients.get(p[1]); if (!c) return undefined;
+    if (p[2] === 'body') return viewBody(c);
+    if (p[2] === 'check') return viewCheckForm(c, null);
+    if (p[2] === 'planview') return viewPlanRO(c);
+  }
+  if (p[0] === 'check') { const ch = S.checks.get(p[1]); if (!ch) return null; const c = S.clients.get(ch.clientId); if (!c) return null; return p[2] === 'edit' ? viewCheckForm(c, ch) : viewCheck(ch); }
+  if (p[0] === 'kunde-setup') return viewSetup();
+  if (p[0] === 'data' && isClientMode()) return viewDataClient();
+  return undefined;
+}
+function lockGate() {
+  if (!LOCK.init) { LOCK.init = true; LOCK.locked = !!S.meta.get('lock'); }
+  if (!LOCK.locked) return false;
+  close360(); document.getElementById('app').innerHTML = viewLock(); UI.lastRoute = '#lock';
+  setTimeout(() => { const i = document.querySelector('[data-form=unlock] input'); if (i) i.focus(); }, 50);
+  return true;
+}
+
+/* ---------- Aktionen ---------- */
+const TRAINER_ONLY = new Set(['new-client', 'edit-client', 'del-client', 'photo-remove', 'add-day', 'del-day', 'day-move', 'add-ex', 'edit-ex', 'del-ex', 'ex-move', 'demo', 'wipe', 'backup', 'import', 'check-del', 'pkg-make', 'ret-import', 'lock-set', 'lock-off', 'pslot-rm']);
+document.addEventListener('click', ev => {
+  const el = ev.target.closest('[data-action]');
+  if (el && isClientMode() && TRAINER_ONLY.has(el.dataset.action)) { ev.preventDefault(); ev.stopImmediatePropagation(); toast('Nur für den Trainer verfügbar'); }
+}, true);
+Object.assign(A, {
+  'body-metric': el => { UI.bodyMetric = el.dataset.v; render(); },
+  'body-range': el => { UI.bodyRange = el.dataset.v; render(); },
+  'p360-open': el => open360(String(el.dataset.ids || '').split(',')),
+  'p360-close': () => close360(),
+  'p3-mode': el => { P3.mode = P3.cmpMode = el.dataset.v; document.querySelectorAll('[data-action=p3-mode]').forEach(b => b.classList.toggle('on', b === el)); const t = document.getElementById('p3-toggle'); if (t) t.classList.toggle('hidden', P3.mode !== 'toggle'); p3Apply(); },
+  'p3-show': el => { P3.show = +el.dataset.v; document.querySelectorAll('[data-action=p3-show]').forEach(b => b.classList.toggle('on', b === el)); p3Apply(); },
+  'p3-goto': el => { P3.play = false; p3PlayBtn(); const cur = ((P3.p % 4) + 4) % 4, base = P3.p - cur; let t = base + +el.dataset.v; if (t - P3.p > 2) t -= 4; if (P3.p - t > 2) t += 4; p3To(t); },
+  'p3-play': () => p3Play(),
+  'photo-view': el => openPhotoView(el.dataset.pid, el.dataset.label),
+  'pslot-rm': el => { const i = +el.dataset.i, s = UI.cd.photos[i]; if (s && s.id) UI.cd.removed.push(s.id); UI.cd.photos[i] = null; refreshSlot(i); },
+  'check-del': async el => {
+    const ch = S.checks.get(el.dataset.id); if (!ch) return;
+    if (!await confirmDialog('Fortschrittscheck löschen?', `Der Check vom ${fmtDate(ch.date)} inkl. ${photoCount(ch)} Fotos wird endgültig gelöscht.`, { ok: 'Löschen', danger: true })) return;
+    for (const id of photoIds(ch)) if (id) await delPhoto(id);
+    del('checks', ch.id); toast('Check gelöscht'); go('/client/' + ch.clientId + '/body');
+  },
+  'pkg-make': el => {
+    const c = S.clients.get(el.dataset.cid);
+    modal('Kunden einladen', `<form data-form="pkg" data-cid="${c.id}">
+      <p class="muted" style="margin-top:0">Die App erstellt eine <b>verschlüsselte Zugangsdatei</b> nur mit den Daten von ${esc(c.name)}: Trainingsplan, Trainings, Messungen und Fortschrittsbilder. Deine internen Notizen sind nicht enthalten.</p>
+      <label class="field"><span>Zugangscode für ${esc(c.name)} (mind. 6 Zeichen)</span><input name="code" class="input" required minlength="6" autocomplete="off" value="${esc(c.access ? c.access.code : '')}" placeholder="z. B. Sonne-Hantel-27"></label>
+      <div class="info" style="margin-bottom:14px">So geht's weiter:<br>1. Datei an den Kunden schicken (AirDrop, WhatsApp, Mail).<br>2. Den Code <b>getrennt</b> mitteilen (z. B. mündlich).<br>3. Der Kunde öffnet <b>${esc(location.href.split('#')[0])}</b> auf seinem Handy, fügt sie zum Home-Bildschirm hinzu und tippt auf „Ich bin Kunde“.</div>
+      <div class="sheet-actions"><button type="button" class="btn btn-ghost" data-action="modal-close">Abbrechen</button><button class="btn btn-primary">Datei erstellen</button></div></form>`);
+  },
+  'ret-import': () => { let i = document.getElementById('ret-file'); if (!i) { i = document.createElement('input'); i.type = 'file'; i.id = 'ret-file'; i.accept = '.json,application/json'; i.hidden = true; document.body.appendChild(i); } i.click(); },
+  'ret-make': () => modal('Trainings an Trainer senden', `<form data-form="ret"><p class="muted" style="margin-top:0">Deine abgeschlossenen Trainings werden verschlüsselt als Datei gespeichert. Schick sie anschließend an deinen Trainer.</p>
+      <label class="field"><span>Dein Zugangscode</span><input name="code" type="password" class="input" required autocomplete="current-password"></label>
+      <div class="sheet-actions"><button type="button" class="btn btn-ghost" data-action="modal-close">Abbrechen</button><button class="btn btn-primary">Datei erstellen</button></div></form>`),
+  'file-share': async () => {
+    const f = UI.readyFile; if (!f) return;
+    const file = new File([f.text], f.name, { type: 'application/json' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: f.name }); closeModal(null); return; } catch (e) { if (e && e.name === 'AbortError') return; } }
+    download(f.name, f.text, 'application/json'); toast('Datei gespeichert');
+  },
+  'file-dl': () => { const f = UI.readyFile; if (f) { download(f.name, f.text, 'application/json'); toast('Datei gespeichert'); } },
+  'lock-set': () => modal('App-Code festlegen', `<form data-form="setlock"><label class="field"><span>Neuer Code (mind. 4 Zeichen)</span><input name="code" type="password" class="input" required minlength="4" autocomplete="new-password"></label>
+      <label class="field"><span>Code wiederholen</span><input name="code2" type="password" class="input" required minlength="4" autocomplete="new-password"></label>
+      <div class="info" style="margin-bottom:14px">Merke dir den Code gut. Ohne ihn kommst du nicht mehr in die App – dann hilft nur ein Backup.</div>
+      <div class="sheet-actions"><button type="button" class="btn btn-ghost" data-action="modal-close">Abbrechen</button><button class="btn btn-primary">Speichern</button></div></form>`),
+  'lock-off': async () => { if (!await confirmDialog('Sperre entfernen?', 'Die App ist danach ohne Code zugänglich.', { ok: 'Entfernen', danger: true })) return; del('meta', 'lock'); toast('Sperre entfernt'); render(); },
+  'lock-now': () => { if (!S.meta.get('lock')) return toast('Kein Code festgelegt'); LOCK.locked = true; render(); },
+  'lock-forgot': async () => {
+    if (isClientMode()) return confirmDialog('Code vergessen?', 'Frag deinen Trainer nach deinem Zugangscode. Bekommst du eine neue Zugangsdatei mit neuem Code, kannst du die App hier zurücksetzen und den Zugang neu einrichten.', { ok: 'OK', cancel: 'App zurücksetzen' }).then(ok => { if (ok === false) A['client-reset'](); });
+    const v = await promptDialog('Alle Daten löschen?', { label: 'Ohne Code gibt es keinen Zugriff. Zum Zurücksetzen LÖSCHEN eintippen (danach Backup importieren).', placeholder: 'LÖSCHEN', ok: 'Zurücksetzen' });
+    if (v && v.trim().toUpperCase() === 'LÖSCHEN') { await DB.replaceAll({}); PH.clear(); await loadAll(); LOCK.locked = false; go('/'); render(); }
+  },
+  'client-reset': async () => {
+    const v = await promptDialog('Kundenmodus beenden', { label: 'Alle Daten auf diesem Gerät werden gelöscht. Zum Bestätigen LÖSCHEN eintippen.', placeholder: 'LÖSCHEN', ok: 'Beenden' });
+    if (!v || v.trim().toUpperCase() !== 'LÖSCHEN') return;
+    await DB.replaceAll({}); PH.clear(); await loadAll(); LOCK.locked = false; UI.open = {}; toast('Kundenmodus beendet'); go('/'); render();
+  },
+});
+function refreshSlot(i) {
+  const w = document.getElementById('pslot-' + i); if (w) { w.innerHTML = pslotHtml(i); hydratePhotos(w); }
+  const n = UI.cd.photos.filter(Boolean).length, pc = document.getElementById('pcount'); if (pc) { pc.textContent = n + '/5'; pc.classList.toggle('live', n === 5); }
+}
+const busy = (f, on) => { const b = f && f.querySelector('button.btn-primary'); if (b) { b.disabled = on; if (on) { b.dataset.t = b.innerHTML; b.innerHTML = 'Bitte warten …'; } else if (b.dataset.t) b.innerHTML = b.dataset.t; } };
+document.addEventListener('submit', async ev => {
+  const f = ev.target, k = f.dataset.form; if (!['check', 'unlock', 'pkg', 'setup', 'ret', 'setlock'].includes(k)) return;
+  ev.preventDefault(); const fd = new FormData(f);
+  try {
+    if (k === 'check') { busy(f, true); await saveCheck(f); return; }
+    if (k === 'unlock') {
+      busy(f, true); const ok = await verifyLock(String(fd.get('code') || '')); busy(f, false);
+      if (!ok) { const e = document.getElementById('lock-err'); if (e) e.textContent = 'Falscher Code.'; f.querySelector('input').value = ''; return; }
+      LOCK.locked = false; UI.lastRoute = ''; render(); return;
+    }
+    if (k === 'pkg') {
+      const code = String(fd.get('code') || ''); if (code.length < 6) return toast('Mindestens 6 Zeichen');
+      busy(f, true); const r = await makePackage(f.dataset.cid, code); closeModal(null);
+      fileReady(r.name, r.text, `Zugangsdatei für <b>${esc(S.clients.get(f.dataset.cid).name)}</b> erstellt (${r.n} Fotos, ${fmtNum(Math.round(r.text.length / 1024 / 1024 * 10) / 10)} MB, verschlüsselt). Schick sie an deinen Kunden und teile ihm den Code getrennt mit.`);
+      return;
+    }
+    if (k === 'ret') { busy(f, true); const r = await makeReturn(String(fd.get('code') || '')); closeModal(null); fileReady(r.name, r.text, `${r.n} Trainings verschlüsselt gespeichert. Schick die Datei jetzt an deinen Trainer.`); return; }
+    if (k === 'setlock') {
+      const a = String(fd.get('code') || ''), b = String(fd.get('code2') || ''); if (a.length < 4) return toast('Mindestens 4 Zeichen'); if (a !== b) return toast('Die Codes stimmen nicht überein');
+      busy(f, true); put('meta', await makeLock(a)); closeModal(null); toast('App-Sperre aktiv 🔒'); render(); return;
+    }
+    if (k === 'setup') {
+      const file = f.querySelector('input[type=file]').files[0]; if (!file) return toast('Bitte zuerst die Datei auswählen');
+      busy(f, true); const was = isClientMode(); await setupFromFile(file, String(fd.get('code') || ''));
+      toast(was ? 'Update geladen ✓' : 'Willkommen! Dein Zugang ist eingerichtet ✓'); go('/'); render(); return;
+    }
+  } catch (e) { busy(f, false); toast(e && e.message || String(e)); }
+});
+document.addEventListener('change', async ev => {
+  const t = ev.target;
+  if (t.dataset.pslot != null && t.files && t.files[0]) {
+    const i = +t.dataset.pslot;
+    try { const r = await resizePhoto(t.files[0]); const old = UI.cd.photos[i]; if (old && old.id) UI.cd.removed.push(old.id); UI.cd.photos[i] = r; refreshSlot(i); }
+    catch (e) { toast(e.message); }
+  } else if (t.dataset.p3sel != null) {
+    const ids = P3.ids.slice(); ids[+t.dataset.p3sel] = t.value; const p = P3.p; await open360(ids); P3.p = p; p3Apply();
+  } else if (t.name === 'bfOn' && t.form && t.form.dataset.form === 'check') {
+    UI.cd.bfOn = t.checked; document.getElementById('bf-box').classList.toggle('hidden', !t.checked);
+  } else if (t.id === 'ret-file' && t.files[0]) {
+    const file = t.files[0]; t.value = '';
+    try {
+      let r; try { r = await importReturn(file); }
+      catch (e) { if (!/Zugangscode/.test(e.message)) throw e; const code = await promptDialog('Zugangscode', { label: 'Code des Kunden', ok: 'Importieren' }); if (!code) return; r = await importReturn(file, code); }
+      toast(`${r.c.name}: ${r.neu} neue, ${r.upd} aktualisierte Trainings${r.rej ? ` · ${r.rej} abgewiesen` : ''}`); render();
+    } catch (e) { toast(e.message); }
+  } else if (t.form && t.form.dataset.form === 'setup' && t.type === 'file' && t.files[0]) {
+    const s = document.querySelector('#setup-pick span'); if (s) s.textContent = '✓ ' + t.files[0].name;
+  }
+});
+document.addEventListener('input', ev => {
+  const t = ev.target;
+  if ((t.dataset.sf != null || t.name === 'date') && t.form && t.form.dataset.form === 'check') { const c = S.clients.get(t.form.dataset.cid), l = document.getElementById('bf-live'); if (c && l) l.innerHTML = bfLiveHtml(c); }
+});
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && (document.getElementById('p360') || document.getElementById('pview'))) close360(); });
+window.addEventListener('hashchange', () => close360());
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { LOCK.hiddenAt = Date.now(); return; }
+  if (S.meta.get('lock') && LOCK.hiddenAt && Date.now() - LOCK.hiddenAt > 5 * 60000 && !LOCK.locked) { LOCK.locked = true; render(); }
+});
 
 (async function init() {
   // Offline-Fähigkeit, sobald die App über eine Web-Adresse geöffnet wird
