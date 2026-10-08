@@ -12,7 +12,7 @@
 <meta name="apple-mobile-web-app-title" content="SWEAT4">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20400%20400%22%3E%3Ccircle%20cx%3D%22200%22%20cy%3D%22200%22%20r%3D%22200%22%20fill%3D%22%23111111%22/%3E%3Cpath%20fill%3D%22%23BE9B5C%22%20transform%3D%22translate%28-23%2C-23%29%22%20d%3D%22M212.5%2C70%20L247%2C70%20L170%2C224%20L286.3%2C224%20L286.3%2C254%20L136.3%2C254%20L136.3%2C224%20Z%20M194.2%2C226%20C194.4%2C223.6%20194.0%2C217.1%20195.4%2C212.0%20C196.7%2C206.8%20198.8%2C201.1%20202.5%2C195.0%20C206.1%2C188.8%20212.0%2C181.6%20217.5%2C175.0%20C223.0%2C168.3%20230.7%2C161.3%20235.5%2C155.0%20C240.3%2C148.6%20243.7%2C141.8%20246.3%2C137.0%20C248.8%2C132.1%20249.8%2C127.8%20250.6%2C126.0%20C251.0%2C128.0%20253.0%2C133.5%20253.0%2C138.0%20C253.0%2C142.5%20252.1%2C147.1%20250.6%2C153.0%20C249.0%2C158.8%20246.8%2C166.3%20243.6%2C173.0%20C240.3%2C179.6%20235.3%2C186.6%20231.0%2C193.0%20C226.6%2C199.3%20220.5%2C205.5%20217.4%2C211.0%20C214.2%2C216.5%20213.1%2C223.5%20212.3%2C226.0%20Z%20M229.0%2C226%20C229.7%2C224.0%20230.3%2C218.1%20233.2%2C214.0%20C236.0%2C209.8%20242.3%2C205.5%20246.0%2C201.0%20C249.6%2C196.5%20253.0%2C191.6%20255.3%2C187.0%20C257.6%2C182.3%20259.0%2C175.3%20259.8%2C173.0%20C260.6%2C174.6%20263.4%2C179.0%20264.6%2C183.0%20C265.8%2C187.0%20267.3%2C192.1%20267.0%2C197.0%20C266.6%2C201.8%20264.0%2C207.1%20262.6%2C212.0%20C261.1%2C216.8%20259.0%2C223.6%20258.3%2C226.0%20Z%20M163.3%2C257.5%20H274.3%20Q277.3%2C257.5%20277.3%2C260.5%20V264.5%20Q277.3%2C267.5%20274.3%2C267.5%20H163.3%20Q160.3%2C267.5%20160.3%2C264.5%20V260.5%20Q160.3%2C257.5%20163.3%2C257.5%20Z%20M202.0%2C271%20H244.0%20Q245.5%2C271%20245.5%2C272.5%20V351.0%20Q245.5%2C352.5%20244.0%2C352.5%20H202.0%20Q200.5%2C352.5%20200.5%2C351.0%20V272.5%20Q200.5%2C271%20202.0%2C271%20Z%20M184.3%2C352.5%20H261.3%20Q264.3%2C352.5%20264.3%2C355.5%20V360%20Q264.3%2C363%20261.3%2C363%20H184.3%20Q181.3%2C363%20181.3%2C360%20V355.5%20Q181.3%2C352.5%20184.3%2C352.5%20Z%22/%3E%3C/svg%3E">
 <!-- Datenschutz: Diese Richtlinie verbietet der App technisch jede Netzwerkverbindung. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data: blob:; manifest-src 'self'; worker-src 'self'; connect-src 'none'; base-uri 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data: blob:; manifest-src 'self'; worker-src 'self'; connect-src 'none'; base-uri 'none'">
 <title>SWEAT4 – Trainer-Logbuch</title>
 <style>
 :root{
@@ -233,6 +233,40 @@ select.input{appearance:none;-webkit-appearance:none;background-image:linear-gra
 #toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);background:var(--text);color:var(--bg);padding:12px 18px;border-radius:12px;font-weight:600;opacity:0;pointer-events:none;transition:all .25s;z-index:80;max-width:90vw;text-align:center}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 @media(max-width:420px){.hide-xs{display:none}}
+/* ---------- Übungskatalog & 3D ---------- */
+.chip3d{display:inline-flex;align-items:center;gap:3px;margin-left:6px;padding:2px 7px;border-radius:999px;border:1px solid rgba(190,155,92,.5);background:var(--accent-soft);color:var(--accent);font-size:11px;font-weight:800;letter-spacing:.04em;cursor:pointer;vertical-align:2px}
+.kat-chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 4px;margin:12px 0 4px;scrollbar-width:none}
+.kat-chips::-webkit-scrollbar{display:none}
+.kat-chips button{flex:none;border:1px solid var(--border);background:var(--surface);color:var(--muted);border-radius:999px;padding:8px 14px;font-weight:600;font-size:14px;cursor:pointer}
+.kat-chips button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.kat-item .t3d{font-size:11px;font-weight:800;color:var(--accent);border:1px solid rgba(190,155,92,.45);border-radius:6px;padding:2px 6px;flex:none}
+.mchips{display:flex;flex-wrap:wrap;gap:6px}
+.mchip{font-size:13px;font-weight:600;padding:5px 10px;border-radius:999px;background:var(--surface-3)}
+.mchip.p{background:var(--accent-soft);color:var(--accent);border:1px solid rgba(190,155,92,.45)}
+.ul{margin:0;padding-left:18px}.ul li+li{margin-top:5px}
+.v3d{position:fixed;inset:0;z-index:60;background:#0b0b0b;display:flex;flex-direction:column;animation:fade .2s ease-out}
+.v3d-top{display:flex;align-items:center;gap:10px;padding:calc(8px + env(safe-area-inset-top)) 8px 8px 16px;border-bottom:1px solid var(--border)}
+.v3d-title{font-weight:700;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v3d-sub{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v3d-stage{position:relative;flex:1;min-height:0;overflow:hidden}
+.v3d-phase{position:absolute;left:10px;right:62px;top:10px;z-index:2;font-size:14px;font-weight:600;background:rgba(11,11,11,.72);border:1px solid var(--border);border-radius:10px;padding:8px 11px;pointer-events:none;min-height:20px}
+.v3d-load{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);text-align:center;padding:24px;z-index:1}
+.v3d-zoom{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;gap:8px;z-index:2}
+.v3d-zoom .icon-btn{background:rgba(28,28,28,.85);border:1px solid var(--border);font-size:24px;font-weight:600;line-height:1}
+.v3d-legend{position:absolute;left:10px;bottom:10px;z-index:2;font-size:12px;background:rgba(11,11,11,.75);border:1px solid var(--border);border-radius:10px;padding:7px 10px;max-width:calc(100% - 20px)}
+.v3d-legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.v3d-bar{padding:10px 10px calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--border);display:flex;flex-direction:column;gap:9px;background:var(--bg)}
+.v3d-row{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+.v3d-row::-webkit-scrollbar{display:none}
+.v3d-row .btn{flex:none}
+.v3d-row .btn.on{background:var(--accent-soft);color:var(--accent);border-color:rgba(190,155,92,.5)}
+.v3d-views{display:flex;width:100%}
+.v3d-views button{flex:1}
+.v3d-info{position:absolute;left:0;right:0;bottom:0;max-height:62%;overflow:auto;z-index:3;background:var(--surface);border-top:1px solid var(--border);border-radius:18px 18px 0 0;padding:16px 16px 20px;animation:slide .22s cubic-bezier(.2,.8,.2,1)}
+.v3d-info h3{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:14px 0 6px}
+.v3d-info h3:first-child{margin-top:0}
+.v3d-info-static h3{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:16px 0 6px}
+
 </style>
 </head>
 <body>
@@ -240,6 +274,7 @@ select.input{appearance:none;-webkit-appearance:none;background-image:linear-gra
 <div id="modal-root"></div>
 <div id="toast"></div>
 
+<script src="uebungen-katalog.js"></script>
 <script>
 'use strict';
 /* =====================================================================
@@ -360,7 +395,7 @@ function download(name, text, mime) {
 const ICONS = {
   back: 'M15 18l-6-6 6-6', plus: 'M12 5v14M5 12h14', edit: 'M4 20h4L19 9l-4-4L4 16v4z', trash: 'M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13',
   up: 'M6 15l6-6 6 6', down: 'M6 9l6 6 6-6', check: 'M5 12.5l4.5 4.5L19 7.5', chart: 'M4 19V11M10 19V5M16 19v-6M2 21h20',
-  history: 'M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 3', lock: 'M6 11h12v10H6zM8 11V7a4 4 0 0 1 8 0v4',
+  history: 'M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 3', cube: 'M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3zM12 12l8-4.5M12 12v9M12 12L4 7.5', book: 'M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4zM5 17a3 3 0 0 1 3-3h11', pause: 'M8 5v14M16 5v14', reset: 'M4 12a8 8 0 1 0 2.4-5.7L4 8.5M4 4v4.5h4.5', lock: 'M6 11h12v10H6zM8 11V7a4 4 0 0 1 8 0v4',
   db: 'M4 6c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3zM4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3',
   search: 'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM21 21l-5-5', download: 'M12 4v12M6 10l6 6 6-6M4 20h16', upload: 'M12 16V4M6 10l6-6 6 6M4 20h16',
   x: 'M6 6l12 12M18 6L6 18', list: 'M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01', dumbbell: 'M6 7v10M3 9v6M18 7v10M21 9v6M6 12h12',
@@ -492,7 +527,7 @@ function viewHome() {
       </div>
       <div class="cc-tags">${active ? '<span class="tag live">läuft</span>' : ''}${mostRecent && mostRecent.c.id === c.id ? '<span class="tag">Zuletzt</span>' : ''}</div>
     </a>`).join('');
-  return topbar({ title: 'Trainer-Logbuch', sub: `${rows.length} ${rows.length === 1 ? 'Kunde' : 'Kunden'}`, right: `<a class="icon-btn" href="#/data" aria-label="Daten &amp; Backup">${ic('db', 22)}</a>` }) +
+  return topbar({ title: 'Trainer-Logbuch', sub: `${rows.length} ${rows.length === 1 ? 'Kunde' : 'Kunden'}`, right: `<a class="icon-btn" href="#/uebungen" aria-label="Übungskatalog &amp; 3D">${ic('book', 22)}</a><a class="icon-btn" href="#/data" aria-label="Daten &amp; Backup">${ic('db', 22)}</a>` }) +
   `<main class="wrap view">
     <div class="home-logo">${LOGO_FULL}</div>
     ${needBackup ? `<div class="banner"><div><b>Backup empfohlen</b><div class="muted" style="font-size:14px">${lb ? 'Letztes Backup: ' + fmtDateTs(lb) : 'Noch kein Backup erstellt.'}</div></div><button class="btn btn-sm btn-primary" data-action="backup">Jetzt sichern</button></div>` : ''}
@@ -594,7 +629,7 @@ function viewPlan(c) {
           <button class="icon-btn sm danger" data-action="del-day" data-id="${d.id}" aria-label="Trainingstag löschen">${ic('trash', 18)}</button>
         </div>
         ${exs.map((e, j) => `<div class="ex-row"><span class="ex-idx">${j + 1}.</span>
-          <div class="grow" data-action="edit-ex" data-did="${d.id}" data-id="${e.id}" style="cursor:pointer"><div style="font-weight:600">${esc(e.name)}</div>
+          <div class="grow" data-action="edit-ex" data-did="${d.id}" data-id="${e.id}" style="cursor:pointer"><div style="font-weight:600">${esc(e.name)}${(k3 => k3 ? ` <button class="chip3d" data-action="open3d" data-id="${k3.id}" aria-label="3D-Ausführung">${ic('cube', 13)} 3D</button>` : '')(katFind(e.name, e.catalogId))}</div>
             <div class="ex-meta">${e.targetSets || CONFIG.DEFAULT_SETS} Sätze${(e.sets || []).some(s => hasVal(s.weight) || hasVal(s.reps)) ? ' · Plan: ' + e.sets.map(fmtSet).join(', ') : ''}${e.note ? ' · 📝 ' + esc(e.note) : ''}</div></div>
           <button class="icon-btn sm" data-action="ex-move" data-id="${e.id}" data-dir="-1" ${j === 0 ? 'disabled' : ''} aria-label="Nach oben">${ic('up')}</button>
           <button class="icon-btn sm" data-action="ex-move" data-id="${e.id}" data-dir="1" ${j === exs.length - 1 ? 'disabled' : ''} aria-label="Nach unten">${ic('down')}</button>
@@ -660,6 +695,7 @@ function viewTrain(sess) {
           <button class="btn btn-sm btn-ghost" data-action="add-set" data-ei="${ei}" ${e.sets.length >= CONFIG.MAX_SETS ? 'disabled' : ''}>${ic('plus', 16)} Satz</button>
           <button class="btn btn-sm btn-ghost" data-action="rm-set" data-ei="${ei}" ${e.sets.length <= 1 ? 'disabled' : ''}>– Satz</button>
           ${last ? `<button class="btn btn-sm btn-ghost" data-action="copy-last" data-ei="${ei}">Letzte Werte übernehmen</button>` : ''}
+          ${(k3 => k3 ? `<button class="btn btn-sm btn-ghost" data-action="open3d" data-id="${k3.id}">${ic('cube', 16)} Technik & 3D</button>` : '')(katForSessionEx(e))}
           ${ei < sess.exercises.length - 1 ? `<button class="btn btn-sm btn-text" data-action="next-ex" data-ei="${ei}">Nächste Übung ${ic('down', 16)}</button>` : ''}
         </div>
         <textarea class="ex-note" data-tf="exnote" data-ei="${ei}" rows="1" placeholder="Notiz zur Übung">${esc(e.note)}</textarea>
@@ -872,6 +908,8 @@ function render() {
     const s = S.sessions.get(p[1]); if (!s) return go('/');
     html = p[0] === 'train' ? viewTrain(s) : viewSession(s);
   } else if (p[0] === 'data') html = viewData();
+  else if (p[0] === 'uebungen') html = viewKatalog();
+  else if (p[0] === 'uebung') html = viewUebung(p[1]);
   if (html == null) return go('/');
   const same = route === UI.lastRoute, y = scrollY;
   app.innerHTML = html;
@@ -879,6 +917,7 @@ function render() {
   UI.lastRoute = route;
   if (!p.length && UI.search) filterClients(UI.search);
   if (p[0] === 'data') fillStorageInfo();
+  if (p[0] === 'uebungen' && UI.katSearch) filterKat(UI.katSearch);
 }
 const curSession = () => { const p = location.hash.slice(1).split('/').filter(Boolean); return p[0] === 'train' ? S.sessions.get(p[1]) : null; };
 
@@ -908,9 +947,10 @@ function resizeImage(file, max = 320) {
 }
 function openExModal(dayId, exId) {
   const e = exId ? S.exercises.get(exId) : null, n = e ? e.targetSets || CONFIG.DEFAULT_SETS : CONFIG.DEFAULT_SETS, sets = e ? e.sets || [] : [];
-  const known = new Set(); all('exercises').forEach(x => known.add(x.name)); all('sessions').forEach(s => s.exercises.forEach(x => known.add(x.name)));
+  const known = new Set(); all('exercises').forEach(x => known.add(x.name)); all('sessions').forEach(s => s.exercises.forEach(x => known.add(x.name))); KAT().forEach(x => known.add(x.n));
   modal(e ? 'Übung bearbeiten' : 'Neue Übung', `<form data-form="exercise" data-did="${dayId}" data-id="${exId || ''}">
     <label class="field"><span>Name der Übung *</span><input name="name" required maxlength="80" autocomplete="off" list="ex-names" value="${esc(e ? e.name : '')}" placeholder="z. B. Bankdrücken"></label>
+    <div class="muted" style="font-size:12px;margin:-8px 0 14px">Tipp: Namen aus dem Übungskatalog wählen – dann ist die 3D-Ausführung automatisch verknüpft.</div>
     <datalist id="ex-names">${[...known].sort((a, b) => a.localeCompare(b, 'de')).map(x => `<option value="${esc(x)}">`).join('')}</datalist>
     <div class="field"><span>Anzahl Sätze</span><div class="radio-seg">${Array.from({ length: CONFIG.MAX_SETS }, (_, i) => `<label><input type="radio" name="targetSets" value="${i + 1}" ${i + 1 === n ? 'checked' : ''}><span>${i + 1}</span></label>`).join('')}</div></div>
     <div class="field"><span>Planwerte (optional – erscheinen im Training als Vorschlag)</span>
@@ -1182,6 +1222,7 @@ document.addEventListener('submit', async ev => {
     let e = f.dataset.id ? S.exercises.get(f.dataset.id) : null;
     if (!e) { if (exercisesOf(did).length >= CONFIG.MAX_EXERCISES) return toast('Maximum erreicht'); e = { id: uid(), dayId: did, order: exercisesOf(did).length, createdAt: Date.now() }; }
     Object.assign(e, { name, targetSets: n, sets, note: String(fd.get('note') || '').trim() });
+    const k3 = katFind(name); e.catalogId = k3 ? k3.id : null;
     put('exercises', e); closeModal(null); render();
   }
 });
@@ -1221,9 +1262,150 @@ document.addEventListener('keydown', ev => {
   const nxt = t.dataset.tf === 'weight' ? document.querySelector(`[data-tf=reps][data-ei="${ei}"][data-si="${si}"]`) : document.querySelector(`[data-tf=weight][data-ei="${ei}"][data-si="${si + 1}"]`);
   if (nxt) nxt.focus(); else t.blur();
 });
-window.addEventListener('hashchange', () => { closeModal(null); render(); });
+window.addEventListener('hashchange', () => { closeModal(null); close3D(); render(); });
 window.addEventListener('pagehide', flushSave);
 document.addEventListener('visibilitychange', () => { if (document.hidden) flushSave(); });
+
+
+/* =====================================================================
+   Übungskatalog & 3D-Ausführung (Erweiterung)
+   - Katalogdaten: uebungen-katalog.js (window.SW_KATALOG)
+   - 3D-Engine: uebungen3d.js + three.min.js – werden erst beim Öffnen geladen
+   - Verknüpfung: Plan-Übung über catalogId bzw. Name/Alias
+   ===================================================================== */
+const KAT = () => window.SW_KATALOG || [];
+const MUSKEL = id => (window.SW_MUSKELN || {})[id] || id;
+const normK = s => norm(s).replace(/[–—-]/g, ' ').replace(/[^a-z0-9äöüß ]/g, '').replace(/\s+/g, ' ').trim();
+let _katIdx = null;
+function katIndex() {
+  if (_katIdx) return _katIdx;
+  const m = new Map();
+  for (const e of KAT()) { m.set(normK(e.n), e); (e.alias || []).forEach(a => { const k = normK(a); if (!m.has(k)) m.set(k, e); }); }
+  return (_katIdx = m);
+}
+function katFind(name, id) {
+  if (id) { const e = KAT().find(x => x.id === id); if (e) return e; }
+  return name ? katIndex().get(normK(name)) || null : null;
+}
+function katForSessionEx(e) { const pe = e.exerciseId && S.exercises.get(e.exerciseId); return katFind(e.name, pe && pe.catalogId); }
+
+function viewKatalog() {
+  const L = KAT(), groups = window.SW_GRUPPEN || [];
+  const g = UI.katGroup || 'Alle';
+  const list = L.filter(e => g === 'Alle' || e.g === g);
+  const sections = (g === 'Alle' ? groups : [g]).map(gr => {
+    const items = list.filter(e => e.g === gr); if (!items.length) return '';
+    return `<section class="section kat-sec"><div class="section-h"><h2>${esc(gr)} <span class="muted">(${items.length})</span></h2></div>
+      <div class="card list-card">${items.map(e => `<a class="list-link kat-item" href="#/uebung/${e.id}" data-name="${esc(normK(e.n + ' ' + e.sub + ' ' + e.eq + ' ' + (e.alias || []).join(' ')))}">
+        <div class="grow"><div style="font-weight:600">${esc(e.n)}</div><div class="muted" style="font-size:13px">${esc(e.sub)} · ${esc(e.eq)}</div></div><span class="t3d">3D</span></a>`).join('')}</div></section>`;
+  }).join('');
+  return topbar({ back: '/', title: 'Übungskatalog', sub: `${L.length} Übungen mit 3D-Ausführung` }) +
+  `<main class="wrap view">
+    ${L.length ? `<label class="search">${ic('search')}<input id="katsearch" type="search" placeholder="Übung suchen …" value="${esc(UI.katSearch || '')}" autocomplete="off"></label>
+    <div class="kat-chips">${['Alle', ...groups].map(x => `<button class="${x === g ? 'on' : ''}" data-action="kat-group" data-v="${esc(x)}">${esc(x)}</button>`).join('')}</div>
+    ${sections}<div id="kat-none" class="empty hidden">Keine Übung gefunden.</div>` : '<div class="card empty">Der Übungskatalog konnte nicht geladen werden (Datei uebungen-katalog.js fehlt).</div>'}
+  </main>`;
+}
+function filterKat(q) {
+  UI.katSearch = q; const n = normK(q); let shown = 0;
+  document.querySelectorAll('.kat-item').forEach(el => { const ok = !n || n.split(' ').every(w => el.dataset.name.includes(w)); el.classList.toggle('hidden', !ok); if (ok) shown++; });
+  document.querySelectorAll('.kat-sec').forEach(sec => sec.classList.toggle('hidden', !sec.querySelector('.kat-item:not(.hidden)')));
+  const nn = document.getElementById('kat-none'); if (nn) nn.classList.toggle('hidden', shown > 0);
+}
+function infoHtml(e) {
+  const li = a => `<ul class="ul">${a.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`;
+  return `<table class="table"><tbody>
+      <tr><td class="muted">Muskelgruppe</td><td>${esc(e.g)}</td></tr><tr><td class="muted">Zielmuskel</td><td>${esc(e.sub)}</td></tr><tr><td class="muted">Equipment</td><td>${esc(e.eq)}</td></tr></tbody></table>
+    <h3>Ausgangsposition</h3><div>${esc(e.start)}</div>
+    <h3>Ausführung</h3><div>${esc(e.exec)}</div>
+    <h3>Bewegungsrichtung</h3><div>${esc(e.dir)}</div>
+    <h3>Wichtige Hinweise</h3>${li(e.tips)}
+    <h3>Häufige Fehler</h3>${li(e.errs)}
+    <h3>Beanspruchte Muskulatur</h3><div class="mchips">${e.prim.map(m => `<span class="mchip p">${esc(MUSKEL(m))}</span>`).join('')}${e.sec.map(m => `<span class="mchip">${esc(MUSKEL(m))}</span>`).join('')}</div>
+    <div class="muted" style="font-size:12px;margin-top:6px">Gold = primär, grau = sekundär</div>`;
+}
+function viewUebung(id) {
+  const e = KAT().find(x => x.id === id); if (!e) return null;
+  return topbar({ back: '/uebungen', title: esc(e.n), sub: `${esc(e.g)} · ${esc(e.sub)}` }) +
+  `<main class="wrap view">
+    <button class="btn btn-primary btn-big" data-action="open3d" data-id="${e.id}">${ic('cube', 22)} 3D-Ausführung ansehen</button>
+    <div class="card v3d-info-static" style="margin-top:16px">${infoHtml(e)}</div>
+  </main>`;
+}
+
+/* ---------- 3D laden (Lazy Loading) ---------- */
+let _3dPromise = null, V3 = null;
+function load3D() {
+  if (window.SW3D) return Promise.resolve();
+  if (_3dPromise) return _3dPromise;
+  const add = src => new Promise((res, rej) => { const sc = document.createElement('script'); sc.src = src; sc.onload = res; sc.onerror = () => rej(new Error(src + ' konnte nicht geladen werden')); document.head.appendChild(sc); });
+  _3dPromise = (window.THREE ? Promise.resolve() : add('three.min.js')).then(() => add('uebungen3d.js')).catch(err => { _3dPromise = null; throw err; });
+  return _3dPromise;
+}
+function webglOk() { try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch (e) { return false; } }
+
+async function open3D(id) {
+  const e = KAT().find(x => x.id === id); if (!e) return;
+  flushSave(); close3D();
+  const root = document.createElement('div'); root.id = 'v3d'; root.className = 'v3d'; root.setAttribute('role', 'dialog'); root.setAttribute('aria-modal', 'true'); root.setAttribute('aria-label', '3D-Ausführung ' + e.n);
+  const views = [['auto', 'Auto'], ['front', 'Vorne'], ['side', 'Seite'], ['back', 'Hinten'], ['diag', 'Schräg']];
+  root.innerHTML = `
+    <div class="v3d-top"><div class="grow"><div class="v3d-title">${esc(e.n)}</div><div class="v3d-sub">${esc(e.g)} · ${esc(e.eq)}</div></div>
+      <button class="icon-btn" data-action="v3-close" aria-label="3D-Ansicht schließen">${ic('x', 24)}</button></div>
+    <div class="v3d-stage" id="v3-stage">
+      <div class="v3d-load" id="v3-load">3D-Ansicht wird geladen …</div>
+      <div class="v3d-phase" id="v3-phase"></div>
+      <div class="v3d-zoom"><button class="icon-btn" data-action="v3-zoom" data-v="in" aria-label="Heranzoomen">+</button><button class="icon-btn" data-action="v3-zoom" data-v="out" aria-label="Herauszoomen">−</button></div>
+      <div class="v3d-legend hidden" id="v3-legend"><span style="white-space:nowrap"><i style="background:#d9a744"></i>Primär: ${e.prim.map(MUSKEL).join(', ')}</span>${e.sec.length ? `<br><span><i style="background:#9a7440"></i>Sekundär: ${e.sec.map(MUSKEL).join(', ')}</span>` : ''}</div>
+      <div class="v3d-info hidden" id="v3-info">${infoHtml(e)}</div>
+    </div>
+    <div class="v3d-bar">
+      <div class="seg v3d-views">${views.map(([k, l]) => `<button class="${k === 'auto' ? 'on' : ''}" data-action="v3-view" data-v="${k}">${l}</button>`).join('')}</div>
+      <div class="v3d-row">
+        <button class="btn btn-sm btn-primary" id="v3-play" data-action="v3-play" aria-label="Pause">${ic('pause', 16)} Pause</button>
+        <button class="btn btn-sm btn-ghost" data-action="v3-reset" aria-label="Von vorne">${ic('reset', 16)}</button>
+        <button class="btn btn-sm btn-ghost" id="v3-speed" data-action="v3-speed">Tempo 1×</button>
+        <button class="btn btn-sm btn-ghost on" id="v3-loop" data-action="v3-loop">Loop</button>
+        <button class="btn btn-sm btn-ghost" id="v3-mus" data-action="v3-muscles">Muskeln</button>
+        <button class="btn btn-sm btn-ghost" id="v3-tech" data-action="v3-info">Technik</button>
+      </div>
+    </div>`;
+  document.body.appendChild(root); document.body.classList.add('modal-open');
+  const loadEl = root.querySelector('#v3-load');
+  if (!webglOk()) { loadEl.innerHTML = 'Dieses Gerät/Browser unterstützt keine 3D-Grafik (WebGL).<br>Die Technikbeschreibung findest du unter „Technik“.'; root.querySelector('#v3-info').classList.remove('hidden'); return; }
+  try {
+    await load3D();
+    if (document.getElementById('v3d') !== root) return;
+    V3 = new SW3D.Viewer(root.querySelector('#v3-stage'));
+    V3.onPhase = label => { const el = document.getElementById('v3-phase'); if (el) el.textContent = label; };
+    V3.onStop = () => setPlayBtn(false);
+    V3.load(e); loadEl.remove();
+  } catch (err) {
+    console.error(err);
+    loadEl.innerHTML = '3D-Ansicht konnte nicht geladen werden.<br><span style="font-size:13px">' + esc(err.message) + '</span>';
+  }
+}
+function close3D() {
+  if (V3) { try { V3.dispose(); } catch (e) { } V3 = null; }
+  const r = document.getElementById('v3d');
+  if (r) { r.remove(); if (!document.getElementById('modal-root').innerHTML) document.body.classList.remove('modal-open'); }
+}
+function setPlayBtn(playing) { const b = document.getElementById('v3-play'); if (b) { b.innerHTML = playing ? `${ic('pause', 16)} Pause` : `${ic('play', 16)} Abspielen`; b.setAttribute('aria-label', playing ? 'Pause' : 'Abspielen'); } }
+Object.assign(A, {
+  open3d: el => open3D(el.dataset.id),
+  'v3-close': () => close3D(),
+  'v3-play': () => { if (!V3) return; if (V3._done) V3.reset(); V3.playing = !V3.playing; setPlayBtn(V3.playing); },
+  'v3-reset': () => { if (!V3) return; V3.reset(); V3.playing = true; setPlayBtn(true); },
+  'v3-speed': el => { if (!V3) return; const sp = V3.speed === 1 ? .5 : V3.speed === .5 ? .25 : 1; V3.speed = sp; el.textContent = 'Tempo ' + String(sp).replace('.', ',') + '×'; el.classList.toggle('on', sp !== 1); },
+  'v3-loop': el => { if (!V3) return; V3.loop = !V3.loop; el.classList.toggle('on', V3.loop); if (V3.loop && V3._done) { V3.reset(); V3.playing = true; setPlayBtn(true); } },
+  'v3-view': el => { if (!V3) return; V3.setView(el.dataset.v); el.parentNode.querySelectorAll('button').forEach(b => b.classList.toggle('on', b === el)); },
+  'v3-zoom': el => { if (V3) V3.zoom(el.dataset.v === 'in' ? .85 : 1.18); },
+  'v3-muscles': el => { if (!V3) return; const on = !V3.muscleOn; V3.setMuscles(on); el.classList.toggle('on', on); document.getElementById('v3-legend').classList.toggle('hidden', !on); },
+  'v3-info': el => { const p = document.getElementById('v3-info'); const show = p.classList.contains('hidden'); p.classList.toggle('hidden', !show); el.classList.toggle('on', show); },
+  'kat-group': el => { UI.katGroup = el.dataset.v; render(); },
+});
+document.addEventListener('input', ev => { if (ev.target.id === 'katsearch') filterKat(ev.target.value); });
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && document.getElementById('v3d') && !document.getElementById('modal-root').innerHTML) close3D(); });
 
 (async function init() {
   // Offline-Fähigkeit, sobald die App über eine Web-Adresse geöffnet wird
