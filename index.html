@@ -646,6 +646,18 @@ img.ld{opacity:1!important}
 .wdays span{display:grid;place-items:center;width:42px;height:38px;border-radius:10px;border:1px solid var(--border);background:var(--surface-2);font-weight:700;font-size:14px;cursor:pointer}
 .wdays input:checked+span{background:var(--gold);color:#111;border-color:var(--gold)}
 .wdays input:focus-visible+span{outline:2px solid var(--gold);outline-offset:2px}
+
+/* Rechtliches */
+.legal-tabs{margin-bottom:14px}.legal-tabs .fchip{text-decoration:none}
+.legal{line-height:1.6;font-size:15px}.legal h2{font:800 22px/1.2 var(--font-display);margin:0 0 6px}
+.legal h3{font-size:14px;letter-spacing:.04em;margin:20px 0 6px;color:var(--gold)}
+.legal p{margin:0 0 8px;color:#d8d2c8;overflow-wrap:anywhere}.legal ul{margin:0 0 8px;padding-left:20px;color:#d8d2c8}.legal li{margin-bottom:6px}
+.consent-txt{white-space:pre-wrap;font:14px/1.55 inherit;font-family:inherit;background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:14px;margin:12px 0;color:var(--text);user-select:text;-webkit-user-select:text}
+.legal-links{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:12px 0 0;font-size:12.5px;color:var(--muted)}
+.legal-links a{color:var(--muted);text-decoration:underline;text-underline-offset:3px}
+.consent-banner{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--r-md);background:rgba(251,191,36,.10);border:1px solid rgba(251,191,36,.35);margin-top:16px;font-size:13.5px;color:#f3d27a}
+.consent-banner b{display:block;color:#f8e3a6;font-size:14.5px;margin-bottom:2px}
+.toggle.need .tg{box-shadow:0 0 0 2px #f3a65a}
 </style>
 </head>
 <body>
@@ -1187,6 +1199,7 @@ function viewHome() {
         <a class="btn btn-ghost btn-block" style="margin-top:14px" href="#/kunde-setup">Ich bin Kunde – Zugang einrichten</a>
       </div>`}
     <a class="privacy-pill" href="#/data">${ic('lock', 16)} Daten bleiben lokal auf diesem Gerät</a>
+    ${LegalLinks()}
   </main>`;
 }
 function filterClients(q) {
@@ -1225,6 +1238,7 @@ function viewClient(c) {
       <a class="btn btn-ghost" href="#/client/${c.id}/progress">${ic('chart')} Fortschritt</a>
       <a class="btn btn-ghost" href="#/client/${c.id}/history">${ic('history')} Historie</a>
     </div>
+    ${ConsentBanner(c)}
     ${NutritionCard(c)}
     ${clientExtraSections(c, 'top')}
 
@@ -1523,6 +1537,8 @@ function viewData() {
   const counts = { Kunden: S.clients.size, Trainingstage: S.days.size, Übungen: S.exercises.size, Trainings: S.sessions.size, Fortschrittschecks: S.checks.size };
   return topbar({ back: '/', title: 'Daten & Backup', sub: 'Speicherort, Sicherung, Export' }) +
   `<main class="wrap view">
+    <div class="card list-card" style="margin-bottom:16px">
+      <a class="list-link" href="#/rechtliches/impressum">${ic('book')}<div class="grow"><b>Rechtliches</b><div class="muted" style="font-size:13px">Impressum, Datenschutz, Gesundheitshinweis, Einwilligung</div></div></a></div>
     <div class="card" style="border-color:rgba(190,155,92,.45)">
       <div class="row" style="margin-bottom:10px"><span class="accent">${ic('lock', 22)}</span><h2 style="font-size:19px">Wo sind meine Daten gespeichert?</h2></div>
       <div class="stack" style="font-size:15px">
@@ -1968,8 +1984,10 @@ document.addEventListener('submit', async ev => {
   if (f.dataset.form === 'client') {
     const name = String(fd.get('name') || '').trim(); if (!name) return;
     const isNew = !f.dataset.id;
+    if (isNew && fd.get('consent') !== 'on') { toast('Bitte zuerst die Einwilligung bestätigen'); f.querySelector('[name=consent]').closest('.toggle').classList.add('need'); return; }
     const c = isNew ? { id: uid(), createdAt: Date.now() } : S.clients.get(f.dataset.id);
     Object.assign(c, { name, goals: String(fd.get('goals') || '').trim(), notes: String(fd.get('notes') || '').trim(), photo: UI.photoDraft || null }, clientExtraValues(fd));
+    c.consentAt = fd.get('consent') === 'on' ? (c.consentAt || Date.now()) : null;
     put('clients', c); if (isNew) { ensurePlan(c.id); requestPersist(); }
     closeModal(null); toast(isNew ? 'Kunde angelegt' : 'Gespeichert');
     if (isNew) go('/client/' + c.id); else render();
@@ -2993,6 +3011,106 @@ document.addEventListener('submit', ev => {
   c.mealsAt = Date.now(); put('clients', c); closeModal(null); UI.foodDay = null; render(); toast('Essrhythmus gespeichert');
 });
 
+/* =====================================================================
+   RECHTLICHES – Impressum, Datenschutz, Gesundheitshinweis, Einwilligung
+   Angaben hier zentral pflegen. Leere Felder werden nicht angezeigt.
+   Hinweis: Entwurf nach üblichen Vorgaben – vor dem Verkauf rechtlich prüfen lassen.
+   ===================================================================== */
+const LEGAL = {
+  owner: 'Khosro Talee',
+  business: 'Sweat4',
+  street: 'Rotenbergstraße 32',
+  city: '66111 Saarbrücken',
+  email: 'sweat4rack@gmail.com',
+  phone: '0152 14539498',
+  vatId: '',            // nach Gewerbeanmeldung: Umsatzsteuer-ID (z. B. 'DE123456789')
+  smallBusiness: false, // true = Kleinunternehmer nach § 19 UStG
+  qualifications: '',   // optional, z. B. 'Lizenzierter Fitnesstrainer (B-Lizenz)'
+  updated: 'Oktober 2026',
+  authority: 'Unabhängiges Datenschutzzentrum Saarland, Fritz-Dobisch-Straße 12, 66111 Saarbrücken, www.datenschutz.saarland.de',
+};
+const LEGAL_TABS = [['impressum', 'Impressum'], ['datenschutz', 'Datenschutz'], ['gesundheit', 'Gesundheit'], ['einwilligung', 'Einwilligung']];
+const lAddr = () => `${esc(LEGAL.owner)}${LEGAL.business ? `<br>${esc(LEGAL.business)}` : ''}<br>${esc(LEGAL.street)}<br>${esc(LEGAL.city)}`;
+
+function legalImpressum() {
+  return `<h2>Impressum</h2>
+    <h3>Angaben gemäß § 5 DDG</h3><p>${lAddr()}</p>
+    <h3>Kontakt</h3><p>Telefon: ${esc(LEGAL.phone)}<br>E-Mail: ${esc(LEGAL.email)}</p>
+    ${LEGAL.vatId ? `<h3>Umsatzsteuer</h3><p>Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG: ${esc(LEGAL.vatId)}</p>` : ''}
+    ${LEGAL.smallBusiness ? '<p>Gemäß § 19 UStG wird keine Umsatzsteuer berechnet (Kleinunternehmerregelung).</p>' : ''}
+    ${LEGAL.qualifications ? `<h3>Qualifikation</h3><p>${esc(LEGAL.qualifications)}</p>` : ''}
+    <h3>Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV</h3><p>${esc(LEGAL.owner)}, ${esc(LEGAL.street)}, ${esc(LEGAL.city)}</p>
+    <h3>Verbraucherstreitbeilegung</h3><p>Wir sind nicht bereit und nicht verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.</p>
+    <h3>Haftung für Inhalte</h3><p>Die Inhalte dieser App wurden mit größter Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte können wir jedoch keine Gewähr übernehmen. Trainings- und Ernährungsempfehlungen ersetzen keine ärztliche Beratung (siehe Gesundheitshinweis).</p>
+    <h3>Urheberrecht</h3><p>Texte, Trainings- und Ernährungspläne, Grafiken und Videos dieser App unterliegen dem Urheberrecht. Vervielfältigung, Bearbeitung und Weitergabe außerhalb der eigenen Nutzung bedürfen der schriftlichen Zustimmung.</p>`;
+}
+function legalDatenschutz() {
+  return `<h2>Datenschutzerklärung</h2><p class="muted">Stand: ${esc(LEGAL.updated)}</p>
+    <h3>1. Verantwortlicher</h3><p>${lAddr()}<br>E-Mail: ${esc(LEGAL.email)} · Telefon: ${esc(LEGAL.phone)}</p>
+    <h3>2. Das Wichtigste in Kürze</h3><ul>
+      <li>Es gibt <b>kein Benutzerkonto, keine Cloud, keine Cookies, kein Tracking und keine Werbung</b>.</li>
+      <li>Alle Daten, die du in die App eingibst, werden <b>nur auf deinem eigenen Gerät</b> gespeichert. Wir haben darauf keinen Zugriff.</li>
+      <li>Daten zwischen Trainer und Kunde werden nur als <b>verschlüsselte Datei</b> ausgetauscht, die ihr selbst verschickt.</li></ul>
+    <h3>3. Bereitstellung der App (Hosting)</h3>
+    <p>Die App wird über GitHub Pages bereitgestellt, einen Dienst der GitHub, Inc., 88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, USA. Beim Aufruf der App verarbeitet GitHub technisch notwendige Zugriffsdaten (IP-Adresse, Datum und Uhrzeit, aufgerufene Datei, Browsertyp), um die App auszuliefern und vor Missbrauch zu schützen. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an einer sicheren und zuverlässigen Bereitstellung). Dabei kann eine Übermittlung in die USA stattfinden. GitHub gibt an, unter dem EU-US Data Privacy Framework zertifiziert zu sein. Weitere Informationen: docs.github.com/de/site-policy/privacy-policies/github-general-privacy-statement</p>
+    <h3>4. Speicherung auf deinem Gerät</h3>
+    <p>Alle Eingaben – z. B. Name, Kontaktdaten, Geburtsdatum, Trainingspläne, Trainings, Gewicht, Körpermaße, Körperfettwerte, Fortschrittsfotos, Ernährungsangaben und Essrhythmus – werden ausschließlich lokal im Speicher deines Browsers (IndexedDB) abgelegt. Für die Offline-Nutzung werden zusätzlich die Programmdateien der App auf deinem Gerät zwischengespeichert. Diese Daten werden nicht an uns oder Dritte übertragen. Du kannst sie jederzeit in der App oder über die Browsereinstellungen löschen.</p>
+    <h3>5. Gesundheitsdaten</h3>
+    <p>Gewicht, Körpermaße, Körperfett, Fortschrittsfotos sowie Trainings- und Ernährungsdaten können Gesundheitsdaten im Sinne von Art. 9 DSGVO sein. Sie werden nur zur Trainings- und Ernährungsbetreuung verarbeitet und nur auf Grundlage deiner ausdrücklichen Einwilligung (Art. 9 Abs. 2 lit. a, Art. 6 Abs. 1 lit. a DSGVO). Die Einwilligung ist freiwillig und kann jederzeit mit Wirkung für die Zukunft widerrufen werden, z. B. per E-Mail an ${esc(LEGAL.email)}.</p>
+    <h3>6. Betreuung durch deinen Trainer</h3>
+    <p>Wenn du von ${esc(LEGAL.owner)} betreut wirst, speichert er die für die Betreuung nötigen Daten auf seinem eigenen Gerät in derselben App. Für den Austausch erzeugt die App eine Datei, die mit deinem persönlichen Zugangscode verschlüsselt ist (AES-256-GCM). Den Übertragungsweg (z. B. WhatsApp, E-Mail oder AirDrop) wählt ihr selbst. Für diese Dienste gelten deren eigene Datenschutzbestimmungen; der Inhalt der Datei bleibt dabei verschlüsselt. Rechtsgrundlage ist deine Einwilligung (Ziffer 5) sowie die Durchführung des Betreuungsvertrags (Art. 6 Abs. 1 lit. b DSGVO).</p>
+    ${videoMode() ? `<h3>7. Übungsvideos</h3><p>Beim Ansehen von Übungsvideos lädt die App das Video von MuscleWiki (USA). Die Vermittlung läuft über einen Server bei Cloudflare, Inc. (USA). Dabei werden technisch notwendig deine IP-Adresse und die angefragte Übung verarbeitet, keine persönlichen Trainings- oder Gesundheitsdaten. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO.</p>` : ''}
+    <h3>${videoMode() ? 8 : 7}. Speicherdauer</h3><p>Daten auf deinem Gerät bleiben gespeichert, bis du sie löschst. Daten beim Trainer werden nach Ende der Betreuung gelöscht, soweit keine gesetzlichen Aufbewahrungspflichten (z. B. für Rechnungen) bestehen.</p>
+    <h3>${videoMode() ? 9 : 8}. Deine Rechte</h3><p>Du hast das Recht auf Auskunft (Art. 15 DSGVO), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung der Verarbeitung (Art. 18), Datenübertragbarkeit (Art. 20) und Widerspruch (Art. 21) sowie das Recht, eine Einwilligung jederzeit zu widerrufen (Art. 7 Abs. 3). Wende dich dazu an ${esc(LEGAL.email)}. Außerdem kannst du dich bei einer Datenschutz-Aufsichtsbehörde beschweren, zuständig ist: ${esc(LEGAL.authority)}.</p>`;
+}
+function legalGesundheit() {
+  return `<h2>Gesundheitshinweis</h2>
+    <p>Die Trainingspläne, Ernährungswerte und Hinweise in dieser App sind <b>Orientierungswerte für gesunde Erwachsene</b>. Sie ersetzen keine ärztliche Untersuchung, Diagnose oder Behandlung.</p>
+    <ul><li>Lass vor Beginn eines Trainings- oder Ernährungsprogramms ärztlich abklären, ob du belastbar bist – besonders bei Vorerkrankungen (z. B. Herz-Kreislauf, Bluthochdruck, Diabetes), Verletzungen, Schmerzen, Medikamenteneinnahme, nach einer Operation, in der Schwangerschaft oder Stillzeit.</li>
+      <li>Brich das Training sofort ab bei Schmerzen in der Brust, Schwindel, Atemnot oder ungewöhnlichen Beschwerden und suche ärztliche Hilfe.</li>
+      <li>Die Ernährungswerte sind nicht für Menschen mit Essstörungen, Nierenerkrankungen oder besonderen medizinischen Ernährungsanforderungen gedacht.</li>
+      <li>Ergebnisse sind individuell und hängen von vielen Faktoren ab. Vorher-Nachher-Ergebnisse anderer sind keine Garantie für eigene Ergebnisse.</li></ul>
+    <p>Die Nutzung erfolgt auf eigene Verantwortung im Rahmen der gesetzlichen Bestimmungen.</p>`;
+}
+function consentText(name = '') {
+  return `Einwilligung in die Verarbeitung von Gesundheitsdaten
+
+Ich, ${name || '______________________'}, willige ausdrücklich ein, dass ${LEGAL.owner} (${LEGAL.business}, ${LEGAL.street}, ${LEGAL.city}) folgende Daten von mir zum Zweck meiner Trainings- und Ernährungsbetreuung verarbeitet: Name, Kontaktdaten, Geburtsdatum, Geschlecht, Größe, Gewicht, Körpermaße, Körperfettwerte, Fortschrittsfotos sowie meine Trainings- und Ernährungsdaten.
+
+Die Daten werden in der SWEAT4-App ausschließlich lokal auf dem Gerät des Trainers und auf meinem eigenen Gerät gespeichert. Ausgetauscht werden sie nur als verschlüsselte Datei. Fortschrittsfotos dienen nur der Dokumentation meines Fortschritts und werden ohne meine gesonderte schriftliche Zustimmung nicht veröffentlicht oder weitergegeben.
+
+Die Einwilligung ist freiwillig. Ich kann sie jederzeit ohne Angabe von Gründen mit Wirkung für die Zukunft widerrufen, z. B. per E-Mail an ${LEGAL.email}. Nach dem Widerruf bzw. nach Ende der Betreuung werden meine Daten gelöscht, soweit keine gesetzlichen Aufbewahrungspflichten bestehen. Weitere Informationen stehen in der Datenschutzerklärung der App.
+
+Ort, Datum: ______________________
+
+Unterschrift: ______________________`;
+}
+function legalEinwilligung() {
+  return `<h2>Einwilligung Gesundheitsdaten</h2>
+    <p>Gewicht, Maße und Körperfotos sind Gesundheitsdaten. Sie dürfen nur mit ausdrücklicher Einwilligung gespeichert werden. Diesen Text kannst du kopieren und von deinen Kunden unterschreiben lassen (auf Papier oder digital). In der App wird die Einwilligung pro Kunde mit Datum vermerkt.</p>
+    <pre class="consent-txt" id="consent-txt">${esc(consentText())}</pre>
+    <button class="btn btn-ghost btn-block" data-action="consent-copy">${ic('list', 18)} Text kopieren</button>`;
+}
+function viewLegal(tab) {
+  tab = LEGAL_TABS.some(t => t[0] === tab) ? tab : 'impressum';
+  const body = { impressum: legalImpressum, datenschutz: legalDatenschutz, gesundheit: legalGesundheit, einwilligung: legalEinwilligung }[tab]();
+  return topbar({ back: '/data', title: 'Rechtliches', sub: esc(LEGAL.business) }) + `<main class="wrap view">
+    <div class="frow legal-tabs" role="tablist">${LEGAL_TABS.filter(t => t[0] !== 'einwilligung' || !isClientMode()).map(([k, l]) => `<a class="fchip ${k === tab ? 'on' : ''}" href="#/rechtliches/${k}" role="tab" aria-selected="${k === tab}">${l}</a>`).join('')}</div>
+    <article class="card legal">${body}</article></main>`;
+}
+const LegalLinks = () => `<nav class="legal-links"><a href="#/rechtliches/impressum">Impressum</a><span>·</span><a href="#/rechtliches/datenschutz">Datenschutz</a><span>·</span><a href="#/rechtliches/gesundheit">Gesundheitshinweis</a></nav>`;
+function ConsentBanner(c) {
+  if (c.consentAt) return '';
+  return `<div class="consent-banner"><div class="grow"><b>Einwilligung fehlt</b><div>Gesundheitsdaten (Gewicht, Maße, Fotos) nur mit Einwilligung speichern.</div></div>
+    <button class="btn btn-sm btn-primary" data-action="consent-set" data-cid="${c.id}">Bestätigen</button></div>`;
+}
+Object.assign(A, {
+  'consent-copy': () => { const t = consentText(); (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => toast('Text kopiert'), () => { const el = document.getElementById('consent-txt'); const r = document.createRange(); r.selectNodeContents(el); const s = getSelection(); s.removeAllRanges(); s.addRange(r); toast('Text markiert – jetzt kopieren'); }); },
+  'consent-set': async el => { const c = S.clients.get(el.dataset.cid); if (!c) return;
+    if (!await confirmDialog('Einwilligung bestätigen', `Liegt dir die unterschriebene Einwilligung von <b>${esc(c.name)}</b> zur Verarbeitung der Gesundheitsdaten vor?<br><br><span class="muted">Den Text findest du unter Rechtliches → Einwilligung.</span>`, { ok: 'Ja, liegt vor' })) return;
+    c.consentAt = Date.now(); put('clients', c); toast('Einwilligung vermerkt'); render(); },
+});
+
 function clientExtraSections(c, part) {
   const cl = checksOf(c.id), last = cl[cl.length - 1], due = checkDue(c), age = ageAt(c.birthDate);
   const vals = last ? MEASURES.map(m => { const fl = firstLast(cl, m.k); return fl ? `<div class="mini"><div class="mini-l">${m.s}</div><div class="mini-v">${fmtNum(fl.cur)} <small>${m.u}</small></div>${fl.n > 1 ? `<div class="mini-d">${sgn(fl.d)} ${m.u}</div>` : ''}</div>` : ''; }).join('') : '';
@@ -3041,7 +3159,9 @@ function clientExtraFields(c) {
       <label class="field"><span>Gewicht (kg)</span><input name="weightKg" class="input" inputmode="decimal" value="${c && c.weightKg ? fmtIn(c.weightKg) : ''}" placeholder="bis zum 1. Check"></label>
       <label class="field" style="grid-column:1/-1"><span>Ernährungsziel</span><select name="nutGoal" class="input">${Object.entries(NUTRITION.goals).map(([k, g]) => `<option value="${k}" ${(c ? nutGoalOf(c) : 'def') === k ? 'selected' : ''}>${esc(g.option || g.label)}</option>`).join('')}</select></label>
       <label class="field" style="grid-column:1/-1"><span>Alltag / Aktivität</span><select name="activity" class="input">${Object.entries(NUTRITION.activity).map(([k, a]) => `<option value="${k}" ${(c && c.activity || 'moderat') === k ? 'selected' : ''}>${esc(a.label)}</option>`).join('')}</select></label>
-    </div><div class="muted" style="font-size:12px;margin:-6px 0 14px">Geschlecht, Geburtsdatum, Größe und Gewicht braucht die App für den Ernährungsplan und die Körperfett-Berechnung. Das Gewicht wird ab dem ersten Fortschrittscheck automatisch aktualisiert. Die 12 Wochen zählen ab dem Startdatum.</div>`;
+    </div>
+    <label class="toggle" style="margin-bottom:12px"><input type="checkbox" name="consent" ${c && c.consentAt ? 'checked' : ''}><span class="tg"></span><span>Einwilligung liegt vor${c && c.consentAt ? ` (seit ${fmtDateTs(c.consentAt)})` : ''}<small>Gesundheitsdaten (Gewicht, Maße, Fotos) nur mit unterschriebener Einwilligung speichern. Text unter Rechtliches → Einwilligung.</small></span></label>
+    <div class="muted" style="font-size:12px;margin:-6px 0 14px">Geschlecht, Geburtsdatum, Größe und Gewicht braucht die App für den Ernährungsplan und die Körperfett-Berechnung. Das Gewicht wird ab dem ersten Fortschrittscheck automatisch aktualisiert. Die 12 Wochen zählen ab dem Startdatum.</div>`;
 }
 function clientExtraValues(fd) {
   const n = parseInt(fd.get('checkEvery'), 10);
@@ -3391,6 +3511,7 @@ function viewClientHome() {
       ${complete.length ? `<div class="ba-row" style="margin-top:12px"><div class="ba"><img data-pid="${photoIds(complete[0])[0]}" alt=""><span>Start · ${fmtDate(complete[0].date)}</span></div>${complete.length > 1 ? `<div class="ba"><img data-pid="${photoIds(complete[complete.length - 1])[0]}" alt=""><span>Aktuell · ${fmtDate(complete[complete.length - 1].date)}</span></div>` : ''}</div>` : ''}
     </section>
     <a class="privacy-pill" href="#/data">${ic('lock', 16)} Nur deine Daten · verschlüsselt übertragen</a>
+    ${LegalLinks()}
   </main>`;
 }
 function viewPlanRO(c) {
@@ -3426,6 +3547,10 @@ function viewDataClient() {
       <div class="stack" style="font-size:15px"><div>👤 Angemeldet als <b>${esc(c ? c.name : '')}</b>. Auf diesem Gerät befinden sich ausschließlich deine eigenen Daten.</div>
       <div>🔒 Die App ist mit deinem Zugangscode geschützt. Daten werden nur verschlüsselt zwischen dir und deinem Trainer ausgetauscht – ohne Cloud.</div>
       ${info ? `<div class="muted" style="font-size:13px">Stand vom Trainer: ${esc(new Date(info.exportedAt).toLocaleString('de-DE'))}</div>` : ''}</div></div>
+    <section class="section"><div class="section-h"><h2>Rechtliches</h2></div><div class="card list-card">
+      <a class="list-link" href="#/rechtliches/impressum">${ic('book')}<div class="grow"><b>Impressum</b></div></a>
+      <a class="list-link" href="#/rechtliches/datenschutz">${ic('lock')}<div class="grow"><b>Datenschutz</b></div></a>
+      <a class="list-link" href="#/rechtliches/gesundheit">${ic('check')}<div class="grow"><b>Gesundheitshinweis</b></div></a></div></section>
     <section class="section"><div class="section-h"><h2>Mit deinem Trainer austauschen</h2></div>
       <div class="card stack">
         <button class="btn btn-primary btn-block" data-action="ret-make">${ic('upload')} Meine Trainings an Trainer senden</button>
@@ -3444,6 +3569,7 @@ function viewSetup() {
       <div class="muted" style="font-size:14px">${cm ? 'Wähle die neue Datei deines Trainers und gib deinen Zugangscode ein.' : '1. Wähle die Datei, die du von deinem Trainer bekommen hast (z. B. per AirDrop, WhatsApp oder E-Mail – vorher in „Dateien“ sichern).<br>2. Gib den Zugangscode ein, den dir dein Trainer gesagt hat.'}</div>
       <label class="btn btn-ghost btn-block" id="setup-pick">${ic('upload')} <span>Datei auswählen</span><input type="file" name="file" accept=".json,application/json" hidden></label>
       <label class="field" style="margin:0"><span>Zugangscode</span><input name="code" type="password" class="input" autocomplete="current-password" required minlength="6"></label>
+      ${cm ? '' : `<label class="toggle"><input type="checkbox" name="agree"><span class="tg"></span><span>Ich habe die <a href="#/rechtliches/datenschutz" class="accent">Datenschutzerklärung</a> und den <a href="#/rechtliches/gesundheit" class="accent">Gesundheitshinweis</a> gelesen und willige in die Verarbeitung meiner Gesundheitsdaten zur Betreuung ein.</span></label>`}
       <button class="btn btn-primary btn-big">${cm ? 'Update laden' : 'Zugang einrichten'}</button>
       <div class="muted" style="font-size:12px">Deine Daten bleiben ausschließlich auf diesem Gerät. Es werden keine Daten ins Internet übertragen.</div>
     </form></main>`;
@@ -3581,6 +3707,7 @@ function routeExtra(p) {
   }
   if (p[0] === 'check') { const ch = S.checks.get(p[1]); if (!ch) return null; const c = S.clients.get(ch.clientId); if (!c) return null; return p[2] === 'edit' ? viewCheckForm(c, ch) : viewCheck(ch); }
   if (p[0] === 'kunde-setup') return viewSetup();
+  if (p[0] === 'rechtliches') return viewLegal(p[1]);
   if (p[0] === 'data' && isClientMode()) return viewDataClient();
   return undefined;
 }
@@ -3679,7 +3806,9 @@ document.addEventListener('submit', async ev => {
     }
     if (k === 'setup') {
       const file = f.querySelector('input[type=file]').files[0]; if (!file) return toast('Bitte zuerst die Datei auswählen');
+      if (!isClientMode() && fd.get('agree') !== 'on') return toast('Bitte Datenschutz und Gesundheitshinweis bestätigen');
       busy(f, true); const was = isClientMode(); await setupFromFile(file, String(fd.get('code') || ''));
+      if (!was) put('meta', { id: 'consent', at: Date.now() });
       toast(was ? 'Update geladen ✓' : 'Willkommen! Dein Zugang ist eingerichtet ✓'); go('/'); render(); return;
     }
   } catch (e) { busy(f, false); toast(e && e.message || String(e)); }

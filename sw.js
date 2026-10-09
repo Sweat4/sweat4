@@ -1,5 +1,5 @@
 // SWEAT4 Trainer-Logbuch – Offline-Cache. Bei Updates VERSION erhöhen.
-const VERSION = 'sweat4-v16';
+const VERSION = 'sweat4-v17';
 const FILES = ['./', 'index.html', 'manifest.webmanifest', 'uebungen-katalog.js', 'uebungen-medien.js', 'lebensmittel.js', 'uebungen3d.js', 'three.min.js', 'icon-180.png', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png'];
 // Fehlende Dateien (z. B. Übungskatalog) dürfen die Installation nicht blockieren
 self.addEventListener('install', e => { e.waitUntil(caches.open(VERSION).then(c => Promise.all(FILES.map(f => c.add(f).catch(() => null)))).then(() => self.skipWaiting())); });
