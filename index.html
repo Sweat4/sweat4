@@ -46,6 +46,7 @@ h1,h2,h3{margin:0;line-height:1.2}
 .tb-sub{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .brand{display:flex;align-items:center;flex:none}
 .brand .logo-mark{height:34px;width:auto;display:block}
+@media(max-width:420px){.brand .logo-mark{height:26px}.topbar-in>.icon-btn:not(:first-child),.topbar-in>a.icon-btn:not(:first-child){width:40px}}
 .home-logo{display:flex;justify-content:center;margin:6px 0 20px}
 .home-logo .logo-full{width:min(300px,78vw);height:auto;display:block}
 .tb-extra{max-width:780px;margin:0 auto;padding:0 16px 10px;display:flex;align-items:center;gap:12px}
@@ -128,6 +129,8 @@ h1,h2,h3{margin:0;line-height:1.2}
 .list-link:last-child{border-bottom:none}
 .list-card{padding:0;overflow:hidden}
 .quick{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.quick3{grid-template-columns:repeat(3,minmax(0,1fr))}.quick3 .btn{padding:0 8px;font-size:15px;gap:6px}
+@media(max-width:380px){.quick3 .btn{flex-direction:column;gap:2px;min-height:58px;font-size:13px}}
 .spark{display:block;margin-top:4px}
 
 /* Plan editor */
@@ -795,7 +798,7 @@ function download(name, text, mime) {
 }
 
 const ICONS = {
-  back: 'M15 18l-6-6 6-6', expand: 'M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5', arrow: 'M5 12h14M13 6l6 6-6 6', plus: 'M12 5v14M5 12h14', edit: 'M4 20h4L19 9l-4-4L4 16v4z', trash: 'M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13',
+  back: 'M15 18l-6-6 6-6', food: 'M7 3v7a2 2 0 0 0 4 0V3M9 10v11M17 21V3c-2.2 0-3.5 2.5-3.5 6s1.3 5 3.5 5', expand: 'M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5', arrow: 'M5 12h14M13 6l6 6-6 6', plus: 'M12 5v14M5 12h14', edit: 'M4 20h4L19 9l-4-4L4 16v4z', trash: 'M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13',
   up: 'M6 15l6-6 6 6', down: 'M6 9l6 6 6-6', check: 'M5 12.5l4.5 4.5L19 7.5', chart: 'M4 19V11M10 19V5M16 19v-6M2 21h20',
   history: 'M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 3', cube: 'M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3zM12 12l8-4.5M12 12v9M12 12L4 7.5', book: 'M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4zM5 17a3 3 0 0 1 3-3h11', pause: 'M8 5v14M16 5v14', reset: 'M4 12a8 8 0 1 0 2.4-5.7L4 8.5M4 4v4.5h4.5', lock: 'M6 11h12v10H6zM8 11V7a4 4 0 0 1 8 0v4',
   db: 'M4 6c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3zM4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3',
@@ -1161,7 +1164,7 @@ function viewHome() {
       </div>
       <div class="cc-tags">${c.status === 'inactive' ? '<span class="tag off">inaktiv</span>' : checkDue(c) ? '<span class="tag warn">Check</span>' : ''}${active ? '<span class="tag live">läuft</span>' : ''}${mostRecent && mostRecent.c.id === c.id ? '<span class="tag">Zuletzt</span>' : ''}</div>
     </a>`).join('');
-  return topbar({ title: 'Trainer-Logbuch', sub: `${rows.length} ${rows.length === 1 ? 'Kunde' : 'Kunden'}`, right: `<a class="icon-btn" href="#/uebungen" aria-label="Übungskatalog &amp; 3D">${ic('book', 22)}</a><a class="icon-btn" href="#/data" aria-label="Daten &amp; Backup">${ic('db', 22)}</a>` }) +
+  return topbar({ title: 'Coaching', sub: `${rows.length} ${rows.length === 1 ? 'Kunde' : 'Kunden'}`, right: `<button class="icon-btn" data-action="food-pick" aria-label="Ernährung">${ic('food', 22)}</button><a class="icon-btn" href="#/uebungen" aria-label="Übungskatalog &amp; 3D">${ic('book', 22)}</a><a class="icon-btn" href="#/data" aria-label="Daten &amp; Backup">${ic('db', 22)}</a>` }) +
   `<main class="wrap view">
     <div class="home-logo">${LOGO_FULL}</div>
     ${needBackup ? `<div class="banner"><div><b>Backup empfohlen</b><div class="muted" style="font-size:14px">${lb ? 'Letztes Backup: ' + fmtDateTs(lb) : 'Noch kein Backup erstellt.'}</div></div><button class="btn btn-sm btn-primary" data-action="backup">Jetzt sichern</button></div>` : ''}
@@ -1217,7 +1220,8 @@ function viewClient(c) {
       ${active ? `<a class="btn btn-primary btn-big" href="#/train/${active.id}">${ic('play', 22)} Laufendes Training fortsetzen</a><div class="muted" style="text-align:center;font-size:14px;margin-top:6px">${esc(sessLabel(active))} · begonnen ${fmtDate(active.date)}</div>`
                : `<button class="btn btn-primary btn-big" data-action="start-training" data-cid="${c.id}">${ic('play', 22)} Training starten</button>`}
     </div>
-    <div class="quick">
+    <div class="quick quick3">
+      <a class="btn btn-ghost" href="#/client/${c.id}/food">${ic('food')} Ernährung</a>
       <a class="btn btn-ghost" href="#/client/${c.id}/progress">${ic('chart')} Fortschritt</a>
       <a class="btn btn-ghost" href="#/client/${c.id}/history">${ic('history')} Historie</a>
     </div>
@@ -2957,6 +2961,10 @@ Object.assign(A, {
   'meal-toggle': el => { const k = el.dataset.k; UI.mealOpen = { ...(UI.mealOpen || {}), [k]: !(UI.mealOpen || {})[k] }; const d = document.getElementById('meal-' + k); if (d) { d.classList.toggle('open'); el.setAttribute('aria-expanded', d.classList.contains('open')); } },
   'food-day': el => { UI.foodDay = el.dataset.v; render(); },
   'meal-cfg': el => openMealCfg(el.dataset.cid),
+  'food-pick': () => { const L = all('clients').filter(c => c.status !== 'inactive').sort((a, b) => a.name.localeCompare(b.name, 'de'));
+    if (!L.length) return toast('Lege zuerst einen Kunden an');
+    modal('Ernährung – für wen?', `<div class="pick-list">${L.map(c => { const n = nutritionFor(c);
+      return `<button class="day-btn tap" data-action="modal-go" data-href="/client/${c.id}/food">${avatar(c, 'sm')}<span class="grow"><span class="day-name">${esc(c.name)}</span><br><span class="muted" style="font-size:13px">${n.kcal ? `${esc(n.goal)} · ${n.kcal.toLocaleString('de-DE')} kcal` : n.missing ? 'Angaben fehlen noch' : ''}</span></span>${ic('food', 20)}</button>`; }).join('')}</div>`); },
   'meal-pick': el => openFoodPicker(el.dataset.k, el.dataset.cat),
   'meal-add': el => { const c = mealClient(); if (!c) return; const k = el.dataset.k, f = foodById(el.dataset.id), items = [...((c.meals || {})[k] || [])];
     if (!items.some(x => x.id === f.id)) items.push({ id: f.id, g: f.k === 'v' ? (f.fix || 100) : (f.u ? f.u.g : 100) }); closeModal(null); saveMeals(c, k, items); },
@@ -3351,13 +3359,14 @@ function viewClientHome() {
   const tile = k => { const d = MEASURES.find(m => m.k === k), fl = firstLast(cl, k); if (!fl) return '';
     return `<a class="stat" href="#/client/${cid}/body"><div class="stat-l">${d.s}</div><div class="stat-v">${fmtNum(fl.cur)} <small style="font-size:14px">${d.u}</small></div><div class="stat-s">${fl.n > 1 ? `${sgn(fl.d)} ${d.u} seit Start` : 'Startwert'}</div></a>`; };
   const complete = cl.filter(isComplete);
-  return topbar({ title: 'SWEAT4', sub: 'Mein Training', right: `<a class="icon-btn" href="#/uebungen" aria-label="Übungen">${ic('book', 22)}</a><a class="icon-btn" href="#/data" aria-label="Einstellungen">${ic('db', 22)}</a>` }) +
+  return topbar({ title: 'SWEAT4', sub: days.length ? 'Mein Training' : 'Meine Ernährung', right: `<a class="icon-btn" href="#/client/${cid}/food" aria-label="Ernährung">${ic('food', 22)}</a><a class="icon-btn" href="#/uebungen" aria-label="Übungen">${ic('book', 22)}</a><a class="icon-btn" href="#/data" aria-label="Einstellungen">${ic('db', 22)}</a>` }) +
   `<main class="wrap view">
     <div class="hero">${avatar(c, 'xl')}<div class="grow"><h1>Willkommen zurück, ${esc(first)} 👋</h1>${c.goals ? `<div class="muted" style="margin-top:4px">🎯 ${esc(c.goals)}</div>` : ''}</div></div>
     <div class="section-h" style="margin-top:6px"><h2>Dein Fortschritt</h2></div>
     <div class="stats">${tile('weight')}${tile('waist')}${tile('chest')}
       <a class="stat" href="#/client/${cid}/history"><div class="stat-l">Training</div><div class="stat-v">${done.length}</div><div class="stat-s">Workouts absolviert</div></a></div>
 
+    ${days.length ? '' : NutritionCard(c, true)}
     <section class="section"><div class="section-h"><h2>Dein Training</h2></div>
       ${active ? `<a class="btn btn-primary btn-big" href="#/train/${active.id}">${ic('play', 22)} Workout fortsetzen</a>`
         : next ? `<button class="btn btn-primary btn-big" data-action="start-day" data-cid="${cid}" data-did="${next.id}">${ic('play', 22)} Nächstes Workout: ${esc(dayLabel(days.indexOf(next), next.name))}</button>` : '<div class="card empty">Dein Trainer hat noch keinen Trainingsplan hinterlegt.</div>'}
@@ -3370,7 +3379,7 @@ function viewClientHome() {
       ${days.length > 1 ? `<div class="day-grid" style="margin-top:12px">${days.map((d, i) => `<button class="day-btn ${next && next.id === d.id ? 'next' : ''}" data-action="start-day" data-cid="${cid}" data-did="${d.id}"><span class="day-no">${i + 1}</span><span class="grow"><span class="day-name">${esc(d.name)}</span><br><span class="muted" style="font-size:14px">${exercisesOf(d.id).length} Übungen</span></span><span class="muted">${ic('play', 16)}</span></button>`).join('')}</div>` : ''}
     </section>
 
-    ${NutritionCard(c, true)}
+    ${days.length ? NutritionCard(c, true) : ''}
 
     <section class="section"><div class="section-h"><h2>Deine Entwicklung</h2></div>
       <div class="card list-card">
