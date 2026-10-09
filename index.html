@@ -579,6 +579,70 @@ img.ld{opacity:1!important}
 .ud-novideo svg{color:var(--gold-deep)}.ud-novideo b{color:var(--text)}
 .xprev-video .xprev-ph{color:rgba(199,164,106,.4)}
 [hidden]{display:none!important}
+
+/* Ernährung */
+.nut{display:grid;gap:14px;border-color:var(--gold-line);background:radial-gradient(120% 120% at 100% 0%,rgba(199,164,106,.10) 0%,rgba(199,164,106,0) 55%),var(--card-grad)}
+.nut-empty{color:var(--muted);font-size:15px}
+.nut-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.nut-eyebrow{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.nut-kcal{font:800 34px/1.1 var(--font-display);margin-top:6px;font-variant-numeric:tabular-nums}
+.nut-kcal small{font-size:14px;font-weight:600;color:var(--muted)}
+.nut-sub{font-size:13px;color:var(--muted);margin-top:4px}
+.nut-water{flex:none;display:grid;justify-items:center;gap:2px;padding:10px 12px;border-radius:var(--r-md);background:var(--surface-2);border:1px solid var(--border);min-width:76px}
+.nut-water b{font-size:18px;font-variant-numeric:tabular-nums}.nut-water small{font-size:11px;color:var(--muted)}
+.nut-drop{width:14px;height:18px;background:#6fa8dc;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;transform:rotate(180deg);opacity:.85}
+.nut-phases{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.nut-ph{padding:7px 6px;border-radius:10px;text-align:center;font-size:12px;background:var(--surface-2);color:var(--muted);border:1px solid var(--border)}
+.nut-ph.past{color:var(--gold-deep)}
+.nut-ph.on{background:var(--accent-soft);color:var(--gold);border-color:var(--gold-line)}
+.nut-macros{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.nut-m{padding:10px;border-radius:var(--r-md);background:var(--surface-2);border-top:3px solid var(--border);min-width:0}
+.nut-m.p{border-top-color:var(--gold)}.nut-m.c{border-top-color:#8f8a80}.nut-m.f{border-top-color:#6b5a3e}
+.nut-m-l{font-size:11px;font-weight:700;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nut-m-v{font:800 22px/1.2 var(--font-display);font-variant-numeric:tabular-nums}.nut-m-v small{font-size:12px;color:var(--muted)}
+.nut-m-k{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.nut-foot{font-size:12px;color:var(--muted);line-height:1.5}
+
+/* Mahlzeiten */
+.food-sum{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.food-kcal{font:800 30px/1.1 var(--font-display);margin-top:4px;font-variant-numeric:tabular-nums}.food-kcal small{font-size:14px;color:var(--muted)}
+.food-mac{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--muted)}.food-mac b{color:var(--text);font-variant-numeric:tabular-nums}
+.rhythm{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:12px 14px;border-radius:var(--r-md);border:1px solid var(--border);background:var(--surface);color:var(--text);font:inherit;cursor:pointer;margin-bottom:12px}
+.rhythm .grow{display:grid;gap:2px;min-width:0}.rhythm .muted{font-size:13px}
+.daysw{margin-bottom:12px}
+.food-warn,.food-hint{font-size:13.5px;line-height:1.45;padding:10px 12px;border-radius:12px;margin-bottom:8px}
+.food-warn{background:rgba(251,191,36,.10);color:#f3d27a;border:1px solid rgba(251,191,36,.3)}
+.food-hint{background:var(--surface-2);color:#cfc9bf;border:1px solid var(--border)}
+.timeline{display:grid;gap:10px;margin-top:6px}
+.meal{border:1px solid var(--border);border-radius:var(--r-md);background:var(--card-grad);overflow:hidden}
+.meal.open{border-color:var(--gold-line)}
+.meal-h{display:flex;align-items:center;gap:12px;width:100%;padding:12px;background:none;border:none;color:var(--text);font:inherit;text-align:left;cursor:pointer}
+.meal-h>svg{flex:none;color:var(--muted);transition:transform var(--t-fast)}.meal.open .meal-h>svg{transform:rotate(180deg)}
+.meal-time{flex:none;min-width:54px;font:800 16px/1 var(--font-display);color:var(--gold);font-variant-numeric:tabular-nums}
+.meal-h .grow{display:grid;gap:3px;min-width:0}
+.meal-t{font-weight:700;display:flex;gap:6px;align-items:center;flex-wrap:wrap}.meal-t .pill{font-size:10.5px;padding:2px 8px}
+.meal-s{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.meal-ok{flex:none;font-size:12px;font-weight:700;color:var(--ok)}.meal-ok.empty{color:var(--muted)}
+.meal-b{display:none;padding:0 12px 14px;gap:12px}.meal.open .meal-b{display:grid}
+.meal-tip{font-size:13px;color:var(--gold);background:var(--accent-soft);padding:8px 10px;border-radius:10px}
+.mbars{display:grid;gap:8px}
+.mb-h{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}.mb-h b{color:var(--text);font-variant-numeric:tabular-nums}
+.mb-t{height:6px;border-radius:99px;background:var(--surface-3);overflow:hidden;margin-top:4px}
+.mb-t i{display:block;height:100%;background:var(--gold-deep);border-radius:99px;transition:width .3s}.mb-t i.ok{background:var(--ok)}.mb-t i.over{background:#e07b5a}
+.mitems{display:grid;gap:6px}
+.mitem{display:flex;align-items:center;gap:8px;padding:6px 4px 6px 8px;border-radius:10px;background:var(--surface-2)}
+.mi-dot{width:8px;height:8px;border-radius:50%;flex:none}.k-p{background:var(--gold)}.k-c{background:#8f8a80}.k-v{background:var(--ok)}.k-f{background:#6b5a3e}
+.mi-n{font-size:14px;min-width:0;overflow-wrap:break-word}.mi-n small{color:var(--muted);margin-left:4px}
+.mi-g{display:flex;align-items:center;gap:4px;flex:none}.mi-g input{width:64px;height:38px;text-align:right;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:0 8px;font-variant-numeric:tabular-nums}.mi-g span{font-size:12px;color:var(--muted)}
+.madd{display:flex;gap:6px;flex-wrap:wrap}.madd .fchip{min-height:32px;font-size:13px;padding:0 10px}
+.mact{display:flex;gap:8px;flex-wrap:wrap}.mact .btn{min-height:42px;flex:1 1 auto}
+.trow{display:flex;gap:12px;align-items:flex-start;padding:12px;border-radius:var(--r-md);border:1px dashed var(--gold-line);background:rgba(199,164,106,.05)}
+.food-opt{display:flex;align-items:center;gap:10px;text-align:left;width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);font:inherit;cursor:pointer}
+.food-opt .grow{display:grid;gap:2px;min-width:0}.food-opt .muted{font-size:12.5px}
+.wdays{display:flex;gap:6px;flex-wrap:wrap}.wdays label{position:relative}.wdays input{position:absolute;opacity:0;pointer-events:none}
+.wdays span{display:grid;place-items:center;width:42px;height:38px;border-radius:10px;border:1px solid var(--border);background:var(--surface-2);font-weight:700;font-size:14px;cursor:pointer}
+.wdays input:checked+span{background:var(--gold);color:#111;border-color:var(--gold)}
+.wdays input:focus-visible+span{outline:2px solid var(--gold);outline-offset:2px}
 </style>
 </head>
 <body>
@@ -589,6 +653,7 @@ img.ld{opacity:1!important}
 
 <script src="uebungen-katalog.js"></script>
 <script src="uebungen-medien.js"></script>
+<script src="lebensmittel.js"></script>
 <script>
 'use strict';
 /* =====================================================================
@@ -1156,6 +1221,7 @@ function viewClient(c) {
       <a class="btn btn-ghost" href="#/client/${c.id}/progress">${ic('chart')} Fortschritt</a>
       <a class="btn btn-ghost" href="#/client/${c.id}/history">${ic('history')} Historie</a>
     </div>
+    ${NutritionCard(c)}
     ${clientExtraSections(c, 'top')}
 
     <section class="section">
@@ -2621,6 +2687,304 @@ function coachDash(rows) {
 }
 
 /* ---------- Kundenprofil: Zusatzbereiche ---------- */
+/* =====================================================================
+   SWEAT4 ERNÄHRUNG – die Methode von Khosro Talee
+   12 Wochen in 3 Phasen à 4 Wochen. Werte in Gramm pro kg Körpergewicht.
+   Männer: Eiweiß, Kohlenhydrate und Fett fest pro kg.
+   Frauen: Eiweiß und Fett pro kg, Kalorien als Anteil vom Bedarf (gleiches Defizit-Verhältnis
+           wie bei den Männern), Kohlenhydrate = Rest.
+   Abnehmen läuft bewusst über die Körperdefinition (gleiche Methode).
+   ===================================================================== */
+const NUTRITION = {
+  activity: {   // Faktor auf den Grundumsatz, inkl. 3× Training pro Woche
+    sitzend: { label: 'Bürojob, wenig Bewegung', f: 1.3 },
+    moderat: { label: 'Berufstätig, moderat aktiv', f: 1.4 },
+    aktiv:   { label: 'Körperlich aktiver Beruf', f: 1.55 },
+    sehr:    { label: 'Schwere körperliche Arbeit', f: 1.7 },
+  },
+  goals: {
+    def: {
+      label: 'Körperdefinition & Abnehmen', ready: true,
+      m: { p: [2.2, 2.5, 2.8], c: [3.1, 2.5, 1.9], f: [0.8, 0.6, 0.4] },
+      w: { p: [1.8, 2.0, 2.2], f: [0.8, 0.6, 0.6], kcal: [0.93, 0.83, 0.73] },
+      water: [40, 50, 60],   // ml pro kg Körpergewicht
+    },
+    mass: {   // sauberer Aufbau (natural): Fett bleibt stabil, Eiweiß und Kohlenhydrate steigen alle 4 Wochen
+      label: 'Muskelaufbau', ready: true,
+      m: { p: [2.2, 2.5, 2.8], c: [4, 5, 6], f: [0.8, 0.8, 0.8] },
+      w: { p: [1.8, 2.0, 2.2], f: [0.8, 0.8, 0.8], kcal: [1.05, 1.21, 1.38] },
+      water: [40, 45, 50],
+    },
+  },
+  floor: { kcal: { m: 1500, w: 1200 }, carbsPerKg: 1.0 }, // Sicherheitsgrenzen
+  weeks: 12, phaseWeeks: 4,
+};
+const nutGoalOf = c => (NUTRITION.goals[c.nutGoal] && c.nutGoal) || (((planOf(c.id) || {}).templateId || '').includes('mass') ? 'mass' : 'def');
+const clientWeight = c => { const cl = checksOf(c.id); for (let i = cl.length - 1; i >= 0; i--) { const w = valOf(cl[i], 'weight'); if (w != null) return { kg: w, src: 'Check vom ' + fmtDate(cl[i].date) }; } return c.weightKg ? { kg: c.weightKg, src: 'Profil' } : null; };
+function bmr(sex, kg, cm, age) { return 10 * kg + 6.25 * cm - 5 * age + (sex === 'm' ? 5 : -161); } // Mifflin-St Jeor
+function nutritionFor(c, date = today()) {
+  const G = NUTRITION.goals[nutGoalOf(c)], miss = [];
+  if (!G || !G.ready) return { pending: true, goal: G ? G.label : '' };
+  const sex = c.sex === 'w' ? 'w' : c.sex === 'm' ? 'm' : null; if (!sex) miss.push('Geschlecht');
+  const W = clientWeight(c); if (!W) miss.push('Gewicht');
+  const age = ageAt(c.birthDate, date), cm = c.heightCm;
+  const canBmr = sex && W && age && cm;
+  if (sex === 'w' && !canBmr) { if (!age) miss.push('Geburtsdatum'); if (!cm) miss.push('Größe'); }
+  if (miss.length) return { missing: miss };
+  const start = c.startDate || today(), days = Math.max(0, daysBetween(start, date)), week = Math.floor(days / 7) + 1;
+  const phase = Math.min(2, Math.floor((week - 1) / NUTRITION.phaseWeeks)), kg = W.kg;
+  const act = NUTRITION.activity[c.activity || 'moderat'] || NUTRITION.activity.moderat;
+  const need = canBmr ? Math.round(bmr(sex, kg, cm, age) * act.f) : null;
+  let p, cb, f, kcal; const S = G[sex];
+  if (sex === 'm') { p = S.p[phase] * kg; cb = S.c[phase] * kg; f = S.f[phase] * kg; kcal = p * 4 + cb * 4 + f * 9; }
+  else { p = S.p[phase] * kg; f = S.f[phase] * kg; kcal = need * S.kcal[phase]; cb = (kcal - p * 4 - f * 9) / 4; }
+  const minC = NUTRITION.floor.carbsPerKg * kg, minK = NUTRITION.floor.kcal[sex];
+  if (cb < minC) cb = minC;
+  kcal = p * 4 + cb * 4 + f * 9;
+  if (kcal < minK) { cb += (minK - kcal) / 4; kcal = minK; }
+  const water = Math.round(G.water[phase] * kg / 100) / 10;
+  return { goal: G.label, sex, week, phase, done: week > NUTRITION.weeks, kg, wSrc: W.src, need, act: act.label,
+    kcal: Math.round(kcal), deficit: need ? need - Math.round(kcal) : null, water,
+    p: Math.round(p), c: Math.round(cb), f: Math.round(f), pk: p / kg, ck: cb / kg, fk: f / kg };
+}
+function NutritionCard(c, own) {
+  const n = nutritionFor(c);
+  const head = `<div class="section-h"><h2>${own ? 'Deine Ernährung' : 'Ernährung'}</h2>${own ? '' : `<button class="btn btn-sm btn-ghost" data-action="edit-client" data-id="${c.id}">${ic('edit', 16)} Profil</button>`}</div>`;
+  if (n.pending) return `<section class="section">${head}<div class="card nut-empty">Der Ernährungsplan für <b>${esc(n.goal)}</b> wird gerade aufgebaut und folgt in Kürze.</div></section>`;
+  if (n.missing) return `<section class="section">${head}<div class="card nut-empty">${own ? 'Dein Trainer ergänzt noch deine Angaben.' : `Für den Ernährungsplan fehlt noch: <b>${n.missing.map(esc).join(', ')}</b>.`}${own ? '' : `<button class="btn btn-ghost btn-block" style="margin-top:12px" data-action="edit-client" data-id="${c.id}">${ic('edit', 18)} Angaben ergänzen</button>`}</div></section>`;
+  const ph = [0, 1, 2].map(i => `<div class="nut-ph ${i === n.phase ? 'on' : i < n.phase ? 'past' : ''}"><b>Woche ${i * 4 + 1}–${i * 4 + 4}</b></div>`).join('');
+  const mac = (l, g, k, cls) => `<div class="nut-m ${cls}"><div class="nut-m-l">${l}</div><div class="nut-m-v">${g}<small> g</small></div><div class="nut-m-k">${fmtNum(Math.round(k * 10) / 10)} g/kg</div></div>`;
+  return `<section class="section">${head}<div class="card nut">
+    <div class="nut-top"><div><div class="nut-eyebrow">${esc(n.goal)} · ${n.done ? '12 Wochen geschafft' : `Woche ${n.week} von 12`}</div>
+      <div class="nut-kcal">${n.kcal.toLocaleString('de-DE')}<small> kcal / Tag</small></div>
+      ${n.need ? `<div class="nut-sub">Bedarf ca. ${n.need.toLocaleString('de-DE')} kcal${n.deficit > 0 ? ` · Defizit ${n.deficit} kcal` : n.deficit < 0 ? ` · Überschuss ${-n.deficit} kcal` : ''}</div>` : ''}</div>
+      <div class="nut-water"><span class="nut-drop" aria-hidden="true"></span><b>${fmtNum(n.water)} l</b><small>Wasser</small></div></div>
+    <div class="nut-phases">${ph}</div>
+    <div class="nut-macros">${mac('Eiweiß', n.p, n.pk, 'p')}${mac('Kohlenhydrate', n.c, n.ck, 'c')}${mac('Fett', n.f, n.fk, 'f')}</div>
+    <a class="btn btn-primary btn-block" href="#/client/${c.id}/food">${ic('list', 18)} Mahlzeiten planen</a>
+    <div class="nut-foot">Berechnet mit ${fmtNum(n.kg)} kg (${esc(n.wSrc)})${own ? '' : ` · ${esc(n.act)}`}.${n.done ? ' Für einen neuen Zyklus das Startdatum neu setzen.' : ''}<br>Orientierungswerte, keine medizinische Beratung.</div>
+  </div></section>`;
+}
+/* =====================================================================
+   SWEAT4 MAHLZEITEN – Tagesrhythmus & Baukasten
+   Modelle: 5 Mahlzeiten (alle 2,5–3 Std., erste direkt nach dem Aufstehen, letzte 3 Std. –
+   spätestens 2,5 Std. – vor dem Schlafen) · Intervallfasten 16:8 (3 Mahlzeiten) · 20:4 (2 Mahlzeiten).
+   Trainingstage: 2 Std. vor dem Training nichts essen, direkt danach essen (Shake + Mahlzeit).
+   Makros werden gleichmäßig auf die Mahlzeiten verteilt.
+   ===================================================================== */
+const MEAL_MODES = {
+  '5': { label: '5 Mahlzeiten am Tag', short: '5 Mahlzeiten', n: 5 },
+  '16': { label: 'Intervallfasten 16:8 (3 Mahlzeiten)', short: '16:8', n: 3, win: 480, starts: ['10:00', '11:00', '12:00', '13:00'] },
+  '20': { label: 'Intervallfasten 20:4 (2 Mahlzeiten)', short: '20:4', n: 2, win: 240, starts: ['12:00', '13:00', '14:00', '15:00', '16:00'] },
+};
+const WEEKDAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+const MEAL_DEFAULT = { mode: '5', wake: '07:00', sleep: '23:00', win: '12:00', train: '', days: [1, 3, 5] };
+const TRAIN_MIN = 75;            // Training inkl. Umziehen
+const NO_FOOD_BEFORE = 120;      // 2 Std. vor dem Training nichts essen
+const toMin = t => { const m = /^(\d{1,2}):(\d{2})$/.exec(t || ''); return m ? +m[1] * 60 + +m[2] : null; };
+const toHM = m => { m = ((Math.round(m) % 1440) + 1440) % 1440; return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); };
+const r15 = m => Math.round(m / 15) * 15;
+const mealCfg = c => ({ ...MEAL_DEFAULT, ...(c.mealCfg || {}) });
+const isTrainDay = (cfg, date = new Date()) => cfg.days.includes(date.getDay() || 7);
+const FOODS = () => window.SW_FOODS || [];
+const foodById = id => FOODS().find(f => f.id === id);
+
+/* ---------- Tagesplan ---------- */
+function mealSchedule(cfg, trainDay) {
+  const M = MEAL_MODES[cfg.mode] || MEAL_MODES['5'], warn = [], hints = [];
+  let sleep = toMin(cfg.sleep), wake = toMin(cfg.wake); if (sleep <= wake) sleep += 1440; // nach Mitternacht
+  let meals, lastAllowed;
+  if (cfg.mode === '5') {
+    const first = wake + 30;
+    let step = Math.min(180, (sleep - 180 - first) / 4);
+    if (step < 150) step = Math.min(180, (sleep - 150 - first) / 4);
+    if (step < 120) warn.push('Zwischen Aufstehen und Schlafengehen ist wenig Zeit – die Abstände liegen unter 2 Stunden.');
+    meals = Array.from({ length: 5 }, (_, i) => ({ t: r15(first + i * step), i, share: 1 }));
+    lastAllowed = sleep - 150;
+  } else {
+    const S = toMin(cfg.win) ?? toMin(M.starts[0]);
+    const off = cfg.mode === '16' ? [0, 240, 450] : [0, 210];
+    meals = off.map((o, i) => ({ t: S + o, i, share: 1 }));
+    lastAllowed = Math.min(S + M.win, sleep - 150);
+    if (S + M.win > sleep - 150) warn.push(`Das Essfenster endet um ${toHM(S + M.win)} – weniger als 2,5 Std. vor dem Schlafen. Ein früheres Fenster ist besser.`);
+    hints.push(`Essfenster ${toHM(S)}–${toHM(S + M.win)} Uhr. Außerhalb nur Wasser, ungesüßter Tee oder schwarzer Kaffee.`);
+  }
+  let train = null;
+  const T = trainDay ? toMin(cfg.train) : null;
+  if (trainDay && T == null) hints.push('Trage im Rhythmus die Trainingszeit ein, dann richtet sich der Plan an Trainingstagen danach.');
+  if (T != null) {
+    const Tend = T + TRAIN_MIN; train = { t: T, end: Tend, stop: T - NO_FOOD_BEFORE };
+    const pre = meals.filter(m => m.t <= T - NO_FOOD_BEFORE), post = meals.filter(m => m.t > T - NO_FOOD_BEFORE);
+    const conflict = post.some(m => m.t < Tend);
+    if (cfg.mode !== '5' && Tend > (toMin(cfg.win) ?? 0) + MEAL_MODES[cfg.mode].win) warn.push('Das Training liegt nach dem Essfenster. Lege das Fenster so, dass du nach dem Training noch essen kannst.');
+    if (cfg.mode !== '5' && T < (toMin(cfg.win) ?? 0) && Tend <= (toMin(cfg.win) ?? 0) + 60) hints.push('Du trainierst vor dem Essfenster, also nüchtern. Die erste Mahlzeit direkt nach dem Training essen.');
+    if (conflict && post.length) {
+      let n = post.length, start = Math.max(Tend, post[0].t), span = lastAllowed - start, step = n > 1 ? Math.min(180, span / (n - 1)) : 0;
+      while (n > 1 && step < 60) { n--; step = Math.min(180, span / (n - 1 || 1)); }
+      const shares = Array(n).fill(1); for (let k = n; k < post.length; k++) shares[n - 1] += 1; // überzählige Mahlzeiten zusammenlegen
+      if (n < post.length) warn.push(`Nach dem Training ist nicht genug Zeit für alle Mahlzeiten – ${post.length - n + 1} Portionen werden zur letzten Mahlzeit zusammengelegt.`);
+      meals = [...pre, ...shares.map((sh, k) => ({ t: r15(start + k * step), i: post[k].i, share: sh, postWO: k === 0 }))];
+    } else {
+      const next = post.find(m => m.t >= Tend);
+      if (next && next.t - Tend <= NO_FOOD_BEFORE) next.postWO = true;
+      else hints.push('Nach dem Training kommt die nächste Mahlzeit erst spät. Trink direkt nach dem Training einen Shake.');
+    }
+  }
+  const late = meals.filter(m => m.t > sleep - 150);
+  if (late.length) warn.push(`Die Mahlzeit um ${toHM(late[late.length - 1].t)} liegt weniger als 2,5 Std. vor dem Schlafen – wegen des späten Trainings. Hier lieber etwas Leichtes wie einen Shake mit Quark.`);
+  return { meals: meals.sort((a, b) => a.t - b.t), train, warn, hints, lastAllowed };
+}
+
+/* ---------- Mengen automatisch berechnen ---------- */
+function mealTotals(items) {
+  const t = { p: 0, c: 0, f: 0, fi: 0 };
+  for (const it of items) { const f = foodById(it.id); if (!f) continue; const k = (it.g || 0) / 100; t.p += f.p * k; t.c += f.c * k; t.f += f.f * k; t.fi += f.fi * k; }
+  t.kcal = t.p * 4 + t.c * 4 + t.f * 9; return t;
+}
+function autoFit(items, target) {
+  autoFitPass(items, target, true);
+  const whole = items.filter(it => { const f = foodById(it.id); return f && f.k !== 'v' && isWhole(f); });
+  if (whole.length && whole.length < items.filter(it => (foodById(it.id) || {}).k !== 'v').length) autoFitPass(items, target, false, new Set(whole));
+  return items;
+}
+const isWhole = f => f.u && /^(Ei|Brötchen|Banane|Apfel|Orange|Wrap)/.test(f.u.l);
+function autoFitPass(items, target, first, locked = new Set()) {
+  const keys = ['p', 'c', 'f'], fixed = [], vars = [];
+  items.forEach(it => { const f = foodById(it.id); if (!f) return; (f.k === 'v' || locked.has(it) ? fixed : vars).push({ it, f }); });
+  fixed.forEach(({ it, f }) => { if (!it.g) it.g = f.fix || 100; });
+  const base = mealTotals(fixed.map(x => x.it)), T = keys.map(k => Math.max(0, target[k] - base[k]));
+  if (!vars.length) return items;
+  const cnt = { p: 0, c: 0, f: 0 }; vars.forEach(v => cnt[v.f.k]++);
+  const x = vars.map(({ f }) => { const k = f.k, ki = keys.indexOf(k); return cnt[k] ? Math.max(.05, T[ki] / cnt[k] / Math.max(f[k], 1)) : .3; });
+  const x0 = x.slice(), sc = T.map(t => Math.max(t, 8)), lam = .02;
+  for (let it = 0; it < 400; it++) for (let i = 0; i < x.length; i++) {
+    let num = lam * x0[i], den = lam;
+    for (let k = 0; k < 3; k++) {
+      const a = vars[i].f[keys[k]] / sc[k]; let rest = 0;
+      for (let j = 0; j < x.length; j++) if (j !== i) rest += vars[j].f[keys[k]] * x[j];
+      num += a * (T[k] - rest) / sc[k]; den += a * a;
+    }
+    x[i] = Math.max(0, num / den);
+  }
+  vars.forEach(({ it, f }, i) => {
+    let g = x[i] * 100;
+    if (isWhole(f)) g = Math.max(1, Math.round(g / f.u.g)) * f.u.g; // ganze Stücke
+    else g = Math.max(5, Math.round(g / 5) * 5);
+    it.g = g;
+  });
+  return items;
+}
+
+/* ---------- Ansicht ---------- */
+const PLURAL = { 'Scheibe': 'Scheiben', 'Banane': 'Bananen', 'Ei (M)': 'Eier (M)', 'Waffel': 'Waffeln', 'Apfel': 'Äpfel', 'Orange': 'Orangen', 'Wrap': 'Wraps' };
+const unitHint = (f, g) => { if (!f || !f.u) return ''; const n = Math.round(g / f.u.g * 2) / 2; return ` ≈ ${fmtNum(n)} ${esc(n > 1 ? PLURAL[f.u.l] || f.u.l : f.u.l)}`; };
+function MacroBar(label, have, want) {
+  const pct = want > 0 ? Math.min(130, have / want * 100) : 0, off = want > 0 ? Math.abs(have - want) / want : 0;
+  return `<div class="mb"><div class="mb-h"><span>${label}</span><b>${Math.round(have)} / ${Math.round(want)} g</b></div><div class="mb-t"><i class="${off <= .1 ? 'ok' : have > want ? 'over' : ''}" style="width:${Math.min(100, pct)}%"></i></div></div>`;
+}
+function MealCard(c, m, idx, per, cfg) {
+  const key = cfg.mode + '-' + m.i, items = ((c.meals || {})[key] || []).map(x => ({ ...x }));
+  const tgt = { p: per.p * m.share, c: per.c * m.share, f: per.f * m.share }, tot = mealTotals(items), open = (UI.mealOpen || {})[key];
+  const tag = m.postWO ? '<span class="pill pill-gold">Nach dem Training</span>' : m.share > 1 ? `<span class="pill">${m.share}× Portion</span>` : '';
+  return `<div class="meal ${open ? 'open' : ''}" id="meal-${key}">
+    <button class="meal-h" data-action="meal-toggle" data-k="${key}" aria-expanded="${!!open}">
+      <span class="meal-time">${toHM(m.t)}</span>
+      <span class="grow"><span class="meal-t">Mahlzeit ${idx + 1} ${tag}</span>
+        <span class="meal-s">${Math.round(tgt.p)} g E · ${Math.round(tgt.c)} g KH · ${Math.round(tgt.f)} g F · ${Math.round(tgt.p * 4 + tgt.c * 4 + tgt.f * 9)} kcal</span></span>
+      <span class="meal-ok ${items.length ? '' : 'empty'}">${items.length ? Math.round(tot.kcal) + ' kcal' : 'leer'}</span>${ic('down', 18)}</button>
+    <div class="meal-b">
+      ${m.postWO ? '<div class="meal-tip">Am einfachsten: direkt nach dem Training einen Shake, den Rest dieser Mahlzeit innerhalb 1 Stunde.</div>' : ''}
+      ${items.length ? `<div class="mbars">${MacroBar('Eiweiß', tot.p, tgt.p)}${MacroBar('Kohlenhydrate', tot.c, tgt.c)}${MacroBar('Fett', tot.f, tgt.f)}</div>
+      <div class="mitems">${items.map((it, j) => { const f = foodById(it.id); return f ? `<div class="mitem"><span class="mi-dot k-${f.k}"></span><span class="grow mi-n">${esc(f.n)}<small>${unitHint(f, it.g)}</small></span>
+        <label class="mi-g"><input inputmode="numeric" data-mg="${key}" data-j="${j}" value="${it.g || ''}" aria-label="Gramm ${esc(f.n)}"><span>g</span></label>
+        <button class="icon-btn sm" data-action="meal-rm" data-k="${key}" data-j="${j}" aria-label="Entfernen">${ic('x', 16)}</button></div>` : ''; }).join('')}</div>` : '<div class="muted" style="font-size:14px">Stell dir die Mahlzeit aus deinen Lebensmitteln zusammen oder lade ein Beispiel.</div>'}
+      <div class="madd">${(window.SW_FOOD_CATS || []).map(k => `<button class="fchip" data-action="meal-pick" data-k="${key}" data-cat="${k.k}">${ic('plus', 14)} ${esc(k.l)}</button>`).join('')}</div>
+      <div class="mact">${items.length ? `<button class="btn btn-primary" data-action="meal-fit" data-k="${key}" data-p="${tgt.p}" data-c="${tgt.c}" data-f="${tgt.f}">Mengen berechnen</button>` : ''}
+        <button class="btn btn-ghost" data-action="meal-example" data-k="${key}" data-p="${tgt.p}" data-c="${tgt.c}" data-f="${tgt.f}">Beispiel laden</button>
+        ${items.length ? `<button class="btn btn-text" data-action="meal-copy" data-k="${key}">Für alle übernehmen</button>` : ''}</div>
+    </div></div>`;
+}
+function viewFood(c) {
+  const own = isClientMode(), n = nutritionFor(c), cfg = mealCfg(c), M = MEAL_MODES[cfg.mode];
+  const back = own ? '/' : '/client/' + c.id;
+  if (!n || n.missing || n.pending) return topbar({ back, title: 'Mahlzeiten' }) + `<main class="wrap view">${NutritionCard(c, own)}</main>`;
+  const day = UI.foodDay || (isTrainDay(cfg) ? 'train' : 'rest'), sch = mealSchedule(cfg, day === 'train');
+  const nMeals = sch.meals.reduce((a, m) => a + m.share, 0), per = { p: n.p / nMeals, c: n.c / nMeals, f: n.f / nMeals };
+  const rows = []; let tr = sch.train, idx = 0;
+  for (const m of sch.meals) {
+    if (tr && tr.stop <= m.t && m.t >= tr.end) { rows.push(TrainRow(tr)); tr = null; }
+    rows.push(MealCard(c, m, idx++, per, cfg));
+  }
+  if (tr) rows.push(TrainRow(tr));
+  return topbar({ back, title: 'Mahlzeiten', sub: esc(c.name) }) + `<main class="wrap view">
+    <div class="food-sum"><div><div class="nut-eyebrow">${esc(n.goal)} · Woche ${Math.min(n.week, 12)}</div><div class="food-kcal">${n.kcal.toLocaleString('de-DE')} <small>kcal</small></div></div>
+      <div class="food-mac"><span><b>${n.p}</b> g E</span><span><b>${n.c}</b> g KH</span><span><b>${n.f}</b> g F</span><span><b>${fmtNum(n.water)}</b> l</span></div></div>
+    <button class="rhythm tap" data-action="meal-cfg" data-cid="${c.id}">
+      <span class="grow"><b>${esc(M.label)}</b><span class="muted">Auf ${esc(cfg.wake)} · Schlaf ${esc(cfg.sleep)}${cfg.mode !== '5' ? ` · Fenster ab ${esc(cfg.win)}` : ''} · Training ${cfg.train ? esc(cfg.train) : '–'} (${cfg.days.map(d => WEEKDAYS[d - 1]).join(', ') || 'keine Tage'})</span></span>${ic('edit', 18)}</button>
+    <div class="figsw daysw" role="group" aria-label="Tag">${[['train', 'Trainingstag'], ['rest', 'Ruhetag']].map(([v, l]) => `<button class="${v === day ? 'on' : ''}" data-action="food-day" data-v="${v}" aria-pressed="${v === day}">${l}</button>`).join('')}</div>
+    ${sch.warn.map(w => `<div class="food-warn">${esc(w)}</div>`).join('')}${sch.hints.map(h => `<div class="food-hint">${esc(h)}</div>`).join('')}
+    <div class="timeline">${rows.join('')}</div>
+    <div class="nut-foot" style="margin-top:14px">Die Makros sind gleichmäßig auf ${nMeals} Mahlzeiten verteilt. Nährwerte sind Richtwerte – die Angabe auf der Packung hat Vorrang.</div>
+  </main>`;
+}
+const TrainRow = tr => `<div class="trow"><span class="meal-time">${toHM(tr.t)}</span><div class="grow"><b>Training</b> bis ca. ${toHM(tr.end)}<div class="muted" style="font-size:13px">Ab ${toHM(tr.stop)} Uhr nichts mehr essen, danach innerhalb 2 Std. essen.</div></div></div>`;
+
+function openMealCfg(cid) {
+  const c = S.clients.get(cid), cfg = mealCfg(c);
+  modal('Essrhythmus', `<form data-form="mealcfg" data-cid="${cid}">
+    <label class="field"><span>Modell</span><select name="mode" class="input" id="mc-mode">${Object.entries(MEAL_MODES).map(([k, m]) => `<option value="${k}" ${cfg.mode === k ? 'selected' : ''}>${esc(m.label)}</option>`).join('')}</select></label>
+    <div class="grid2"><label class="field"><span>Aufstehen</span><input type="time" name="wake" class="input" value="${esc(cfg.wake)}" required></label>
+      <label class="field"><span>Schlafengehen</span><input type="time" name="sleep" class="input" value="${esc(cfg.sleep)}" required></label></div>
+    <label class="field ${cfg.mode === '5' ? 'hidden' : ''}" id="mc-win"><span>Essfenster beginnt um</span><select name="win" class="input">${[...new Set([...MEAL_MODES['16'].starts, ...MEAL_MODES['20'].starts])].sort().map(s => `<option ${cfg.win === s ? 'selected' : ''}>${s}</option>`).join('')}</select></label>
+    <label class="field"><span>Trainingszeit (Beginn)</span><input type="time" name="train" class="input" value="${esc(cfg.train)}"></label>
+    <div class="field"><span>Trainingstage</span><div class="wdays">${WEEKDAYS.map((d, i) => `<label><input type="checkbox" name="d${i + 1}" ${cfg.days.includes(i + 1) ? 'checked' : ''}><span>${d}</span></label>`).join('')}</div></div>
+    <div class="muted" style="font-size:12px;margin:-4px 0 14px">20:4 ist ein sehr strenges Fasten – nur nach Absprache mit dem Trainer.</div>
+    <div class="sheet-actions"><button type="button" class="btn btn-ghost" data-action="modal-close">Abbrechen</button><button class="btn btn-primary">Speichern</button></div></form>`,
+    el => el.querySelector('#mc-mode').addEventListener('change', e => el.querySelector('#mc-win').classList.toggle('hidden', e.target.value === '5')));
+}
+function openFoodPicker(key, cat) {
+  const L = FOODS().filter(f => f.k === cat), C = (window.SW_FOOD_CATS || []).find(x => x.k === cat);
+  modal(esc(C ? C.l : 'Lebensmittel'), `<label class="search">${ic('search')}<input id="foodsearch" type="search" placeholder="Suchen …" autocomplete="off"></label>
+    <div class="pick-list food-list" style="margin-top:12px">${L.map(f => `<button class="food-opt tap" data-action="meal-add" data-k="${key}" data-id="${f.id}" data-name="${esc(norm(f.n))}"><span class="grow"><b>${esc(f.n)}</b><span class="muted">pro 100 g: ${fmtNum(f.p)} E · ${fmtNum(f.c)} KH · ${fmtNum(f.f)} F</span></span>${ic('plus', 18)}</button>`).join('')}</div>`,
+    el => { const s = el.querySelector('#foodsearch'); s.addEventListener('input', () => { const q = norm(s.value); el.querySelectorAll('.food-opt').forEach(b => b.classList.toggle('hidden', !!q && !b.dataset.name.includes(q))); }); });
+}
+function mealClient() { const p = location.hash.slice(1).split('/').filter(Boolean); return p[0] === 'client' ? S.clients.get(p[1]) : null; }
+function saveMeals(c, key, items, rerenderIt = true) {
+  c.meals = { ...(c.meals || {}), [key]: items }; c.mealsAt = Date.now(); put('clients', c);
+  if (rerenderIt) { UI.mealOpen = { ...(UI.mealOpen || {}), [key]: true }; render(); }
+}
+Object.assign(A, {
+  'meal-toggle': el => { const k = el.dataset.k; UI.mealOpen = { ...(UI.mealOpen || {}), [k]: !(UI.mealOpen || {})[k] }; const d = document.getElementById('meal-' + k); if (d) { d.classList.toggle('open'); el.setAttribute('aria-expanded', d.classList.contains('open')); } },
+  'food-day': el => { UI.foodDay = el.dataset.v; render(); },
+  'meal-cfg': el => openMealCfg(el.dataset.cid),
+  'meal-pick': el => openFoodPicker(el.dataset.k, el.dataset.cat),
+  'meal-add': el => { const c = mealClient(); if (!c) return; const k = el.dataset.k, f = foodById(el.dataset.id), items = [...((c.meals || {})[k] || [])];
+    if (!items.some(x => x.id === f.id)) items.push({ id: f.id, g: f.k === 'v' ? (f.fix || 100) : (f.u ? f.u.g : 100) }); closeModal(null); saveMeals(c, k, items); },
+  'meal-rm': el => { const c = mealClient(); if (!c) return; const k = el.dataset.k, items = [...((c.meals || {})[k] || [])]; items.splice(+el.dataset.j, 1); saveMeals(c, k, items); },
+  'meal-fit': el => { const c = mealClient(); if (!c) return; const k = el.dataset.k, items = ((c.meals || {})[k] || []).map(x => ({ ...x })); autoFit(items, { p: +el.dataset.p, c: +el.dataset.c, f: +el.dataset.f }); saveMeals(c, k, items); toast('Mengen berechnet'); },
+  'meal-example': el => { const k = el.dataset.k, t = { p: el.dataset.p, c: el.dataset.c, f: el.dataset.f };
+    modal('Beispiel laden', `<div class="pick-list">${(window.SW_MEAL_EXAMPLES || []).map(x => `<button class="food-opt tap" data-action="meal-example-use" data-k="${k}" data-x="${x.id}" data-p="${t.p}" data-c="${t.c}" data-f="${t.f}"><span class="grow"><b>${esc(x.n)}</b><span class="muted">${esc(x.when)} · ${x.items.map(id => (foodById(id) || {}).n || '').filter(Boolean).map(esc).join(', ')}</span></span>${ic('plus', 18)}</button>`).join('')}</div>`); },
+  'meal-example-use': el => { const c = mealClient(); if (!c) return; const x = (window.SW_MEAL_EXAMPLES || []).find(e => e.id === el.dataset.x); if (!x) return;
+    const items = autoFit(x.items.map(id => ({ id, g: 0 })), { p: +el.dataset.p, c: +el.dataset.c, f: +el.dataset.f }); closeModal(null); saveMeals(c, el.dataset.k, items); toast('Beispiel geladen – Mengen passen zu deinen Zielen'); },
+  'meal-copy': async el => { const c = mealClient(); if (!c) return; const k = el.dataset.k, mode = k.split('-')[0], n = MEAL_MODES[mode].n;
+    if (!await confirmDialog('Für alle Mahlzeiten übernehmen?', 'Diese Zusammenstellung wird in alle Mahlzeiten kopiert. Bereits zusammengestellte Mahlzeiten werden ersetzt.', { ok: 'Übernehmen' })) return;
+    const src = (c.meals || {})[k] || [], meals = { ...(c.meals || {}) }; for (let i = 0; i < n; i++) meals[mode + '-' + i] = src.map(x => ({ ...x }));
+    c.meals = meals; c.mealsAt = Date.now(); put('clients', c); render(); },
+});
+document.addEventListener('change', ev => {
+  const t = ev.target; if (!t.dataset || t.dataset.mg == null) return;
+  const c = mealClient(); if (!c) return; const k = t.dataset.mg, items = [...((c.meals || {})[k] || [])], g = parseNum(t.value);
+  if (items[+t.dataset.j]) { items[+t.dataset.j] = { ...items[+t.dataset.j], g: g > 0 && g < 5000 ? Math.round(g) : items[+t.dataset.j].g }; saveMeals(c, k, items); }
+});
+document.addEventListener('submit', ev => {
+  const f = ev.target; if (f.dataset.form !== 'mealcfg') return;
+  const fd = new FormData(f), c = S.clients.get(f.dataset.cid); if (!c) return;
+  const ok = v => toMin(v) != null ? v : null;
+  c.mealCfg = { mode: MEAL_MODES[fd.get('mode')] ? fd.get('mode') : '5', wake: ok(fd.get('wake')) || MEAL_DEFAULT.wake, sleep: ok(fd.get('sleep')) || MEAL_DEFAULT.sleep,
+    win: fd.get('win') || MEAL_DEFAULT.win, train: ok(fd.get('train')) || '', days: WEEKDAYS.map((_, i) => i + 1).filter(d => fd.get('d' + d) === 'on') };
+  c.mealsAt = Date.now(); put('clients', c); closeModal(null); UI.foodDay = null; render(); toast('Essrhythmus gespeichert');
+});
+
 function clientExtraSections(c, part) {
   const cl = checksOf(c.id), last = cl[cl.length - 1], due = checkDue(c), age = ageAt(c.birthDate);
   const vals = last ? MEASURES.map(m => { const fl = firstLast(cl, m.k); return fl ? `<div class="mini"><div class="mini-l">${m.s}</div><div class="mini-v">${fmtNum(fl.cur)} <small>${m.u}</small></div>${fl.n > 1 ? `<div class="mini-d">${sgn(fl.d)} ${m.u}</div>` : ''}</div>` : ''; }).join('') : '';
@@ -2665,12 +3029,20 @@ function clientExtraFields(c) {
       <label class="field"><span>Geburtsdatum</span><input name="birthDate" type="date" class="input" value="${esc(c ? c.birthDate || '' : '')}"></label>
       <label class="field"><span>Check-Rhythmus (Tage)</span><input name="checkEvery" class="input" inputmode="numeric" value="${c && c.checkEvery ? c.checkEvery : CHECK_EVERY_DEFAULT}"></label>
       <label class="field"><span>Status</span><select name="status" class="input"><option value="active">aktiv</option><option value="inactive" ${c && c.status === 'inactive' ? 'selected' : ''}>inaktiv</option></select></label>
-    </div><div class="muted" style="font-size:12px;margin:-6px 0 14px">Geschlecht &amp; Geburtsdatum werden nur für die Körperfett-Berechnung (7-Punkt-Messung) benötigt.</div>`;
+      <label class="field"><span>Größe (cm)</span><input name="heightCm" class="input" inputmode="numeric" value="${c && c.heightCm ? c.heightCm : ''}" placeholder="z. B. 175"></label>
+      <label class="field"><span>Gewicht (kg)</span><input name="weightKg" class="input" inputmode="decimal" value="${c && c.weightKg ? fmtIn(c.weightKg) : ''}" placeholder="bis zum 1. Check"></label>
+      <label class="field" style="grid-column:1/-1"><span>Ernährungsziel</span><select name="nutGoal" class="input">${Object.entries(NUTRITION.goals).map(([k, g]) => `<option value="${k}" ${(c ? nutGoalOf(c) : 'def') === k ? 'selected' : ''}>${esc(g.option || g.label)}</option>`).join('')}</select></label>
+      <label class="field" style="grid-column:1/-1"><span>Alltag / Aktivität</span><select name="activity" class="input">${Object.entries(NUTRITION.activity).map(([k, a]) => `<option value="${k}" ${(c && c.activity || 'moderat') === k ? 'selected' : ''}>${esc(a.label)}</option>`).join('')}</select></label>
+    </div><div class="muted" style="font-size:12px;margin:-6px 0 14px">Geschlecht, Geburtsdatum, Größe und Gewicht braucht die App für den Ernährungsplan und die Körperfett-Berechnung. Das Gewicht wird ab dem ersten Fortschrittscheck automatisch aktualisiert. Die 12 Wochen zählen ab dem Startdatum.</div>`;
 }
 function clientExtraValues(fd) {
   const n = parseInt(fd.get('checkEvery'), 10);
   return { email: String(fd.get('email') || '').trim(), startDate: fd.get('startDate') || '', sex: fd.get('sex') || '', birthDate: fd.get('birthDate') || '',
-    checkEvery: n > 0 && n < 400 ? n : CHECK_EVERY_DEFAULT, status: fd.get('status') === 'inactive' ? 'inactive' : 'active' };
+    checkEvery: n > 0 && n < 400 ? n : CHECK_EVERY_DEFAULT, status: fd.get('status') === 'inactive' ? 'inactive' : 'active',
+    heightCm: (h => h >= 120 && h <= 230 ? Math.round(h) : null)(parseNum(fd.get('heightCm'))),
+    weightKg: (w => w >= 30 && w <= 300 ? w : null)(parseNum(fd.get('weightKg'))),
+    nutGoal: NUTRITION.goals[fd.get('nutGoal')] ? fd.get('nutGoal') : null,
+    activity: NUTRITION.activity[fd.get('activity')] ? fd.get('activity') : 'moderat' };
 }
 
 /* ---------- Seite: Körper & Fortschritt ---------- */
@@ -2998,6 +3370,8 @@ function viewClientHome() {
       ${days.length > 1 ? `<div class="day-grid" style="margin-top:12px">${days.map((d, i) => `<button class="day-btn ${next && next.id === d.id ? 'next' : ''}" data-action="start-day" data-cid="${cid}" data-did="${d.id}"><span class="day-no">${i + 1}</span><span class="grow"><span class="day-name">${esc(d.name)}</span><br><span class="muted" style="font-size:14px">${exercisesOf(d.id).length} Übungen</span></span><span class="muted">${ic('play', 16)}</span></button>`).join('')}</div>` : ''}
     </section>
 
+    ${NutritionCard(c, true)}
+
     <section class="section"><div class="section-h"><h2>Deine Entwicklung</h2></div>
       <div class="card list-card">
         <a class="list-link" href="#/client/${cid}/body">${ic('chart')}<div class="grow"><b>Körpermessungen &amp; Gewicht</b><div class="muted" style="font-size:13px">${cl.length ? `${cl.length} Messungen · zuletzt ${fmtDate(cl[cl.length - 1].date)}` : 'noch keine Messung'}</div></div></a>
@@ -3114,6 +3488,8 @@ async function setupFromFile(file, code) {
   if (pkg.clientId !== h.clientId || !packageIsolated(pkg)) throw new Error('Die Datei ist ungültig.');
   const map = new Map(pkg.data.sessions.map(s => [s.id, s]));
   if (role.value === 'client') for (const s of all('sessions')) { const o = map.get(s.id); if (s.clientId === pkg.clientId && (!o || (s.updatedAt || 0) > (o.updatedAt || 0))) map.set(s.id, s); }
+  if (role.value === 'client') { const loc = S.clients.get(pkg.clientId), pc = pkg.data.clients && pkg.data.clients[0];
+    if (loc && pc && (loc.mealsAt || 0) > (pc.mealsAt || 0)) Object.assign(pc, { mealCfg: loc.mealCfg, meals: loc.meals, mealsAt: loc.mealsAt }); } // eigene Mahlzeiten bleiben erhalten
   const lock = await makeLock(code);
   const meta = [{ id: 'role', value: 'client', clientId: pkg.clientId, since: Date.now() }, lock, { id: 'pkgInfo', exportedAt: pkg.exportedAt }];
   await DB.replaceAll({ ...pkg.data, sessions: [...map.values()], meta, photos: pkg.photos });
@@ -3192,6 +3568,7 @@ function routeExtra(p) {
     if (p[2] === 'body') return viewBody(c);
     if (p[2] === 'check') return viewCheckForm(c, null);
     if (p[2] === 'planview') return viewPlanRO(c);
+    if (p[2] === 'food') return viewFood(c);
   }
   if (p[0] === 'check') { const ch = S.checks.get(p[1]); if (!ch) return null; const c = S.clients.get(ch.clientId); if (!c) return null; return p[2] === 'edit' ? viewCheckForm(c, ch) : viewCheck(ch); }
   if (p[0] === 'kunde-setup') return viewSetup();
