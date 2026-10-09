@@ -1,0 +1,15 @@
+name = "sweat4-video"
+main = "worker.js"
+compatibility_date = "2026-06-01"
+
+[vars]
+ALLOWED_ORIGIN = "https://sweat4.github.io"
+
+# KV-Speicher für die Zuordnung Übung → Video (einmal anlegen: npx wrangler kv namespace create MAP)
+[[kv_namespaces]]
+binding = "MAP"
+id = "HIER_DIE_KV_ID_EINTRAGEN"
+
+# Geheimnisse NICHT hier eintragen, sondern:
+#   npx wrangler secret put MW_API_KEY
+#   npx wrangler secret put ADMIN_TOKEN

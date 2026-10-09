@@ -12,7 +12,7 @@
 <meta name="apple-mobile-web-app-title" content="SWEAT4">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20400%20400%22%3E%3Ccircle%20cx%3D%22200%22%20cy%3D%22200%22%20r%3D%22200%22%20fill%3D%22%23111111%22/%3E%3Cpath%20fill%3D%22%23BE9B5C%22%20transform%3D%22translate%28-23%2C-23%29%22%20d%3D%22M212.5%2C70%20L247%2C70%20L170%2C224%20L286.3%2C224%20L286.3%2C254%20L136.3%2C254%20L136.3%2C224%20Z%20M194.2%2C226%20C194.4%2C223.6%20194.0%2C217.1%20195.4%2C212.0%20C196.7%2C206.8%20198.8%2C201.1%20202.5%2C195.0%20C206.1%2C188.8%20212.0%2C181.6%20217.5%2C175.0%20C223.0%2C168.3%20230.7%2C161.3%20235.5%2C155.0%20C240.3%2C148.6%20243.7%2C141.8%20246.3%2C137.0%20C248.8%2C132.1%20249.8%2C127.8%20250.6%2C126.0%20C251.0%2C128.0%20253.0%2C133.5%20253.0%2C138.0%20C253.0%2C142.5%20252.1%2C147.1%20250.6%2C153.0%20C249.0%2C158.8%20246.8%2C166.3%20243.6%2C173.0%20C240.3%2C179.6%20235.3%2C186.6%20231.0%2C193.0%20C226.6%2C199.3%20220.5%2C205.5%20217.4%2C211.0%20C214.2%2C216.5%20213.1%2C223.5%20212.3%2C226.0%20Z%20M229.0%2C226%20C229.7%2C224.0%20230.3%2C218.1%20233.2%2C214.0%20C236.0%2C209.8%20242.3%2C205.5%20246.0%2C201.0%20C249.6%2C196.5%20253.0%2C191.6%20255.3%2C187.0%20C257.6%2C182.3%20259.0%2C175.3%20259.8%2C173.0%20C260.6%2C174.6%20263.4%2C179.0%20264.6%2C183.0%20C265.8%2C187.0%20267.3%2C192.1%20267.0%2C197.0%20C266.6%2C201.8%20264.0%2C207.1%20262.6%2C212.0%20C261.1%2C216.8%20259.0%2C223.6%20258.3%2C226.0%20Z%20M163.3%2C257.5%20H274.3%20Q277.3%2C257.5%20277.3%2C260.5%20V264.5%20Q277.3%2C267.5%20274.3%2C267.5%20H163.3%20Q160.3%2C267.5%20160.3%2C264.5%20V260.5%20Q160.3%2C257.5%20163.3%2C257.5%20Z%20M202.0%2C271%20H244.0%20Q245.5%2C271%20245.5%2C272.5%20V351.0%20Q245.5%2C352.5%20244.0%2C352.5%20H202.0%20Q200.5%2C352.5%20200.5%2C351.0%20V272.5%20Q200.5%2C271%20202.0%2C271%20Z%20M184.3%2C352.5%20H261.3%20Q264.3%2C352.5%20264.3%2C355.5%20V360%20Q264.3%2C363%20261.3%2C363%20H184.3%20Q181.3%2C363%20181.3%2C360%20V355.5%20Q181.3%2C352.5%20184.3%2C352.5%20Z%22/%3E%3C/svg%3E">
 <!-- Datenschutz: Diese Richtlinie verbietet der App technisch jede Netzwerkverbindung. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; manifest-src 'self'; worker-src 'self'; connect-src 'none'; base-uri 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob: https://api.musclewiki.com; manifest-src 'self'; worker-src 'self'; connect-src https://*.workers.dev; base-uri 'none'">
 <title>SWEAT4 – Trainer-Logbuch</title>
 <style>
 :root{
@@ -570,6 +570,15 @@ img.ld{opacity:1!important}
 .kat-figrow{display:flex;align-items:center;gap:10px}
 .ud-tags{align-items:center}
 .ud-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#0e0e0e}
+
+/* Videoplayer */
+.ud-vstage{position:absolute;inset:0;display:grid;place-items:center;background:#0b0b0b}
+.ud-vstage .ud-video{object-fit:contain}
+.ud-src{position:absolute;left:12px;bottom:12px;z-index:3;font-size:11px;color:var(--muted);background:rgba(9,9,9,.72);padding:4px 9px;border-radius:999px}
+.ud-novideo{display:grid;justify-items:center;gap:6px;text-align:center;padding:16px;color:var(--muted)}
+.ud-novideo svg{color:var(--gold-deep)}.ud-novideo b{color:var(--text)}
+.xprev-video .xprev-ph{color:rgba(199,164,106,.4)}
+[hidden]{display:none!important}
 </style>
 </head>
 <body>
@@ -1275,7 +1284,7 @@ function viewTrain(sess) {
           <button class="btn btn-sm btn-ghost" data-action="add-set" data-ei="${ei}" ${e.sets.length >= CONFIG.MAX_SETS ? 'disabled' : ''}>${ic('plus', 16)} Satz</button>
           <button class="btn btn-sm btn-ghost" data-action="rm-set" data-ei="${ei}" ${e.sets.length <= 1 ? 'disabled' : ''}>– Satz</button>
           ${last ? `<button class="btn btn-sm btn-ghost" data-action="copy-last" data-ei="${ei}">Letzte Werte übernehmen</button>` : ''}
-          ${(k3 => k3 ? `<button class="btn btn-sm btn-ghost" data-action="open3d" data-id="${k3.id}" data-fig="${figureForClient(c) || ''}">${ic('cube', 16)} Technik & 3D</button>` : '')(katForSessionEx(e))}
+          ${(k3 => k3 ? `<button class="btn btn-sm btn-ghost" data-action="open3d" data-id="${k3.id}" data-fig="${figureForClient(c) || ''}">${ic('cube', 16)} Technik & ${videoMode() ? 'Video' : '3D'}</button>` : '')(katForSessionEx(e))}
           ${ei < sess.exercises.length - 1 ? `<button class="btn btn-sm btn-text" data-action="next-ex" data-ei="${ei}">Nächste Übung ${ic('down', 16)}</button>` : ''}
         </div>
         <textarea class="ex-note" data-tf="exnote" data-ei="${ei}" rows="1" placeholder="Notiz zur Übung">${esc(e.note)}</textarea>
@@ -1448,7 +1457,7 @@ function viewData() {
       <div class="row" style="margin-bottom:10px"><span class="accent">${ic('lock', 22)}</span><h2 style="font-size:19px">Wo sind meine Daten gespeichert?</h2></div>
       <div class="stack" style="font-size:15px">
         <div>📍 <b>Nur auf diesem Gerät, in diesem Browser</b> – in der lokalen Browser-Datenbank (IndexedDB) mit dem Namen <code>${CONFIG.DB_NAME}</code>.</div>
-        <div>🚫 <b>Keine Cloud, kein Server, kein Konto.</b> Die App lädt nichts aus dem Internet und sendet nichts. Das ist technisch gesperrt (Content-Security-Policy erlaubt keine Netzwerkverbindungen).</div>
+        <div>🚫 <b>Keine Cloud, kein Konto.</b> Deine Kunden- und Trainingsdaten verlassen das Gerät nie.${videoMode() ? ' Einzige Ausnahme: Übungsvideos werden beim Ansehen von MuscleWiki geladen – dabei wird nur die Übung übertragen, keine persönlichen Daten.' : ' Die App lädt nichts aus dem Internet.'}</div>
         <div>⚠️ <b>Wichtig:</b> Jeder Browser und jedes Gerät hat einen eigenen Speicher. Wenn du die Browserdaten / den Verlauf „inklusive Website-Daten“ löschst, sind auch die Trainingsdaten weg. Erstelle deshalb regelmäßig ein Backup.</div>
         <div class="muted" style="font-size:13px;word-break:break-all">App-Adresse: ${esc(location.href.split('#')[0])}</div>
       </div>
@@ -1517,7 +1526,7 @@ function render() {
   if (!p.length && UI.search) filterClients(UI.search);
   if (p[0] === 'data') fillStorageInfo();
   hydrateThumbs(app);
-  if (p[0] === 'uebung') mountDetail3D(p[1]);
+  if (p[0] === 'uebung') { mountDetail3D(p[1]); mountDetailVideo(p[1]); }
   hydratePhotos(app);
 }
 const curSession = () => { const p = location.hash.slice(1).split('/').filter(Boolean); return p[0] === 'train' ? S.sessions.get(p[1]) : null; };
@@ -2026,7 +2035,26 @@ function figureDefault() { // eigene Auswahl > eigener Kundenzugang > Standard
 }
 const curFig = () => UI.fig || figureDefault();
 const FigureSwitch = fig => `<div class="figsw" role="group" aria-label="Trainingsfigur">${['w', 'm'].map(v => `<button class="${v === fig ? 'on' : ''}" data-action="fig-set" data-v="${v}" aria-pressed="${v === fig}">${FIG_LABEL[v]}</button>`).join('')}</div>`;
-/* Echte Videos (optional): window.SW_MEDIA aus uebungen-medien.js – ersetzt die 3D-Figur, sobald vorhanden */
+/* ---------- Video-Service: echte Übungsvideos ----------
+   Zentrale Stelle für alle Videoquellen. Reihenfolge: eigene Videos (SW_MEDIA) → Video-Server (MuscleWiki).
+   Ist kein Video-Server eingetragen (SW_VIDEO.endpoint leer), bleibt die bisherige 3D-Darstellung aktiv. */
+const videoMode = () => !!((window.SW_VIDEO || {}).endpoint);
+const VIDEO = { cache: new Map() };
+async function videoFor(id, fig) {
+  const own = mediaFor(id, fig); if (own) return { src: own.src, poster: own.poster, source: 'SWEAT4' };
+  if (!videoMode()) return null;
+  const key = id + '|' + fig, hit = VIDEO.cache.get(key);
+  if (hit && hit.until > Date.now()) return hit.v;
+  const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 12000);
+  try {
+    const r = await fetch(SW_VIDEO.endpoint.replace(/\/$/, '') + '/video?id=' + encodeURIComponent(id) + '&fig=' + fig, { signal: ctl.signal });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.error || 'Server antwortet nicht');
+    const v = d.none ? null : { src: d.src, source: d.source || 'MuscleWiki', angle: d.angle, female: d.female };
+    VIDEO.cache.set(key, { v, until: Date.now() + (v ? 9 : 30) * 60000 }); // Token gilt 15 Min.
+    return v;
+  } finally { clearTimeout(t); }
+}
 function mediaFor(id, fig) { const m = (window.SW_MEDIA || {})[id]; return m ? (m[fig] || m.any || null) : null; }
 
 const REDUCED_MOTION = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -2115,7 +2143,7 @@ const FilterChip = (label, on, action, value, count) =>
 const SectionHeader = (title, meta = '') => `<div class="sh"><h2>${esc(title)}</h2>${meta ? `<span class="sh-meta">${meta}</span>` : ''}</div>`;
 const EmptyState = (title, text, action = '') => `<div class="empty-state"><div class="es-ic">${ic('search', 26)}</div><div class="es-t">${esc(title)}</div><div class="es-x">${esc(text)}</div>${action}</div>`;
 const LoadingState = text => `<div class="loading-state"><span class="spin" aria-hidden="true"></span>${esc(text)}</div>`;
-const ExercisePreview = (id, cls = '', fig = curFig()) => `<div class="xprev ${cls}" data-thumb="${esc(id)}" data-fig="${fig}"><span class="xprev-ph" aria-hidden="true">${ic('dumbbell', 30)}</span></div>`;
+const ExercisePreview = (id, cls = '', fig = curFig()) => videoMode() ? `<div class="xprev xprev-video ${cls}"><span class="xprev-ph" aria-hidden="true">${ic('play', 26)}</span></div>` : `<div class="xprev ${cls}" data-thumb="${esc(id)}" data-fig="${fig}"><span class="xprev-ph" aria-hidden="true">${ic('dumbbell', 30)}</span></div>`;
 function ExerciseCard(e) {
   return `<a class="xcard tap" href="#/uebung/${e.id}" aria-label="${esc(e.n)} – Details und 3D-Ausführung">
     <div class="xcard-media">${ExercisePreview(e.id)}<span class="xcard-group">${esc(e.g)}</span><span class="xcard-play" aria-hidden="true">${ic('play', 14)}</span></div>
@@ -2155,10 +2183,10 @@ function viewKatalog() {
   const g = UI.katGroup || 'Alle', eq = UI.katEq || 'Alle';
   const cnt = gr => L.filter(e => e.g === gr).length;
   const eqNames = EQ_CATS.map(([n]) => n).filter(n => L.some(e => eqCats(e).includes(n)));
-  return topbar({ back: '/', title: 'Übungskatalog', sub: `${L.length} Übungen · 3D-Ausführung` }) +
+  return topbar({ back: '/', title: 'Übungskatalog', sub: `${L.length} Übungen · ${videoMode() ? 'Videos' : '3D-Ausführung'}` }) +
   `<main class="wrap view wrap-wide">
     <div class="kat-tools">
-      <div class="kat-figrow"><span class="frow-l">Figur</span>${FigureSwitch(curFig())}</div>
+      <div class="kat-figrow"><span class="frow-l">${videoMode() ? 'Video' : 'Figur'}</span>${FigureSwitch(curFig())}</div>
       <label class="search">${ic('search')}<input id="katsearch" type="search" placeholder="Übung, Muskel oder Gerät suchen" value="${esc(UI.katSearch || '')}" autocomplete="off" aria-label="Übungen durchsuchen"></label>
       <div class="frow" role="group" aria-label="Muskelgruppe">${FilterChip('Alle', g === 'Alle', 'kat-group', 'Alle', L.length)}${groups.map(x => FilterChip(x, x === g, 'kat-group', x, cnt(x))).join('')}</div>
       <div class="frow frow-sub" role="group" aria-label="Equipment"><span class="frow-l">Gerät</span>${FilterChip('Alle', eq === 'Alle', 'kat-eq', 'Alle')}${eqNames.map(x => FilterChip(x, x === eq, 'kat-eq', x)).join('')}</div>
@@ -2189,17 +2217,32 @@ async function mountDetail3D(id) {
     host.classList.add('ready');
   } catch (err) { console.error(err); if (note) note.innerHTML = '3D-Ansicht konnte nicht geladen werden.'; }
 }
+async function mountDetailVideo(id) {
+  const host = document.getElementById('ud-vstage'); if (!host) return;
+  const fig = curFig(), set = html => { if (document.getElementById('ud-vstage') === host) host.innerHTML = html; };
+  const none = msg => { set(`<div class="ud-novideo">${ic('play', 28)}<b>Video derzeit nicht verfügbar</b><span>${esc(msg)}</span></div>`); const b = document.getElementById('ud-play'); if (b) b.hidden = true; };
+  let v; try { v = await videoFor(id, fig); } catch (e) { return none(navigator.onLine === false ? 'Keine Internetverbindung.' : 'Die Videoquelle ist gerade nicht erreichbar.'); }
+  if (document.getElementById('ud-vstage') !== host) return;
+  if (!v) return none('Für diese Übung gibt es noch kein passendes Video.');
+  set(`<video class="ud-video" id="ud-video" src="${esc(v.src)}" ${v.poster ? `poster="${esc(v.poster)}"` : ''} muted loop playsinline ${REDUCED_MOTION() ? '' : 'autoplay'} preload="auto" aria-label="Übungsvideo"></video>
+    <div class="ud-src">Video: ${esc(v.source)}${(fig === 'w') !== !!v.female && v.source === 'MuscleWiki' ? ` · nur mit ${v.female ? 'Frau' : 'Mann'} verfügbar` : ''}</div>`);
+  const vid = document.getElementById('ud-video'), b = document.getElementById('ud-play');
+  if (b) b.hidden = false;
+  const sync = () => { if (b) { b.innerHTML = vid.paused ? ic('play', 18) : ic('pause', 18); b.setAttribute('aria-label', vid.paused ? 'Video abspielen' : 'Video anhalten'); } };
+  vid.addEventListener('play', sync); vid.addEventListener('pause', sync); sync();
+  vid.addEventListener('error', () => { VIDEO.cache.delete(id + '|' + fig); none('Das Video konnte nicht geladen werden.'); }, { once: true });
+}
 function udPlayBtn() { const b = document.getElementById('ud-play'); if (b && VD) { b.innerHTML = VD.playing ? ic('pause', 18) : ic('play', 18); b.setAttribute('aria-label', VD.playing ? 'Animation anhalten' : 'Animation abspielen'); } }
 function ExerciseDetailView(e) {
   const trainer = !isClientMode();
   const li = (a, cls, icn) => `<ul class="ud-list ${cls}">${a.map(x => `<li><span class="ud-li-ic">${icn}</span><span>${esc(x)}</span></li>`).join('')}</ul>`;
   return `<div class="ud">
     <div class="ud-hero">
-      ${(md => md ? `<video class="ud-video" src="${esc(md.src)}" ${md.poster ? `poster="${esc(md.poster)}"` : ''} muted loop playsinline ${REDUCED_MOTION() ? '' : 'autoplay'} preload="metadata" aria-label="Video: ${esc(e.n)}"></video>`
-        : `<div class="ud-stage" id="ud-stage">${ExercisePreview(e.id, 'ud-poster')}<div class="ud-load">${LoadingState('3D-Bewegung wird geladen …')}</div></div>`)(mediaFor(e.id, curFig()))}
+      ${(videoMode() || mediaFor(e.id, curFig())) ? `<div class="ud-vstage" id="ud-vstage" data-id="${e.id}"><div class="ud-load">${LoadingState('Video wird geladen …')}</div></div>`
+        : `<div class="ud-stage" id="ud-stage">${ExercisePreview(e.id, 'ud-poster')}<div class="ud-load">${LoadingState('3D-Bewegung wird geladen …')}</div></div>`}
       <div class="ud-phase" id="ud-phase" aria-live="polite"></div>
-      <div class="ud-ctrl"><button class="icon-btn glass" id="ud-play" data-action="ud-play" aria-label="Animation anhalten">${ic('pause', 18)}</button>
-        <button class="icon-btn glass" data-action="open3d" data-id="${e.id}" aria-label="Vollbild mit Ansichten, Tempo und Technik">${ic('expand', 18)}</button></div>
+      <div class="ud-ctrl"><button class="icon-btn glass" id="ud-play" data-action="ud-play" aria-label="Anhalten">${ic('pause', 18)}</button>
+        ${(videoMode() || mediaFor(e.id, curFig())) ? '' : `<button class="icon-btn glass" data-action="open3d" data-id="${e.id}" aria-label="Vollbild mit Ansichten, Tempo und Technik">${ic('expand', 18)}</button>`}</div>
     </div>
     <div class="ud-head">
       <div class="ud-tags"><span class="pill pill-gold">${esc(e.g)}</span><span class="pill">${esc(eqShort(e))}</span><span class="grow"></span>${FigureSwitch(curFig())}</div>
@@ -2299,7 +2342,7 @@ Object.assign(A, {
   'kat-group': el => { UI.katGroup = el.dataset.v; refreshKat(); },
   'kat-eq': el => { UI.katEq = el.dataset.v; refreshKat(); },
   'kat-reset': () => { UI.katGroup = 'Alle'; UI.katEq = 'Alle'; UI.katSearch = ''; const s = document.getElementById('katsearch'); if (s) s.value = ''; refreshKat(); },
-  'ud-play': () => { if (!VD) return; if (VD._done) VD.reset(); VD.playing = !VD.playing; udPlayBtn(); },
+  'ud-play': () => { const vid = document.getElementById('ud-video'); if (vid) { vid.paused ? vid.play().catch(() => {}) : vid.pause(); return; } if (!VD) return; if (VD._done) VD.reset(); VD.playing = !VD.playing; udPlayBtn(); },
   'ud-add': el => openAddToPlan(el.dataset.id),
   'ud-add-client': el => openAddToPlan(el.dataset.id, el.dataset.cid),
   'ud-add-day': el => addCatalogExercise(el.dataset.id, el.dataset.did),
@@ -2311,7 +2354,7 @@ Object.assign(A, {
     const p = location.hash.slice(1).split('/').filter(Boolean);
     if (p[0] === 'uebungen') return refreshKat();
     if (p[0] === 'uebung') {
-      if (mediaFor(p[1], 'w') || mediaFor(p[1], 'm')) return render();
+      if (videoMode() || mediaFor(p[1], 'w') || mediaFor(p[1], 'm')) return render();
       document.querySelectorAll('.ud-poster').forEach(x => { x.dataset.fig = v; x.querySelectorAll('img').forEach(i => i.remove()); });
       if (VD) { VD.setFigure(v); VD.setMuscles(true); } else hydrateThumbs();
     }
@@ -2377,7 +2420,7 @@ function close3D() {
 }
 function setPlayBtn(playing) { const b = document.getElementById('v3-play'); if (b) { b.innerHTML = playing ? `${ic('pause', 16)} Pause` : `${ic('play', 16)} Abspielen`; b.setAttribute('aria-label', playing ? 'Pause' : 'Abspielen'); } }
 Object.assign(A, {
-  open3d: el => open3D(el.dataset.id, el.dataset.fig),
+  open3d: el => { if (videoMode()) { if (el.dataset.fig) UI.fig = el.dataset.fig; return go('/uebung/' + el.dataset.id); } open3D(el.dataset.id, el.dataset.fig); },
   'v3-close': () => { close3D(); const p = location.hash.slice(1).split('/').filter(Boolean); if (p[0] === 'uebung') mountDetail3D(p[1]); },
   'v3-play': () => { if (!V3) return; if (V3._done) V3.reset(); V3.playing = !V3.playing; setPlayBtn(V3.playing); },
   'v3-reset': () => { if (!V3) return; V3.reset(); V3.playing = true; setPlayBtn(true); },

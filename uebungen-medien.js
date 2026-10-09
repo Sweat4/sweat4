@@ -17,3 +17,13 @@
    ===================================================================== */
 window.SW_MEDIA = {
 };
+
+/* =====================================================================
+   Video-Server für echte Übungsvideos (MuscleWiki)
+   Adresse deines Cloudflare-Workers eintragen, z. B. 'https://sweat4-video.DEINNAME.workers.dev'.
+   Leer lassen = bisherige 3D-Darstellung. Eingetragen = Videos statt 3D.
+   Der geheime API-Schlüssel gehört NICHT hierher, sondern nur in den Worker.
+   ===================================================================== */
+window.SW_VIDEO = {
+  endpoint: '',
+};
