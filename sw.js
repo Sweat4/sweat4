@@ -1,9 +1,9 @@
 // SWEAT4 Trainer-Logbuch – Offline-Cache. Bei Updates VERSION erhöhen.
-const VERSION = 'sweat4-v20';
+const VERSION = 'sweat4-v21';
 const FILES = ['./', 'index.html', 'manifest.webmanifest', 'uebungen-katalog.js', 'uebungen-medien.js', 'lebensmittel.js', 'uebungen3d.js', 'three.min.js', 'icon-180.png', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png'];
 // Fehlende Dateien (z. B. Übungskatalog) dürfen die Installation nicht blockieren
 self.addEventListener('install', e => { e.waitUntil(caches.open(VERSION).then(c => Promise.all(FILES.map(f => c.add(f).catch(() => null)))).then(() => self.skipWaiting())); });
-self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== VERSION && k !== 'sweat4-thumbs-v3').map(k => caches.delete(k)))).then(() => self.clients.claim())); });
+self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== VERSION && k !== 'sweat4-thumbs-v4').map(k => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   // Nur eigene Dateien cachen. Fremde Anfragen (Video-Server, Videostreams) gehen unverändert ins Netz –
