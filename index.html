@@ -1612,7 +1612,7 @@ function viewData() {
         <div class="muted">Letztes Backup: <b style="color:var(--text)">${lb ? fmtDateTs(lb) : 'noch keins'}</b></div>
         <button class="btn btn-primary btn-big" data-action="backup">${ic('download', 22)} Backup erstellen</button>
         <button class="btn btn-ghost btn-block" data-action="import">${ic('upload')} Backup importieren</button>
-        <input type="file" id="import-file" accept=".json,application/json" hidden>
+        <input type="file" id="import-file" hidden>
         <div class="muted" style="font-size:13px">Das Backup ist eine JSON-Datei mit allen Kunden, Plänen, Übungen, Trainings, Notizen, Messungen und Fortschrittsbildern. Bewahre sie sicher auf – sie enthält vertrauliche Kundendaten. Mit „Backup importieren“ kannst du sie auch auf ein anderes Gerät übertragen.</div>
       </div>
     </section>
@@ -3598,7 +3598,7 @@ function dataExtraTrainer() {
         ${lock ? `<button class="btn btn-text btn-block" data-action="lock-off">Sperre entfernen</button>` : ''}</div>
     </section>
     ${S.clients.size ? '' : `<section class="section"><div class="section-h"><h2>Ich bin Kunde</h2></div><div class="card stack"><div class="muted" style="font-size:14px">Du hast von deinem Trainer eine Zugangsdatei bekommen? Dann richte hier deinen Kunden-Zugang ein.</div><a class="btn btn-primary btn-block" href="#/kunde-setup">Kunden-Zugang einrichten</a></div></section>`}
-    <input type="file" id="ret-file" accept=".json,application/json" hidden>`;
+    <input type="file" id="ret-file" hidden>`;
 }
 function viewDataClient() {
   const c = S.clients.get(roleInfo().clientId), info = S.meta.get('pkgInfo');
@@ -3628,7 +3628,7 @@ function viewSetup() {
   return topbar({ back: cm ? '/data' : '/', title: cm ? 'Update laden' : 'Kunden-Zugang einrichten', sub: 'Datei von deinem Trainer' }) + `<main class="wrap view">
     <form data-form="setup" class="card stack">
       <div class="muted" style="font-size:14px">${cm ? 'Wähle die neue Datei deines Trainers und gib deinen Zugangscode ein.' : '1. Wähle die Datei, die du von deinem Trainer bekommen hast (z. B. per AirDrop, WhatsApp oder E-Mail – vorher in „Dateien“ sichern).<br>2. Gib den Zugangscode ein, den dir dein Trainer gesagt hat.'}</div>
-      <label class="btn btn-ghost btn-block" id="setup-pick">${ic('upload')} <span>Datei auswählen</span><input type="file" name="file" accept=".json,application/json" hidden></label>
+      <label class="btn btn-ghost btn-block" id="setup-pick">${ic('upload')} <span>Datei auswählen</span><input type="file" name="file" hidden></label>
       <label class="field" style="margin:0"><span>Zugangscode</span><input name="code" type="password" class="input" autocomplete="current-password" required minlength="6"></label>
       ${cm ? '' : `<label class="toggle"><input type="checkbox" name="agree"><span class="tg"></span><span>Ich habe die <a href="#/rechtliches/datenschutz" class="accent">Datenschutzerklärung</a> und den <a href="#/rechtliches/gesundheit" class="accent">Gesundheitshinweis</a> gelesen und willige in die Verarbeitung meiner Gesundheitsdaten zur Betreuung ein.</span></label>`}
       <button class="btn btn-primary btn-big">${cm ? 'Update laden' : 'Zugang einrichten'}</button>
@@ -3811,7 +3811,7 @@ Object.assign(A, {
       <div class="info" style="margin-bottom:14px">So geht's weiter:<br>1. Datei an den Kunden schicken (AirDrop, WhatsApp, Mail).<br>2. Den Code <b>getrennt</b> mitteilen (z. B. mündlich).<br>3. Der Kunde öffnet <b>${esc(location.href.split('#')[0])}</b> auf seinem Handy, fügt sie zum Home-Bildschirm hinzu und tippt auf „Ich bin Kunde“.</div>
       <div class="sheet-actions"><button type="button" class="btn btn-ghost" data-action="modal-close">Abbrechen</button><button class="btn btn-primary">Datei erstellen</button></div></form>`);
   },
-  'ret-import': () => { let i = document.getElementById('ret-file'); if (!i) { i = document.createElement('input'); i.type = 'file'; i.id = 'ret-file'; i.accept = '.json,application/json'; i.hidden = true; document.body.appendChild(i); } i.click(); },
+  'ret-import': () => { let i = document.getElementById('ret-file'); if (!i) { i = document.createElement('input'); i.type = 'file'; i.id = 'ret-file'; i.hidden = true; document.body.appendChild(i); } i.click(); },
   'ret-make': () => modal('Trainings an Trainer senden', `<form data-form="ret"><p class="muted" style="margin-top:0">Deine abgeschlossenen Trainings werden verschlüsselt als Datei gespeichert. Schick sie anschließend an deinen Trainer.</p>
       <label class="field"><span>Dein Zugangscode</span><input name="code" type="password" class="input" required autocomplete="current-password"></label>
       <div class="sheet-actions"><button type="button" class="btn btn-ghost" data-action="modal-close">Abbrechen</button><button class="btn btn-primary">Datei erstellen</button></div></form>`),
