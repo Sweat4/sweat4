@@ -110,6 +110,11 @@ h1,h2,h3{margin:0;line-height:1.2}
 .cc-meta{font-size:14px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cc-meta b{color:var(--text);font-weight:600}
 .cc-tags{position:absolute;top:10px;right:12px;display:flex;gap:6px}
+.btn-next{justify-content:flex-start;text-align:left;gap:14px;padding:12px 18px;white-space:normal;height:auto}
+.btn-next .nx-ic{flex:none;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:rgba(17,17,17,.12)}
+.btn-next .nx-tx{display:flex;flex-direction:column;min-width:0;line-height:1.2}
+.btn-next small{font-size:12.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.75}
+.btn-next b{font-size:19px;font-weight:700;margin-top:3px;overflow-wrap:anywhere}
 .avatar{width:52px;height:52px;border-radius:50%;flex:none;display:grid;place-items:center;font-weight:700;font-size:18px;overflow:hidden}
 .avatar img{width:100%;height:100%;object-fit:cover}
 .avatar.xl{width:76px;height:76px;font-size:26px}
@@ -3549,7 +3554,7 @@ function viewClientHome() {
     ${days.length ? '' : NutritionCard(c, true)}
     <section class="section"><div class="section-h"><h2>Dein Training</h2></div>
       ${active ? `<a class="btn btn-primary btn-big" href="#/train/${active.id}">${ic('play', 22)} Workout fortsetzen</a>`
-        : next ? `<button class="btn btn-primary btn-big" data-action="start-day" data-cid="${cid}" data-did="${next.id}">${ic('play', 22)} Nächstes Workout: ${esc(dayLabel(days.indexOf(next), next.name))}</button>` : '<div class="card empty">Dein Trainer hat noch keinen Trainingsplan hinterlegt.</div>'}
+        : next ? `<button class="btn btn-primary btn-big btn-next" data-action="start-day" data-cid="${cid}" data-did="${next.id}"><span class="nx-ic">${ic('play', 22)}</span><span class="nx-tx"><small>Nächstes Workout · Tag ${days.indexOf(next) + 1}</small><b>${esc(next.name || 'Training')}</b></span></button>` : '<div class="card empty">Dein Trainer hat noch keinen Trainingsplan hinterlegt.</div>'}
       <div class="card list-card" style="margin-top:12px">
         <a class="list-link" href="#/client/${cid}/planview">${ic('list')}<div class="grow"><b>Aktueller Trainingsplan</b><div class="muted" style="font-size:13px">${days.length} ${days.length === 1 ? 'Trainingstag' : 'Trainingstage'}</div></div></a>
         ${last ? `<a class="list-link" href="#/session/${last.id}">${ic('check')}<div class="grow"><b>Letztes Workout</b><div class="muted" style="font-size:13px">${fmtDate(last.date)} · ${esc(sessLabel(last))}</div></div></a>` : ''}
