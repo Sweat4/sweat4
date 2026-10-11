@@ -1383,7 +1383,7 @@ function viewHome() {
         <div style="margin-bottom:18px">Lege deinen ersten Kunden an, um loszulegen.</div>
         <button class="btn btn-primary btn-big" data-action="new-client">${ic('plus', 22)} Ersten Kunden anlegen</button>
         <button class="btn btn-text" style="margin-top:12px" data-action="demo">Beispieldaten laden (zum Ausprobieren)</button>
-        <a class="btn btn-ghost btn-block" style="margin-top:14px" href="#/kunde-setup">Ich bin Kunde – Zugang einrichten</a>
+        <a class="btn btn-ghost btn-block" style="margin-top:14px" href="#/kunde-setup">${T('Ich bin Kunde – Zugang einrichten')}</a>
       </div>`}
     <a class="privacy-pill" href="#/data">${ic('lock', 16)} Daten bleiben lokal auf diesem Gerät</a>
     ${LegalLinks()}
@@ -3913,7 +3913,7 @@ function viewDataClient() {
         <a class="btn btn-ghost btn-block" href="#/kunde-setup">${ic('download')} ${T('Update vom Trainer laden')}</a>`}
         <div class="muted" style="font-size:13px">${T('Neue Pläne, Messungen und Fortschrittsbilder bekommst du von deinem Trainer. Deine eigenen Trainings bleiben beim Update erhalten.')}</div>
       </div></section>
-    <section class="section"><div class="section-h"><h2>${T('Gerät')}</h2></div>
+    <section class="section"><div class="section-h"><h2>${T('Dieses Gerät')}</h2></div>
       <div class="card stack"><button class="btn btn-ghost btn-block" data-action="lock-now">${ic('lock')} ${T('Jetzt sperren')}</button>
         <button class="btn btn-danger-ghost btn-block" data-action="client-reset">${ic('trash')} ${T('Kundenmodus beenden & Daten löschen')}</button></div></section>
   </main>`;
@@ -3935,15 +3935,19 @@ function inviteReady(cid) {
 function viewSetup(lcid, lbox) {
   const cm = isClientMode();
   if (lcid && (!cm || roleInfo().clientId === lcid)) return topbar({ title: cm ? T('Update laden') : T('Willkommen bei SWEAT4'), sub: cm ? T('Neuer Plan von deinem Trainer') : T('Zugang einrichten'), right: cm ? '' : `<div class="tb-lang">${LangSwitch()}</div>` }) + `<main class="wrap view">
+    ${!cm && isIOS() && !isStandalone() ? `<div class="card stack" style="margin-bottom:14px;border-color:var(--accent)"><b>${T('iPhone: zuerst die App auf den Home-Bildschirm legen')}</b>
+      <div class="muted" style="font-size:14px">${T('Die App auf dem Home-Bildschirm hat einen eigenen Speicher. Richte deinen Zugang deshalb direkt dort ein:')}<br>1. ${T('Tippe auf „Link kopieren“.')}<br>2. ${T('Tippe unten auf Teilen → „Zum Home-Bildschirm“.')}<br>3. ${T('Öffne SWEAT4 auf dem Home-Bildschirm, tippe auf „Ich bin Kunde“ und füge den Link ein.')}</div>
+      <button type="button" class="btn btn-primary" data-action="setup-copy-link">${ic('upload', 18)} ${T('Link kopieren')}</button></div>` : ''}
     <form data-form="setup" data-cid="${esc(lcid)}" data-box="${esc(lbox || '')}" class="card stack">
       <div class="muted" style="font-size:14px">${T('Dein Trainer hat dich eingeladen. Gib den Zugangscode ein, den du von ihm bekommen hast – dein Plan wird dann automatisch geladen.')}</div>
       <label class="field" style="margin:0"><span>${T('Zugangscode')}</span><input name="code" type="text" class="input" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="go"></label>
       ${cm ? '' : `<label class="toggle"><input type="checkbox" name="agree"><span class="tg"></span><span>${T('Ich habe die {a} und den {b} gelesen und willige in die Verarbeitung meiner Gesundheitsdaten zur Betreuung ein.', { a: `<a href="#/rechtliches/datenschutz" class="accent">${T('Datenschutzerklärung')}</a>`, b: `<a href="#/rechtliches/gesundheit" class="accent">${T('Gesundheitshinweis')}</a>` })}</span></label>`}
       <button class="btn btn-primary btn-big">${cm ? T('Update laden') : T('Zugang einrichten')}</button>
       <div class="setup-err down" style="font-size:14px;font-weight:600" role="alert"></div>
-      <div class="muted" style="font-size:12px">${T('Tipp: Danach über Teilen → „Zum Home-Bildschirm“ als App ablegen.')}</div>
+      ${isIOS() && !isStandalone() ? '' : `<div class="muted" style="font-size:12px">${T('Tipp: Danach über Teilen → „Zum Home-Bildschirm“ als App ablegen.')}</div>`}
     </form></main>`;
-  return topbar({ back: cm ? '/data' : '/', title: cm ? T('Update laden') : T('Kunden-Zugang einrichten'), sub: T('Datei von deinem Trainer'), right: cm ? '' : `<div class="tb-lang">${LangSwitch()}</div>` }) + `<main class="wrap view">
+  return topbar({ back: cm ? '/data' : '/', title: cm ? T('Update laden') : T('Kunden-Zugang einrichten'), sub: cm ? T('Datei von deinem Trainer') : T('Einladung von deinem Trainer'), right: cm ? '' : `<div class="tb-lang">${LangSwitch()}</div>` }) + `<main class="wrap view">
+    ${cm ? '' : InvitePaste() + `<div class="muted" style="font-size:13px;margin:4px 2px 10px">${T('Oder mit einer Zugangsdatei:')}</div>`}
     <form data-form="setup" class="card stack">
       <div class="muted" style="font-size:14px">${cm ? T('Wähle die neue Datei deines Trainers und gib deinen Zugangscode ein.') : T('1. Wähle die Datei, die du von deinem Trainer bekommen hast (z. B. per AirDrop, WhatsApp oder E-Mail – vorher in „Dateien“ sichern).') + '<br>' + T('2. Gib den Zugangscode ein, den dir dein Trainer gesagt hat.')}</div>
       <label class="btn btn-ghost btn-block" id="setup-pick">${ic('upload')} <span>${T('Datei auswählen')}</span><input type="file" name="file" hidden></label>
@@ -4070,6 +4074,14 @@ async function boxGet(cid, code, slot, since, url) {
   return r.json();
 }
 const textFile = t => ({ text: async () => t });
+/* iPhone: Home-Bildschirm-App und Safari haben getrennte Speicher → Einrichtung muss in der App passieren */
+const isIOS = () => /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const isStandalone = () => !!(navigator.standalone || (window.matchMedia && matchMedia('(display-mode: standalone)').matches));
+const InvitePaste = () => `<div class="card stack" style="margin-bottom:14px"><b>${T('Einladungslink einfügen')}</b>
+  <div class="muted" style="font-size:14px">${T('Kopiere den Link aus der Nachricht deines Trainers (lange drauf tippen → Kopieren) und füge ihn hier ein.')}</div>
+  <input id="inv-paste" class="input" type="url" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="https://sweat4.github.io/…">
+  <div class="grid2"><button type="button" class="btn btn-ghost" data-action="invite-paste">${T('Einfügen')}</button><button type="button" class="btn btn-primary" data-action="invite-open">${T('Weiter')}</button></div>
+  <div class="inv-err down" style="font-size:14px;font-weight:600"></div></div>`;
 const inviteLink = cid => `${location.href.split('#')[0]}#/kunde-setup/${cid}/${encodeURIComponent(boxUrl())}`;
 /* Trainer → Kunde */
 async function boxSendUpdate(cid) {
@@ -4259,6 +4271,21 @@ Object.assign(A, {
   'invite-share': async () => { const link = UI.invite; if (!link) return;
     if (navigator.share) { try { await navigator.share({ title: 'SWEAT4', text: `Dein Zugang zur SWEAT4 App: ${link}` }); closeModal(null); return; } catch (e) { if (e && e.name === 'AbortError') return; } }
     A['invite-copy'](); },
+  'setup-copy-link': async () => {
+    const link = location.href; let ok = false;
+    try { await navigator.clipboard.writeText(link); ok = true; } catch (e) {}
+    toast(ok ? T('Link kopiert ✓') : T('Kopieren nicht möglich – Link markieren und kopieren'));
+  },
+  'invite-paste': async () => {
+    const i = document.getElementById('inv-paste'); if (!i) return;
+    try { i.value = await navigator.clipboard.readText(); } catch (e) { i.focus(); }
+  },
+  'invite-open': () => {
+    const i = document.getElementById('inv-paste'), e = document.querySelector('.inv-err');
+    const m = /#\/?(kunde-setup\/[^\s"'<>]+)/.exec(String(i && i.value || '').trim());
+    if (!m) { if (e) e.textContent = T('Das ist kein Einladungslink. Kopiere den ganzen Link aus der Nachricht deines Trainers.'); return; }
+    location.hash = '/' + m[1];
+  },
   'invite-copy': () => { const link = UI.invite; if (!link) return; (navigator.clipboard ? navigator.clipboard.writeText(link) : Promise.reject()).then(() => toast(T('Link kopiert ✓')), () => toast(T('Kopieren nicht möglich – Link markieren und kopieren'))); },
   'box-apply': async () => { const code = await askCode(T('Neuen Plan laden')); if (!code || !BOX.pending) return;
     try { const res = BOX.pending; await setupFromFile(textFile(res.data), code, { boxV: res.v }); BOX.pending = null; toast(T('Neuer Plan geladen ✓')); go('/'); render(); } catch (e) { toast(e.message); } },

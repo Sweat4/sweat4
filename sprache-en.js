@@ -613,7 +613,21 @@ window.SW_I18N.en = {
     "Bitte den Zugangscode eingeben.": "Please enter the access code.",
     "Der Zugangscode hat mindestens 6 Zeichen. Du bekommst ihn von deinem Trainer – es ist kein eigenes Passwort.": "The access code has at least 6 characters. You get it from your trainer – it is not a password you choose yourself.",
     "Deine abgeschlossenen Trainings werden verschlüsselt als Datei gespeichert. Schick sie anschließend an deinen Trainer.": "Your completed workouts are saved encrypted as a file. Then send it to your trainer.",
-    "Datei erstellen": "Create file"
+    "Datei erstellen": "Create file",
+    "Dieses Gerät": "This device",
+    "Ich bin Kunde – Zugang einrichten": "I'm a client – set up access",
+    "Einladungslink einfügen": "Paste invitation link",
+    "Kopiere den Link aus der Nachricht deines Trainers (lange drauf tippen → Kopieren) und füge ihn hier ein.": "Copy the link from your trainer’s message (long-press → Copy) and paste it here.",
+    "Einfügen": "Paste",
+    "Das ist kein Einladungslink. Kopiere den ganzen Link aus der Nachricht deines Trainers.": "That is not an invitation link. Copy the whole link from your trainer’s message.",
+    "Einladung von deinem Trainer": "Invitation from your trainer",
+    "Oder mit einer Zugangsdatei:": "Or with an access file:",
+    "iPhone: zuerst die App auf den Home-Bildschirm legen": "iPhone: add the app to your Home Screen first",
+    "Die App auf dem Home-Bildschirm hat einen eigenen Speicher. Richte deinen Zugang deshalb direkt dort ein:": "The Home Screen app has its own storage. So set up your access directly there:",
+    "Tippe auf „Link kopieren“.": "Tap “Copy link”.",
+    "Tippe unten auf Teilen → „Zum Home-Bildschirm“.": "Tap Share at the bottom → “Add to Home Screen”.",
+    "Öffne SWEAT4 auf dem Home-Bildschirm, tippe auf „Ich bin Kunde“ und füge den Link ein.": "Open SWEAT4 from your Home Screen, tap “I'm a client” and paste the link.",
+    "Link kopieren": "Copy link"
   },
   /* Übungskatalog: id → [Name, Zielmuskel, Equipment, Ausgangsposition, Ausführung, Bewegungsrichtung, [Hinweise], [Fehler]] */
   kat: {
