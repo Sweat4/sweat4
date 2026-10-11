@@ -774,6 +774,50 @@ img.ld{opacity:1!important}
 .avatar{background:hsl(var(--h,30) 32% 84%);color:hsl(var(--h,30) 45% 28%)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .avatar{background:hsl(var(--h,30) 35% 22%);color:hsl(var(--h,30) 70% 78%)}}
 :root[data-theme="dark"] .avatar{background:hsl(var(--h,30) 35% 22%);color:hsl(var(--h,30) 70% 78%)}
+
+/* ---------- Betreuung: Dashboard, Meldungen, Zusammenfassung, Nachrichten ---------- */
+.care{margin-bottom:8px}
+.care .section-h{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.care-h{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:16px 2px 8px;display:flex;align-items:center;gap:8px}
+.empty-s{padding:14px 16px;color:var(--muted);font-size:14px}
+.badge{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-size:11.5px;font-weight:800;letter-spacing:0}
+.dot-new{width:10px;height:10px;border-radius:50%;background:var(--accent);flex:none;box-shadow:0 0 0 3px var(--accent-soft)}
+.bell{position:relative}
+.bell-n{position:absolute;top:4px;right:2px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-size:10.5px;font-weight:800;display:grid;place-items:center}
+.care-todo{gap:10px}
+.care-todo-a{display:flex;align-items:flex-start;gap:10px;min-width:0;color:inherit}
+.care-ic{font-size:20px;line-height:1.2;flex:none;width:26px;text-align:center}
+.care-chips{display:flex;flex-wrap:wrap;gap:6px}
+.tag.ok{background:rgba(74,222,128,.14);color:var(--ok)}
+.tag.neutral{background:var(--surface-3);color:var(--text)}
+.list-link.ev.unread{background:var(--accent-soft)}
+.sum-card{padding:14px}
+.findings{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:8px}
+.findings li{display:flex;gap:8px;align-items:flex-start;font-size:15px;line-height:1.4;background:var(--surface-2);border-radius:12px;padding:10px 12px}
+.sum-notes{margin-top:10px;display:grid;gap:6px;font-size:14px;color:var(--muted)}
+.done-banner{display:flex;gap:12px;align-items:center;background:var(--accent-soft);border:1px solid var(--accent);border-radius:16px;padding:14px;margin-bottom:12px}
+.done-ic{width:40px;height:40px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-size:22px;font-weight:800;flex:none}
+details.exd{padding:0}
+details.exd>summary{list-style:none;display:flex;align-items:center;gap:10px;padding:14px 16px;cursor:pointer}
+details.exd>summary::-webkit-details-marker{display:none}
+details.exd[open]>summary svg{transform:rotate(180deg)}
+details.exd>*:not(summary){margin:0 16px 14px}
+.thread{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+.bubble{max-width:86%;padding:10px 13px;border-radius:16px;background:var(--surface-2);border:1px solid var(--border)}
+.bubble.me{align-self:flex-end;background:var(--accent-soft);border-color:rgba(190,155,92,.35)}
+.bubble.them{align-self:flex-start}
+.bubble.issue{border-color:var(--warn)}
+.b-from{font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--accent);margin-bottom:3px}
+.b-text{font-size:15px;line-height:1.45;white-space:normal;overflow-wrap:anywhere}
+.b-meta{font-size:11.5px;color:var(--muted);margin-top:4px}
+.b-ref{display:inline-block;font-size:12.5px;color:var(--muted);margin-bottom:4px}
+.composer textarea{min-height:84px;resize:vertical}
+.qr-h{font-size:12px}
+.qr{display:flex;gap:6px;flex-wrap:wrap}
+.qr .qr-chip{flex:0 1 auto;max-width:100%;min-height:34px;height:auto;font-size:13px;text-align:left;white-space:normal;line-height:1.3;padding:7px 12px}
+.msg-card{display:block;margin:12px 0 4px;padding:14px 16px;color:inherit}
+.msg-card.new{border-color:var(--accent);background:linear-gradient(0deg,var(--accent-soft),var(--accent-soft)),var(--surface)}
+.push-card{padding-top:4px;border-top:1px solid var(--border);margin-top:4px}
 </style>
 </head>
 <body>
@@ -801,7 +845,7 @@ const CONFIG = {
   MAX_SETS: 5,          // max. Sätze pro Übung
   DEFAULT_SETS: 3,
   DB_NAME: 'trainer-logbuch',
-  DB_VERSION: 2,          // 2: Fortschrittschecks + Fotos
+  DB_VERSION: 3,          // 2: Fortschrittschecks + Fotos · 3: Nachrichten + Betreuungs-Ereignisse
   APP_ID: 'trainer-logbuch',
   BACKUP_VERSION: 1,
   BACKUP_REMINDER_DAYS: 14,
@@ -809,7 +853,7 @@ const CONFIG = {
 /* SWEAT4-Logo (Vektor, eingebettet – funktioniert offline) */
 const LOGO_MARK = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="10 -110 2310 840" class="logo-mark" role="img" aria-label="SWEAT4"><path fill="#BE9B5C" d="M316.0 714.0Q230.0 714.0 150.0 693.0Q70.0 672.0 21.0 637.0L86.0 491.0Q133.0 522.0 195.0 541.0Q257.0 560.0 317.0 560.0Q378.0 560.0 404.5 544.0Q431.0 528.0 431.0 503.0Q431.0 479.0 409.5 465.0Q388.0 451.0 352.5 442.0Q317.0 433.0 274.5 424.0Q232.0 415.0 189.5 401.5Q147.0 388.0 111.5 365.0Q76.0 342.0 54.5 305.0Q33.0 268.0 33.0 213.0Q33.0 151.0 67.5 99.5Q102.0 48.0 170.5 17.0Q239.0 -14.0 343.0 -14.0Q411.0 -14.0 478.0 1.5Q545.0 17.0 597.0 47.0L536.0 194.0Q486.0 167.0 437.0 153.5Q388.0 140.0 342.0 140.0Q280.0 140.0 254.5 158.5Q229.0 177.0 229.0 203.0Q229.0 226.0 250.5 239.0Q272.0 252.0 307.5 261.0Q343.0 270.0 385.5 279.0Q428.0 288.0 470.0 301.5Q512.0 315.0 547.5 337.5Q583.0 360.0 604.5 396.5Q626.0 433.0 626.0 488.0Q626.0 549.0 592.0 600.5Q558.0 652.0 489.0 683.0Q420.0 714.0 316.0 714.0Z M890.0 700.0 663.0 0.0H867.0L1008.0 447.0L1156.0 0.0H1338.0L1480.0 452.0L1626.0 0.0H1815.0L1588.0 700.0H1376.0L1242.0 274.0L1102.0 700.0Z"/><path fill="#BE9B5C" transform="translate(1529.2,-284.8) scale(2.713)" d="M212.5,70 L247,70 L170,224 L286.3,224 L286.3,254 L136.3,254 L136.3,224 Z M194.2,226 C194.4,223.6 194.0,217.1 195.4,212.0 C196.7,206.8 198.8,201.1 202.5,195.0 C206.1,188.8 212.0,181.6 217.5,175.0 C223.0,168.3 230.7,161.3 235.5,155.0 C240.3,148.6 243.7,141.8 246.3,137.0 C248.8,132.1 249.8,127.8 250.6,126.0 C251.0,128.0 253.0,133.5 253.0,138.0 C253.0,142.5 252.1,147.1 250.6,153.0 C249.0,158.8 246.8,166.3 243.6,173.0 C240.3,179.6 235.3,186.6 231.0,193.0 C226.6,199.3 220.5,205.5 217.4,211.0 C214.2,216.5 213.1,223.5 212.3,226.0 Z M229.0,226 C229.7,224.0 230.3,218.1 233.2,214.0 C236.0,209.8 242.3,205.5 246.0,201.0 C249.6,196.5 253.0,191.6 255.3,187.0 C257.6,182.3 259.0,175.3 259.8,173.0 C260.6,174.6 263.4,179.0 264.6,183.0 C265.8,187.0 267.3,192.1 267.0,197.0 C266.6,201.8 264.0,207.1 262.6,212.0 C261.1,216.8 259.0,223.6 258.3,226.0 Z M163.3,257.5 H274.3 Q277.3,257.5 277.3,260.5 V264.5 Q277.3,267.5 274.3,267.5 H163.3 Q160.3,267.5 160.3,264.5 V260.5 Q160.3,257.5 163.3,257.5 Z M202.0,271 H244.0 Q245.5,271 245.5,272.5 V351.0 Q245.5,352.5 244.0,352.5 H202.0 Q200.5,352.5 200.5,351.0 V272.5 Q200.5,271 202.0,271 Z M184.3,352.5 H261.3 Q264.3,352.5 264.3,355.5 V360 Q264.3,363 261.3,363 H184.3 Q181.3,363 181.3,360 V355.5 Q181.3,352.5 184.3,352.5 Z"/></svg>';
 const LOGO_FULL = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="-20 -70 2360 1070" class="logo-full" role="img" aria-label="SWEAT4 – The Sweat4 Control System"><g transform="translate(0,52.5)"><path fill="#BE9B5C" d="M316.0 714.0Q230.0 714.0 150.0 693.0Q70.0 672.0 21.0 637.0L86.0 491.0Q133.0 522.0 195.0 541.0Q257.0 560.0 317.0 560.0Q378.0 560.0 404.5 544.0Q431.0 528.0 431.0 503.0Q431.0 479.0 409.5 465.0Q388.0 451.0 352.5 442.0Q317.0 433.0 274.5 424.0Q232.0 415.0 189.5 401.5Q147.0 388.0 111.5 365.0Q76.0 342.0 54.5 305.0Q33.0 268.0 33.0 213.0Q33.0 151.0 67.5 99.5Q102.0 48.0 170.5 17.0Q239.0 -14.0 343.0 -14.0Q411.0 -14.0 478.0 1.5Q545.0 17.0 597.0 47.0L536.0 194.0Q486.0 167.0 437.0 153.5Q388.0 140.0 342.0 140.0Q280.0 140.0 254.5 158.5Q229.0 177.0 229.0 203.0Q229.0 226.0 250.5 239.0Q272.0 252.0 307.5 261.0Q343.0 270.0 385.5 279.0Q428.0 288.0 470.0 301.5Q512.0 315.0 547.5 337.5Q583.0 360.0 604.5 396.5Q626.0 433.0 626.0 488.0Q626.0 549.0 592.0 600.5Q558.0 652.0 489.0 683.0Q420.0 714.0 316.0 714.0Z M890.0 700.0 663.0 0.0H867.0L1008.0 447.0L1156.0 0.0H1338.0L1480.0 452.0L1626.0 0.0H1815.0L1588.0 700.0H1376.0L1242.0 274.0L1102.0 700.0Z"/><path fill="#BE9B5C" transform="translate(1529.2,-284.8) scale(2.713)" d="M212.5,70 L247,70 L170,224 L286.3,224 L286.3,254 L136.3,254 L136.3,224 Z M194.2,226 C194.4,223.6 194.0,217.1 195.4,212.0 C196.7,206.8 198.8,201.1 202.5,195.0 C206.1,188.8 212.0,181.6 217.5,175.0 C223.0,168.3 230.7,161.3 235.5,155.0 C240.3,148.6 243.7,141.8 246.3,137.0 C248.8,132.1 249.8,127.8 250.6,126.0 C251.0,128.0 253.0,133.5 253.0,138.0 C253.0,142.5 252.1,147.1 250.6,153.0 C249.0,158.8 246.8,166.3 243.6,173.0 C240.3,179.6 235.3,186.6 231.0,193.0 C226.6,199.3 220.5,205.5 217.4,211.0 C214.2,216.5 213.1,223.5 212.3,226.0 Z M229.0,226 C229.7,224.0 230.3,218.1 233.2,214.0 C236.0,209.8 242.3,205.5 246.0,201.0 C249.6,196.5 253.0,191.6 255.3,187.0 C257.6,182.3 259.0,175.3 259.8,173.0 C260.6,174.6 263.4,179.0 264.6,183.0 C265.8,187.0 267.3,192.1 267.0,197.0 C266.6,201.8 264.0,207.1 262.6,212.0 C261.1,216.8 259.0,223.6 258.3,226.0 Z M163.3,257.5 H274.3 Q277.3,257.5 277.3,260.5 V264.5 Q277.3,267.5 274.3,267.5 H163.3 Q160.3,267.5 160.3,264.5 V260.5 Q160.3,257.5 163.3,257.5 Z M202.0,271 H244.0 Q245.5,271 245.5,272.5 V351.0 Q245.5,352.5 244.0,352.5 H202.0 Q200.5,352.5 200.5,351.0 V272.5 Q200.5,271 202.0,271 Z M184.3,352.5 H261.3 Q264.3,352.5 264.3,355.5 V360 Q264.3,363 261.3,363 H184.3 Q181.3,363 181.3,360 V355.5 Q181.3,352.5 184.3,352.5 Z"/><path fill="#BE9B5C" transform="translate(-0.2,67.3) scale(0.86)" d="M159.7 993.5V910.8H127.8V902.4H201.4V910.8H169.4V993.5Z M298.9 993.5V951.5H241.9V993.5H232.3V902.4H241.9V943.0H298.9V902.4H308.4V993.5Z M353.7 993.5V902.4H416.1V910.8H363.3V943.2H410.4V951.4H363.3V985.2H418.0V993.5Z  M531.1 994.3Q520.8 994.3 511.6 991.0Q502.3 987.6 497.2 982.4L501.0 975.0Q505.8 979.8 514.0 983.0Q522.1 986.1 531.1 986.1Q543.8 986.1 549.7 981.4Q555.5 976.7 555.5 969.9Q555.5 964.6 552.5 961.4Q549.5 958.2 544.5 956.4Q539.5 954.5 533.5 953.0Q527.5 951.6 521.6 950.0Q515.6 948.4 510.6 945.6Q505.6 942.9 502.5 938.4Q499.5 933.9 499.5 926.6Q499.5 920.0 503.0 914.3Q506.6 908.6 514.0 905.1Q521.4 901.7 533.0 901.7Q540.7 901.7 548.2 903.8Q555.8 906.0 561.2 909.7L558.0 917.4Q552.1 913.5 545.6 911.7Q539.0 909.9 533.0 909.9Q520.5 909.9 514.7 914.7Q508.9 919.5 508.9 926.4Q508.9 931.7 512.0 934.9Q515.1 938.1 520.1 940.0Q525.1 942.0 531.1 943.4Q537.0 944.7 543.0 946.4Q548.9 948.1 553.9 950.8Q558.9 953.4 561.9 957.9Q565.0 962.3 565.0 969.4Q565.0 976.1 561.4 981.7Q557.7 987.4 550.2 990.8Q542.8 994.3 531.1 994.3Z M622.2 993.5 591.5 902.4H601.4L627.7 980.7L654.9 902.4H663.8L690.6 981.1L717.3 902.4H726.5L695.8 993.5H685.7L659.0 916.0L632.2 993.5Z M759.7 993.5V902.4H822.1V910.8H769.3V943.2H816.4V951.4H769.3V985.2H824.1V993.5Z M847.7 993.5 889.4 902.4H898.9L940.5 993.5H930.3L919.5 969.2H868.7L857.8 993.5ZM872.2 961.4H916.0L894.1 912.5Z M984.3 993.5V910.8H952.3V902.4H1025.9V910.8H993.9V993.5Z M1035.8 969.6V962.8L1084.1 902.4H1094.5L1047.9 961.2H1087.4V940.2H1096.5V961.2H1114.8V969.6H1096.5V993.5H1087.2V969.6Z  M1236.2 994.3Q1226.0 994.3 1217.3 990.8Q1208.7 987.4 1202.2 981.1Q1195.8 974.9 1192.2 966.4Q1188.6 958.0 1188.6 948.0Q1188.6 938.0 1192.2 929.5Q1195.8 921.0 1202.2 914.8Q1208.7 908.6 1217.4 905.1Q1226.1 901.7 1236.4 901.7Q1246.4 901.7 1255.0 905.0Q1263.7 908.3 1269.7 914.9L1263.5 921.0Q1258.0 915.3 1251.2 912.8Q1244.4 910.3 1236.6 910.3Q1225.7 910.3 1217.0 915.2Q1208.3 920.1 1203.2 928.7Q1198.1 937.2 1198.1 948.0Q1198.1 958.8 1203.2 967.3Q1208.3 975.8 1217.0 980.7Q1225.7 985.7 1236.6 985.7Q1244.4 985.7 1251.2 983.1Q1258.0 980.5 1263.5 974.8L1269.7 980.9Q1263.7 987.5 1255.0 990.9Q1246.2 994.3 1236.2 994.3Z M1339.8 994.3Q1329.4 994.3 1320.6 990.8Q1311.9 987.4 1305.5 981.1Q1299.0 974.9 1295.5 966.4Q1291.9 958.0 1291.9 948.0Q1291.9 938.0 1295.5 929.5Q1299.0 921.0 1305.5 914.8Q1311.9 908.6 1320.6 905.1Q1329.4 901.7 1339.8 901.7Q1350.0 901.7 1358.7 905.1Q1367.5 908.6 1373.9 914.8Q1380.3 921.0 1383.9 929.5Q1387.5 938.0 1387.5 948.0Q1387.5 958.0 1383.9 966.4Q1380.3 974.9 1373.9 981.1Q1367.5 987.4 1358.7 990.8Q1350.0 994.3 1339.8 994.3ZM1339.8 985.7Q1350.7 985.7 1359.3 980.8Q1368.0 975.9 1372.9 967.3Q1377.9 958.8 1377.9 948.0Q1377.9 937.2 1372.9 928.6Q1368.0 920.0 1359.3 915.1Q1350.7 910.3 1339.8 910.3Q1328.7 910.3 1320.1 915.1Q1311.4 920.0 1306.4 928.6Q1301.4 937.2 1301.4 948.0Q1301.4 958.8 1306.4 967.3Q1311.4 975.9 1320.1 980.8Q1328.7 985.7 1339.8 985.7Z M1424.7 993.5V902.4H1432.6L1491.3 976.3V902.4H1500.8V993.5H1492.8L1434.3 919.6V993.5Z M1563.7 993.5V910.8H1531.7V902.4H1605.3V910.8H1573.3V993.5Z M1636.3 993.5V902.4H1670.4Q1687.7 902.4 1697.6 910.7Q1707.6 919.0 1707.6 933.7Q1707.6 944.3 1702.1 951.7Q1696.6 959.0 1686.8 962.3L1709.0 993.5H1698.5L1677.6 964.2Q1674.1 964.6 1670.4 964.6H1645.9V993.5ZM1645.9 956.4H1670.1Q1683.8 956.4 1690.8 950.4Q1697.9 944.5 1697.9 933.7Q1697.9 922.7 1690.8 916.8Q1683.8 910.8 1670.1 910.8H1645.9Z M1785.7 994.3Q1775.3 994.3 1766.6 990.8Q1757.9 987.4 1751.5 981.1Q1745.0 974.9 1741.4 966.4Q1737.9 958.0 1737.9 948.0Q1737.9 938.0 1741.4 929.5Q1745.0 921.0 1751.5 914.8Q1757.9 908.6 1766.6 905.1Q1775.3 901.7 1785.7 901.7Q1796.0 901.7 1804.7 905.1Q1813.4 908.6 1819.9 914.8Q1826.3 921.0 1829.9 929.5Q1833.5 938.0 1833.5 948.0Q1833.5 958.0 1829.9 966.4Q1826.3 974.9 1819.9 981.1Q1813.4 987.4 1804.7 990.8Q1796.0 994.3 1785.7 994.3ZM1785.7 985.7Q1796.7 985.7 1805.3 980.8Q1813.9 975.9 1818.9 967.3Q1823.8 958.8 1823.8 948.0Q1823.8 937.2 1818.9 928.6Q1813.9 920.0 1805.3 915.1Q1796.7 910.3 1785.7 910.3Q1774.7 910.3 1766.0 915.1Q1757.4 920.0 1752.4 928.6Q1747.4 937.2 1747.4 948.0Q1747.4 958.8 1752.4 967.3Q1757.4 975.9 1766.0 980.8Q1774.7 985.7 1785.7 985.7Z M1870.7 993.5V902.4H1880.3V985.2H1931.3V993.5Z  M2037.6 994.3Q2027.4 994.3 2018.1 991.0Q2008.9 987.6 2003.8 982.4L2007.6 975.0Q2012.4 979.8 2020.5 983.0Q2028.7 986.1 2037.6 986.1Q2050.4 986.1 2056.2 981.4Q2062.1 976.7 2062.1 969.9Q2062.1 964.6 2059.1 961.4Q2056.1 958.2 2051.1 956.4Q2046.1 954.5 2040.1 953.0Q2034.1 951.6 2028.2 950.0Q2022.2 948.4 2017.2 945.6Q2012.2 942.9 2009.1 938.4Q2006.0 933.9 2006.0 926.6Q2006.0 920.0 2009.6 914.3Q2013.2 908.6 2020.6 905.1Q2028.0 901.7 2039.6 901.7Q2047.3 901.7 2054.8 903.8Q2062.4 906.0 2067.8 909.7L2064.6 917.4Q2058.7 913.5 2052.1 911.7Q2045.6 909.9 2039.6 909.9Q2027.1 909.9 2021.3 914.7Q2015.5 919.5 2015.5 926.4Q2015.5 931.7 2018.6 934.9Q2021.7 938.1 2026.7 940.0Q2031.7 942.0 2037.6 943.4Q2043.6 944.7 2049.5 946.4Q2055.5 948.1 2060.5 950.8Q2065.5 953.4 2068.5 957.9Q2071.6 962.3 2071.6 969.4Q2071.6 976.1 2068.0 981.7Q2064.3 987.4 2056.8 990.8Q2049.4 994.3 2037.6 994.3Z M2127.9 993.5V962.0L2091.5 902.4H2101.8L2133.0 953.4L2164.2 902.4H2173.8L2137.4 962.0V993.5Z M2227.5 994.3Q2217.3 994.3 2208.0 991.0Q2198.8 987.6 2193.7 982.4L2197.5 975.0Q2202.3 979.8 2210.4 983.0Q2218.6 986.1 2227.5 986.1Q2240.3 986.1 2246.1 981.4Q2252.0 976.7 2252.0 969.9Q2252.0 964.6 2249.0 961.4Q2246.0 958.2 2241.0 956.4Q2236.0 954.5 2230.0 953.0Q2224.0 951.6 2218.0 950.0Q2212.1 948.4 2207.0 945.6Q2202.0 942.9 2199.0 938.4Q2195.9 933.9 2195.9 926.6Q2195.9 920.0 2199.5 914.3Q2203.1 908.6 2210.5 905.1Q2217.9 901.7 2229.5 901.7Q2237.2 901.7 2244.7 903.8Q2252.2 906.0 2257.7 909.7L2254.5 917.4Q2248.6 913.5 2242.0 911.7Q2235.5 909.9 2229.5 909.9Q2217.0 909.9 2211.2 914.7Q2205.4 919.5 2205.4 926.4Q2205.4 931.7 2208.5 934.9Q2211.5 938.1 2216.5 940.0Q2221.5 942.0 2227.5 943.4Q2233.5 944.7 2239.4 946.4Q2245.3 948.1 2250.4 950.8Q2255.4 953.4 2258.4 957.9Q2261.5 962.3 2261.5 969.4Q2261.5 976.1 2257.8 981.7Q2254.2 987.4 2246.7 990.8Q2239.2 994.3 2227.5 994.3Z M2314.4 993.5V910.8H2282.4V902.4H2356.0V910.8H2324.0V993.5Z M2387.0 993.5V902.4H2449.4V910.8H2396.6V943.2H2443.7V951.4H2396.6V985.2H2451.4V993.5Z M2489.6 993.5V902.4H2497.5L2537.1 969.9L2576.2 902.4H2584.2V993.5H2574.9V920.8L2539.2 981.9H2534.6L2498.8 921.3V993.5Z"/></g></svg>';
-const STORES = ['clients', 'plans', 'days', 'exercises', 'sessions', 'meta', 'checks'];  // 'photos' liegt separat (groß, wird bei Bedarf geladen)
+const STORES = ['clients', 'plans', 'days', 'exercises', 'sessions', 'meta', 'checks', 'messages', 'events'];  // 'photos' liegt separat (groß, wird bei Bedarf geladen)
 
 /* Datenmodell (Kurzfassung)
    client   {id, name, notes, goals, photo, createdAt}
@@ -819,6 +863,8 @@ const STORES = ['clients', 'plans', 'days', 'exercises', 'sessions', 'meta', 'ch
    session  {id, clientId, planId, dayId, dayName, dayIndex, date, startedAt, finishedAt,
              status:'active'|'done', note,
              exercises:[{id, exerciseId, name, planNote, note, target, sets:[{weight,reps,rpe,note,done}]}]}
+   message  {id, clientId, from:'trainer'|'client', text, at, readAt, kind:'issue'|null, sessionId}
+   event    {id:'done:<sessionId>'|'msg:<messageId>'|'dismiss:…', type, clientId, sessionId, msgId, at, read, handled}  ← nur Trainergerät
    → Eine Trainingseinheit speichert eine KOPIE (Name, Werte) aller Übungen.
      Planänderungen verändern die Historie deshalb nie. */
 
@@ -869,7 +915,7 @@ function del(store, id) { S[store].delete(id); return DB.del(store, id).catch(db
 async function loadAll() { for (const s of STORES) { S[s].clear(); (await DB.getAll(s)).forEach(o => S[s].set(o.id, o)); } }
 
 let saveTimer = null, pendingSession = null;
-function saveSessionSoon(sess) { pendingSession = sess; clearTimeout(saveTimer); saveTimer = setTimeout(flushSave, 350); }
+function saveSessionSoon(sess) { pendingSession = sess; clearTimeout(saveTimer); saveTimer = setTimeout(flushSave, 350); if (typeof liveSyncSoon === 'function') liveSyncSoon(); }
 function flushSave() { clearTimeout(saveTimer); if (pendingSession) { put('sessions', pendingSession); pendingSession = null; } }
 
 /* ---------------- Helpers ---------------- */
@@ -1002,6 +1048,7 @@ const ICONS = {
   history: 'M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 3', cube: 'M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3zM12 12l8-4.5M12 12v9M12 12L4 7.5', book: 'M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4zM5 17a3 3 0 0 1 3-3h11', pause: 'M8 5v14M16 5v14', reset: 'M4 12a8 8 0 1 0 2.4-5.7L4 8.5M4 4v4.5h4.5', lock: 'M6 11h12v10H6zM8 11V7a4 4 0 0 1 8 0v4',
   db: 'M4 6c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3zM4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3',
   search: 'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM21 21l-5-5', download: 'M12 4v12M6 10l6 6 6-6M4 20h16', upload: 'M12 16V4M6 10l6-6 6 6M4 20h16',
+  bell: 'M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0', chat: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z',
   x: 'M6 6l12 12M18 6L6 18', list: 'M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01', dumbbell: 'M6 7v10M3 9v6M18 7v10M21 9v6M6 12h12',
 };
 function ic(n, s = 20) {
@@ -1363,10 +1410,12 @@ function viewHome() {
       </div>
       <div class="cc-tags">${c.status === 'inactive' ? '<span class="tag off">inaktiv</span>' : checkDue(c) ? '<span class="tag warn">Check</span>' : ''}${active ? '<span class="tag live">läuft</span>' : ''}${mostRecent && mostRecent.c.id === c.id ? '<span class="tag">Zuletzt</span>' : ''}</div>
     </a>`).join('');
-  return topbar({ title: 'Coaching', sub: `${rows.length} ${rows.length === 1 ? 'Kunde' : 'Kunden'}`, right: `<button class="icon-btn" data-action="food-pick" aria-label="Ernährung">${ic('food', 22)}</button><a class="icon-btn" href="#/uebungen" aria-label="Übungskatalog &amp; 3D">${ic('book', 22)}</a><a class="icon-btn" href="#/data" aria-label="Daten &amp; Backup">${ic('db', 22)}</a>` }) +
+  const ue = unreadEvents();
+  return topbar({ title: 'Coaching', sub: `${rows.length} ${rows.length === 1 ? 'Kunde' : 'Kunden'}`, right: `<a class="icon-btn bell" href="#/meldungen" aria-label="${T('Meldungen')}">${ic('bell', 22)}${ue ? `<span class="bell-n">${ue > 99 ? '99+' : ue}</span>` : ''}</a><button class="icon-btn" data-action="food-pick" aria-label="Ernährung">${ic('food', 22)}</button><a class="icon-btn" href="#/uebungen" aria-label="Übungskatalog &amp; 3D">${ic('book', 22)}</a><a class="icon-btn" href="#/data" aria-label="Daten &amp; Backup">${ic('db', 22)}</a>` }) +
   `<main class="wrap view">
     <div class="home-logo">${LOGO_FULL}</div>
     ${needBackup ? `<div class="banner"><div><b>Backup empfohlen</b><div class="muted" style="font-size:14px">${lb ? 'Letztes Backup: ' + fmtDateTs(lb) : 'Noch kein Backup erstellt.'}</div></div><button class="btn btn-sm btn-primary" data-action="backup">Jetzt sichern</button></div>` : ''}
+    ${CareDash(rows)}
     ${coachDash(rows)}
     <div class="search-row">
       <label class="search">${ic('search')}<input id="search" type="search" placeholder="Kunden suchen …" value="${esc(UI.search)}" autocomplete="off"></label>
@@ -1596,14 +1645,14 @@ function viewSession(s) {
   return topbar({ back: '/client/' + s.clientId + '/history', title: esc(sessLabel(s)), sub: `${fmtDate(s.date)} · ${esc(c ? c.name : '')}` }) +
   `<main class="wrap view">
     ${s.status === 'active' ? `<div class="banner"><div><b>${T('Training läuft noch')}</b></div><a class="btn btn-sm btn-primary" href="#/train/${s.id}">${T('Fortsetzen')}</a></div>` : ''}
-    <div class="stats four">
+    ${s.status === 'done' ? SessionSummary(s) + `<div class="care-h">${T('Übungen & Sätze')}</div><div class="stack">${SessionExercises(s)}</div>` : `<div class="stats four">
       <div class="stat"><div class="stat-l">${T('Datum')}</div><div class="stat-v">${fmtDate(s.date)}</div></div>
       <div class="stat"><div class="stat-l">${T('Sätze')}</div><div class="stat-v">${sessionSets(s)}</div></div>
       <div class="stat"><div class="stat-l">${T('Volumen')}</div><div class="stat-v">${fmtVol(sessionVolume(s))}</div></div>
       <div class="stat"><div class="stat-l">${T('Dauer')}</div><div class="stat-v">${dur}</div></div>
     </div>
     ${s.note ? `<div class="card note-box" style="margin-top:12px">📝 ${esc(s.note)}</div>` : ''}
-    <div class="stack" style="margin-top:14px">${exs}</div>
+    <div class="stack" style="margin-top:14px">${exs}</div>`}
     <div class="quick" style="margin-top:18px">
       <a class="btn btn-ghost" href="#/train/${s.id}">${ic('edit')} ${T('Bearbeiten')}</a>
       <button class="btn btn-danger-ghost" data-action="del-session" data-id="${s.id}">${ic('trash')} ${T('Löschen')}</button>
@@ -1803,6 +1852,7 @@ function render() {
   if (typeof BOX !== 'undefined') { if (!p.length && isClientMode()) setTimeout(() => boxClientSync(false).catch(() => {}), 300); else if (p[0] === 'client' && p[1] && !p[2]) setTimeout(() => boxAutoFetch(p[1]), 300); }
   hydrateThumbs(app);
   if (p[0] === 'uebung') { mountDetail3D(p[1]); mountDetailVideo(p[1]); }
+  if (!isClientMode()) { if (p[0] === 'session' && S.events.has('done:' + p[1]) && !S.events.get('done:' + p[1]).read) markEvent('done:' + p[1], { read: true }); if (!p.length || p[0] === 'meldungen') setTimeout(() => careFetchAll(), 400); }
   hydratePhotos(app);
 }
 const curSession = () => { const p = location.hash.slice(1).split('/').filter(Boolean); return p[0] === 'train' ? S.sessions.get(p[1]) : null; };
@@ -2132,10 +2182,13 @@ const A = {
     saveSessionSoon(sess); rerender(); openEx(sess, sess.exercises.length - 1, true);
   },
   finish: async () => {
-    const sess = curSession();
+    const sess = curSession(); if (!sess) return;                         // z. B. doppeltes Antippen nach dem Abschluss
     if (!sessionSets(sess) && !await confirmDialog(T('Keine Sätze eingetragen'), T('Es wurden noch keine Werte eingetragen. Training trotzdem speichern?'), { ok: T('Trotzdem speichern') })) return;
+    if (sess.status === 'done') return go('/session/' + sess.id);           // doppelter Abschluss → kein zweites Ereignis
     sess.status = 'done'; sess.finishedAt = Date.now(); pendingSession = sess; flushSave();
-    toast(T('Training gespeichert ✓')); go('/client/' + sess.clientId);
+    toast(T('Training gespeichert ✓'));
+    if (isClientMode()) { UI.justDone = sess.id; go('/session/' + sess.id); setTimeout(() => boxClientSync(true, true).catch(() => {}), 200); }
+    else go('/client/' + sess.clientId);
   },
   discard: async () => {
     const sess = curSession();
@@ -3483,6 +3536,7 @@ function clientExtraSections(c, part) {
         <tr><td class="muted">Check-Rhythmus</td><td class="r">alle ${c.checkEvery || CHECK_EVERY_DEFAULT} Tage</td></tr>
       </tbody></table></div>
     </section>
+    ${MsgSection(c)}
     <section class="section">
       <div class="section-h"><h2>Kunden-App</h2></div>
       ${boxUrl() ? (c.access && c.access.code ? `<div class="card stack">
@@ -3836,6 +3890,7 @@ function viewClientHome() {
   `<main class="wrap view">
     <div id="box-banner">${boxBanner()}</div>
     <div class="hero">${avatar(c, 'xl')}<div class="grow"><h1>${T('Willkommen zurück, {n}', { n: esc(first) })} 👋</h1>${c.goals ? `<div class="muted" style="margin-top:4px">🎯 ${esc(c.goals)}</div>` : ''}</div></div>
+    ${ClientMsgCard(cid)}
     <div class="section-h" style="margin-top:6px"><h2>${T('Dein Fortschritt')}</h2></div>
     <div class="stats">${tile('weight')}${tile('waist')}${tile('chest')}
       <a class="stat" href="#/client/${cid}/history"><div class="stat-l">${T('Training')}</div><div class="stat-v">${done.length}</div><div class="stat-s">${T('Workouts absolviert')}</div></a></div>
@@ -3966,6 +4021,8 @@ function viewDataClient() {
         <div class="muted" style="font-size:13px">${T('Deine Trainings gehen automatisch an deinen Trainer, neue Pläne werden dir beim Öffnen angezeigt.')}</div>` : `<button class="btn btn-primary btn-block" data-action="ret-make">${ic('upload')} ${T('Meine Trainings an Trainer senden')}</button>
         <a class="btn btn-ghost btn-block" href="#/kunde-setup">${ic('download')} ${T('Update vom Trainer laden')}</a>`}
         <div class="muted" style="font-size:13px">${T('Neue Pläne, Messungen und Fortschrittsbilder bekommst du von deinem Trainer. Deine eigenen Trainings bleiben beim Update erhalten.')}</div>
+        <a class="btn btn-ghost btn-block" href="#/nachrichten">${ic('chat')} ${T('Nachrichten')}</a>
+        ${boxUrl() ? PushCard('client') : ''}
       </div></section>
     <section class="section"><div class="section-h"><h2>${T('Dieses Gerät')}</h2></div>
       <div class="card stack"><button class="btn btn-ghost btn-block" data-action="lock-now">${ic('lock')} ${T('Jetzt sperren')}</button>
@@ -4029,14 +4086,14 @@ async function clientPackage(cid) {
   const cc = { ...c, notes: '' }; delete cc.access;
   const photos = (await DB.photosOfClient(cid)).filter(p => p.clientId === cid);
   return { clientId: cid, clientName: c.name, exportedAt: new Date().toISOString(),
-    data: { clients: [cc], plans, days, exercises: all('exercises').filter(e => dids.has(e.dayId)), sessions: all('sessions').filter(s => s.clientId === cid), checks: all('checks').filter(x => x.clientId === cid) }, photos };
+    data: { clients: [cc], plans, days, exercises: all('exercises').filter(e => dids.has(e.dayId)), sessions: all('sessions').filter(s => s.clientId === cid), checks: all('checks').filter(x => x.clientId === cid), messages: msgsOf(cid) }, photos };
 }
 /* Datenebene: prüft, dass ein Paket ausschließlich Daten EINES Kunden enthält */
 function packageIsolated(pkg) {
   const cid = pkg.clientId, d = pkg.data, pids = new Set(d.plans.map(p => p.id)), dids = new Set(d.days.map(x => x.id));
   return d.clients.length === 1 && d.clients[0].id === cid && d.plans.every(p => p.clientId === cid) && d.days.every(x => pids.has(x.planId))
     && d.exercises.every(e => dids.has(e.dayId)) && d.sessions.every(s => s.clientId === cid) && d.checks.every(x => x.clientId === cid)
-    && pkg.photos.every(p => p.clientId === cid && d.checks.some(x => x.id === p.checkId));
+    && pkg.photos.every(p => p.clientId === cid && d.checks.some(x => x.id === p.checkId)) && (d.messages || []).every(m => m && m.clientId === cid);
 }
 function fileReady(name, text, info) {
   UI.readyFile = { name, text };
@@ -4047,7 +4104,7 @@ function fileReady(name, text, info) {
 async function makePackage(cid, code) {
   const c = S.clients.get(cid), pkg = await clientPackage(cid);
   if (!packageIsolated(pkg)) throw new Error(T('Sicherheitsprüfung fehlgeschlagen – Datei wurde nicht erstellt.'));
-  if (boxUrl()) pkg.box = boxUrl();
+  if (boxUrl()) { pkg.box = boxUrl(); pkg.notify = pushChannel().ch; }
   const text = await encryptPayload(pkg, code, { kind: 'client-package', v: 1, clientId: cid });
   c.access = { ...(c.access || {}), code, lastExport: Date.now() }; put('clients', c);
   return { name: `sweat4-zugang_${(c.name || 'kunde').replace(/[^\wäöüÄÖÜß-]+/g, '_')}_${today()}.json`, text, n: pkg.photos.length };
@@ -4068,7 +4125,12 @@ async function setupFromFile(file, code, opts = {}) {
   const boxU = pkg.box || opts.box || boxUrl();
   const meta = [{ id: 'role', value: 'client', clientId: pkg.clientId, since: Date.now() }, lock, { id: 'pkgInfo', exportedAt: pkg.exportedAt, boxV: opts.boxV || 0 }];
   if (boxU) meta.push({ id: 'box', url: boxU }); const upM = S.meta.get('boxUp'); if (upM) meta.push(upM);
-  await DB.replaceAll({ ...pkg.data, sessions: [...map.values()], meta, photos: pkg.photos });
+  if (pkg.notify) meta.push({ id: 'notify', ch: pkg.notify });
+  for (const k of ['msgV', 'pushCh', 'pushOn', 'lang']) { const m = S.meta.get(k); if (m && role.value === 'client') meta.push(m); }
+  // Nachrichten zusammenführen (lokal noch nicht übertragene Nachrichten und Lesebestätigungen bleiben erhalten)
+  const msgs = new Map((pkg.data.messages || []).filter(m => m.clientId === pkg.clientId).map(m => [m.id, m]));
+  if (role.value === 'client') for (const m of all('messages')) { const o = msgs.get(m.id); if (m.clientId === pkg.clientId && (!o || (m.readAt && !o.readAt) || (m.updatedAt || 0) > (o.updatedAt || 0))) msgs.set(m.id, o ? { ...o, readAt: o.readAt || m.readAt } : m); }
+  await DB.replaceAll({ ...pkg.data, sessions: [...map.values()], messages: [...msgs.values()], events: [], meta, photos: pkg.photos });
   PH.clear(); await loadAll(); LOCK.init = true; LOCK.locked = false; UI.open = {}; BOX.code = code; await sessionStart(code);
 }
 async function makeReturn(code) {
@@ -4076,7 +4138,9 @@ async function makeReturn(code) {
   flushSave();
   const cid = roleInfo().clientId, c = S.clients.get(cid);
   const sessions = all('sessions').filter(s => s.clientId === cid && s.status === 'done');
-  const text = await encryptPayload({ clientId: cid, sessions, meals: c.meals || null, mealCfg: c.mealCfg || null, mealsAt: c.mealsAt || 0, exportedAt: new Date().toISOString() }, code, { kind: 'client-return', v: 1, clientId: cid });
+  const pushOn = (S.meta.get('pushOn') || {}).on, ch = S.meta.get('pushCh');
+  const text = await encryptPayload({ clientId: cid, sessions, meals: c.meals || null, mealCfg: c.mealCfg || null, mealsAt: c.mealsAt || 0, exportedAt: new Date().toISOString(),
+    messages: msgsOf(cid), live: liveState(cid), lang: I18N.cur, notifyCh: pushOn && ch ? ch.ch : null }, code, { kind: 'client-return', v: 1, clientId: cid });
   return { name: `sweat4-trainings_${(c.name || 'kunde').replace(/[^\wäöüÄÖÜß-]+/g, '_')}_${today()}.json`, text, n: sessions.length };
 }
 async function importReturn(file, codeIn) {
@@ -4086,16 +4150,27 @@ async function importReturn(file, codeIn) {
   const code = codeIn || (c.access && c.access.code); if (!code) throw new Error(T('Kein Zugangscode für diesen Kunden hinterlegt.'));
   const p = await decryptPayload(h, code);
   if (p.clientId !== c.id || !Array.isArray(p.sessions)) throw new Error(T('Die Datei ist ungültig.'));
-  let neu = 0, upd = 0, rej = 0;
+  let neu = 0, upd = 0, rej = 0; const doneNew = [];
   for (const s of p.sessions) {
     if (!s || s.clientId !== c.id || !Array.isArray(s.exercises) || !s.id) { rej++; continue; } // Datenebene: fremde Datensätze werden abgewiesen
     const ex = S.sessions.get(s.id);
     if (ex && ex.clientId !== c.id) { rej++; continue; }
+    const wasDone = !!(ex && ex.status === 'done');
     if (!ex) { put('sessions', s); neu++; } else if ((s.updatedAt || 0) > (ex.updatedAt || 0)) { put('sessions', s); upd++; }
+    // Ein ordnungsgemäß beendetes Training erzeugt genau EIN Ereignis (feste ID). Ältere Trainings (> 7 Tage) werden still übernommen.
+    if (s.status === 'done' && !wasDone && s.finishedAt && Date.now() - s.finishedAt < CARE.EVENT_MAX_AGE && addEvent({ id: 'done:' + s.id, type: 'done', clientId: c.id, sessionId: s.id, at: s.finishedAt })) doneNew.push(s);
   }
+  // Nachrichten des Kunden + Lesebestätigungen
+  const msgNew = mergeMessages(p.messages, c.id, 'client');
+  for (const m of msgNew) addEvent({ id: 'msg:' + m.id, type: m.kind === 'issue' ? 'issue' : 'msg', clientId: c.id, msgId: m.id, at: m.at });
+  { const cc = S.clients.get(c.id), patch = {};
+    if ('live' in p) patch.live = p.live && p.live.id ? { ...p.live, receivedAt: Date.now() } : null;
+    if (p.lang === 'de' || p.lang === 'en') patch.lang = p.lang;
+    if ('notifyCh' in p) patch.notifyCh = /^[0-9a-f]{64}$/.test(p.notifyCh || '') ? p.notifyCh : null;
+    if (Object.keys(patch).some(k => JSON.stringify(cc[k]) !== JSON.stringify(patch[k]))) put('clients', Object.assign(cc, patch)); }
   let meals = false;
   if (p.mealsAt && p.mealsAt > (c.mealsAt || 0)) { const cc = S.clients.get(c.id); Object.assign(cc, { meals: p.meals, mealCfg: p.mealCfg, mealsAt: p.mealsAt }); put('clients', cc); meals = true; }
-  return { c, neu, upd, rej, meals };
+  return { c, neu, upd, rej, meals, doneNew, msgNew };
 }
 
 
@@ -4152,29 +4227,50 @@ async function boxFetchReturn(cid, silent) {
   if (!res || res.missing) { if (!silent) toast('Keine neuen Trainings von ' + c.name); return; }
   const r = await importReturn(textFile(res.data));
   const cc = S.clients.get(cid); cc.access = { ...cc.access, boxGot: res.v }; put('clients', cc);
-  if (r.neu || r.upd || r.meals || !silent) toast(`${c.name}: ${r.neu} neue, ${r.upd} aktualisierte Trainings${r.meals ? ' · Mahlzeiten aktualisiert' : ''}`);
-  if (r.neu || r.upd || r.meals) render();
+  const first = c.name.split(' ')[0];
+  if (r.doneNew.length) toast(T('{n} hat ein Training abgeschlossen', { n: first }) + ' 🏋️');
+  else if (r.msgNew.length) toast(T('Neue Nachricht von {n}', { n: first }) + ' 💬');
+  else if (!silent) toast(T('{n}: {a} neue, {b} aktualisierte Trainings', { n: c.name, a: r.neu, b: r.upd }) + (r.meals ? ' · ' + T('Mahlzeiten aktualisiert') : ''));
+  render();
 }
-function boxAutoFetch(cid) {
+function boxAutoFetch(cid, every = 120000) {
   if (!boxUrl() || isClientMode()) return; const t = Date.now();
-  if (BOX.checked['up' + cid] && t - BOX.checked['up' + cid] < 120000) return; BOX.checked['up' + cid] = t;
-  boxFetchReturn(cid, true).catch(() => {});
+  if (BOX.checked['up' + cid] && t - BOX.checked['up' + cid] < every) return; BOX.checked['up' + cid] = t;
+  return boxFetchReturn(cid, true).catch(() => {});
+}
+/* Trainer: alle eingeladenen Kunden abfragen (beim Öffnen der Startseite, bei Rückkehr in die App, alle 2 Min.) */
+async function careFetchAll(every = 120000) {
+  if (!boxUrl() || isClientMode() || document.hidden) return;
+  for (const c of all('clients')) if (c.access && c.access.code && c.access.boxSent && c.status !== 'inactive') await boxAutoFetch(c.id, every);
 }
 /* Kunde: neue Pläne prüfen + eigene Trainings automatisch hochladen */
-async function boxClientSync(force) {
+async function boxClientSync(force, quiet) {
   if (!isClientMode() || !boxUrl() || !BOX.code) return;
   const t = Date.now(); if (!force && BOX.checked.client && t - BOX.checked.client < 60000) return; BOX.checked.client = t;
   const cid = roleInfo().clientId, c = S.clients.get(cid); if (!c) return;
-  const last = Math.max(c.mealsAt || 0, ...all('sessions').filter(s => s.clientId === cid && s.status === 'done').map(s => s.updatedAt || 0));
-  const up = S.meta.get('boxUp');
-  if (last && (!up || last > (up.at || 0))) {
-    try { const r = await makeReturn(BOX.code); await boxPut(cid, BOX.code, 'up', r.text); put('meta', { id: 'boxUp', at: last, sent: Date.now() }); } catch (e) { if (force) toast(e.message); }
+  flushSave();
+  const lastDone = Math.max(0, ...all('sessions').filter(s => s.clientId === cid && s.status === 'done').map(s => s.updatedAt || 0));
+  const myMsgs = msgsOf(cid), lastMsg = Math.max(0, ...myMsgs.map(m => Math.max(m.from === 'client' ? m.at || 0 : 0, m.readAt || 0)));
+  const live = liveState(cid), liveSig = live ? live.id + ':' + Math.floor((live.updatedAt || 0) / 180000) : '';   // Live-Status höchstens alle 3 Min.
+  const pushCh = (S.meta.get('pushOn') || {}).on ? (S.meta.get('pushCh') || {}).ch || '' : '';
+  const sig = [lastDone, c.mealsAt || 0, lastMsg, liveSig, pushCh, I18N.cur].join('|');
+  const up = S.meta.get('boxUp') || {};
+  if ((lastDone || c.mealsAt || lastMsg || live || up.sig) && sig !== up.sig) {
+    try {
+      const r = await makeReturn(BOX.code); await boxPut(cid, BOX.code, 'up', r.text);
+      put('meta', { id: 'boxUp', at: Math.max(lastDone, c.mealsAt || 0), sig, sent: Date.now(), lastDone, lastClientMsg: lastMsg });
+      // Trainer per Push wecken (ohne Inhalt) – nur bei neuem Trainingsabschluss bzw. neuer Kundennachricht
+      const ch = (S.meta.get('notify') || {}).ch;
+      if (lastDone > (up.lastDone || 0)) pushPing(ch, 'done');
+      else if (myMsgs.some(m => m.from === 'client' && m.at > (up.lastClientMsg || up.sent || 0))) pushPing(ch, 'msg');
+    } catch (e) { if (force && !quiet) toast(e.message); }
   }
+  try { if (await boxClientMessages(cid)) { toast(T('Neue Nachricht von deinem Trainer') + ' 💬'); render(); } } catch (e) {}
   const info = S.meta.get('pkgInfo') || {};
   const res = await boxGet(cid, BOX.code, 'down', info.boxV || 0).catch(e => { if (force) toast(e.message); return null; });
   BOX.pending = res && !res.missing ? res : null;
   const b = document.getElementById('box-banner'); if (b) b.innerHTML = boxBanner();
-  if (force && !BOX.pending) toast(T('Alles aktuell ✓'));
+  if (force && !quiet && !BOX.pending) toast(T('Alles aktuell ✓'));
 }
 const boxBanner = () => BOX.pending ? `<div class="box-banner"><div class="grow"><b>${T('Neuer Plan von deinem Trainer')}</b><div>${T('Training und Ernährung wurden aktualisiert.')}</div></div>
   <button class="btn btn-primary" data-action="box-apply">${T('Jetzt laden')}</button></div>` : '';
@@ -4217,17 +4313,392 @@ async function demoBody() {
   render();
 }
 
+/* =====================================================================
+   BETREUUNG – Trainingsabschlüsse, Analyse, Trainer-Dashboard, Meldungen, Nachrichten, Push
+   Architektur (bestehend): Daten liegen lokal (IndexedDB) auf dem Trainer- bzw. Kundengerät und werden
+   Ende-zu-Ende verschlüsselt über den Briefkasten ausgetauscht. Es gibt EINEN Trainer pro Trainergerät.
+   - Kunde → Trainer: Slot „up“ (Trainings, Mahlzeiten, Nachrichten, Lesebestätigungen, Live-Status)
+   - Trainer → Kunde: Slot „down“ (Plan-Update, inkl. Nachrichten) und Slot „msg“ (nur Nachrichten, sofort)
+   - Ereignisse (Store „events“, nur Trainergerät) haben feste IDs („done:<Training>“, „msg:<Nachricht>“) →
+     ein Abschluss erzeugt genau EIN Ereignis, auch bei wiederholtem Abholen/Neuladen.
+   - Push (optional): Briefkasten sendet eine Push-Nachricht OHNE Inhalt (nur „Es gibt Neuigkeiten“) –
+     keine Trainingsdaten verlassen das Gerät unverschlüsselt.
+   ===================================================================== */
+const CARE = { LIVE_FRESH: 30 * 60e3, EVENT_MAX_AGE: 7 * 864e5, lt: 0 };
+const careCfg = () => ({ inactiveDays: 14, pushDone: true, pushMsg: true, ...(S.meta.get('careCfg') || {}) });
+
+/* ---------- Ereignisse (Trainergerät) ---------- */
+function addEvent(ev) { if (S.events.has(ev.id)) return false; put('events', { read: false, handled: false, ...ev, at: ev.at || Date.now() }); return true; }
+const careEvents = () => all('events').filter(e => e.type !== 'dismiss' && S.clients.has(e.clientId)).sort((a, b) => (b.at || 0) - (a.at || 0));
+const unreadEvents = () => careEvents().filter(e => !e.read).length;
+function markEvent(id, patch) { const e = S.events.get(id); if (e) put('events', { ...e, ...patch }); }
+function markEventsWhere(fn, patch) { for (const e of all('events')) if (fn(e)) put('events', { ...e, ...patch }); }
+
+/* ---------- Nachrichten ---------- */
+const msgsOf = cid => all('messages').filter(m => m.clientId === cid).sort((a, b) => (a.at || 0) - (b.at || 0));
+const unreadFrom = (cid, from) => msgsOf(cid).filter(m => m.from === from && !m.readAt);
+/* Übernimmt Nachrichten aus einem Paket. Neu angelegt werden nur Nachrichten der Gegenseite (author),
+   bei eigenen Nachrichten wird nur die Lesebestätigung übernommen. */
+function mergeMessages(list, cid, author) {
+  const neu = [];
+  for (const m of Array.isArray(list) ? list : []) {
+    if (!m || !m.id || m.clientId !== cid || typeof m.text !== 'string' || (m.from !== 'trainer' && m.from !== 'client')) continue;
+    const ex = S.messages.get(m.id);
+    if (!ex) { if (m.from !== author) continue; const n = { id: m.id, clientId: cid, from: m.from, text: m.text.slice(0, 4000), at: m.at || Date.now(), kind: m.kind || null, sessionId: m.sessionId || null, readAt: null }; put('messages', n); neu.push(n); }
+    else if (ex.clientId === cid && ex.from !== author && m.readAt && !ex.readAt) put('messages', { ...ex, readAt: m.readAt });
+  }
+  return neu;
+}
+function markThreadRead(cid, from) { let n = 0; for (const m of unreadFrom(cid, from)) { put('messages', { ...m, readAt: Date.now() }); n++; } return n; }
+
+/* ---------- Analyse einer Trainingseinheit ----------
+   Verglichen wird pro Übung mit der letzten FRÜHEREN abgeschlossenen Einheit desselben Kunden, die dieselbe
+   Übung enthält (gleiche Plan-Übung bzw. gleicher Name). Nur echte Arbeitssätze mit Werten zählen.
+   Aufwärmsätze werden in SWEAT4 nicht gesondert erfasst – Sätze mit „warmup“-Markierung würden ignoriert.
+   Leistungssteigerung wird nur gemeldet, wenn die Planvorgabe (Wiederholungsbereich) gleich geblieben ist. */
+const workSets = e => (e.sets || []).filter(x => isPerformed(x) && !x.warmup);
+function topSet(e) { let b = null; for (const x of workSets(e)) if (hasVal(x.weight) && hasVal(x.reps) && x.reps > 0 && (!b || x.weight > b.weight || (x.weight === b.weight && x.reps > b.reps))) b = x; return b; }
+function bestBwReps(e) { let b = null; for (const x of workSets(e)) if (!hasVal(x.weight) && hasVal(x.reps) && (!b || x.reps > b.reps)) b = x; return b; }
+const targetSig = e => JSON.stringify((e.target || []).map(t => t ? [t.reps ?? null, t.repsMax ?? null] : null));
+const plannedSets = e => (e.target && e.target.length) || (e.sets || []).length;
+function prevComparable(s, e) {
+  const n = norm(e.name), key = sessKey(s);
+  for (const o of sessionsOf(s.clientId, true)) {
+    if (o.id === s.id || sessKey(o) >= key) continue;
+    const pe = (e.exerciseId && o.exercises.find(x => x.exerciseId === e.exerciseId)) || o.exercises.find(x => norm(x.name) === n);
+    if (pe && workSets(pe).length) return { s: o, e: pe };
+  }
+  return null;
+}
+function analyzeSession(s) {
+  const A = { items: [], ex: [], planned: 0, doneEx: 0, skipped: [], partial: [], setsDone: 0, setsPlanned: 0, complete: false, dur: null, prevDate: null, notes: [] };
+  if (!s || !Array.isArray(s.exercises)) return A;
+  const d = s.finishedAt && s.startedAt ? (s.finishedAt - s.startedAt) / 60000 : null;
+  A.dur = d != null && d >= 3 && d <= 360 ? Math.round(d) : null;          // nur plausible Dauer anzeigen
+  for (const e of s.exercises) {
+    const fromPlan = !!e.exerciseId, ws = workSets(e), ps = plannedSets(e), nm = exNameS(e);
+    const row = { e, name: nm, done: ws.length, planned: fromPlan ? ps : null, prev: null, cmp: null };
+    A.setsDone += ws.length;
+    if (fromPlan) { A.planned++; A.setsPlanned += ps; if (!ws.length) A.skipped.push(nm); else if (ws.length < ps) A.partial.push({ name: nm, done: ws.length, planned: ps }); }
+    if (ws.length) A.doneEx++;
+    if (e.note) A.notes.push({ name: nm, text: e.note });
+    const pv = ws.length ? prevComparable(s, e) : null;
+    if (pv) {
+      row.prev = pv; A.prevDate = A.prevDate || pv.s.date;
+      const same = targetSig(e) === targetSig(pv.e) || !(e.target && e.target.length) || !(pv.e.target && pv.e.target.length);
+      const t1 = topSet(e), t0 = topSet(pv.e), b1 = bestBwReps(e), b0 = bestBwReps(pv.e);
+      if (!same) row.cmp = { kind: 'plan' };
+      else if (t1 && t0 && t1.weight > t0.weight) { row.cmp = { kind: 'weight', from: t0.weight, to: t1.weight, reps: t1.reps }; A.items.push({ kind: 'weight', name: nm, from: t0.weight, to: t1.weight }); }
+      else if (t1 && t0 && t1.weight === t0.weight && t1.reps > t0.reps) { row.cmp = { kind: 'reps', w: t1.weight, from: t0.reps, to: t1.reps }; A.items.push({ kind: 'reps', name: nm, w: t1.weight, from: t0.reps, to: t1.reps }); }
+      else if (!t1 && !t0 && b1 && b0 && b1.reps > b0.reps) { row.cmp = { kind: 'reps', w: null, from: b0.reps, to: b1.reps }; A.items.push({ kind: 'reps', name: nm, w: null, from: b0.reps, to: b1.reps }); }
+      else if (t1 && t0 && t1.weight < t0.weight) row.cmp = { kind: 'less', from: t0.weight, to: t1.weight };
+      else row.cmp = { kind: 'same' };
+    }
+    A.ex.push(row);
+  }
+  A.complete = A.planned > 0 && !A.skipped.length && !A.partial.length;
+  if (A.complete) A.items.unshift({ kind: 'complete' });
+  if (A.skipped.length) A.items.push({ kind: 'skipped', names: A.skipped });
+  if (s.note) A.notes.unshift({ name: null, text: s.note });
+  return A;
+}
+function findingText(f) {
+  if (f.kind === 'complete') return T('Trainingsplan vollständig absolviert.');
+  if (f.kind === 'weight') return T('Leistungssteigerung erkannt: {x} – heute {b} kg statt {a} kg.', { x: f.name, a: fmtNum(f.from), b: fmtNum(f.to) });
+  if (f.kind === 'reps') return f.w != null ? T('Mehr Wiederholungen bei {x}: {b} statt {a} mit {w} kg.', { x: f.name, a: fmtNum(f.from), b: fmtNum(f.to), w: fmtNum(f.w) }) : T('Mehr Wiederholungen bei {x}: {b} statt {a}.', { x: f.name, a: fmtNum(f.from), b: fmtNum(f.to) });
+  if (f.kind === 'skipped') return T('Ausgelassen: {x}', { x: f.names.join(', ') });
+  return '';
+}
+const findingIcon = k => ({ complete: '✅', weight: '📈', reps: '📈', skipped: '⚠️' }[k] || '•');
+const progressCount = A => A.items.filter(f => f.kind === 'weight' || f.kind === 'reps').length;
+function sessionSummaryLine(s, A) {
+  const p = [T('{a}/{b} Übungen', { a: A.doneEx, b: A.planned || A.doneEx }), TN(A.setsDone, '{n} Satz', '{n} Sätze')];
+  if (A.dur) p.push(A.dur + ' ' + T('min'));
+  const pc = progressCount(A); if (pc) p.push('📈 ' + TN(pc, '{n} Steigerung', '{n} Steigerungen'));
+  else if (A.complete) p.push('✅ ' + T('vollständig'));
+  return p.join(' · ');
+}
+
+/* ---------- Trainingsstatus eines Kunden (Häufigkeit aus Trainingstagen bzw. Plan) ---------- */
+function clientRhythm(c) {
+  const md = c.mealCfg && Array.isArray(c.mealCfg.days) && c.mealCfg.days.length ? c.mealCfg.days.length : 0;
+  const pd = clientDays(c.id).length;
+  const perWeek = md || pd || 3, interval = 7 / perWeek;
+  const done = sessionsOf(c.id, true), last = done[0] || null, cfg = careCfg();
+  const since = last ? daysBetween(last.date, today()) : null;
+  let st;
+  if (!pd && !done.length) st = 'noplan';
+  else if (!last) st = 'notstarted';
+  else if (since > cfg.inactiveDays) st = 'inactive';
+  else if (since > Math.ceil(interval * 1.5)) st = 'overdue';
+  else st = 'ontrack';
+  const missed = last && since > interval ? Math.floor(since / interval) : 0;
+  return { st, perWeek, interval, since, last, missed, src: md ? 'days' : pd ? 'plan' : 'default' };
+}
+const RHYTHM_LABEL = { get ontrack() { return T('Training planmäßig'); }, get overdue() { return T('Training überfällig'); }, get inactive() { return T('Länger keine Aktivität'); }, get notstarted() { return T('Plan noch nicht begonnen'); }, get noplan() { return T('Noch kein Plan'); } };
+const RHYTHM_CLS = { ontrack: 'ok', overdue: 'warn', inactive: 'off', notstarted: 'neutral', noplan: 'neutral' };
+const liveOf = c => c.live && c.live.id && Date.now() - (c.live.updatedAt || 0) < CARE.LIVE_FRESH ? c.live : null;
+
+/* „Rückmeldung erforderlich“: offene Ereignisse + berechnete Hinweise (überfällig) */
+function careTodos() {
+  const out = [];
+  for (const e of careEvents()) if (!e.handled) {
+    const c = S.clients.get(e.clientId);
+    if (e.type === 'done') { const s = S.sessions.get(e.sessionId); if (!s) continue; const A = analyzeSession(s);
+      out.push({ id: e.id, c, at: e.at, icon: progressCount(A) ? '📈' : '🏋️', title: progressCount(A) ? T('Leistungssteigerung – Rückmeldung geben') : T('Neues Training – Rückmeldung geben'), sub: `${sessLabel(s)} · ${sessionSummaryLine(s, A)}`, href: '#/session/' + s.id }); }
+    else if (e.type === 'msg' || e.type === 'issue') { const m = S.messages.get(e.msgId); if (!m) continue;
+      out.push({ id: e.id, c, at: e.at, icon: e.type === 'issue' ? '🆘' : '💬', title: e.type === 'issue' ? T('Meldet eine Schwierigkeit') : T('Unbeantwortete Nachricht'), sub: m.text.slice(0, 90), href: `#/client/${c.id}/nachrichten` }); }
+  }
+  for (const c of all('clients')) if (c.status !== 'inactive') {
+    const r = clientRhythm(c); if (r.missed < 2 || !r.last) continue;
+    const id = `dismiss:missed:${c.id}:${r.last.id}`; if (S.events.has(id)) continue;
+    out.push({ id, c, at: Date.now(), icon: '⏰', title: T('Mehrere Trainings ausgelassen'), sub: T('Letztes Training vor {n} Tagen · geplant {p}× pro Woche', { n: r.since, p: fmtNum(Math.round(r.perWeek * 10) / 10) }), href: '#/client/' + c.id, computed: true });
+  }
+  return out.sort((a, b) => b.at - a.at);
+}
+
+/* ---------- Trainer-Dashboard ---------- */
+function CareDash(rows) {
+  if (!rows.length) return '';
+  const cs = rows.map(r => r.c).filter(c => c.status !== 'inactive');
+  const fresh = careEvents().filter(e => e.type === 'done' && !e.read).slice(0, 8);
+  const live = cs.map(c => ({ c, l: liveOf(c) })).filter(x => x.l);
+  const todos = careTodos();
+  const rh = cs.map(c => ({ c, r: clientRhythm(c) })), cnt = k => rh.filter(x => x.r.st === k).length;
+  const doneCard = e => { const s = S.sessions.get(e.sessionId), c = S.clients.get(e.clientId); if (!s || !c) return ''; const A = analyzeSession(s);
+    return `<a class="list-link care-row" href="#/session/${s.id}" data-ev="${e.id}">${avatar(c, 'sm')}<div class="grow"><div style="font-weight:600">${esc(T('{n} hat ein Training abgeschlossen', { n: c.name.split(' ')[0] }))}</div>
+      <div class="muted" style="font-size:13px">${esc(sessLabel(s))} · ${fmtDateTs(s.finishedAt || e.at)} ${fmtTime(s.finishedAt || e.at)}</div><div class="muted" style="font-size:13px">${esc(sessionSummaryLine(s, A))}</div></div><span class="dot-new" aria-label="${T('neu')}"></span></a>`; };
+  return `<section class="care">
+    <div class="section-h" style="margin-top:4px"><h2>${T('Betreuung')}</h2><a class="btn btn-sm btn-ghost" href="#/meldungen">${ic('bell', 16)} ${T('Meldungen')}${unreadEvents() ? ` <span class="badge">${unreadEvents()}</span>` : ''}</a></div>
+    <div class="care-h">${T('Neue Trainingsabschlüsse')}</div>
+    ${fresh.length ? `<div class="card list-card">${fresh.map(doneCard).join('')}</div>` : `<div class="card empty-s">${T('Keine neuen Trainingsabschlüsse.')}</div>`}
+    ${live.length ? `<div class="care-h">${T('Trainiert gerade')}</div><div class="card list-card">${live.map(({ c, l }) => `<a class="list-link" href="#/client/${c.id}">${avatar(c, 'sm')}<div class="grow"><div style="font-weight:600">${esc(c.name)} <span class="tag live">${T('live')}</span></div>
+      <div class="muted" style="font-size:13px">${esc(dayLabel(l.dayIndex ?? 0, TD(l.dayName)))} · ${T('seit {t}', { t: fmtTime(l.startedAt) })} · ${T('{a} von {b} Sätzen', { a: l.sets, b: l.total })} · ${T('zuletzt gespeichert {t}', { t: fmtTime(l.updatedAt) })}</div></div></a>`).join('')}</div>` : ''}
+    <div class="care-h">${T('Rückmeldung erforderlich')}${todos.length ? ` <span class="badge">${todos.length}</span>` : ''}</div>
+    ${todos.length ? `<div class="card list-card">${todos.slice(0, 10).map(t => `<div class="list-link care-todo"><a class="grow care-todo-a" href="${t.href}"><span class="care-ic">${t.icon}</span><span class="grow"><b>${esc(t.c.name)}</b> – ${esc(t.title)}<br><span class="muted" style="font-size:13px">${esc(t.sub)}</span></span></a>
+      <button class="btn btn-sm btn-ghost" data-action="care-done" data-id="${esc(t.id)}">${T('Erledigt')}</button></div>`).join('')}</div>` : `<div class="card empty-s">${T('Alles erledigt ✓')}</div>`}
+    <div class="care-h">${T('Trainingsstatus')}</div>
+    <div class="care-chips">${['ontrack', 'overdue', 'inactive', 'notstarted'].map(k => `<span class="tag ${RHYTHM_CLS[k]}">${RHYTHM_LABEL[k]}: ${cnt(k)}</span>`).join('')}</div>
+    ${rh.filter(x => x.r.st !== 'ontrack').length ? `<div class="card list-card" style="margin-top:8px">${rh.filter(x => x.r.st !== 'ontrack').sort((a, b) => (b.r.since ?? 999) - (a.r.since ?? 999)).slice(0, 8).map(({ c, r }) => `<a class="list-link" href="#/client/${c.id}">${avatar(c, 'sm')}<div class="grow"><div style="font-weight:600">${esc(c.name)}</div>
+      <div class="muted" style="font-size:13px">${RHYTHM_LABEL[r.st]}${r.last ? ' · ' + T('letztes Training vor {n} Tagen', { n: r.since }) : ''} · ${T('geplant {p}× pro Woche', { p: fmtNum(Math.round(r.perWeek * 10) / 10) })}</div></div></a>`).join('')}</div>` : ''}
+    <div class="muted" style="font-size:12px;margin-top:6px">${T('Hinweise zum Nachfragen – nicht jede Pause bedeutet fehlende Motivation. „Länger keine Aktivität“ ab {n} Tagen (änderbar unter Meldungen → Einstellungen).', { n: careCfg().inactiveDays })}</div>
+  </section>`;
+}
+const fmtTime = ts => ts ? new Date(ts).toLocaleTimeString(LOC(), { hour: '2-digit', minute: '2-digit' }) : '';
+
+/* ---------- Meldungszentrale (Trainer) ---------- */
+function eventLine(e) {
+  const c = S.clients.get(e.clientId); if (!c) return null;
+  if (e.type === 'done') { const s = S.sessions.get(e.sessionId); if (!s) return null; const A = analyzeSession(s);
+    return { icon: progressCount(A) ? '📈' : '🏋️', title: T('{n} hat ein Training abgeschlossen', { n: c.name }), sub: `${sessLabel(s)} · ${sessionSummaryLine(s, A)}`, href: '#/session/' + s.id }; }
+  if (e.type === 'msg' || e.type === 'issue') { const m = S.messages.get(e.msgId); if (!m) return null;
+    return { icon: e.type === 'issue' ? '🆘' : '💬', title: e.type === 'issue' ? T('{n} meldet eine Schwierigkeit', { n: c.name }) : T('Neue Nachricht von {n}', { n: c.name }), sub: m.text.slice(0, 120), href: `#/client/${c.id}/nachrichten` }; }
+  return null;
+}
+function viewMeldungen() {
+  const evs = careEvents().map(e => ({ e, l: eventLine(e) })).filter(x => x.l).slice(0, 100), cfg = careCfg();
+  return topbar({ back: '/', title: T('Meldungen'), sub: TN(unreadEvents(), '{n} ungelesen', '{n} ungelesen') }) + `<main class="wrap view">
+    ${evs.length ? `<div class="row" style="justify-content:flex-end;margin-bottom:8px"><button class="btn btn-sm btn-ghost" data-action="ev-read-all">${ic('check', 16)} ${T('Alle als gelesen markieren')}</button></div>
+    <div class="card list-card">${evs.map(({ e, l }) => `<a class="list-link ev ${e.read ? '' : 'unread'}" href="${l.href}" data-ev="${esc(e.id)}"><span class="care-ic">${l.icon}</span><div class="grow"><div style="font-weight:${e.read ? 500 : 700}">${esc(l.title)}</div><div class="muted" style="font-size:13px">${esc(l.sub)}</div><div class="muted" style="font-size:12px">${fmtDateTs(e.at)} ${fmtTime(e.at)}${e.handled ? ' · ' + T('erledigt') : ''}</div></div>${e.read ? '' : '<span class="dot-new"></span>'}</a>`).join('')}</div>`
+      : `<div class="card empty">${T('Noch keine Meldungen. Sobald Kunden Trainings abschließen oder schreiben, erscheinen sie hier.')}</div>`}
+    <section class="section"><div class="section-h"><h2>${T('Einstellungen')}</h2></div><div class="card stack">
+      <label class="field" style="margin:0"><span>${T('„Länger keine Aktivität“ ab')}</span><select class="input" data-care="inactiveDays">${[7, 10, 14, 21, 30].map(n => `<option value="${n}" ${cfg.inactiveDays === n ? 'selected' : ''}>${T('{n} Tagen', { n })}</option>`).join('')}</select></label>
+      ${PushCard('trainer')}
+    </div></section>
+  </main>`;
+}
+
+/* ---------- Detailansicht: Zusammenfassung über den Satzdaten ---------- */
+function SessionSummary(s) {
+  if (s.status !== 'done') return '';
+  const A = analyzeSession(s), c = S.clients.get(s.clientId), cm = isClientMode(), plan = s.planId && S.plans.get(s.planId);
+  const head = cm ? (UI.justDone === s.id ? `<div class="done-banner"><div class="done-ic">✓</div><div><b>${T('Training gespeichert – stark!')}</b><div>${T('Dein Trainer sieht dein Training und meldet sich bei dir.')}</div></div></div>` : '')
+    : `<div class="row" style="gap:10px;align-items:center;margin-bottom:10px">${c ? avatar(c, 'sm') : ''}<div class="grow"><b style="font-size:17px">${esc(c ? c.name : '')}</b><div class="muted" style="font-size:13px">${esc(plan ? TD(plan.name) : '')}</div></div></div>`;
+  const kv = (l, v) => `<div class="stat"><div class="stat-l">${l}</div><div class="stat-v" style="font-size:18px">${v}</div></div>`;
+  // Überblick in Sekunden: höchstens 3 Steigerungen einzeln, der Rest zusammengefasst (Details unten je Übung)
+  const prog = A.items.filter(f => f.kind === 'weight' || f.kind === 'reps'), shown = A.items.filter(f => !prog.includes(f) || prog.indexOf(f) < 3);
+  const items = shown.map(f => `<li><span>${findingIcon(f.kind)}</span> ${esc(findingText(f))}</li>`).join('')
+    + (prog.length > 3 ? `<li><span>📈</span> ${esc(TN(prog.length - 3, '+ {n} weitere Steigerung – siehe Übungen unten', '+ {n} weitere Steigerungen – siehe Übungen unten'))}</li>` : '');
+  return `${head}<div class="card sum-card">
+    <div class="stats four" style="margin:0">${kv(T('Abgeschlossen'), `${fmtDate(s.date)}<div class="stat-s">${fmtTime(s.finishedAt)}</div>`)}${kv(T('Dauer'), A.dur ? A.dur + ' ' + T('min') : '–')}${kv(T('Übungen'), `${A.doneEx}/${A.planned || A.doneEx}`)}${kv(T('Sätze'), A.setsPlanned ? `${A.setsDone}/${A.setsPlanned}` : A.setsDone)}</div>
+    ${items ? `<ul class="findings">${items}</ul>` : `<div class="muted" style="margin-top:10px;font-size:14px">${A.prevDate ? T('Keine auffälligen Veränderungen zum letzten vergleichbaren Training.') : T('Noch kein vergleichbares früheres Training – der Vergleich erscheint ab dem nächsten Mal.')}</div>`}
+    ${A.partial.length ? `<div class="muted" style="font-size:13px;margin-top:6px">${T('Nicht alle Sätze')}: ${A.partial.map(p => `${esc(p.name)} (${p.done}/${p.planned})`).join(', ')}</div>` : ''}
+    ${A.prevDate ? `<div class="muted" style="font-size:12px;margin-top:6px">${T('Verglichen mit dem letzten Training derselben Übung (zuletzt {d}).', { d: fmtDate(A.prevDate) })}</div>` : ''}
+    ${A.notes.length ? `<div class="sum-notes">${A.notes.map(n => `<div>📝 ${n.name ? `<b>${esc(n.name)}:</b> ` : ''}${esc(n.text)}</div>`).join('')}</div>` : ''}
+    ${cm ? '' : `<button class="btn btn-primary btn-block" style="margin-top:12px" data-action="msg-compose" data-cid="${s.clientId}" data-sid="${s.id}">${ic('chat', 18)} ${T('Rückmeldung senden')}</button>`}
+  </div>`;
+}
+/* Satzdaten je Übung, aufklappbar, mit Vergleich zur letzten vergleichbaren Einheit */
+function SessionExercises(s) {
+  const A = analyzeSession(s);
+  const fs = sets => sets.map(x => hasVal(x.weight) ? `${fmtNum(x.weight)}×${hasVal(x.reps) ? fmtNum(x.reps) : '–'}` : hasVal(x.reps) ? fmtNum(x.reps) : '✓').join(' · ');
+  return A.ex.map(r => {
+    const e = r.e, sets = workSets(e), missing = r.planned ? Math.max(0, r.planned - sets.length) : 0;
+    const cmp = r.cmp ? ({ weight: `📈 ${T('mehr Gewicht')} (${fmtNum(r.cmp.from)} → ${fmtNum(r.cmp.to)} kg)`, reps: `📈 ${T('mehr Wiederholungen')} (${fmtNum(r.cmp.from)} → ${fmtNum(r.cmp.to)})`, less: T('weniger Gewicht als zuletzt'), same: T('wie beim letzten Mal'), plan: T('Vorgabe wurde geändert – kein direkter Vergleich') }[r.cmp.kind]) : '';
+    return `<details class="card exd" ${sets.length ? '' : ''}><summary><div class="grow"><div style="font-weight:700">${esc(r.name)}</div>
+      <div class="muted" style="font-size:13px">${sets.length ? `${r.planned ? `${sets.length}/${r.planned}` : sets.length} ${T('Sätze')}${cmp ? ' · ' + cmp : ''}` : T('nicht durchgeführt')}${missing && sets.length ? ' · ' + TN(missing, '{n} Satz fehlt', '{n} Sätze fehlen') : ''}</div></div>${ic('down', 18)}</summary>
+      ${sets.length ? `<table class="table"><thead><tr><th>${T('Satz')}</th><th>${T('Gewicht')}</th><th>${T('Wdh.')}</th><th>RPE/RIR</th><th>${T('Notiz')}</th></tr></thead><tbody>
+      ${sets.map((st, i) => `<tr><td>${i + 1}${st.done ? ' <span class="accent">✓</span>' : ''}</td><td>${hasVal(st.weight) ? fmtNum(st.weight) + ' kg' : '–'}</td><td>${hasVal(st.reps) ? fmtNum(st.reps) : '–'}</td><td>${esc(st.rpe) || '–'}</td><td>${esc(st.note)}</td></tr>`).join('')}</tbody></table>` : ''}
+      ${r.prev ? `<div class="muted" style="font-size:13px;margin-top:8px">${T('Letztes Mal ({d})', { d: fmtDate(r.prev.s.date) })}: ${fs(workSets(r.prev.e))}</div>` : ''}
+      ${e.note ? `<div class="muted" style="margin-top:6px">📝 ${esc(e.note)}</div>` : ''}</details>`;
+  }).join('');
+}
+
+/* ---------- Nachrichten-Ansicht (Trainer & Kunde) ---------- */
+function MsgThread(cid) {
+  const cm = isClientMode(), me = cm ? 'client' : 'trainer', list = msgsOf(cid);
+  return `<div class="thread" id="thread">${list.length ? list.map(m => {
+    const mine = m.from === me, s = m.sessionId && S.sessions.get(m.sessionId);
+    return `<div class="bubble ${mine ? 'me' : 'them'} ${m.kind === 'issue' ? 'issue' : ''}"><div class="b-from">${m.from === 'trainer' ? (cm ? T('Dein Trainer') : T('Du')) : (cm ? T('Du') : esc((S.clients.get(cid) || {}).name || ''))}${m.kind === 'issue' ? ' · ' + T('Schwierigkeit') : ''}</div>
+      ${s ? `<a class="b-ref" href="#/session/${s.id}">🏋️ ${esc(sessLabel(s))} · ${fmtDate(s.date)}</a>` : ''}
+      <div class="b-text">${esc(m.text).replace(/\n/g, '<br>')}</div><div class="b-meta">${fmtDateTs(m.at)} ${fmtTime(m.at)}${mine ? (m.readAt ? ' · ' + T('gelesen') : ' · ' + T('gesendet')) : ''}</div></div>`; }).join('')
+    : `<div class="empty-s muted">${cm ? T('Noch keine Nachrichten. Hier erscheinen persönliche Rückmeldungen deines Trainers.') : T('Noch keine Nachrichten mit diesem Kunden.')}</div>`}</div>`;
+}
+function viewMessages(cid) {
+  const cm = isClientMode(), c = S.clients.get(cid); if (!c) return null;
+  if (markThreadRead(cid, cm ? 'trainer' : 'client')) { if (cm) setTimeout(() => boxClientSync(false, true).catch(() => {}), 300); }
+  if (!cm) markEventsWhere(e => (e.type === 'msg' || e.type === 'issue') && e.clientId === cid && !e.read, { read: true });
+  return topbar({ back: cm ? '/' : '/client/' + cid, title: cm ? T('Nachrichten') : esc(c.name), sub: cm ? T('mit deinem Trainer') : T('Nachrichten') }) + `<main class="wrap view">
+    ${MsgThread(cid)}
+    <div class="card stack composer">
+      ${cm ? '' : QuickReplies(cid, null)}
+      <textarea id="msg-text" class="input" rows="3" maxlength="2000" placeholder="${cm ? T('Nachricht an deinen Trainer …') : T('Nachricht an {n} …', { n: esc(c.name.split(' ')[0]) })}"></textarea>
+      ${cm ? `<label class="toggle"><input type="checkbox" id="msg-issue"><span class="tg"></span><span>${T('Ich habe eine Schwierigkeit / brauche Unterstützung')}</span></label>` : ''}
+      <button class="btn btn-primary btn-block" data-action="msg-send" data-cid="${cid}">${ic('chat', 18)} ${T('Senden')}</button>
+      <div class="muted" style="font-size:12px">${cm ? T('Nur du und dein Trainer sehen diese Nachrichten. Sie werden verschlüsselt übertragen.') : T('Die Nachricht wird verschlüsselt an die App von {n} geschickt.', { n: esc(c.name.split(' ')[0]) })}</div>
+    </div></main>`;
+}
+/* Schnellantworten: Texte in der Sprache des Kunden (falls bekannt), Leistungsdaten nur aus echten Trainingsdaten */
+function TL(lang, s, v) { const d = lang === 'de' ? null : ((window.SW_I18N || {})[lang] || {}).ui; let r = (d && d[s]) || s; if (v) r = String(r).replace(/\{(\w+)\}/g, (m, k) => v[k] != null ? v[k] : m); return r; }
+const withLang = (L, fn) => { const o = I18N.cur; I18N.cur = L; try { return fn(); } finally { I18N.cur = o; } };
+function quickReplyTexts(cid, sid) {
+  const c = S.clients.get(cid), L = (c && c.lang) || (isEN() ? 'en' : 'de'), out = [];
+  const s = sid && S.sessions.get(sid), A = s && s.status === 'done' ? withLang(L, () => analyzeSession(s)) : null;   // Übungsnamen in der Sprache des Kunden
+  const num = n => Number(n).toLocaleString(L === 'en' ? 'en-GB' : 'de-DE', { maximumFractionDigits: 2 });
+  const exn = name => name; // Übungsname wie in der App angezeigt
+  if (A) {
+    const w = A.items.find(f => f.kind === 'weight'), r = A.items.find(f => f.kind === 'reps');
+    if (w) out.push(TL(L, 'Starkes Training heute! Bei {x} hast du dich von {a} kg auf {b} kg gesteigert. Weiter so!', { x: exn(w.name), a: num(w.from), b: num(w.to) }));
+    if (r) out.push(r.w != null ? TL(L, 'Bei {x} hast du mit {w} kg {b} Wiederholungen geschafft – letztes Mal waren es {a}. Guter Fortschritt!', { x: exn(r.name), w: num(r.w), a: num(r.from), b: num(r.to) }) : TL(L, 'Bei {x} hast du {b} Wiederholungen geschafft – letztes Mal waren es {a}. Guter Fortschritt!', { x: exn(r.name), a: num(r.from), b: num(r.to) }));
+    if (A.complete) out.push(TL(L, 'Super, dass du dein Training vollständig absolviert hast.'));
+    if (A.skipped.length) out.push(TL(L, 'Mir ist aufgefallen, dass du einige Übungen ausgelassen hast. Gibt es einen Grund dafür, bei dem ich dich unterstützen kann?'));
+  }
+  out.push(TL(L, 'Starkes Training! Weiter so.'), TL(L, 'Wie hast du dich heute beim Training gefühlt?'), TL(L, 'Melde dich bitte bei mir, wenn du Unterstützung benötigst.'));
+  if (!A) out.splice(1, 0, TL(L, 'Glückwunsch zur Leistungssteigerung.'), TL(L, 'Dein Trainingsplan wurde vollständig absolviert. Sehr gut.'));
+  return { L, list: [...new Set(out)] };
+}
+function QuickReplies(cid, sid) {
+  const q = quickReplyTexts(cid, sid);
+  return `<div class="qr-h muted">${T('Schnellantworten – antippen, prüfen, anpassen')}${q.L === 'en' ? ' · English' : ''}</div><div class="qr">${q.list.map((t, i) => `<button type="button" class="fchip qr-chip" data-action="qr-use" data-i="${i}" data-cid="${cid}" data-sid="${sid || ''}">${esc(t)}</button>`).join('')}</div>`;
+}
+function MsgSection(c) {
+  const list = msgsOf(c.id), unread = unreadFrom(c.id, 'client').length, last = list[list.length - 1];
+  return `<section class="section"><div class="section-h"><h2>${T('Nachrichten')}</h2>${unread ? `<span class="badge">${unread}</span>` : ''}</div>
+    <a class="card list-link" href="#/client/${c.id}/nachrichten">${ic('chat')}<div class="grow"><div style="font-weight:600">${last ? esc((last.from === 'trainer' ? T('Du') + ': ' : '') + last.text.slice(0, 80)) : T('Noch keine Nachrichten')}</div>
+      <div class="muted" style="font-size:13px">${last ? fmtDateTs(last.at) + ' ' + fmtTime(last.at) : T('Persönliche Rückmeldung schreiben')}</div></div>${ic('back', 18).replace('M15 18l-6-6 6-6', 'M9 6l6 6-6 6')}</a></section>`;
+}
+/* Kunde: Startseiten-Karte für Nachrichten des Trainers */
+function ClientMsgCard(cid) {
+  const un = unreadFrom(cid, 'trainer'), last = msgsOf(cid).filter(m => m.from === 'trainer').pop();
+  if (!last) return `<a class="card list-link" href="#/nachrichten" style="margin-top:12px">${ic('chat')}<div class="grow"><div style="font-weight:600">${T('Nachrichten')}</div><div class="muted" style="font-size:13px">${T('Schreib deinem Trainer')}</div></div></a>`;
+  return `<a class="card msg-card ${un.length ? 'new' : ''}" href="#/nachrichten"><div class="row" style="gap:8px;align-items:center">${ic('chat', 18)}<b>${un.length ? T('Neue Nachricht von deinem Trainer') : T('Nachricht von deinem Trainer')}</b>${un.length ? `<span class="badge">${un.length}</span>` : ''}</div>
+    <div style="margin-top:6px">${esc(last.text.slice(0, 160))}${last.text.length > 160 ? '…' : ''}</div><div class="muted" style="font-size:12px;margin-top:4px">${fmtDateTs(last.at)} ${fmtTime(last.at)}</div></a>`;
+}
+
+/* ---------- Senden & Synchronisieren ---------- */
+async function sendMessage(cid, text, opts = {}) {
+  const cm = isClientMode(), t = String(text || '').trim(); if (!t) throw new Error(T('Bitte eine Nachricht eingeben.'));
+  const m = { id: uid(), clientId: cid, from: cm ? 'client' : 'trainer', text: t.slice(0, 2000), at: Date.now(), kind: opts.issue ? 'issue' : null, sessionId: opts.sessionId || null, readAt: null };
+  put('messages', m);
+  if (cm) { await boxClientSync(true, true); return { m, delivered: !!boxUrl() }; }
+  // Trainer: zugehörige offene Punkte gelten als beantwortet
+  markEventsWhere(e => e.clientId === cid && !e.handled && ((e.type === 'msg' || e.type === 'issue') || (opts.sessionId && e.type === 'done' && e.sessionId === opts.sessionId)), { handled: true, read: true });
+  let delivered = false;
+  try { delivered = await boxSendMessages(cid); } catch (e) { delivered = false; m.err = e.message; }
+  return { m, delivered };
+}
+async function boxSendMessages(cid) {
+  const c = S.clients.get(cid); if (!c || !c.access || !c.access.code || !boxUrl()) return false;
+  const text = await encryptPayload({ clientId: cid, messages: msgsOf(cid), sentAt: Date.now() }, c.access.code, { kind: 'client-msgs', v: 1, clientId: cid });
+  await boxPut(cid, c.access.code, 'msg', text);
+  pushPing(c.notifyCh, 'msg');
+  return true;
+}
+/* Kunde: Nachrichten des Trainers abholen */
+async function boxClientMessages(cid) {
+  const mv = (S.meta.get('msgV') || {}).v || 0;
+  const r = await boxGet(cid, BOX.code, 'msg', mv).catch(() => null);
+  if (!r || r.missing || !r.data) return 0;
+  const h = await readHeader(textFile(r.data)); if (h.kind !== 'client-msgs' || h.clientId !== cid) return 0;
+  const p = await decryptPayload(h, BOX.code); if (!p || p.clientId !== cid) return 0;
+  const neu = mergeMessages(p.messages, cid, 'trainer');
+  put('meta', { id: 'msgV', v: r.v });
+  return neu.length;
+}
+const liveState = cid => { const a = activeSession(cid); if (!a) return null; return { id: a.id, dayName: a.dayName, dayIndex: a.dayIndex, startedAt: a.startedAt, updatedAt: a.updatedAt || Date.now(), sets: sessionSets(a), total: a.exercises.reduce((t, e) => t + (e.sets || []).length, 0) }; };
+/* Kunde: während des Trainings den Fortschritt (höchstens alle 3 Min.) an den Trainer melden */
+function liveSyncSoon() { if (!isClientMode() || !boxUrl()) return; clearTimeout(CARE.lt); CARE.lt = setTimeout(() => boxClientSync(false, true).catch(() => {}), 4000); }
+
+/* ---------- Push (optional) ---------- */
+const pushSupported = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+const b64u = buf => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+const unb64u = s => { s = s.replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; return Uint8Array.from(atob(s), ch => ch.charCodeAt(0)); };
+function pushPing(ch, type) { const u = boxUrl(); if (!u || !ch || !/^[0-9a-f]{64}$/.test(ch)) return; fetch(`${u}/push/ping/${ch}?t=${type}`, { method: 'POST' }).catch(() => {}); }
+function pushChannel() { let m = S.meta.get('pushCh'); if (!m) { m = { id: 'pushCh', ch: hexOf(rnd(32)), token: hexOf(rnd(32)) }; put('meta', m); } return m; }
+async function pushEnable(role) {
+  if (!pushSupported()) throw new Error(isIOS() && !isStandalone() ? T('Auf dem iPhone funktionieren Push-Mitteilungen nur in der App auf dem Home-Bildschirm (ab iOS 16.4).') : T('Dieses Gerät bzw. dieser Browser unterstützt keine Push-Mitteilungen.'));
+  const u = boxUrl(); if (!u) throw new Error(T('Kein Briefkasten eingerichtet.'));
+  const perm = await Notification.requestPermission();
+  if (perm !== 'granted') throw new Error(T('Mitteilungen wurden nicht erlaubt. Du kannst sie in den Einstellungen des Handys freigeben.'));
+  let kr; try { kr = await fetch(`${u}/push/key`, { cache: 'no-store' }); } catch (e) { throw new Error(T('Briefkasten nicht erreichbar. Bist du online?')); }
+  if (!kr.ok) throw new Error(T('Der Briefkasten unterstützt noch keine Push-Mitteilungen – bitte die neue worker.js hochladen.'));
+  const { key } = await kr.json();
+  const reg = await navigator.serviceWorker.ready;
+  let sub = await reg.pushManager.getSubscription();
+  if (sub) { const cur = sub.options && sub.options.applicationServerKey && b64u(sub.options.applicationServerKey); if (cur && cur !== key) { await sub.unsubscribe(); sub = null; } }
+  if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: unb64u(key) });
+  const ch = pushChannel(), cfg = careCfg();
+  const types = role === 'trainer' ? [cfg.pushDone ? 'done' : null, cfg.pushMsg ? 'msg' : null].filter(Boolean) : ['msg'];
+  const r = await fetch(`${u}/push/sub/${ch.ch}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: ch.token, sub: sub.toJSON(), types }) });
+  if (!r.ok) throw new Error(T('Briefkasten-Fehler ({s}).', { s: r.status }));
+  put('meta', { id: 'pushOn', on: true, at: Date.now(), role });
+  if (role === 'client') boxClientSync(true, true).catch(() => {});   // Kanal an den Trainer melden
+  return true;
+}
+async function pushDisable() {
+  try { const reg = await navigator.serviceWorker.ready, sub = await reg.pushManager.getSubscription(), ch = S.meta.get('pushCh');
+    if (sub && ch && boxUrl()) await fetch(`${boxUrl()}/push/sub/${ch.ch}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: ch.token, endpoint: sub.endpoint }) }).catch(() => {});
+    if (sub) await sub.unsubscribe(); } catch (e) {}
+  put('meta', { id: 'pushOn', on: false, at: Date.now() });
+}
+function PushCard(role) {
+  const on = (S.meta.get('pushOn') || {}).on, perm = 'Notification' in window ? Notification.permission : 'unsupported', cfg = careCfg();
+  const hint = !pushSupported() ? (isIOS() && !isStandalone() ? T('Auf dem iPhone funktionieren Push-Mitteilungen nur in der App auf dem Home-Bildschirm (ab iOS 16.4).') : T('Dieses Gerät bzw. dieser Browser unterstützt keine Push-Mitteilungen.'))
+    : perm === 'denied' ? T('Mitteilungen sind für SWEAT4 blockiert. Erlaube sie in den Einstellungen des Handys.') : '';
+  return `<div class="stack push-card"><b>${T('Push-Mitteilungen')}</b>
+    <div class="muted" style="font-size:13px">${role === 'trainer' ? T('Du bekommst eine Mitteilung aufs Handy, wenn ein Kunde ein Training abschließt oder dir schreibt – auch wenn SWEAT4 geschlossen ist. Die Mitteilung enthält keine Trainingsdaten; Details siehst du erst in der App.') : T('Du bekommst eine Mitteilung, wenn dein Trainer dir schreibt. Die Mitteilung enthält keinen Text – du liest die Nachricht in der App.')}</div>
+    ${role === 'trainer' ? `<label class="toggle"><input type="checkbox" data-care="pushDone" ${cfg.pushDone ? 'checked' : ''}><span class="tg"></span><span>${T('Bei Trainingsabschlüssen')}</span></label>
+    <label class="toggle"><input type="checkbox" data-care="pushMsg" ${cfg.pushMsg ? 'checked' : ''}><span class="tg"></span><span>${T('Bei neuen Nachrichten')}</span></label>` : ''}
+    ${hint ? `<div class="info" style="font-size:13px">${hint}</div>` : on ? `<div class="grid2"><button class="btn btn-ghost" data-action="push-test">${T('Test senden')}</button><button class="btn btn-ghost" data-action="push-off">${T('Ausschalten')}</button></div><div class="muted" style="font-size:12px">✓ ${T('Push-Mitteilungen sind auf diesem Gerät aktiv.')}</div>`
+      : `<button class="btn btn-primary btn-block" data-action="push-on" data-role="${role}">${ic('bell', 18)} ${T('Push-Mitteilungen aktivieren')}</button>`}
+  </div>`;
+}
+
 /* ---------- Router-Erweiterung ---------- */
 function routeGuard(p) {
   if (!isClientMode()) return null;
   const cid = roleInfo().clientId;
-  if (p[0] === 'client') { if (p[1] !== cid || !p[2] || p[2] === 'check') return '/'; if (p[2] === 'plan') return `/client/${cid}/planview`; }
+  if (p[0] === 'meldungen') return '/';
+  if (p[0] === 'client') { if (p[1] !== cid || !p[2] || p[2] === 'check') return '/'; if (p[2] === 'plan') return `/client/${cid}/planview`; if (p[2] === 'nachrichten') return '/nachrichten'; }
   if ((p[0] === 'train' || p[0] === 'session') && S.sessions.get(p[1]) && S.sessions.get(p[1]).clientId !== cid) return '/';
   if (p[0] === 'check' && (!S.checks.get(p[1]) || S.checks.get(p[1]).clientId !== cid || p[2] === 'edit')) return '/';
   return null;
 }
 function routeExtra(p) {
   if (!p.length && isClientMode()) return viewClientHome();
+  if (p[0] === 'meldungen' && !isClientMode()) return viewMeldungen();
+  if (p[0] === 'nachrichten' && isClientMode()) return viewMessages(roleInfo().clientId);
+  if (p[0] === 'client' && p[2] === 'nachrichten' && !isClientMode()) return viewMessages(p[1]) || null;
   if (p[0] === 'client' && p[2]) {
     const c = S.clients.get(p[1]); if (!c) return undefined;
     if (p[2] === 'body') return viewBody(c);
@@ -4250,12 +4721,42 @@ function lockGate() {
 }
 
 /* ---------- Aktionen ---------- */
-const TRAINER_ONLY = new Set(['box-save', 'box-test', 'box-send', 'box-fetch', 'box-link', 'new-client', 'edit-client', 'del-client', 'photo-remove', 'add-day', 'del-day', 'day-move', 'add-ex', 'edit-ex', 'del-ex', 'tpl-apply', 'ud-add', 'ud-add-client', 'ud-add-day', 'ex-move', 'demo', 'wipe', 'backup', 'import', 'check-del', 'pkg-make', 'ret-import', 'lock-set', 'lock-off', 'pslot-rm']);
+const TRAINER_ONLY = new Set(['care-done', 'ev-read-all', 'msg-compose', 'qr-use', 'box-save', 'box-test', 'box-send', 'box-fetch', 'box-link', 'new-client', 'edit-client', 'del-client', 'photo-remove', 'add-day', 'del-day', 'day-move', 'add-ex', 'edit-ex', 'del-ex', 'tpl-apply', 'ud-add', 'ud-add-client', 'ud-add-day', 'ex-move', 'demo', 'wipe', 'backup', 'import', 'check-del', 'pkg-make', 'ret-import', 'lock-set', 'lock-off', 'pslot-rm']);
 document.addEventListener('click', ev => {
   const el = ev.target.closest('[data-action]');
   if (el && isClientMode() && TRAINER_ONLY.has(el.dataset.action)) { ev.preventDefault(); ev.stopImmediatePropagation(); toast(T('Nur für den Trainer verfügbar')); }
 }, true);
 Object.assign(A, {
+  /* ---------- Betreuung ---------- */
+  'care-done': el => { const id = el.dataset.id;
+    if (id.startsWith('dismiss:')) put('events', { id, type: 'dismiss', clientId: id.split(':')[2], at: Date.now(), read: true, handled: true });
+    else markEvent(id, { handled: true, read: true });
+    toast(T('Als erledigt markiert')); render(); },
+  'ev-read-all': () => { markEventsWhere(e => !e.read, { read: true }); render(); },
+  'msg-compose': el => {
+    const cid = el.dataset.cid, sid = el.dataset.sid || '', c = S.clients.get(cid); if (!c) return;
+    UI.qrCtx = { cid, sid };
+    modal(T('Rückmeldung an {n}', { n: esc(c.name.split(' ')[0]) }), `<div class="stack">${QuickReplies(cid, sid)}
+      <textarea id="msg-text" class="input" rows="5" maxlength="2000" placeholder="${T('Persönliche Rückmeldung schreiben …')}"></textarea>
+      <div class="muted" style="font-size:12px">${T('Die Nachricht wird erst gesendet, wenn du auf „Senden“ tippst. Du kannst jeden Vorschlag vorher ändern.')}</div>
+      <div class="sheet-actions"><button type="button" class="btn btn-ghost" data-action="modal-close">${T('Abbrechen')}</button><button class="btn btn-primary" data-action="msg-send" data-cid="${cid}" data-sid="${sid}">${T('Senden')}</button></div></div>`);
+  },
+  'qr-use': el => { const q = quickReplyTexts(el.dataset.cid, el.dataset.sid || null), t = q.list[+el.dataset.i], ta = document.getElementById('msg-text'); if (!ta || !t) return;
+    ta.value = ta.value.trim() ? ta.value.trim() + '\n' + t : t; ta.focus(); },
+  'msg-send': async el => {
+    const ta = document.getElementById('msg-text'), cid = el.dataset.cid, sid = el.dataset.sid || null, issue = !!(document.getElementById('msg-issue') || {}).checked;
+    if (!ta || !ta.value.trim()) return toast(T('Bitte eine Nachricht eingeben.'));
+    el.disabled = true;
+    try {
+      const r = await sendMessage(cid, ta.value, { sessionId: sid, issue });
+      if (document.querySelector('.overlay')) closeModal(null);
+      toast(isClientMode() ? T('Nachricht gesendet ✓') : r.delivered ? T('Nachricht gesendet ✓') : T('Gespeichert – wird mit dem nächsten Update zugestellt.'));
+      ta.value = ''; render();
+    } catch (e) { toast(e.message); } finally { el.disabled = false; }
+  },
+  'push-on': async el => { try { await pushEnable(el.dataset.role || (isClientMode() ? 'client' : 'trainer')); toast(T('Push-Mitteilungen aktiviert ✓')); } catch (e) { toast(e.message); } render(); },
+  'push-off': async () => { await pushDisable(); toast(T('Push-Mitteilungen ausgeschaltet')); render(); },
+  'push-test': async () => { const ch = S.meta.get('pushCh'); if (!ch || !boxUrl()) return; try { const r = await fetch(`${boxUrl()}/push/ping/${ch.ch}?t=test`, { method: 'POST' }); const j = await r.json().catch(() => ({})); toast(j.sent ? T('Test gesendet – die Mitteilung sollte gleich erscheinen.') : T('Kein Gerät erreicht. Bitte Push erneut aktivieren.')); } catch (e) { toast(T('Briefkasten nicht erreichbar. Bist du online?')); } },
   'body-metric': el => { UI.bodyMetric = el.dataset.v; render(); },
   'body-range': el => { UI.bodyRange = el.dataset.v; render(); },
   'p360-open': el => open360(String(el.dataset.ids || '').split(',')),
@@ -4430,10 +4931,22 @@ document.addEventListener('visibilitychange', () => {
 ['pointerdown', 'keydown', 'input'].forEach(t => document.addEventListener(t, () => sessionTouch(false), { passive: true, capture: true }));
 setInterval(sessionCheck, 60e3);
 
+/* Betreuung: Einstellungen, Meldungen als gelesen markieren, regelmäßig abholen */
+document.addEventListener('change', ev => {
+  const t = ev.target; if (!t.dataset || !t.dataset.care) return;
+  const cfg = careCfg(), k = t.dataset.care; cfg[k] = t.type === 'checkbox' ? t.checked : +t.value;
+  put('meta', { id: 'careCfg', ...cfg });
+  if ((k === 'pushDone' || k === 'pushMsg') && (S.meta.get('pushOn') || {}).on) pushEnable('trainer').catch(e => toast(e.message));
+  toast(T('Gespeichert'));
+});
+document.addEventListener('click', ev => { const a = ev.target.closest('a[data-ev]'); if (a && !isClientMode()) markEvent(a.dataset.ev, { read: true }); });
+document.addEventListener('visibilitychange', () => { if (document.hidden || LOCK.locked) return; if (isClientMode()) boxClientSync(false, true).catch(() => {}); else careFetchAll(60000); });
+setInterval(() => { if (document.hidden || LOCK.locked) return; if (isClientMode()) boxClientSync(false, true).catch(() => {}); else careFetchAll(); }, 120000);
+
 (async function init() {
   // Offline-Fähigkeit, sobald die App über eine Web-Adresse geöffnet wird
   if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
-  try { await DB.open(); await loadAll(); if (S.meta.get('lock')) { LOCK.init = true; LOCK.locked = !(await sessionRestore()); } render(); }
+  try { await DB.open(); await loadAll(); if ((S.meta.get('lang') || {}).value !== I18N.cur) put('meta', { id: 'lang', value: I18N.cur }); /* Sprache für Push-Texte im Service Worker */ if (S.meta.get('lock')) { LOCK.init = true; LOCK.locked = !(await sessionRestore()); } render(); }
   catch (e) {
     document.getElementById('app').innerHTML = `<main class="wrap"><div class="card" style="margin-top:30px"><h2>Speicher nicht verfügbar</h2>
       <p class="muted">Der Browser erlaubt keine lokale Datenbank (IndexedDB). Häufige Ursachen: privater/Inkognito-Modus oder eine Vorschau-Ansicht. Bitte öffne die Datei direkt in Chrome, Edge, Firefox oder Safari.</p>
