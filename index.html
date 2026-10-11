@@ -3937,18 +3937,20 @@ function viewSetup(lcid, lbox) {
   if (lcid && (!cm || roleInfo().clientId === lcid)) return topbar({ title: cm ? T('Update laden') : T('Willkommen bei SWEAT4'), sub: cm ? T('Neuer Plan von deinem Trainer') : T('Zugang einrichten'), right: cm ? '' : `<div class="tb-lang">${LangSwitch()}</div>` }) + `<main class="wrap view">
     <form data-form="setup" data-cid="${esc(lcid)}" data-box="${esc(lbox || '')}" class="card stack">
       <div class="muted" style="font-size:14px">${T('Dein Trainer hat dich eingeladen. Gib den Zugangscode ein, den du von ihm bekommen hast – dein Plan wird dann automatisch geladen.')}</div>
-      <label class="field" style="margin:0"><span>${T('Zugangscode')}</span><input name="code" type="password" class="input" autocomplete="current-password" required minlength="6"></label>
+      <label class="field" style="margin:0"><span>${T('Zugangscode')}</span><input name="code" type="text" class="input" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="go"></label>
       ${cm ? '' : `<label class="toggle"><input type="checkbox" name="agree"><span class="tg"></span><span>${T('Ich habe die {a} und den {b} gelesen und willige in die Verarbeitung meiner Gesundheitsdaten zur Betreuung ein.', { a: `<a href="#/rechtliches/datenschutz" class="accent">${T('Datenschutzerklärung')}</a>`, b: `<a href="#/rechtliches/gesundheit" class="accent">${T('Gesundheitshinweis')}</a>` })}</span></label>`}
       <button class="btn btn-primary btn-big">${cm ? T('Update laden') : T('Zugang einrichten')}</button>
+      <div class="setup-err down" style="font-size:14px;font-weight:600" role="alert"></div>
       <div class="muted" style="font-size:12px">${T('Tipp: Danach über Teilen → „Zum Home-Bildschirm“ als App ablegen.')}</div>
     </form></main>`;
   return topbar({ back: cm ? '/data' : '/', title: cm ? T('Update laden') : T('Kunden-Zugang einrichten'), sub: T('Datei von deinem Trainer'), right: cm ? '' : `<div class="tb-lang">${LangSwitch()}</div>` }) + `<main class="wrap view">
     <form data-form="setup" class="card stack">
       <div class="muted" style="font-size:14px">${cm ? T('Wähle die neue Datei deines Trainers und gib deinen Zugangscode ein.') : T('1. Wähle die Datei, die du von deinem Trainer bekommen hast (z. B. per AirDrop, WhatsApp oder E-Mail – vorher in „Dateien“ sichern).') + '<br>' + T('2. Gib den Zugangscode ein, den dir dein Trainer gesagt hat.')}</div>
       <label class="btn btn-ghost btn-block" id="setup-pick">${ic('upload')} <span>${T('Datei auswählen')}</span><input type="file" name="file" hidden></label>
-      <label class="field" style="margin:0"><span>${T('Zugangscode')}</span><input name="code" type="password" class="input" autocomplete="current-password" required minlength="6"></label>
+      <label class="field" style="margin:0"><span>${T('Zugangscode')}</span><input name="code" type="text" class="input" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="go"></label>
       ${cm ? '' : `<label class="toggle"><input type="checkbox" name="agree"><span class="tg"></span><span>${T('Ich habe die {a} und den {b} gelesen und willige in die Verarbeitung meiner Gesundheitsdaten zur Betreuung ein.', { a: `<a href="#/rechtliches/datenschutz" class="accent">${T('Datenschutzerklärung')}</a>`, b: `<a href="#/rechtliches/gesundheit" class="accent">${T('Gesundheitshinweis')}</a>` })}</span></label>`}
       <button class="btn btn-primary btn-big">${cm ? T('Update laden') : T('Zugang einrichten')}</button>
+      <div class="setup-err down" style="font-size:14px;font-weight:600" role="alert"></div>
       <div class="muted" style="font-size:12px">${T('Deine Daten werden auf diesem Gerät gespeichert und nur verschlüsselt mit deinem Trainer ausgetauscht.')}</div>
     </form></main>`;
 }
@@ -4213,9 +4215,9 @@ Object.assign(A, {
       <div class="sheet-actions"><button type="button" class="btn btn-ghost" data-action="modal-close">Abbrechen</button><button class="btn btn-primary">Datei erstellen</button></div></form>`);
   },
   'ret-import': () => { let i = document.getElementById('ret-file'); if (!i) { i = document.createElement('input'); i.type = 'file'; i.id = 'ret-file'; i.hidden = true; document.body.appendChild(i); } i.click(); },
-  'ret-make': () => modal(T('Trainings an Trainer senden'), `<form data-form="ret"><p class="muted" style="margin-top:0">Deine abgeschlossenen Trainings werden verschlüsselt als Datei gespeichert. Schick sie anschließend an deinen Trainer.</p>
-      <label class="field"><span>Dein Zugangscode</span><input name="code" type="password" class="input" required autocomplete="current-password"></label>
-      <div class="sheet-actions"><button type="button" class="btn btn-ghost" data-action="modal-close">Abbrechen</button><button class="btn btn-primary">Datei erstellen</button></div></form>`),
+  'ret-make': () => modal(T('Trainings an Trainer senden'), `<form data-form="ret"><p class="muted" style="margin-top:0">${T('Deine abgeschlossenen Trainings werden verschlüsselt als Datei gespeichert. Schick sie anschließend an deinen Trainer.')}</p>
+      <label class="field"><span>${T('Dein Zugangscode')}</span><input name="code" type="text" class="input" required autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"></label>
+      <div class="sheet-actions"><button type="button" class="btn btn-ghost" data-action="modal-close">${T('Abbrechen')}</button><button class="btn btn-primary">${T('Datei erstellen')}</button></div></form>`),
   'file-share': async () => {
     const f = UI.readyFile; if (!f) return;
     const file = new File([f.text], f.name, { type: 'application/json' });
@@ -4266,7 +4268,7 @@ function refreshSlot(i) {
   const w = document.getElementById('pslot-' + i); if (w) { w.innerHTML = pslotHtml(i); hydratePhotos(w); }
   const n = UI.cd.photos.filter(Boolean).length, pc = document.getElementById('pcount'); if (pc) { pc.textContent = n + '/5'; pc.classList.toggle('live', n === 5); }
 }
-const busy = (f, on) => { const b = f && f.querySelector('button.btn-primary'); if (b) { b.disabled = on; if (on) { b.dataset.t = b.innerHTML; b.innerHTML = 'Bitte warten …'; } else if (b.dataset.t) b.innerHTML = b.dataset.t; } };
+const busy = (f, on) => { const b = f && f.querySelector('button.btn-primary'); if (b) { b.disabled = on; if (on) { b.dataset.t = b.innerHTML; b.innerHTML = T('Bitte warten …'); } else if (b.dataset.t) b.innerHTML = b.dataset.t; } };
 document.addEventListener('submit', async ev => {
   const f = ev.target, k = f.dataset.form; if (!['check', 'unlock', 'pkg', 'setup', 'ret', 'setlock'].includes(k)) return;
   ev.preventDefault(); const fd = new FormData(f);
@@ -4278,7 +4280,7 @@ document.addEventListener('submit', async ev => {
       LOCK.locked = false; BOX.code = String(fd.get('code') || ''); UI.lastRoute = ''; render(); return;
     }
     if (k === 'pkg') {
-      const code = String(fd.get('code') || ''); if (code.length < 6) return toast(T('Mindestens 6 Zeichen'));
+      const code = String(fd.get('code') || '').trim(); if (code.length < 6) return toast(T('Mindestens 6 Zeichen'));
       busy(f, true); const r = await makePackage(f.dataset.cid, code); closeModal(null);
       if (boxUrl()) { const v = await boxPut(f.dataset.cid, code, 'down', r.text); const cc = S.clients.get(f.dataset.cid); cc.access = { ...cc.access, boxSent: v }; put('clients', cc); inviteReady(f.dataset.cid); render(); return; }
       fileReady(r.name, r.text, `Zugangsdatei für <b>${esc(S.clients.get(f.dataset.cid).name)}</b> erstellt (${r.n} Fotos, ${fmtNum(Math.round(r.text.length / 1024 / 1024 * 10) / 10)} MB, verschlüsselt). Schick sie an deinen Kunden und teile ihm den Code getrennt mit.`);
@@ -4291,18 +4293,26 @@ document.addEventListener('submit', async ev => {
     }
     if (k === 'setup') {
       const fi = f.querySelector('input[type=file]'), file = fi && fi.files[0];
-      if (!f.dataset.cid && !file) return toast(T('Bitte zuerst die Datei auswählen'));
-      if (!isClientMode() && fd.get('agree') !== 'on') return toast(T('Bitte Datenschutz und Gesundheitshinweis bestätigen'));
-      busy(f, true); const was = isClientMode(), code = String(fd.get('code') || '');
+      const err = m => { const e = f.querySelector('.setup-err'); if (e) e.textContent = m; if (m) toast(m); };
+      const code = String(fd.get('code') || '').trim();
+      if (!f.dataset.cid && !file) return err(T('Bitte zuerst die Datei auswählen'));
+      if (!code) return err(T('Bitte den Zugangscode eingeben.'));
+      if (code.length < 6) return err(T('Der Zugangscode hat mindestens 6 Zeichen. Du bekommst ihn von deinem Trainer – es ist kein eigenes Passwort.'));
+      if (!isClientMode() && fd.get('agree') !== 'on') return err(T('Bitte Datenschutz und Gesundheitshinweis bestätigen'));
+      err(''); busy(f, true); const was = isClientMode();
       if (f.dataset.cid) {
-        const res = await boxGet(f.dataset.cid, code, 'down', 0, f.dataset.box);
-        if (!res || res.missing) throw new Error(T('Kein Zugang gefunden. Prüfe den Code – oder frag deinen Trainer, ob er dich eingeladen hat.'));
-        await setupFromFile(textFile(res.data), code, { boxV: res.v, box: f.dataset.box });
+        // Code genau wie eingegeben, sonst mit üblichen Tipp-Varianten (Groß-/Kleinschreibung) versuchen
+        const raw = String(fd.get('code') || ''), up1 = c => c.charAt(0).toUpperCase() + c.slice(1);
+        const tries = [...new Set([code, raw, up1(code), code.split(/([-\s_.])/).map(up1).join(''), code.toLowerCase(), code.toUpperCase()])].filter(Boolean);
+        let res = null, use = code;
+        for (const c of tries) { const r = await boxGet(f.dataset.cid, c, 'down', 0, f.dataset.box); if (r && !r.missing) { res = r; use = c; break; } }
+        if (!res) throw new Error(T('Kein Zugang gefunden. Prüfe den Code – oder frag deinen Trainer, ob er dich eingeladen hat.'));
+        await setupFromFile(textFile(res.data), use, { boxV: res.v, box: f.dataset.box });
       } else await setupFromFile(file, code);
       if (!was) put('meta', { id: 'consent', at: Date.now() });
       toast(was ? T('Update geladen ✓') : T('Willkommen! Dein Zugang ist eingerichtet ✓')); go('/'); render(); return;
     }
-  } catch (e) { busy(f, false); toast(e && e.message || String(e)); }
+  } catch (e) { busy(f, false); const m = e && e.message || String(e); const el = f.querySelector('.setup-err'); if (el) el.textContent = m; toast(m); }
 });
 document.addEventListener('change', async ev => {
   const t = ev.target;

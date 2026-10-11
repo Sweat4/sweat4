@@ -608,7 +608,12 @@ window.SW_I18N.en = {
     "Satznotiz": "Set note",
     "Übungsnotiz": "Exercise note",
     "ja": "yes",
-    "nein": "no"
+    "nein": "no",
+    "Bitte warten …": "Please wait …",
+    "Bitte den Zugangscode eingeben.": "Please enter the access code.",
+    "Der Zugangscode hat mindestens 6 Zeichen. Du bekommst ihn von deinem Trainer – es ist kein eigenes Passwort.": "The access code has at least 6 characters. You get it from your trainer – it is not a password you choose yourself.",
+    "Deine abgeschlossenen Trainings werden verschlüsselt als Datei gespeichert. Schick sie anschließend an deinen Trainer.": "Your completed workouts are saved encrypted as a file. Then send it to your trainer.",
+    "Datei erstellen": "Create file"
   },
   /* Übungskatalog: id → [Name, Zielmuskel, Equipment, Ausgangsposition, Ausführung, Bewegungsrichtung, [Hinweise], [Fehler]] */
   kat: {
