@@ -115,6 +115,64 @@ h1,h2,h3{margin:0;line-height:1.2}
 .btn-next .nx-tx{display:flex;flex-direction:column;min-width:0;line-height:1.2}
 .btn-next small{font-size:12.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.75}
 .btn-next b{font-size:19px;font-weight:700;margin-top:3px;overflow-wrap:anywhere}
+.box-banner{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:var(--r-md);background:var(--accent-soft);border:1px solid var(--gold-line);margin-bottom:14px}
+.box-banner b{display:block;color:var(--text)}.box-banner div div{font-size:13.5px;color:var(--text-2)}
+/* ---------- Trainingsplan-Karten (Kunde) ---------- */
+.pday-tabs{display:flex;gap:8px;overflow-x:auto;margin:0 -16px 14px;padding:2px 16px 4px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.pday-tabs::-webkit-scrollbar{display:none}
+.pday-tab{flex:none;display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:118px;max-width:200px;padding:10px 14px;border-radius:14px;border:1px solid var(--border);background:var(--surface);color:var(--text);text-align:left;cursor:pointer}
+.pday-tab small{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.pday-tab b{font-size:14.5px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.pday-tab.on{border-color:var(--gold-line);background:var(--accent-soft);box-shadow:0 0 0 1px var(--gold-line) inset}
+.pday-tab.on small{color:var(--accent)}
+.pday-hero{border-radius:var(--r-lg);padding:18px 16px 16px;margin-bottom:16px;background:var(--card-grad);border:1px solid var(--border);box-shadow:var(--shadow)}
+.pday-eyebrow{font-size:11.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+.pday-hero h2{font-size:24px;line-height:1.15;margin:6px 0 10px;text-wrap:balance}
+.pday-stats{display:flex;flex-wrap:wrap;gap:6px 16px;margin-bottom:14px;color:var(--muted);font-size:14px}
+.pday-stats b{color:var(--text);font-size:16px;font-variant-numeric:tabular-nums}
+.pex-list{display:flex;flex-direction:column;gap:10px}
+.pex{border-radius:var(--r-md);background:var(--card-grad);border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden}
+.pex-main{display:flex;gap:12px;padding:12px}
+.pex-tap{flex:none;padding:0;border:0;background:none;cursor:pointer;border-radius:12px}
+.pex-tap:disabled{cursor:default}
+.pex-thumb{position:relative;width:76px;height:76px;border-radius:12px;overflow:hidden;background:#141414;border:1px solid var(--border)}
+.pex-thumb .xprev{border-radius:0}
+.pex-ph{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted)}
+.pex-no{position:absolute;left:5px;top:5px;min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:var(--accent-fill);color:var(--accent-ink);font-size:12.5px;font-weight:800;display:grid;place-items:center;font-variant-numeric:tabular-nums;box-shadow:0 1px 4px rgba(0,0,0,.35)}
+.pex-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
+.pex-name{margin:0;font-size:16px;line-height:1.25;font-weight:700;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pex-sub{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pex-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px}
+.pex-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 9px 3px 4px;border-radius:999px;background:var(--surface-3);border:1px solid var(--border);font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--text)}
+.pex-chip i{font-style:normal;min-width:18px;height:18px;border-radius:999px;display:grid;place-items:center;background:var(--bg);color:var(--muted);font-size:11px}
+.pex-chip.all{padding:4px 11px;background:var(--accent-soft);border-color:var(--gold-line);color:var(--text)}
+.pex-chip.warm{border-style:dashed;color:var(--muted)}
+.pex-meta{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;font-size:12.5px;color:var(--muted)}
+.pex-meta svg{vertical-align:-2px}
+.pex-more{border-top:1px solid var(--border)}
+.pex-more summary{list-style:none;cursor:pointer;padding:9px 12px;font-size:13px;font-weight:600;color:var(--muted);display:flex;align-items:center;justify-content:space-between}
+.pex-more summary::-webkit-details-marker{display:none}
+.pex-more summary::after{content:"";width:8px;height:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);margin-right:4px;transition:transform .15s}
+.pex-more[open] summary::after{transform:rotate(-135deg)}
+.pex-note{margin:0 12px 10px;font-size:14px;line-height:1.5;color:var(--text-2)}
+.pex-acts{display:flex;gap:8px;padding:0 12px 12px}
+.pex-ss{position:relative;display:flex;flex-direction:column;gap:6px;padding:10px 10px 10px 14px;border-radius:var(--r-lg);border:1px solid var(--gold-line);background:var(--accent-soft)}
+.pex-ss::before{content:"";position:absolute;left:0;top:14px;bottom:14px;width:3px;border-radius:0 3px 3px 0;background:var(--accent-fill)}
+.pex-ss-h{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;font-size:12.5px;color:var(--text-2);padding:0 2px 2px}
+.pex-ss-tag{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-ink);background:var(--accent-fill);padding:3px 8px;border-radius:999px}
+.pex-ss .pex{box-shadow:none}
+@media (min-width:720px){.pex-thumb{width:96px;height:96px}.pex-name{font-size:17px}}
+/* Trainer-Planansicht: gleiche Satz-Chips und Vorschaubilder */
+.ex-row .pex-thumb{width:52px;height:52px;border-radius:10px}
+.ex-row .pex-no{min-width:18px;height:18px;font-size:11px;left:3px;top:3px;padding:0 4px}
+.ex-row .pex-chips{margin-top:4px}
+.ex-row.in-ss{box-shadow:inset 3px 0 0 var(--accent-fill)}
+.ex-row .ex-sub{font-size:12.5px;color:var(--muted);margin-top:3px}
+.pl-row{flex-wrap:wrap;align-items:flex-start;padding:12px 10px 8px 12px;gap:10px}
+.pl-row>.grow{flex:1 1 0;min-width:0}
+.pl-row>.pex-thumb{align-self:flex-start;flex:none}
+.pl-row .ex-meta{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:4px}
+.pl-row .ex-acts{flex-basis:100%;display:flex;justify-content:flex-end;gap:2px;margin-top:-4px}
 .avatar{width:52px;height:52px;border-radius:50%;flex:none;display:grid;place-items:center;font-weight:700;font-size:18px;overflow:hidden}
 .avatar img{width:100%;height:100%;object-fit:cover}
 .avatar.xl{width:76px;height:76px;font-size:26px}
@@ -1344,13 +1402,13 @@ function viewPlan(c) {
           <button class="icon-btn sm" data-action="day-move" data-id="${d.id}" data-dir="1" ${i === days.length - 1 ? 'disabled' : ''} aria-label="Nach unten">${ic('down')}</button>
           <button class="icon-btn sm danger" data-action="del-day" data-id="${d.id}" aria-label="Trainingstag löschen">${ic('trash', 18)}</button>
         </div>
-        ${exs.map((e, j) => `<div class="ex-row"><span class="ex-idx">${j + 1}.</span>
+        ${exs.map((e, j) => `<div class="ex-row pl-row ${ssInfo(exs, j) ? 'in-ss' : ''}">${exThumb(katFind(e.name, e.catalogId), j + 1, figureForClient(c) || curFig())}
           <div class="grow" data-action="edit-ex" data-did="${d.id}" data-id="${e.id}" style="cursor:pointer"><div style="font-weight:600">${esc(e.name)}${(k3 => k3 ? ` <button class="chip3d" data-action="open3d" data-id="${k3.id}" data-fig="${figureForClient(c) || ''}" aria-label="3D-Ausführung">${ic('cube', 13)} 3D</button>` : '')(katFind(e.name, e.catalogId))}</div>
-            <div class="ex-meta">${(si => si ? `<span class="tag ss-tag">${si.kind} ${si.label}</span> ` : '')(ssInfo(exs, j))}${esc(planSummary(e))}${(pg => (pg.auto ? ` · <span class="accent">↗ +${fmtNum(pg.step)} kg</span>` : e.step > 0 ? ` · Schritt ${fmtNum(pg.step)} kg` : '') + (hasVal(pg.goal) ? ` · Ziel ${hasVal(pg.start) ? fmtNum(pg.start) + ' → ' : ''}${fmtNum(pg.goal)} kg` : ''))(progOfPlan(e))}${e.note ? ' · 📝 ' + esc(e.note) : ''}</div></div>
-          <button class="icon-btn sm" data-action="ex-move" data-id="${e.id}" data-dir="-1" ${j === 0 ? 'disabled' : ''} aria-label="Nach oben">${ic('up')}</button>
+            ${chipsHtml(e)}${(si => { const pg = progOfPlan(e), m = [si ? `<span class="tag ss-tag">${si.kind} ${si.label}</span>` : '', e.rest ? `⏱ ${restTxt(e.rest)}` : '', pg.auto ? `<span class="accent">↗ +${fmtNum(pg.step)} kg</span>` : e.step > 0 ? `Schritt ${fmtNum(pg.step)} kg` : '', hasVal(pg.goal) ? `Ziel ${hasVal(pg.start) ? fmtNum(pg.start) + ' → ' : ''}${fmtNum(pg.goal)} kg` : '', e.note ? '📝 ' + esc(e.note) : ''].filter(Boolean); return m.length ? `<div class="ex-meta">${m.join(' · ')}</div>` : ''; })(ssInfo(exs, j))}</div>
+          <div class="ex-acts"><button class="icon-btn sm" data-action="ex-move" data-id="${e.id}" data-dir="-1" ${j === 0 ? 'disabled' : ''} aria-label="Nach oben">${ic('up')}</button>
           <button class="icon-btn sm" data-action="ex-move" data-id="${e.id}" data-dir="1" ${j === exs.length - 1 ? 'disabled' : ''} aria-label="Nach unten">${ic('down')}</button>
           <button class="icon-btn sm" data-action="edit-ex" data-did="${d.id}" data-id="${e.id}" aria-label="Bearbeiten">${ic('edit', 18)}</button>
-          <button class="icon-btn sm danger" data-action="del-ex" data-id="${e.id}" aria-label="Löschen">${ic('trash', 18)}</button></div>`).join('') || '<div class="ex-row muted">Noch keine Übungen.</div>'}
+          <button class="icon-btn sm danger" data-action="del-ex" data-id="${e.id}" aria-label="Löschen">${ic('trash', 18)}</button></div></div>`).join('') || '<div class="ex-row muted">Noch keine Übungen.</div>'}
         <div class="day-foot"><button class="btn btn-ghost btn-block" data-action="add-ex" data-did="${d.id}" ${exs.length >= CONFIG.MAX_EXERCISES ? 'disabled' : ''}>${ic('plus')} Übung hinzufügen <span class="muted">(${exs.length}/${CONFIG.MAX_EXERCISES})</span></button></div>
       </div>`;
     }).join('')}</div>
@@ -1597,6 +1655,7 @@ function viewData() {
   `<main class="wrap view">
     <div class="card list-card" style="margin-bottom:16px">
       <a class="list-link" href="#/rechtliches/impressum">${ic('book')}<div class="grow"><b>Rechtliches</b><div class="muted" style="font-size:13px">Impressum, Datenschutz, Gesundheitshinweis, Einwilligung</div></div></a></div>
+    ${BoxSection()}
     ${ThemeSection()}
     <div class="card" style="border-color:rgba(190,155,92,.45)">
       <div class="row" style="margin-bottom:10px"><span class="accent">${ic('lock', 22)}</span><h2 style="font-size:19px">Wo sind meine Daten gespeichert?</h2></div>
@@ -1670,6 +1729,7 @@ function render() {
   UI.lastRoute = route;
   if (!p.length && UI.search) filterClients(UI.search);
   if (p[0] === 'data') fillStorageInfo();
+  if (typeof BOX !== 'undefined') { if (!p.length && isClientMode()) setTimeout(() => boxClientSync(false).catch(() => {}), 300); else if (p[0] === 'client' && p[1] && !p[2]) setTimeout(() => boxAutoFetch(p[1]), 300); }
   hydrateThumbs(app);
   if (p[0] === 'uebung') { mountDetail3D(p[1]); mountDetailVideo(p[1]); }
   hydratePhotos(app);
@@ -2134,9 +2194,22 @@ function katIndex() {
   for (const e of KAT()) { m.set(normK(e.n), e); (e.alias || []).forEach(a => { const k = normK(a); if (!m.has(k)) m.set(k, e); }); }
   return (_katIdx = m);
 }
+/* Namen aus den Sweat4-Vorlagen, die im Katalog anders heißen */
+const KAT_ALIAS = {
+  'bankdrücken (langhantel)': 'bankdruecken-lh', 'schrägbankdrücken (kurzhantel)': 'schraegbank-kh', 'kurzhantelrudern auf der schrägbank': 'kh-rudern-schraegbank',
+  'latziehen breit': 'latziehen-breit', 'latziehen zur brust': 'latziehen-breit', 'butterfly-maschine': 'butterfly', 'butterfly / fliegende am kabelzug': 'kabel-fliegende-gerade',
+  'fliegende am turm': 'kabel-fliegende-gerade', 'rudern sitzend am turm': 'rudern-eng-turm', 'back squats': 'kniebeuge', 'ausfallschritte im gehen (kurzhantel)': 'ausfallschritte-gehen',
+  'hackenschmidt-kniebeuge': 'hackenschmidt', 'schulterdrücken sitzend (kurzhantel)': 'schulterdruecken-kh', 'schulterdrücken (langhantel)': 'schulterdruecken-lh-stehend',
+  'seitheben stehend (kurzhantel)': 'seitheben-stehend', 'hintere schulter über kreuz am turm': 'hintere-schulter-turm-ueberkreuzt',
+  'einbeinige ausfallschritte (kurzhantel)': 'ausfallschritte-einbeinig-kh', 'po-kickbacks am turm': 'kickbacks-turm', 'seitstütz mit becken heben': 'seitstuetz-becken',
+  'seitstütz mit seitlichem beinheben': 'seitstuetz-bein', 'knie-hock-sprünge': 'knee-tuck-jumps', 'sprung-ausfallschritte': 'jumping-lunges', 'box jumps (60–70 cm)': 'box-jumps',
+  'squat-sprünge (mitte · rechts · mitte · links)': 'seitliche-squat-jumps', 'plank halten': 'plank'
+};
 function katFind(name, id) {
   if (id) { const e = KAT().find(x => x.id === id); if (e) return e; }
-  return name ? katIndex().get(normK(name)) || null : null;
+  if (!name) return null;
+  const hit = katIndex().get(normK(name)); if (hit) return hit;
+  const al = KAT_ALIAS[String(name).trim().toLowerCase()]; return al ? KAT().find(x => x.id === al) || null : null;
 }
 function katForSessionEx(e) { const pe = e.exerciseId && S.exercises.get(e.exerciseId); return katFind(e.name, pe && pe.catalogId); }
 
@@ -2325,6 +2398,7 @@ function refreshKat() {
   document.querySelectorAll('[data-action="kat-eq"]').forEach(b => { const on = b.dataset.v === (UI.katEq || 'Alle'); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
 }
 function viewKatalog() {
+  UI.uebBack = null;
   const L = KAT(), groups = window.SW_GRUPPEN || [];
   if (!L.length) return topbar({ back: '/', title: 'Übungskatalog' }) + `<main class="wrap view">${EmptyState('Katalog nicht gefunden', 'Die Datei uebungen-katalog.js fehlt. Lade sie zusammen mit der App hoch.')}</main>`;
   const g = UI.katGroup || 'Alle', eq = UI.katEq || 'Alle';
@@ -2417,7 +2491,7 @@ function ExerciseDetailView(e) {
 }
 function viewUebung(id) {
   const e = KAT().find(x => x.id === id); if (!e) return null;
-  return topbar({ back: '/uebungen', title: esc(e.n), sub: esc(e.g) }) + `<main class="wrap view wrap-wide">${ExerciseDetailView(e)}</main>`;
+  return topbar({ back: UI.uebBack || '/uebungen', title: esc(e.n), sub: esc(e.g) }) + `<main class="wrap view wrap-wide">${ExerciseDetailView(e)}</main>`;
 }
 
 /* Übung einem Kundenplan hinzufügen – nutzt die vorhandenen Datenstrukturen (plans/days/exercises) */
@@ -3109,7 +3183,7 @@ function legalDatenschutz() {
     <h3>2. Das Wichtigste in Kürze</h3><ul>
       <li>Es gibt <b>kein Benutzerkonto, keine Cloud, keine Cookies, kein Tracking und keine Werbung</b>.</li>
       <li>Alle Daten, die du in die App eingibst, werden <b>nur auf deinem eigenen Gerät</b> gespeichert. Wir haben darauf keinen Zugriff.</li>
-      <li>Daten zwischen Trainer und Kunde werden nur als <b>verschlüsselte Datei</b> ausgetauscht, die ihr selbst verschickt.</li></ul>
+      <li>Daten zwischen Trainer und Kunde werden nur <b>verschlüsselt</b> ausgetauscht – als Datei, die ihr selbst verschickt, oder über einen verschlüsselten Online-Briefkasten.</li></ul>
     <h3>3. Bereitstellung der App (Hosting)</h3>
     <p>Die App wird über GitHub Pages bereitgestellt, einen Dienst der GitHub, Inc., 88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, USA. Beim Aufruf der App verarbeitet GitHub technisch notwendige Zugriffsdaten (IP-Adresse, Datum und Uhrzeit, aufgerufene Datei, Browsertyp), um die App auszuliefern und vor Missbrauch zu schützen. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an einer sicheren und zuverlässigen Bereitstellung). Dabei kann eine Übermittlung in die USA stattfinden. GitHub gibt an, unter dem EU-US Data Privacy Framework zertifiziert zu sein. Weitere Informationen: docs.github.com/de/site-policy/privacy-policies/github-general-privacy-statement</p>
     <h3>4. Speicherung auf deinem Gerät</h3>
@@ -3118,6 +3192,7 @@ function legalDatenschutz() {
     <p>Gewicht, Körpermaße, Körperfett, Fortschrittsfotos sowie Trainings- und Ernährungsdaten können Gesundheitsdaten im Sinne von Art. 9 DSGVO sein. Sie werden nur zur Trainings- und Ernährungsbetreuung verarbeitet und nur auf Grundlage deiner ausdrücklichen Einwilligung (Art. 9 Abs. 2 lit. a, Art. 6 Abs. 1 lit. a DSGVO). Die Einwilligung ist freiwillig und kann jederzeit mit Wirkung für die Zukunft widerrufen werden, z. B. per E-Mail an ${esc(LEGAL.email)}.</p>
     <h3>6. Betreuung durch deinen Trainer</h3>
     <p>Wenn du von ${esc(LEGAL.owner)} betreut wirst, speichert er die für die Betreuung nötigen Daten auf seinem eigenen Gerät in derselben App. Für den Austausch erzeugt die App eine Datei, die mit deinem persönlichen Zugangscode verschlüsselt ist (AES-256-GCM). Den Übertragungsweg (z. B. WhatsApp, E-Mail oder AirDrop) wählt ihr selbst. Für diese Dienste gelten deren eigene Datenschutzbestimmungen; der Inhalt der Datei bleibt dabei verschlüsselt. Rechtsgrundlage ist deine Einwilligung (Ziffer 5) sowie die Durchführung des Betreuungsvertrags (Art. 6 Abs. 1 lit. b DSGVO).</p>
+    <p><b>Online-Briefkasten:</b> Wenn dein Trainer den Briefkasten nutzt, legt die App die bereits auf dem Gerät verschlüsselten Daten (AES-GCM 256, Schlüssel aus deinem Zugangscode) bei Cloudflare, Inc. (101 Townsend St, San Francisco, CA 94107, USA) ab, damit dein Gerät sie abholen kann. Cloudflare sieht nur verschlüsselte Daten, eine technische Adresse und deine IP-Adresse; den Inhalt kann ohne deinen Code niemand lesen – auch nicht Cloudflare oder der Betreiber. Die Daten werden 180 Tage nach dem letzten Abgleich automatisch gelöscht. Rechtsgrundlage ist deine Einwilligung (Art. 6 Abs. 1 lit. a, Art. 9 Abs. 2 lit. a DSGVO); mit Cloudflare besteht ein Auftragsverarbeitungsvertrag, die Übermittlung in die USA erfolgt auf Grundlage des EU-US Data Privacy Framework bzw. der EU-Standardvertragsklauseln.</p>
     ${videoMode() ? `<h3>7. Übungsvideos</h3><p>Beim Ansehen von Übungsvideos lädt die App das Video von MuscleWiki (USA). Die Vermittlung läuft über einen Server bei Cloudflare, Inc. (USA). Dabei werden technisch notwendig deine IP-Adresse und die angefragte Übung verarbeitet, keine persönlichen Trainings- oder Gesundheitsdaten. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO.</p>` : ''}
     <h3>${videoMode() ? 8 : 7}. Speicherdauer</h3><p>Daten auf deinem Gerät bleiben gespeichert, bis du sie löschst. Daten beim Trainer werden nach Ende der Betreuung gelöscht, soweit keine gesetzlichen Aufbewahrungspflichten (z. B. für Rechnungen) bestehen.</p>
     <h3>${videoMode() ? 9 : 8}. Deine Rechte</h3><p>Du hast das Recht auf Auskunft (Art. 15 DSGVO), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung der Verarbeitung (Art. 18), Datenübertragbarkeit (Art. 20) und Widerspruch (Art. 21) sowie das Recht, eine Einwilligung jederzeit zu widerrufen (Art. 7 Abs. 3). Wende dich dazu an ${esc(LEGAL.email)}. Außerdem kannst du dich bei einer Datenschutz-Aufsichtsbehörde beschweren, zuständig ist: ${esc(LEGAL.authority)}.</p>`;
@@ -3136,7 +3211,7 @@ function consentText(name = '') {
 
 Ich, ${name || '______________________'}, willige ausdrücklich ein, dass ${LEGAL.owner} (${LEGAL.business}, ${LEGAL.street}, ${LEGAL.city}) folgende Daten von mir zum Zweck meiner Trainings- und Ernährungsbetreuung verarbeitet: Name, Kontaktdaten, Geburtsdatum, Geschlecht, Größe, Gewicht, Körpermaße, Körperfettwerte, Fortschrittsfotos sowie meine Trainings- und Ernährungsdaten.
 
-Die Daten werden in der SWEAT4-App ausschließlich lokal auf dem Gerät des Trainers und auf meinem eigenen Gerät gespeichert. Ausgetauscht werden sie nur als verschlüsselte Datei. Fortschrittsfotos dienen nur der Dokumentation meines Fortschritts und werden ohne meine gesonderte schriftliche Zustimmung nicht veröffentlicht oder weitergegeben.
+Die Daten werden in der SWEAT4-App ausschließlich lokal auf dem Gerät des Trainers und auf meinem eigenen Gerät gespeichert. Ausgetauscht werden sie nur verschlüsselt – als Datei oder über einen verschlüsselten Online-Briefkasten. Fortschrittsfotos dienen nur der Dokumentation meines Fortschritts und werden ohne meine gesonderte schriftliche Zustimmung nicht veröffentlicht oder weitergegeben.
 
 Die Einwilligung ist freiwillig. Ich kann sie jederzeit ohne Angabe von Gründen mit Wirkung für die Zukunft widerrufen, z. B. per E-Mail an ${LEGAL.email}. Nach dem Widerruf bzw. nach Ende der Betreuung werden meine Daten gelöscht, soweit keine gesetzlichen Aufbewahrungspflichten bestehen. Weitere Informationen stehen in der Datenschutzerklärung der App.
 
@@ -3205,11 +3280,19 @@ function clientExtraSections(c, part) {
     </section>
     <section class="section">
       <div class="section-h"><h2>Kunden-App</h2></div>
-      <div class="card stack">
+      ${boxUrl() ? (c.access && c.access.code ? `<div class="card stack">
+        <div class="muted" style="font-size:14px">Verbunden über den Briefkasten.${c.access.boxSent ? ` Zuletzt gesendet: <b style="color:var(--text)">${fmtDateTs(c.access.boxSent)}</b>.` : ''}${c.access.boxGot ? ` Trainings erhalten: <b style="color:var(--text)">${fmtDateTs(c.access.boxGot)}</b>.` : ''}</div>
+        <button class="btn btn-primary btn-block" data-action="box-send" data-cid="${c.id}">${ic('upload')} Update an ${esc(c.name.split(' ')[0])} senden</button>
+        <div class="grid2"><button class="btn btn-ghost" data-action="box-fetch" data-cid="${c.id}">${ic('download')} Trainings abholen</button><button class="btn btn-ghost" data-action="box-link" data-cid="${c.id}">${ic('book')} Einladung</button></div>
+        <button class="btn btn-text btn-block" style="font-size:13px" data-action="pkg-make" data-cid="${c.id}">Code ändern / als Datei senden</button>
+      </div>` : `<div class="card stack">
+        <div class="muted" style="font-size:14px">Noch nicht eingeladen. ${esc(c.name)} bekommt einen Link und einen Code – danach kommen Updates mit einem Tipp an.</div>
+        <button class="btn btn-primary btn-block" data-action="pkg-make" data-cid="${c.id}">${ic('upload')} ${esc(c.name.split(' ')[0])} einladen</button></div>`) : `<div class="card stack">
         <div class="muted" style="font-size:14px">${c.access && c.access.lastExport ? `Zugangsdatei zuletzt erstellt am <b style="color:var(--text)">${fmtDateTs(c.access.lastExport)}</b>.` : 'Noch kein Kunden-Zugang erstellt.'} Die Kundendatei ist verschlüsselt und enthält <b>nur die Daten von ${esc(c.name)}</b> (ohne deine internen Notizen).</div>
         <button class="btn btn-ghost btn-block" data-action="pkg-make" data-cid="${c.id}">${ic('upload')} ${c.access ? 'Kundendatei aktualisieren' : 'Kunden einladen (Zugangsdatei)'}</button>
         <button class="btn btn-ghost btn-block" data-action="ret-import">${ic('download')} Trainings vom Kunden importieren</button>
-      </div>
+        <div class="muted" style="font-size:12.5px">Einfacher geht's mit dem Briefkasten: Daten → Online-Briefkasten.</div>
+      </div>`}
     </section>`;
 }
 function clientExtraFields(c) {
@@ -3546,6 +3629,7 @@ function viewClientHome() {
   const complete = cl.filter(isComplete);
   return topbar({ title: 'SWEAT4', sub: days.length ? 'Mein Training' : 'Meine Ernährung', right: `<a class="icon-btn" href="#/client/${cid}/food" aria-label="Ernährung">${ic('food', 22)}</a><a class="icon-btn" href="#/uebungen" aria-label="Übungen">${ic('book', 22)}</a><a class="icon-btn" href="#/data" aria-label="Einstellungen">${ic('db', 22)}</a>` }) +
   `<main class="wrap view">
+    <div id="box-banner">${boxBanner()}</div>
     <div class="hero">${avatar(c, 'xl')}<div class="grow"><h1>Willkommen zurück, ${esc(first)} 👋</h1>${c.goals ? `<div class="muted" style="margin-top:4px">🎯 ${esc(c.goals)}</div>` : ''}</div></div>
     <div class="section-h" style="margin-top:6px"><h2>Dein Fortschritt</h2></div>
     <div class="stats">${tile('weight')}${tile('waist')}${tile('chest')}
@@ -3579,13 +3663,67 @@ function viewClientHome() {
     ${LegalLinks()}
   </main>`;
 }
+/* ---------- Trainingsplan als Übungskarten (Kunde) ----------
+   Gleiche Bausteine wie der Übungskatalog (Vorschaubild, Karten, Gold-Akzente), aber als Liste mit kompakten Satz-Chips. */
+function setChips(e) {
+  const n = e.targetSets || CONFIG.DEFAULT_SETS, u = e.unit === 's' ? ' Sek.' : '';
+  if (e.amrap) return [{ t: `${n} × max.`, all: true }];
+  const sets = (e.sets || []).slice(0, n);
+  if (!sets.some(x => hasVal(x.weight) || hasVal(x.reps) || hasVal(x.repsMax))) return [{ t: `${n} Sätze`, all: true }];
+  const parts = sets.map(x => fmtTarget(x).replace(' Wdh.', '') + u);
+  if (new Set(parts).size === 1) return [{ t: `${n} × ${parts[0]}`, all: true }];
+  return parts.map((t, i) => ({ t, i: i + 1, warm: !!(sets[i] && sets[i].warmup) }));
+}
+const chipsHtml = e => `<div class="pex-chips">${setChips(e).map(c => `<span class="pex-chip ${c.all ? 'all' : ''} ${c.warm ? 'warm' : ''}">${c.i ? `<i>${c.warm ? 'A' : c.i}</i>` : ''}${esc(c.t)}</span>`).join('')}</div>`;
+const restTxt = r => r ? (r % 60 ? r + ' Sek.' : r / 60 + ' Min.') : '';
+const exThumb = (k3, no, fig, cls = '') => `<div class="pex-thumb ${cls}">${k3 ? ExercisePreview(k3.id, 'pex-prev', fig || curFig()) : `<span class="pex-ph">${ic('dumbbell', 22)}</span>`}<span class="pex-no">${no}</span></div>`;
+function pexCard(c, e, no, si) {
+  const k3 = katFind(e.name, e.catalogId), fig = figureForClient(c) || curFig(), sub = k3 ? [k3.sub || k3.g, k3.eq].filter(Boolean).join(' · ') : '';
+  const meta = [e.rest && !si ? `${ic('history', 13)} ${restTxt(e.rest)} Pause` : '', e.note ? `${ic('book', 13)} Hinweis` : ''].filter(Boolean);
+  const open = k3 ? `data-action="ueb-open" data-id="${k3.id}"` : '';
+  return `<article class="pex">
+    <div class="pex-main">
+      <button class="pex-tap" ${open} ${k3 ? '' : 'disabled'} aria-label="${esc(e.name)} ansehen">${exThumb(k3, no, fig)}</button>
+      <div class="pex-body">
+        <h3 class="pex-name">${esc(e.name)}</h3>
+        ${sub ? `<div class="pex-sub">${esc(sub)}</div>` : ''}
+        ${chipsHtml(e)}
+        ${meta.length ? `<div class="pex-meta">${meta.join('<span>·</span>')}</div>` : ''}
+      </div>
+    </div>
+    ${e.note || k3 ? `<details class="pex-more"><summary>Details &amp; Ausführung</summary>
+      ${e.note ? `<p class="pex-note">${esc(e.note)}</p>` : ''}
+      ${k3 ? `<div class="pex-acts"><button class="btn btn-sm btn-ghost" data-action="ueb-open" data-id="${k3.id}">${ic('book', 15)} Ausführung</button>${videoMode() ? '' : `<button class="btn btn-sm btn-ghost" data-action="open3d" data-id="${k3.id}" data-fig="${fig}">${ic('cube', 15)} 3D</button>`}</div>` : ''}
+    </details>` : ''}
+  </article>`;
+}
+function exGroups(exs) {
+  const out = []; let i = 0;
+  while (i < exs.length) { const si = ssInfo(exs, i); if (si && si.first) { out.push({ ss: si, items: exs.slice(si.a, si.b + 1).map((e, k) => ({ e, i: si.a + k })) }); i = si.b + 1; } else { out.push({ items: [{ e: exs[i], i }] }); i++; } }
+  return out;
+}
 function viewPlanRO(c) {
   const days = clientDays(c.id), plan = planOf(c.id);
-  return topbar({ back: '/', title: 'Trainingsplan', sub: esc(plan ? plan.name : '') }) + `<main class="wrap view"><div class="stack">${days.map((d, i) => `<div class="card day-card">
-    <div class="day-head"><span class="day-no">${i + 1}</span><b class="grow" style="font-size:17px">${esc(d.name)}</b></div>
-    ${(exs => exs.map((e, j) => `<div class="ex-row"><span class="ex-idx">${j + 1}.</span><div class="grow"><div style="font-weight:600">${esc(e.name)}${(k3 => k3 ? ` <button class="chip3d" data-action="open3d" data-id="${k3.id}" data-fig="${figureForClient(c) || ''}">${ic('cube', 13)} 3D</button>` : '')(katFind(e.name, e.catalogId))}</div>
-      <div class="ex-meta">${(si => si ? `<span class="tag ss-tag">${si.kind} ${si.label}</span> ` : '')(ssInfo(exs, j))}${esc(planSummary(e))}${e.note ? ' · 📝 ' + esc(e.note) : ''}</div></div></div>`).join(''))(exercisesOf(d.id)) || '<div class="ex-row muted">Keine Übungen.</div>'}
-    <div class="day-foot"><button class="btn btn-primary btn-block" data-action="start-day" data-cid="${c.id}" data-did="${d.id}">${ic('play')} Dieses Workout starten</button></div></div>`).join('') || '<div class="card empty">Noch kein Plan vorhanden.</div>'}</div></main>`;
+  if (!days.length) return topbar({ back: '/', title: 'Trainingsplan', sub: '' }) + `<main class="wrap view"><div class="card empty">Noch kein Plan vorhanden.</div></main>`;
+  UI.roDay = UI.roDay || {};
+  const nx = nextDay(c.id), cur = days.find(d => d.id === UI.roDay[c.id]) || nx || days[0], di = days.indexOf(cur);
+  const exs = exercisesOf(cur.id), sets = exs.reduce((a, e) => a + (e.targetSets || CONFIG.DEFAULT_SETS), 0), act = activeSession(c.id);
+  const startBtn = act && act.dayId === cur.id ? `<a class="btn btn-primary btn-big" href="#/train/${act.id}">${ic('play', 22)} Workout fortsetzen</a>`
+    : `<button class="btn btn-primary btn-big" data-action="start-day" data-cid="${c.id}" data-did="${cur.id}">${ic('play', 22)} Workout starten</button>`;
+  const groups = exGroups(exs);
+  return topbar({ back: '/', title: 'Trainingsplan', sub: esc(plan ? plan.name : '') }) + `<main class="wrap view">
+    <div class="pday-tabs" role="tablist">${days.map((d, i) => `<button class="pday-tab ${d.id === cur.id ? 'on' : ''}" role="tab" aria-selected="${d.id === cur.id}" data-action="ro-day" data-cid="${c.id}" data-did="${d.id}"><small>Tag ${i + 1}${nx && d.id === nx.id ? ' · als Nächstes' : ''}</small><b>${esc(d.name || 'Training')}</b></button>`).join('')}</div>
+    <section class="pday-hero">
+      <div class="pday-eyebrow">Tag ${di + 1} von ${days.length}${nx && cur.id === nx.id ? ' · dein nächstes Workout' : ''}</div>
+      <h2>${esc(cur.name || 'Training')}</h2>
+      <div class="pday-stats"><span><b>${exs.length}</b> Übungen</span><span><b>${sets}</b> Sätze</span>${groups.some(g => g.ss) ? `${(n => `<span><b>${n}</b> ${groups.some(g => g.ss && g.ss.circuit) ? (n === 1 ? 'Zirkel' : 'Zirkel & Supersätze') : n === 1 ? 'Supersatz' : 'Supersätze'}</span>`)(groups.filter(g => g.ss).length)}` : ''}</div>
+      ${startBtn}
+    </section>
+    <div class="pex-list">${groups.map(g => g.ss ? `<div class="pex-ss ${g.ss.circuit ? 'circ' : ''}">
+        <div class="pex-ss-h"><span class="pex-ss-tag">${g.ss.circuit ? 'Zirkel' : 'Supersatz ' + esc(g.ss.letter)}</span><span>${g.ss.circuit ? `${g.ss.size} Stationen hintereinander` : 'im Wechsel, ohne Pause dazwischen'}${(r => r ? ` · danach ${restTxt(r)} Pause` : '')(g.items[g.items.length - 1].e.rest || g.items[0].e.rest)}</span></div>
+        ${g.items.map(x => pexCard(c, x.e, x.i + 1, ssInfo(exs, x.i))).join('')}</div>` : pexCard(c, g.items[0].e, g.items[0].i + 1, null)).join('') || '<div class="card empty">Keine Übungen an diesem Tag.</div>'}</div>
+    ${exs.length > 3 ? `<div style="margin-top:16px">${startBtn}</div>` : ''}
+  </main>`;
 }
 
 /* ---------- Einstellungen (Datenseite) ---------- */
@@ -3619,8 +3757,9 @@ function viewDataClient() {
       <a class="list-link" href="#/rechtliches/gesundheit">${ic('check')}<div class="grow"><b>Gesundheitshinweis</b></div></a></div></section>
     <section class="section"><div class="section-h"><h2>Mit deinem Trainer austauschen</h2></div>
       <div class="card stack">
-        <button class="btn btn-primary btn-block" data-action="ret-make">${ic('upload')} Meine Trainings an Trainer senden</button>
-        <a class="btn btn-ghost btn-block" href="#/kunde-setup">${ic('download')} Update vom Trainer laden</a>
+        ${boxUrl() ? `<button class="btn btn-primary btn-block" data-action="box-sync">${ic('history')} Jetzt abgleichen</button>
+        <div class="muted" style="font-size:13px">Deine Trainings gehen automatisch an deinen Trainer, neue Pläne werden dir beim Öffnen angezeigt.</div>` : `<button class="btn btn-primary btn-block" data-action="ret-make">${ic('upload')} Meine Trainings an Trainer senden</button>
+        <a class="btn btn-ghost btn-block" href="#/kunde-setup">${ic('download')} Update vom Trainer laden</a>`}
         <div class="muted" style="font-size:13px">Neue Pläne, Messungen und Fortschrittsbilder bekommst du von deinem Trainer als Datei. Deine eigenen Trainings bleiben beim Update erhalten.</div>
       </div></section>
     <section class="section"><div class="section-h"><h2>Gerät</h2></div>
@@ -3628,8 +3767,30 @@ function viewDataClient() {
         <button class="btn btn-danger-ghost btn-block" data-action="client-reset">${ic('trash')} Kundenmodus beenden &amp; Daten löschen</button></div></section>
   </main>`;
 }
-function viewSetup() {
+
+const BoxSection = () => `<section class="section"><div class="section-h"><h2>Online-Briefkasten</h2></div><div class="card stack">
+  <div class="muted" style="font-size:13.5px">Updates und Trainings gehen verschlüsselt über deinen eigenen Briefkasten (Cloudflare) – ohne Dateien. Adresse aus der Anleitung hier eintragen.</div>
+  <label class="field" style="margin:0"><span>Briefkasten-Adresse</span><input id="box-url" class="input" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="https://sweat4-box.DEINNAME.workers.dev" value="${esc(boxUrl())}"></label>
+  <div class="grid2"><button class="btn btn-primary" data-action="box-save">Speichern</button><button class="btn btn-ghost" data-action="box-test">Verbindung testen</button></div>
+  ${boxUrl() ? '<div class="muted" style="font-size:12.5px">✓ Briefkasten aktiv. Neue Kunden lädst du ab jetzt per Link ein.</div>' : ''}</div></section>`;
+function inviteReady(cid) {
+  const c = S.clients.get(cid), link = inviteLink(cid); UI.invite = link;
+  modal('Einladung bereit', `<p class="muted" style="margin-top:0">Schick ${esc(c.name)} diesen Link. Den <b>Code</b> (${esc(c.access.code)}) teilst du getrennt mit, z. B. mündlich.</p>
+    <div class="consent-txt" style="word-break:break-all;font-size:12.5px">${esc(link)}</div>
+    <div class="stack"><button class="btn btn-primary btn-big" data-action="invite-share">${ic('upload', 22)} Link teilen (WhatsApp, Mail …)</button>
+    <button class="btn btn-ghost btn-block" data-action="invite-copy">Link kopieren</button></div>
+    <div class="muted" style="font-size:12.5px;margin-top:10px">Ab jetzt reicht bei Änderungen: „Update senden“. ${esc(c.name.split(' ')[0])} bekommt es beim nächsten Öffnen der App angezeigt.</div>`);
+}
+function viewSetup(lcid, lbox) {
   const cm = isClientMode();
+  if (lcid && (!cm || roleInfo().clientId === lcid)) return topbar({ title: cm ? 'Update laden' : 'Willkommen bei SWEAT4', sub: cm ? 'Neuer Plan von deinem Trainer' : 'Zugang einrichten' }) + `<main class="wrap view">
+    <form data-form="setup" data-cid="${esc(lcid)}" data-box="${esc(lbox || '')}" class="card stack">
+      <div class="muted" style="font-size:14px">Dein Trainer hat dich eingeladen. Gib den Zugangscode ein, den du von ihm bekommen hast – dein Plan wird dann automatisch geladen.</div>
+      <label class="field" style="margin:0"><span>Zugangscode</span><input name="code" type="password" class="input" autocomplete="current-password" required minlength="6"></label>
+      ${cm ? '' : `<label class="toggle"><input type="checkbox" name="agree"><span class="tg"></span><span>Ich habe die <a href="#/rechtliches/datenschutz" class="accent">Datenschutzerklärung</a> und den <a href="#/rechtliches/gesundheit" class="accent">Gesundheitshinweis</a> gelesen und willige in die Verarbeitung meiner Gesundheitsdaten ein.</span></label>`}
+      <button class="btn btn-primary btn-big">${cm ? 'Update laden' : 'Zugang einrichten'}</button>
+      <div class="muted" style="font-size:12px">Tipp: Danach über Teilen → „Zum Home-Bildschirm“ als App ablegen.</div>
+    </form></main>`;
   return topbar({ back: cm ? '/data' : '/', title: cm ? 'Update laden' : 'Kunden-Zugang einrichten', sub: 'Datei von deinem Trainer' }) + `<main class="wrap view">
     <form data-form="setup" class="card stack">
       <div class="muted" style="font-size:14px">${cm ? 'Wähle die neue Datei deines Trainers und gib deinen Zugangscode ein.' : '1. Wähle die Datei, die du von deinem Trainer bekommen hast (z. B. per AirDrop, WhatsApp oder E-Mail – vorher in „Dateien“ sichern).<br>2. Gib den Zugangscode ein, den dir dein Trainer gesagt hat.'}</div>
@@ -3637,7 +3798,7 @@ function viewSetup() {
       <label class="field" style="margin:0"><span>Zugangscode</span><input name="code" type="password" class="input" autocomplete="current-password" required minlength="6"></label>
       ${cm ? '' : `<label class="toggle"><input type="checkbox" name="agree"><span class="tg"></span><span>Ich habe die <a href="#/rechtliches/datenschutz" class="accent">Datenschutzerklärung</a> und den <a href="#/rechtliches/gesundheit" class="accent">Gesundheitshinweis</a> gelesen und willige in die Verarbeitung meiner Gesundheitsdaten zur Betreuung ein.</span></label>`}
       <button class="btn btn-primary btn-big">${cm ? 'Update laden' : 'Zugang einrichten'}</button>
-      <div class="muted" style="font-size:12px">Deine Daten bleiben ausschließlich auf diesem Gerät. Es werden keine Daten ins Internet übertragen.</div>
+      <div class="muted" style="font-size:12px">Deine Daten werden auf diesem Gerät gespeichert und nur verschlüsselt mit deinem Trainer ausgetauscht.</div>
     </form></main>`;
 }
 function viewLock() {
@@ -3675,11 +3836,12 @@ function fileReady(name, text, info) {
 async function makePackage(cid, code) {
   const c = S.clients.get(cid), pkg = await clientPackage(cid);
   if (!packageIsolated(pkg)) throw new Error('Sicherheitsprüfung fehlgeschlagen – Datei wurde nicht erstellt.');
+  if (boxUrl()) pkg.box = boxUrl();
   const text = await encryptPayload(pkg, code, { kind: 'client-package', v: 1, clientId: cid });
-  c.access = { code, lastExport: Date.now() }; put('clients', c);
+  c.access = { ...(c.access || {}), code, lastExport: Date.now() }; put('clients', c);
   return { name: `sweat4-zugang_${(c.name || 'kunde').replace(/[^\wäöüÄÖÜß-]+/g, '_')}_${today()}.json`, text, n: pkg.photos.length };
 }
-async function setupFromFile(file, code) {
+async function setupFromFile(file, code, opts = {}) {
   const h = await readHeader(file);
   if (h.kind !== 'client-package') throw new Error(h.kind === 'client-return' ? 'Das ist eine Rückmelde-Datei für den Trainer.' : 'Unbekannter Dateityp.');
   const role = roleInfo();
@@ -3692,16 +3854,18 @@ async function setupFromFile(file, code) {
   if (role.value === 'client') { const loc = S.clients.get(pkg.clientId), pc = pkg.data.clients && pkg.data.clients[0];
     if (loc && pc && (loc.mealsAt || 0) > (pc.mealsAt || 0)) Object.assign(pc, { mealCfg: loc.mealCfg, meals: loc.meals, mealsAt: loc.mealsAt }); } // eigene Mahlzeiten bleiben erhalten
   const lock = await makeLock(code);
-  const meta = [{ id: 'role', value: 'client', clientId: pkg.clientId, since: Date.now() }, lock, { id: 'pkgInfo', exportedAt: pkg.exportedAt }];
+  const boxU = pkg.box || opts.box || boxUrl();
+  const meta = [{ id: 'role', value: 'client', clientId: pkg.clientId, since: Date.now() }, lock, { id: 'pkgInfo', exportedAt: pkg.exportedAt, boxV: opts.boxV || 0 }];
+  if (boxU) meta.push({ id: 'box', url: boxU }); const upM = S.meta.get('boxUp'); if (upM) meta.push(upM);
   await DB.replaceAll({ ...pkg.data, sessions: [...map.values()], meta, photos: pkg.photos });
-  PH.clear(); await loadAll(); LOCK.init = true; LOCK.locked = false; UI.open = {};
+  PH.clear(); await loadAll(); LOCK.init = true; LOCK.locked = false; UI.open = {}; BOX.code = code;
 }
 async function makeReturn(code) {
   if (!(await verifyLock(code))) throw new Error('Falscher Zugangscode.');
   flushSave();
   const cid = roleInfo().clientId, c = S.clients.get(cid);
   const sessions = all('sessions').filter(s => s.clientId === cid && s.status === 'done');
-  const text = await encryptPayload({ clientId: cid, sessions, exportedAt: new Date().toISOString() }, code, { kind: 'client-return', v: 1, clientId: cid });
+  const text = await encryptPayload({ clientId: cid, sessions, meals: c.meals || null, mealCfg: c.mealCfg || null, mealsAt: c.mealsAt || 0, exportedAt: new Date().toISOString() }, code, { kind: 'client-return', v: 1, clientId: cid });
   return { name: `sweat4-trainings_${(c.name || 'kunde').replace(/[^\wäöüÄÖÜß-]+/g, '_')}_${today()}.json`, text, n: sessions.length };
 }
 async function importReturn(file, codeIn) {
@@ -3718,7 +3882,88 @@ async function importReturn(file, codeIn) {
     if (ex && ex.clientId !== c.id) { rej++; continue; }
     if (!ex) { put('sessions', s); neu++; } else if ((s.updatedAt || 0) > (ex.updatedAt || 0)) { put('sessions', s); upd++; }
   }
-  return { c, neu, upd, rej };
+  let meals = false;
+  if (p.mealsAt && p.mealsAt > (c.mealsAt || 0)) { const cc = S.clients.get(c.id); Object.assign(cc, { meals: p.meals, mealCfg: p.mealCfg, mealsAt: p.mealsAt }); put('clients', cc); meals = true; }
+  return { c, neu, upd, rej, meals };
+}
+
+
+/* ---------- Briefkasten: verschlüsselter Online-Austausch (optional) ----------
+   Daten werden auf dem Gerät mit dem Zugangscode verschlüsselt (AES-GCM), der Briefkasten sieht nur Datensalat.
+   Adresse im Briefkasten = SHA-256(Kunden-ID + Code); Schreibrecht nur mit einem zweiten, ebenfalls aus dem Code abgeleiteten Schlüssel. */
+const BOX = { code: null, checked: {}, pending: null };
+const boxUrl = () => { const m = S.meta.get('box'); return m && m.url ? String(m.url).trim().replace(/\/+$/, '') : ''; };
+const hexOf = buf => [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+async function boxKeys(cid, code) {
+  const h = str => crypto.subtle.digest('SHA-256', te.encode(str)).then(hexOf);
+  return { id: await h(`sweat4-box|${cid}|${code}`), token: await h(`sweat4-write|${cid}|${code}`) };
+}
+async function boxPut(cid, code, slot, text) {
+  const u = boxUrl(); if (!u) throw new Error('Kein Briefkasten eingerichtet.');
+  const k = await boxKeys(cid, code);
+  let r; try { r = await fetch(`${u}/box/${k.id}/${slot}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-Box-Token': k.token }, body: text }); }
+  catch (e) { throw new Error('Briefkasten nicht erreichbar. Bist du online?'); }
+  if (!r.ok) throw new Error(r.status === 403 ? 'Briefkasten: Zugang verweigert.' : r.status === 413 ? 'Briefkasten: Daten zu groß (zu viele Fotos?).' : `Briefkasten-Fehler (${r.status}).`);
+  return (await r.json()).v;
+}
+async function boxGet(cid, code, slot, since, url) {
+  const u = String(url || boxUrl()).replace(/\/+$/, ''); if (!u) throw new Error('Kein Briefkasten eingerichtet.');
+  const k = await boxKeys(cid, code);
+  let r; try { r = await fetch(`${u}/box/${k.id}/${slot}${since ? `?since=${since}` : ''}`, { cache: 'no-store' }); }
+  catch (e) { throw new Error('Briefkasten nicht erreichbar. Bist du online?'); }
+  if (r.status === 204) return null;
+  if (r.status === 404) return { missing: true };
+  if (!r.ok) throw new Error(`Briefkasten-Fehler (${r.status}).`);
+  return r.json();
+}
+const textFile = t => ({ text: async () => t });
+const inviteLink = cid => `${location.href.split('#')[0]}#/kunde-setup/${cid}/${encodeURIComponent(boxUrl())}`;
+/* Trainer → Kunde */
+async function boxSendUpdate(cid) {
+  const c = S.clients.get(cid); if (!c || !c.access || !c.access.code) throw new Error('Erst den Kunden einladen (Zugangscode festlegen).');
+  const r = await makePackage(cid, c.access.code);
+  const v = await boxPut(cid, c.access.code, 'down', r.text);
+  const cc = S.clients.get(cid); cc.access = { ...cc.access, boxSent: v }; put('clients', cc);
+  return r;
+}
+/* Kunde → Trainer (vom Trainer abgeholt) */
+async function boxFetchReturn(cid, silent) {
+  const c = S.clients.get(cid); if (!c || !c.access || !c.access.code || !boxUrl()) return;
+  const res = await boxGet(cid, c.access.code, 'up', c.access.boxGot || 0);
+  if (!res || res.missing) { if (!silent) toast('Keine neuen Trainings von ' + c.name); return; }
+  const r = await importReturn(textFile(res.data));
+  const cc = S.clients.get(cid); cc.access = { ...cc.access, boxGot: res.v }; put('clients', cc);
+  if (r.neu || r.upd || r.meals || !silent) toast(`${c.name}: ${r.neu} neue, ${r.upd} aktualisierte Trainings${r.meals ? ' · Mahlzeiten aktualisiert' : ''}`);
+  if (r.neu || r.upd || r.meals) render();
+}
+function boxAutoFetch(cid) {
+  if (!boxUrl() || isClientMode()) return; const t = Date.now();
+  if (BOX.checked['up' + cid] && t - BOX.checked['up' + cid] < 120000) return; BOX.checked['up' + cid] = t;
+  boxFetchReturn(cid, true).catch(() => {});
+}
+/* Kunde: neue Pläne prüfen + eigene Trainings automatisch hochladen */
+async function boxClientSync(force) {
+  if (!isClientMode() || !boxUrl() || !BOX.code) return;
+  const t = Date.now(); if (!force && BOX.checked.client && t - BOX.checked.client < 60000) return; BOX.checked.client = t;
+  const cid = roleInfo().clientId, c = S.clients.get(cid); if (!c) return;
+  const last = Math.max(c.mealsAt || 0, ...all('sessions').filter(s => s.clientId === cid && s.status === 'done').map(s => s.updatedAt || 0));
+  const up = S.meta.get('boxUp');
+  if (last && (!up || last > (up.at || 0))) {
+    try { const r = await makeReturn(BOX.code); await boxPut(cid, BOX.code, 'up', r.text); put('meta', { id: 'boxUp', at: last, sent: Date.now() }); } catch (e) { if (force) toast(e.message); }
+  }
+  const info = S.meta.get('pkgInfo') || {};
+  const res = await boxGet(cid, BOX.code, 'down', info.boxV || 0).catch(e => { if (force) toast(e.message); return null; });
+  BOX.pending = res && !res.missing ? res : null;
+  const b = document.getElementById('box-banner'); if (b) b.innerHTML = boxBanner();
+  if (force && !BOX.pending) toast('Alles aktuell ✓');
+}
+const boxBanner = () => BOX.pending ? `<div class="box-banner"><div class="grow"><b>Neuer Plan von deinem Trainer</b><div>Training und Ernährung wurden aktualisiert.</div></div>
+  <button class="btn btn-primary" data-action="box-apply">Jetzt laden</button></div>` : '';
+async function askCode(title) {
+  if (BOX.code) return BOX.code;
+  const v = await promptDialog(title || 'Zugangscode', { label: 'Dein Zugangscode', ok: 'Weiter' }); if (!v) return null;
+  if (!(await verifyLock(v))) { toast('Falscher Zugangscode.'); return null; }
+  BOX.code = v; return v;
 }
 
 /* ---------- Demo: Körperdaten & generierte Beispielbilder ---------- */
@@ -3772,7 +4017,7 @@ function routeExtra(p) {
     if (p[2] === 'food') return viewFood(c);
   }
   if (p[0] === 'check') { const ch = S.checks.get(p[1]); if (!ch) return null; const c = S.clients.get(ch.clientId); if (!c) return null; return p[2] === 'edit' ? viewCheckForm(c, ch) : viewCheck(ch); }
-  if (p[0] === 'kunde-setup') return viewSetup();
+  if (p[0] === 'kunde-setup') return viewSetup(p[1], p[2] ? decodeURIComponent(p[2]) : '');
   if (p[0] === 'rechtliches') return viewLegal(p[1]);
   if (p[0] === 'data' && isClientMode()) return viewDataClient();
   return undefined;
@@ -3786,7 +4031,7 @@ function lockGate() {
 }
 
 /* ---------- Aktionen ---------- */
-const TRAINER_ONLY = new Set(['new-client', 'edit-client', 'del-client', 'photo-remove', 'add-day', 'del-day', 'day-move', 'add-ex', 'edit-ex', 'del-ex', 'tpl-apply', 'ud-add', 'ud-add-client', 'ud-add-day', 'ex-move', 'demo', 'wipe', 'backup', 'import', 'check-del', 'pkg-make', 'ret-import', 'lock-set', 'lock-off', 'pslot-rm']);
+const TRAINER_ONLY = new Set(['box-save', 'box-test', 'box-send', 'box-fetch', 'box-link', 'new-client', 'edit-client', 'del-client', 'photo-remove', 'add-day', 'del-day', 'day-move', 'add-ex', 'edit-ex', 'del-ex', 'tpl-apply', 'ud-add', 'ud-add-client', 'ud-add-day', 'ex-move', 'demo', 'wipe', 'backup', 'import', 'check-del', 'pkg-make', 'ret-import', 'lock-set', 'lock-off', 'pslot-rm']);
 document.addEventListener('click', ev => {
   const el = ev.target.closest('[data-action]');
   if (el && isClientMode() && TRAINER_ONLY.has(el.dataset.action)) { ev.preventDefault(); ev.stopImmediatePropagation(); toast('Nur für den Trainer verfügbar'); }
@@ -3844,6 +4089,28 @@ Object.assign(A, {
     await DB.replaceAll({}); PH.clear(); await loadAll(); LOCK.locked = false; UI.open = {}; toast('Kundenmodus beendet'); go('/'); render();
   },
 });
+
+Object.assign(A, {
+  'ro-day': el => { UI.roDay = UI.roDay || {}; UI.roDay[el.dataset.cid] = el.dataset.did; render(); },
+  'ueb-open': el => { UI.uebBack = location.hash.slice(1) || '/'; go('/uebung/' + el.dataset.id); },
+  'box-save': () => { const v = (document.getElementById('box-url').value || '').trim().replace(/\/+$/, '');
+    if (v && !/^https:\/\/[\w.-]+\.workers\.dev$/.test(v)) return toast('Adresse muss so aussehen: https://NAME.workers.dev');
+    if (v) put('meta', { id: 'box', url: v }); else del('meta', 'box'); toast(v ? 'Briefkasten gespeichert ✓' : 'Briefkasten entfernt'); render(); },
+  'box-test': async () => { const v = (document.getElementById('box-url').value || '').trim().replace(/\/+$/, ''); if (!v) return toast('Erst die Adresse eintragen');
+    try { const r = await fetch(v + '/health', { cache: 'no-store' }); const j = await r.json(); toast(j && j.ok && j.kv ? 'Verbindung OK ✓' : j && j.ok ? 'Worker läuft, aber Speicher (KV) fehlt – Schritt 4 der Anleitung' : 'Unerwartete Antwort'); }
+    catch (e) { toast('Nicht erreichbar – Adresse prüfen'); } },
+  'box-send': async el => { const c = S.clients.get(el.dataset.cid); el.disabled = true; const t = el.innerHTML; el.innerHTML = 'Wird gesendet …';
+    try { await boxSendUpdate(c.id); toast(`Update an ${c.name} gesendet ✓`); render(); } catch (e) { toast(e.message); el.disabled = false; el.innerHTML = t; } },
+  'box-fetch': async el => { try { await boxFetchReturn(el.dataset.cid, false); } catch (e) { toast(e.message); } },
+  'box-link': el => inviteReady(el.dataset.cid),
+  'invite-share': async () => { const link = UI.invite; if (!link) return;
+    if (navigator.share) { try { await navigator.share({ title: 'SWEAT4', text: `Dein Zugang zur SWEAT4 App: ${link}` }); closeModal(null); return; } catch (e) { if (e && e.name === 'AbortError') return; } }
+    A['invite-copy'](); },
+  'invite-copy': () => { const link = UI.invite; if (!link) return; (navigator.clipboard ? navigator.clipboard.writeText(link) : Promise.reject()).then(() => toast('Link kopiert ✓'), () => toast('Kopieren nicht möglich – Link markieren und kopieren')); },
+  'box-apply': async () => { const code = await askCode('Neuen Plan laden'); if (!code || !BOX.pending) return;
+    try { const res = BOX.pending; await setupFromFile(textFile(res.data), code, { boxV: res.v }); BOX.pending = null; toast('Neuer Plan geladen ✓'); go('/'); render(); } catch (e) { toast(e.message); } },
+  'box-sync': async () => { const code = await askCode(); if (!code) return; await boxClientSync(true); },
+});
 function refreshSlot(i) {
   const w = document.getElementById('pslot-' + i); if (w) { w.innerHTML = pslotHtml(i); hydratePhotos(w); }
   const n = UI.cd.photos.filter(Boolean).length, pc = document.getElementById('pcount'); if (pc) { pc.textContent = n + '/5'; pc.classList.toggle('live', n === 5); }
@@ -3857,23 +4124,30 @@ document.addEventListener('submit', async ev => {
     if (k === 'unlock') {
       busy(f, true); const ok = await verifyLock(String(fd.get('code') || '')); busy(f, false);
       if (!ok) { const e = document.getElementById('lock-err'); if (e) e.textContent = 'Falscher Code.'; f.querySelector('input').value = ''; return; }
-      LOCK.locked = false; UI.lastRoute = ''; render(); return;
+      LOCK.locked = false; BOX.code = String(fd.get('code') || ''); UI.lastRoute = ''; render(); return;
     }
     if (k === 'pkg') {
       const code = String(fd.get('code') || ''); if (code.length < 6) return toast('Mindestens 6 Zeichen');
       busy(f, true); const r = await makePackage(f.dataset.cid, code); closeModal(null);
+      if (boxUrl()) { const v = await boxPut(f.dataset.cid, code, 'down', r.text); const cc = S.clients.get(f.dataset.cid); cc.access = { ...cc.access, boxSent: v }; put('clients', cc); inviteReady(f.dataset.cid); render(); return; }
       fileReady(r.name, r.text, `Zugangsdatei für <b>${esc(S.clients.get(f.dataset.cid).name)}</b> erstellt (${r.n} Fotos, ${fmtNum(Math.round(r.text.length / 1024 / 1024 * 10) / 10)} MB, verschlüsselt). Schick sie an deinen Kunden und teile ihm den Code getrennt mit.`);
       return;
     }
-    if (k === 'ret') { busy(f, true); const r = await makeReturn(String(fd.get('code') || '')); closeModal(null); fileReady(r.name, r.text, `${r.n} Trainings verschlüsselt gespeichert. Schick die Datei jetzt an deinen Trainer.`); return; }
+    if (k === 'ret') { busy(f, true); const r = await makeReturn(String(fd.get('code') || '')); if (boxUrl()) { BOX.code = String(fd.get('code') || ''); await boxPut(roleInfo().clientId, BOX.code, 'up', r.text); closeModal(null); toast('An deinen Trainer gesendet ✓'); return; } closeModal(null); fileReady(r.name, r.text, `${r.n} Trainings verschlüsselt gespeichert. Schick die Datei jetzt an deinen Trainer.`); return; }
     if (k === 'setlock') {
       const a = String(fd.get('code') || ''), b = String(fd.get('code2') || ''); if (a.length < 4) return toast('Mindestens 4 Zeichen'); if (a !== b) return toast('Die Codes stimmen nicht überein');
       busy(f, true); put('meta', await makeLock(a)); closeModal(null); toast('App-Sperre aktiv 🔒'); render(); return;
     }
     if (k === 'setup') {
-      const file = f.querySelector('input[type=file]').files[0]; if (!file) return toast('Bitte zuerst die Datei auswählen');
+      const fi = f.querySelector('input[type=file]'), file = fi && fi.files[0];
+      if (!f.dataset.cid && !file) return toast('Bitte zuerst die Datei auswählen');
       if (!isClientMode() && fd.get('agree') !== 'on') return toast('Bitte Datenschutz und Gesundheitshinweis bestätigen');
-      busy(f, true); const was = isClientMode(); await setupFromFile(file, String(fd.get('code') || ''));
+      busy(f, true); const was = isClientMode(), code = String(fd.get('code') || '');
+      if (f.dataset.cid) {
+        const res = await boxGet(f.dataset.cid, code, 'down', 0, f.dataset.box);
+        if (!res || res.missing) throw new Error('Kein Zugang gefunden. Prüfe den Code – oder frag deinen Trainer, ob er dich eingeladen hat.');
+        await setupFromFile(textFile(res.data), code, { boxV: res.v, box: f.dataset.box });
+      } else await setupFromFile(file, code);
       if (!was) put('meta', { id: 'consent', at: Date.now() });
       toast(was ? 'Update geladen ✓' : 'Willkommen! Dein Zugang ist eingerichtet ✓'); go('/'); render(); return;
     }
