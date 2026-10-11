@@ -2156,7 +2156,7 @@ const A = {
   wipe: async () => {
     const v = await promptDialog(T('Alle Daten löschen'), { label: T('Zum Bestätigen LÖSCHEN eintippen'), placeholder: T('LÖSCHEN'), ok: T('Alles löschen') });
     if (v == null || !isDel(v)) { if (v != null) toast(T('Abgebrochen')); return; }
-    await DB.replaceAll({}); PH.clear(); await loadAll(); UI.open = {}; LOCK.init = false; toast(T('Alle Daten gelöscht')); go('/'); render();
+    await sessionEnd(); await DB.replaceAll({}); PH.clear(); await loadAll(); UI.open = {}; LOCK.init = false; toast(T('Alle Daten gelöscht')); go('/'); render();
   },
 };
 
@@ -2838,6 +2838,60 @@ async function pbkdf(code, salt, usage) {
 }
 async function makeLock(code) { const salt = rnd(16); return { id: 'lock', salt: b64(salt), hash: b64(await pbkdf(code, salt, 'bits')) }; }
 async function verifyLock(code) { const l = S.meta.get('lock'); if (!l) return true; return b64(await pbkdf(code, unb64(l.salt), 'bits')) === l.hash; }
+/* =====================================================================
+   ENTSPERR-SITZUNG (App-Sperre)
+   Ursache der früheren „Abmeldungen“: Die Entsperrung lag nur im Arbeitsspeicher. Jedes Neuladen der App
+   (iOS beendet Home-Bildschirm-Apps im Hintergrund oft schon nach kurzer Zeit) und jede Pause > 5 Min.
+   mit gesperrtem Bildschirm haben die App wieder gesperrt.
+   Jetzt: Nach dem Entsperren gilt eine Sitzung von 2 Std. ab der letzten Aktivität (gleitend, wird bei
+   jeder Eingabe/Rückkehr in die App erneuert), höchstens 12 Std. am Stück. Gespeichert in einer eigenen
+   IndexedDB („sweat4-session“, nicht in Backups/Exporten): Ablaufzeiten + der Zugangscode, verschlüsselt mit
+   einem nicht exportierbaren Geräteschlüssel (WebCrypto). Die Sitzung gilt nur für die aktuelle Sperre –
+   wird der Code geändert, die Sperre entfernt oder die App zurückgesetzt, ist sie ungültig.
+   „Jetzt sperren“, Kundenmodus beenden und Zurücksetzen beenden die Sitzung sofort.
+   ===================================================================== */
+const SESSION = { IDLE: 2 * 3600e3, MAX: 12 * 3600e3, TOUCH_EVERY: 60e3, lastTouch: 0, exp: 0, start: 0 };
+const SessDB = {
+  db: null,
+  open() { return this.db ? Promise.resolve(this.db) : new Promise((res, rej) => { const r = indexedDB.open('sweat4-session', 1); r.onupgradeneeded = () => r.result.createObjectStore('s'); r.onsuccess = () => res(this.db = r.result); r.onerror = () => rej(r.error); }); },
+  async op(mode, fn) { const db = await this.open(); return new Promise((res, rej) => { const tx = db.transaction('s', mode), st = tx.objectStore('s'), r = fn(st); tx.oncomplete = () => res(r && r.result); tx.onerror = () => rej(tx.error); }); },
+  get() { return this.op('readonly', st => st.get('cur')); },
+  set(v) { return this.op('readwrite', st => st.put(v, 'cur')); },
+  clear() { return this.op('readwrite', st => st.delete('cur')); },
+};
+async function sessionStart(code) {
+  const l = S.meta.get('lock'); if (!l || !code) return;
+  try {
+    const key = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+    const iv = rnd(12), ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, te.encode(code)), now = Date.now();
+    SESSION.start = now; SESSION.exp = now + SESSION.IDLE; SESSION.lastTouch = now;
+    await SessDB.set({ key, iv, ct, start: now, exp: SESSION.exp, lock: l.hash });
+  } catch (e) { /* ohne IndexedDB: Sitzung nur im Speicher, wie bisher */ SESSION.start = Date.now(); SESSION.exp = SESSION.start + SESSION.IDLE; }
+}
+async function sessionEnd() { SESSION.exp = 0; SESSION.start = 0; BOX.code = null; try { await SessDB.clear(); } catch (e) {} }
+const sessionValid = (now = Date.now()) => SESSION.exp > now && now - SESSION.start < SESSION.MAX;
+/* Beim App-Start: gültige Sitzung wiederherstellen (true) – sonst gesperrt starten */
+async function sessionRestore() {
+  const l = S.meta.get('lock'); if (!l) return false;
+  try {
+    const r = await SessDB.get(), now = Date.now();
+    if (!r || r.lock !== l.hash || !(r.exp > now) || now - r.start >= SESSION.MAX) { if (r) await SessDB.clear(); return false; }
+    const code = new TextDecoder().decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: r.iv }, r.key, r.ct));
+    SESSION.start = r.start; SESSION.exp = r.exp; BOX.code = code; sessionTouch(true);
+    return true;
+  } catch (e) { try { await SessDB.clear(); } catch (x) {} return false; }
+}
+/* Aktivität verlängert die Sitzung (gleitend, gedrosselt) – höchstens bis start + MAX */
+function sessionTouch(force) {
+  const now = Date.now(); if (!SESSION.start || LOCK.locked || !sessionValid(now)) return;
+  if (!force && now - SESSION.lastTouch < SESSION.TOUCH_EVERY) return;
+  SESSION.lastTouch = now; SESSION.exp = Math.min(now + SESSION.IDLE, SESSION.start + SESSION.MAX);
+  SessDB.get().then(r => r && SessDB.set({ ...r, exp: SESSION.exp })).catch(() => {});
+}
+function sessionCheck() {
+  if (!S.meta.get('lock') || LOCK.locked) return;
+  if (!sessionValid()) { LOCK.locked = true; sessionEnd(); render(); }
+}
 async function encryptPayload(obj, code, header) {
   const salt = rnd(16), iv = rnd(12), key = await pbkdf(code, salt, 'key');
   const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, te.encode(JSON.stringify(obj)));
@@ -4015,7 +4069,7 @@ async function setupFromFile(file, code, opts = {}) {
   const meta = [{ id: 'role', value: 'client', clientId: pkg.clientId, since: Date.now() }, lock, { id: 'pkgInfo', exportedAt: pkg.exportedAt, boxV: opts.boxV || 0 }];
   if (boxU) meta.push({ id: 'box', url: boxU }); const upM = S.meta.get('boxUp'); if (upM) meta.push(upM);
   await DB.replaceAll({ ...pkg.data, sessions: [...map.values()], meta, photos: pkg.photos });
-  PH.clear(); await loadAll(); LOCK.init = true; LOCK.locked = false; UI.open = {}; BOX.code = code;
+  PH.clear(); await loadAll(); LOCK.init = true; LOCK.locked = false; UI.open = {}; BOX.code = code; await sessionStart(code);
 }
 async function makeReturn(code) {
   if (!(await verifyLock(code))) throw new Error(T('Falscher Zugangscode.'));
@@ -4241,17 +4295,17 @@ Object.assign(A, {
       <label class="field"><span>Code wiederholen</span><input name="code2" type="password" class="input" required minlength="4" autocomplete="new-password"></label>
       <div class="info" style="margin-bottom:14px">Merke dir den Code gut. Ohne ihn kommst du nicht mehr in die App – dann hilft nur ein Backup.</div>
       <div class="sheet-actions"><button type="button" class="btn btn-ghost" data-action="modal-close">Abbrechen</button><button class="btn btn-primary">Speichern</button></div></form>`),
-  'lock-off': async () => { if (!await confirmDialog(T('Sperre entfernen?'), T('Die App ist danach ohne Code zugänglich.'), { ok: T('Entfernen'), danger: true })) return; del('meta', 'lock'); toast(T('Sperre entfernt')); render(); },
-  'lock-now': () => { if (!S.meta.get('lock')) return toast(T('Kein Code festgelegt')); LOCK.locked = true; render(); },
+  'lock-off': async () => { if (!await confirmDialog(T('Sperre entfernen?'), T('Die App ist danach ohne Code zugänglich.'), { ok: T('Entfernen'), danger: true })) return; del('meta', 'lock'); await sessionEnd(); toast(T('Sperre entfernt')); render(); },
+  'lock-now': async () => { if (!S.meta.get('lock')) return toast(T('Kein Code festgelegt')); LOCK.locked = true; await sessionEnd(); render(); },
   'lock-forgot': async () => {
     if (isClientMode()) return confirmDialog(T('Code vergessen?'), T('Frag deinen Trainer nach deinem Zugangscode. Bekommst du eine neue Zugangsdatei mit neuem Code, kannst du die App hier zurücksetzen und den Zugang neu einrichten.'), { ok: T('OK'), cancel: T('App zurücksetzen') }).then(ok => { if (ok === false) A['client-reset'](); });
     const v = await promptDialog(T('Alle Daten löschen?'), { label: T('Ohne Code gibt es keinen Zugriff. Zum Zurücksetzen LÖSCHEN eintippen (danach Backup importieren).'), placeholder: T('LÖSCHEN'), ok: T('Zurücksetzen') });
-    if (v && isDel(v)) { await DB.replaceAll({}); PH.clear(); await loadAll(); LOCK.locked = false; go('/'); render(); }
+    if (v && isDel(v)) { await sessionEnd(); await DB.replaceAll({}); PH.clear(); await loadAll(); LOCK.locked = false; go('/'); render(); }
   },
   'client-reset': async () => {
     const v = await promptDialog(T('Kundenmodus beenden'), { label: T('Alle Daten auf diesem Gerät werden gelöscht. Zum Bestätigen LÖSCHEN eintippen.'), placeholder: T('LÖSCHEN'), ok: T('Beenden') });
     if (!v || !isDel(v)) return;
-    await DB.replaceAll({}); PH.clear(); await loadAll(); LOCK.locked = false; UI.open = {}; toast(T('Kundenmodus beendet')); go('/'); render();
+    await sessionEnd(); await DB.replaceAll({}); PH.clear(); await loadAll(); LOCK.locked = false; UI.open = {}; toast(T('Kundenmodus beendet')); go('/'); render();
   },
 });
 
@@ -4304,7 +4358,7 @@ document.addEventListener('submit', async ev => {
     if (k === 'unlock') {
       busy(f, true); const ok = await verifyLock(String(fd.get('code') || '')); busy(f, false);
       if (!ok) { const e = document.getElementById('lock-err'); if (e) e.textContent = T('Falscher Code.'); f.querySelector('input').value = ''; return; }
-      LOCK.locked = false; BOX.code = String(fd.get('code') || ''); UI.lastRoute = ''; render(); return;
+      LOCK.locked = false; BOX.code = String(fd.get('code') || ''); await sessionStart(BOX.code); UI.lastRoute = ''; render(); return;
     }
     if (k === 'pkg') {
       const code = String(fd.get('code') || '').trim(); if (code.length < 6) return toast(T('Mindestens 6 Zeichen'));
@@ -4316,7 +4370,7 @@ document.addEventListener('submit', async ev => {
     if (k === 'ret') { busy(f, true); const r = await makeReturn(String(fd.get('code') || '')); if (boxUrl()) { BOX.code = String(fd.get('code') || ''); await boxPut(roleInfo().clientId, BOX.code, 'up', r.text); closeModal(null); toast(T('An deinen Trainer gesendet ✓')); return; } closeModal(null); fileReady(r.name, r.text, `${r.n} Trainings verschlüsselt gespeichert. Schick die Datei jetzt an deinen Trainer.`); return; }
     if (k === 'setlock') {
       const a = String(fd.get('code') || ''), b = String(fd.get('code2') || ''); if (a.length < 4) return toast(T('Mindestens 4 Zeichen')); if (a !== b) return toast(T('Die Codes stimmen nicht überein'));
-      busy(f, true); put('meta', await makeLock(a)); closeModal(null); toast(T('App-Sperre aktiv 🔒')); render(); return;
+      busy(f, true); const lk = await makeLock(a); put('meta', lk); await sessionStart(a); closeModal(null); toast(T('App-Sperre aktiv 🔒')); render(); return;
     }
     if (k === 'setup') {
       const fi = f.querySelector('input[type=file]'), file = fi && fi.files[0];
@@ -4370,13 +4424,16 @@ document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && (documen
 window.addEventListener('hashchange', () => close360());
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) { LOCK.hiddenAt = Date.now(); return; }
-  if (S.meta.get('lock') && LOCK.hiddenAt && Date.now() - LOCK.hiddenAt > 5 * 60000 && !LOCK.locked) { LOCK.locked = true; render(); }
+  // zurück in der App: nur sperren, wenn die 2-Stunden-Sitzung abgelaufen ist – sonst verlängern
+  sessionCheck(); sessionTouch(true);
 });
+['pointerdown', 'keydown', 'input'].forEach(t => document.addEventListener(t, () => sessionTouch(false), { passive: true, capture: true }));
+setInterval(sessionCheck, 60e3);
 
 (async function init() {
   // Offline-Fähigkeit, sobald die App über eine Web-Adresse geöffnet wird
   if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
-  try { await DB.open(); await loadAll(); render(); }
+  try { await DB.open(); await loadAll(); if (S.meta.get('lock')) { LOCK.init = true; LOCK.locked = !(await sessionRestore()); } render(); }
   catch (e) {
     document.getElementById('app').innerHTML = `<main class="wrap"><div class="card" style="margin-top:30px"><h2>Speicher nicht verfügbar</h2>
       <p class="muted">Der Browser erlaubt keine lokale Datenbank (IndexedDB). Häufige Ursachen: privater/Inkognito-Modus oder eine Vorschau-Ansicht. Bitte öffne die Datei direkt in Chrome, Edge, Firefox oder Safari.</p>
