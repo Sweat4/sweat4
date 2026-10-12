@@ -1317,6 +1317,331 @@
   };
   function shiftPose(p, d) { p.pelvis.add(d); for (const sd of ['L', 'R']) { if (p.ankle && p.ankle[sd]) p.ankle[sd].add(d); if (p.hand && p.hand[sd]) p.hand[sd].add(d); } }
 
+  /* === MOBILITY (Boden-Übungen, Schlüsselposen mit weicher Überblendung) ===== */
+  // Jede Pose wird vollständig beschrieben (Becken, Rumpf, Hände, Füße, Gelenk-Pole),
+  // damit zwischen zwei Posen sauber interpoliert werden kann.
+  function poseLerp(a, b, k) {
+    const o = {};
+    for (const key of ['yaw', 'pitch', 'roll', 'flex', 'twist', 'bend', 'shrug', 'head']) o[key] = lerp(a[key] || 0, b[key] || 0, k);
+    o.pelvis = lv(a.pelvis, b.pelvis, k);
+    for (const g of ['ankle', 'hand', 'knee', 'elbow', 'foot']) {
+      if (!a[g] && !b[g]) continue; o[g] = {};
+      for (const sd of ['L', 'R']) { const x = a[g] && a[g][sd], y = b[g] && b[g][sd]; if (x && y) o[g][sd] = lv(x, y, k); else if (x || y) o[g][sd] = (x || y).clone(); }
+    }
+    return o;
+  }
+  // keys: [Zeitpunkt (s), Pose, Text] – die Pose wird bis zum nächsten Zeitpunkt in die folgende überblendet
+  function poseKeys(keys, total) {
+    return t => {
+      const x = ((t % total) + total) % total;
+      let i = 0; while (i < keys.length - 1 && keys[i + 1][0] <= x) i++;
+      const a = keys[i], b = keys[(i + 1) % keys.length], tb = i + 1 < keys.length ? b[0] : total;
+      const u = tb > a[0] ? clamp((x - a[0]) / (tb - a[0]), 0, 1) : 0;
+      return { pose: poseLerp(a[1], b[1], ease(u)), label: a[2] };
+    };
+  }
+  const MAT = (kit, x0, x1, z0, z1) => kit.box(x1 - x0, .012, z1 - z0, V((x0 + x1) / 2, .006, (z0 + z1) / 2), null, kit.MT.mat);
+  const both = (l, r) => ({ L: l, R: r });
+  const mirrorX = v => V(-v.x, v.y, v.z);
+  // Seitenwechsel: Pose links ↔ rechts spiegeln
+  function mirrorPose(p) {
+    const o = Object.assign({}, p, { pelvis: mirrorX(p.pelvis), yaw: -(p.yaw || 0), roll: -(p.roll || 0), twist: -(p.twist || 0), bend: -(p.bend || 0) });
+    for (const g of ['ankle', 'hand', 'knee', 'elbow', 'foot']) if (p[g]) o[g] = { L: p[g].R && mirrorX(p[g].R), R: p[g].L && mirrorX(p[g].L) };
+    return o;
+  }
+
+  // Grundhaltungen
+  const QUAD_Y = .5;
+  function quadruped(o = {}) { // Vierfüßlerstand: Knie unter der Hüfte, Hände unter den Schultern
+    const p = Object.assign({ pelvis: V(0, QUAD_Y, 0), pitch: 80, flex: 0, head: -18 }, o);
+    const K = kin(p);
+    p.hand = p.hand || sides(sg => V(sg * .16, .025, K.S.z + .02));
+    p.elbow = p.elbow || sides(sg => V(sg * .25, 0, -1));
+    p.ankle = p.ankle || sides(sg => V(sg * .12, .06, p.pelvis.z - .45));
+    p.knee = p.knee || sides(() => V(0, -1, .05));
+    p.foot = p.foot || sides(() => V(0, -.25, -1));
+    return p;
+  }
+  function supine(o = {}) { // Rückenlage: Kopf Richtung -z, Füße Richtung +z
+    const p = Object.assign({ pelvis: V(0, .1, 0), pitch: -90, head: 0 }, o);
+    const K = kin(p);
+    p.hand = p.hand || sides(sg => relP(K, sg, .25, .05, -.07));
+    p.elbow = p.elbow || sides(sg => V(sg, 0, 0));
+    p.ankle = p.ankle || sides(sg => V(sg * .14, .06, .46));
+    p.knee = p.knee || sides(sg => V(sg * .1, 1, .2));
+    p.foot = p.foot || sides(() => V(0, -.1, 1));
+    return p;
+  }
+
+  TPL.mob = p => {
+    const v = p.v;
+    const floor = (x0, x1, z0, z1) => kit => MAT(kit, x0, x1, z0, z1);
+
+    /* 90/90-Wechsel */
+    if (v === '9090') {
+      const base = o => {
+        const q = Object.assign({ pelvis: V(0, .12, 0), pitch: -8, flex: 4, head: -4 }, o);
+        const K = kin(q);
+        q.hand = sides(sg => V(sg * .24, .025, -.32)); q.elbow = sides(() => V(0, 0, -1));
+        return q;
+      };
+      const left = base({ twist: 18 });
+      left.ankle = both(V(-.12, .07, .5), V(-.5, .07, -.36)); left.knee = both(V(1, .1, .4), V(-1, .1, .5));
+      left.foot = both(V(-1, -.2, .2), V(0, -.2, -1));
+      const mid = base({ twist: 0 });
+      mid.ankle = both(V(.3, .06, .48), V(-.3, .06, .48)); mid.knee = both(V(.25, 1, 0), V(-.25, 1, 0)); mid.foot = both(V(.1, 0, 1), V(-.1, 0, 1));
+      const right = mirrorPose(left);
+      return {
+        thumbT: 0.3, cam: { az: 25, el: 32, dist: 2.7, target: V(0, .2, .1) }, setup: floor(-.9, .9, -.6, .9),
+        custom: poseKeys([[0, left, 'Links vorne – aufrecht sitzen, beide Knie 90°'], [1.2, left, 'Knie langsam zur Mitte führen'], [2.4, mid, 'Mitte – Füße am Boden, Knie oben'],
+          [3.2, right, 'Rechts vorne – aufrecht sitzen, kurz halten'], [4.4, right, 'Knie langsam zur Mitte führen'], [5.6, mid, 'Mitte – Füße am Boden, Knie oben']], 6.4)
+      };
+    }
+
+    /* Hüftbeuger-Dehnung im Halbkniestand */
+    if (v === 'hipflex') {
+      const kneel = (dz, arms) => {
+        const q = { pelvis: V(0, .5, dz), pitch: -3, flex: -2, head: 0 };
+        const K = kin(q);
+        q.ankle = both(V(.13, .08, .55), V(-.13, .07, -.5)); q.knee = both(V(0, .2, 1), V(0, -1, -.15));
+        q.foot = both(V(.05, 0, 1), V(0, -.3, -1));
+        if (arms) { q.hand = both(rel(K, 1, .12, .62, .02), rel(K, -1, .12, .62, .02)); q.elbow = sides(sg => V(sg, .2, 0)); }
+        else { q.hand = sides(sg => relP(K, sg, .17, .05, .04)); q.elbow = sides(sg => V(sg, 0, -.6)); }
+        return q;
+      };
+      const a = kneel(0, false), b = kneel(.13, false), c = kneel(.14, true);
+      b.pelvis.y = .46; c.pelvis.y = .46;
+      return {
+        thumbT: 3.2, cam: { az: 82, el: 12, dist: 2.8, target: V(0, .5, 0) }, setup: floor(-.5, .5, -.8, .9),
+        custom: poseKeys([[0, a, 'Halbkniestand – linker Fuß vorne, rechtes Knie am Boden'], [1, a, 'Gesäß anspannen, Becken leicht aufrichten'], [2, b, 'Hüfte langsam nach vorne schieben'],
+          [3, b, 'Halten – Dehnung vorne in der rechten Hüfte'], [4.6, c, 'Optional: Arme nach oben strecken'], [6.2, c, 'Halten und ruhig atmen'], [7.4, a, 'Zurück – danach Seite wechseln']], 8.4)
+      };
+    }
+
+    /* Taubenhaltung */
+    if (v === 'pigeon') {
+      const legs = q => { q.ankle = both(V(-.2, .07, .36), V(-.13, .05, -.86)); q.knee = both(V(1, -.2, .6), V(0, -1, -.1)); q.foot = both(V(-1, -.1, 0), V(0, -.7, -1)); return q; };
+      const up = legs({ pelvis: V(.02, .19, 0), pitch: 0, flex: -2, head: 0 });
+      { const K = kin(up); up.hand = sides(sg => V(sg * .26 + .03, .025, .2)); up.elbow = sides(sg => V(sg, 0, -.4)); }
+      const down = legs({ pelvis: V(.02, .17, 0), pitch: 48, flex: 30, head: -20 });
+      { down.hand = sides(sg => V(sg * .16 + .02, .04, .78)); down.elbow = sides(sg => V(sg * .3, -1, 0)); }
+      return {
+        thumbT: 4, cam: { az: 55, el: 18, dist: 2.8, target: V(0, .25, .05) }, setup: floor(-.6, .6, -1.05, 1),
+        custom: poseKeys([[0, up, 'Linkes Bein vorne angewinkelt, rechtes Bein lang nach hinten'], [1.4, up, 'Becken gerade ausrichten'], [2.6, down, 'Oberkörper langsam nach vorne ablegen'],
+          [3.8, down, 'Halten – Dehnung im linken Gesäß'], [6.6, up, 'Langsam aufrichten, danach Seite wechseln']], 7.8)
+      };
+    }
+
+    /* Figur-4-Dehnung in Rückenlage */
+    if (v === 'fig4') {
+      const flat = supine();
+      const crossed = (pull) => {
+        const q = supine({ head: pull ? -10 : 0 });
+        if (pull) { q.ankle.L = V(.12, .5, .18); q.knee.L = V(0, 1, .4); q.foot.L = V(0, .3, 1); }
+        else { q.ankle.L = V(.14, .06, .46); }
+        let J = solve(q);
+        q.ankle.R = J.L.knee.clone().add(V(-.06, .07, .02)); q.knee.R = V(-1, .5, .2); q.foot.R = V(.2, .3, 1);
+        J = solve(q);
+        const thigh = J.L.hip.clone().lerp(J.L.knee, .7);
+        if (pull) { q.hand = both(thigh.clone().add(V(.08, -.03, 0)), thigh.clone().add(V(-.08, -.03, 0))); q.elbow = sides(sg => V(sg, -.3, -.4)); }
+        return q;
+      };
+      const a = crossed(false), b = crossed(true);
+      return {
+        thumbT: 4.5, cam: { az: 65, el: 22, dist: 2.8, target: V(0, .2, .05) }, setup: floor(-.5, .5, -.9, .8),
+        custom: poseKeys([[0, flat, 'Rückenlage – Knie angewinkelt, Füße am Boden'], [1, a, 'Rechten Knöchel aufs linke Knie legen'], [2.2, a, 'Rechtes Knie locker nach außen'],
+          [3, b, 'Linken Oberschenkel zur Brust ziehen'], [4.2, b, 'Halten – Dehnung im rechten Gesäß'], [7, a, 'Langsam lösen, danach Seite wechseln']], 8.2)
+      };
+    }
+
+    /* Knie zur Brust */
+    if (v === 'kneechest') {
+      const long = supine(); long.ankle = sides(sg => V(sg * .12, .06, .86)); long.knee = sides(sg => V(sg * .1, 1, 0)); long.foot = sides(sg => V(sg * .2, 1, .4));
+      const pull = side => {
+        const q = supine({ head: -12 }); q.ankle = Object.assign({}, long.ankle); q.knee = Object.assign({}, long.knee); q.foot = Object.assign({}, long.foot);
+        const sg = side === 'L' ? 1 : -1;
+        q.ankle[side] = V(sg * .12, .38, .12); q.knee[side] = V(0, 1, .6); q.foot[side] = V(0, .2, 1);
+        const J = solve(q), kn = J[side].knee;
+        q.hand = both(kn.clone().add(V(.07, -.02, -.02)), kn.clone().add(V(-.07, -.02, -.02))); q.elbow = sides(s2 => V(s2, -.5, -.3));
+        return q;
+      };
+      const pl = pull('L'), pr = pull('R');
+      return {
+        thumbT: 2.5, cam: { az: 70, el: 20, dist: 2.9, target: V(0, .2, .1) }, setup: floor(-.5, .5, -.9, 1.1),
+        custom: poseKeys([[0, long, 'Rückenlage – Beine lang'], [1, pl, 'Linkes Knie zur Brust ziehen'], [2.2, pl, 'Halten – unterer Rücken bleibt am Boden'], [4, long, 'Bein lang ablegen'],
+          [5, pr, 'Rechtes Knie zur Brust ziehen'], [6.2, pr, 'Halten – Schultern locker'], [8, long, 'Bein lang ablegen']], 9)
+      };
+    }
+
+    /* Thread the Needle (Einfädeln) */
+    if (v === 'thread') {
+      const base = quadruped();
+      const under = quadruped({ twist: 42, pelvis: V(0, QUAD_Y - .02, -.02), head: -30, flex: 8 });
+      { const K = kin(under); under.hand = both(V(.18, .025, .5), V(.42, .06, .42)); under.elbow = both(V(.4, .3, -1), V(0, -1, 0)); }
+      const open = quadruped({ twist: -50, head: 5 });
+      { const K = kin(open); const sr = shoulder(K, -1); open.hand = both(V(.16, .025, K.S.z + .02), sr.clone().add(V(-.05, .6, 0))); open.elbow = both(V(.25, 0, -1), V(-.3, 0, -1)); }
+      return {
+        thumbT: 2.6, cam: { az: 40, el: 18, dist: 3.3, target: V(0, .5, .25) }, setup: floor(-.6, .6, -.75, .9),
+        custom: poseKeys([[0, base, 'Vierfüßlerstand – Hände unter den Schultern'], [1, under, 'Rechten Arm unter dem Körper durchfädeln'], [2.4, under, 'Halten – Schulter und Kopf sinken ab'],
+          [3.8, open, 'Brustkorb öffnen, Arm zur Decke'], [5, open, 'Blick folgt der Hand'], [6, base, 'Zurück – danach Seite wechseln']], 7)
+      };
+    }
+
+    /* Katze-Kuh */
+    if (v === 'catcow') {
+      const base = quadruped(), cat = quadruped({ pitch: 66, flex: 32, head: -55 }), cow = quadruped({ pitch: 92, flex: -24, head: 18 });
+      for (const q of [cat, cow]) { const K = kin(q); q.hand = sides(sg => V(sg * .16, .025, base.hand.L.z)); }
+      return {
+        thumbT: 2.4, cam: { az: 88, el: 10, dist: 2.7, target: V(0, .4, .2) }, setup: floor(-.5, .5, -.75, .85),
+        custom: poseKeys([[0, base, 'Vierfüßlerstand – Rücken neutral'], [.8, cat, 'Katze: ausatmen, Rücken rund machen'], [2.2, cat, 'Kinn zur Brust, Bauch einziehen'],
+          [3, cow, 'Kuh: einatmen, Brust nach vorne, Blick leicht nach oben'], [4.4, cow, 'Kein starkes Hohlkreuz'], [5.2, base, 'Zurück in die Mitte']], 6)
+      };
+    }
+
+    /* Kindhaltung */
+    if (v === 'child') {
+      const base = quadruped();
+      const child = { pelvis: V(0, .22, -.13), pitch: 104, flex: 22, head: -25 };
+      child.ankle = sides(sg => V(sg * .1, .05, -.12)); child.knee = sides(sg => V(sg * .2, -.5, 1)); child.foot = sides(() => V(0, -.2, -1));
+      child.hand = sides(sg => V(sg * .17, .025, .98)); child.elbow = sides(sg => V(sg * .2, 1, 0));
+      return {
+        thumbT: 3, cam: { az: 70, el: 14, dist: 2.8, target: V(0, .3, .25) }, setup: floor(-.5, .5, -.6, 1.2),
+        custom: poseKeys([[0, base, 'Vierfüßlerstand'], [.8, child, 'Gesäß langsam Richtung Fersen'], [2.2, child, 'Halten – Arme lang nach vorne'], [5.4, child, 'Ruhig in den Rücken atmen'], [7, base, 'Langsam zurück']], 8)
+      };
+    }
+
+    /* Open Book (Offenes Buch) – Seitlage rechts, Kopf Richtung -x */
+    if (v === 'openbook') {
+      const side = (tw, armUp) => {
+        const q = { pelvis: V(.3, .13, 0), roll: 90, pitch: 0, flex: 0, twist: tw, head: 0 };
+        const K = kin(q), sL = shoulder(K, 1), sR = shoulder(K, -1);
+        q.ankle = both(V(.75, .2, .45), V(.75, .06, .45)); q.knee = both(V(0, .2, 1), V(0, -.2, 1)); q.foot = both(V(1, 0, 0), V(1, 0, 0));
+        const front = sR.clone().add(V(0, .02, .58));
+        q.hand = both(armUp === 0 ? front.clone().add(V(0, .06, 0)) : armUp === 1 ? sL.clone().add(V(0, .6, .06)) : sL.clone().add(V(.02, -.05, -.58)), front);
+        q.elbow = both(V(1, .3, 0), V(1, -.3, 0));
+        return q;
+      };
+      const a = side(0, 0), b = side(35, 1), c = side(70, 2);
+      return {
+        thumbT: 3.9, cam: { az: -60, el: 25, dist: 2.9, target: V(.1, .22, 0) }, setup: floor(-.8, 1.1, -.6, .9),
+        custom: poseKeys([[0, a, 'Seitlage – Knie 90° gebeugt, Arme nach vorne'], [1, a, 'Knie bleiben zusammen am Boden'], [2, b, 'Oberen Arm im Bogen nach oben führen'], [2.9, c, 'Brustkorb öffnen, Arm zur anderen Seite'],
+          [3.9, c, 'Kurz halten – Blick folgt der Hand'], [5, b, 'Kontrolliert zurück'], [5.8, a, 'Danach Seite wechseln']], 6.6)
+      };
+    }
+
+    /* Beinbeuger-Dehnung im Sitzen */
+    if (v === 'hamstring') {
+      const sit = (lean) => {
+        const q = { pelvis: V(0, .12, 0), pitch: lerp(-6, 32, lean), flex: lerp(0, 24, lean), head: lerp(0, -18, lean) };
+        const K = kin(q);
+        q.ankle = both(V(.1, .06, .86), V(.0, .07, .3)); q.knee = both(V(0, 1, 0), V(-1, .4, .3)); q.foot = both(V(0, 1, .35), V(.6, 0, .3));
+        q.hand = lean ? sides(sg => V(.1 + sg * .06, .16, .68)) : sides(sg => V(sg * .24, .025, .05));
+        q.elbow = sides(sg => V(sg, -.2, 0));
+        return q;
+      };
+      const a = sit(0), b = sit(1);
+      return {
+        thumbT: 4, cam: { az: 70, el: 18, dist: 2.7, target: V(0, .3, .35) }, setup: floor(-.5, .5, -.4, 1.15),
+        custom: poseKeys([[0, a, 'Sitzen – linkes Bein lang, rechte Fußsohle innen am Oberschenkel'], [1.2, a, 'Rücken lang machen'], [2.4, b, 'Aus der Hüfte nach vorne zum Fuß greifen'],
+          [3.6, b, 'Halten – Dehnung hinten im Oberschenkel'], [6.4, a, 'Langsam aufrichten, danach Seite wechseln']], 7.6)
+      };
+    }
+
+    /* Glute Bridge (Beckenheben) */
+    if (v === 'bridge') {
+      const low = supine({ pelvis: V(0, .1, -.02) }); low.hand = sides(sg => V(sg * .25, .025, -.12)); low.elbow = sides(sg => V(sg, 0, 0));
+      const high = supine({ pelvis: V(0, .38, -.06), pitch: -124 }); high.hand = low.hand; high.elbow = low.elbow;
+      return {
+        thumbT: 2.7, cam: { az: 75, el: 12, dist: 2.8, target: V(0, .25, -.05) }, setup: floor(-.5, .5, -.9, .75),
+        custom: poseKeys([[0, low, 'Rückenlage – Füße hüftbreit, Arme neben dem Körper'], [.6, low, 'Gesäß anspannen'], [1.6, high, 'Becken anheben, bis Knie–Hüfte–Schulter eine Linie bilden'],
+          [2.6, high, 'Oben kurz halten'], [3.4, low, 'Kontrolliert absenken']], 5)
+      };
+    }
+
+    /* Echsen-Dehnung (Lizard) */
+    if (v === 'lizard') {
+      const pose = (sink) => {
+        const q = { pelvis: V(-.02, lerp(.34, .28, sink), lerp(0, .1, sink)), pitch: lerp(58, 72, sink), flex: 8, head: -20 };
+        q.ankle = both(V(.26, .08, .58), V(-.13, .06, -.68)); q.knee = both(V(.4, .3, 1), V(0, -1, -.2)); q.foot = both(V(.15, 0, 1), V(0, -.4, -1));
+        q.hand = both(V(.06, .025, .66), V(-.22, .025, .66)); q.elbow = sides(sg => V(sg * .2, 0, -1));
+        return q;
+      };
+      const a = pose(0), b = pose(1);
+      return {
+        thumbT: 4, cam: { az: 60, el: 16, dist: 2.9, target: V(0, .3, .1) }, setup: floor(-.55, .6, -.9, .95),
+        custom: poseKeys([[0, a, 'Tiefer Ausfallschritt – linker Fuß außen neben den Händen'], [1.2, a, 'Rechtes Knie am Boden'], [2.4, b, 'Hüfte langsam nach vorne und unten sinken lassen'],
+          [3.6, b, 'Halten – Dehnung in Hüfte und Leiste'], [6.4, a, 'Zurück, danach Seite wechseln']], 7.6)
+      };
+    }
+
+    /* World's Greatest Stretch */
+    if (v === 'wgs') {
+      const pose = (ph) => {
+        const q = { pelvis: V(0, ph === 1 ? .42 : .45, 0), pitch: ph === 1 ? 70 : 62, flex: ph === 1 ? 16 : 10, head: -20, twist: ph === 2 ? 60 : 0 };
+        const K = kin(q), sL = shoulder(K, 1);
+        q.ankle = both(V(.2, .08, .62), V(-.14, .08, -.74)); q.knee = both(V(.15, .4, 1), V(0, -.3, -1)); q.foot = both(V(0, 0, 1), V(0, -.8, -.4));
+        const rH = V(-.02, .025, .64);
+        const lH = ph === 0 ? V(.32, .025, .64) : ph === 1 ? V(.14, .1, .5) : sL.clone().add(V(.05, .58, .05));
+        q.hand = both(lH, rH); q.elbow = both(ph === 1 ? V(-.2, -1, -.3) : V(.3, 0, -1), V(-.3, 0, -1));
+        return q;
+      };
+      const a = pose(0), b = pose(1), c = pose(2);
+      return {
+        thumbT: 3.9, cam: { az: 50, el: 14, dist: 3.4, target: V(0, .58, .15) }, setup: floor(-.55, .6, -.95, .95),
+        custom: poseKeys([[0, a, 'Großer Ausfallschritt – Hände am Boden, hinteres Bein lang'], [1, b, 'Linken Ellbogen zum linken Fuß absenken'], [2, b, 'Kurz halten'],
+          [2.8, c, 'Oberkörper aufdrehen, linker Arm zur Decke'], [3.8, c, 'Blick folgt der Hand'], [4.8, a, 'Hand zurück zum Boden']], 5.8)
+      };
+    }
+
+    /* Seitliches Beinheben im Liegen – Seitlage rechts, Kopf Richtung -x */
+    if (v === 'sideleg') {
+      const pose = lift => {
+        const q = { pelvis: V(.15, .13, 0), roll: 90, pitch: 0, head: 8 };
+        const K = kin(q), sR = shoulder(K, -1);
+        q.ankle = both(V(1.0, lerp(.22, .58, lift), -.02), V(1.0, .05, 0)); q.knee = both(V(0, 0, 1), V(0, 0, 1)); q.foot = both(V(0, -.1, 1), V(0, -.1, 1));
+        q.hand = both(rel(K, 1, 0, -.12, .28).setY(.03), sR.clone().add(V(-.5, .02, .05))); q.elbow = both(V(0, 1, 0), V(0, -1, 0));
+        return q;
+      };
+      const a = pose(0), b = pose(1);
+      return {
+        thumbT: 1.5, cam: { az: 10, el: 18, dist: 3.0, target: V(.3, .25, 0) }, setup: floor(-.8, 1.25, -.4, .5),
+        custom: poseKeys([[0, a, 'Seitlage – Körper in einer Linie'], [.6, b, 'Oberes Bein gestreckt anheben, Fuß zeigt nach vorne'], [1.4, b, 'Oben kurz halten'], [1.8, a, 'Langsam absenken']], 2.8)
+      };
+    }
+
+    /* Rumpfrotation in Rückenlage */
+    if (v === 'rotation') {
+      const pose = ang => {
+        const q = supine({ head: 0 });
+        const K = kin(q);
+        q.hand = sides(sg => shoulder(K, sg).clone().add(V(sg * .58, 0, 0)).setY(.03)); q.elbow = sides(() => V(0, 1, 0));
+        const s = Math.sin(ang * D2R), c = Math.cos(ang * D2R);
+        q.ankle = sides(sg => V(sg * .1 + s * .12, .06 + Math.abs(s) * (sg * Math.sign(s) > 0 ? .02 : .06), .44));
+        q.knee = sides(() => V(s, c, .1)); q.foot = sides(() => V(s * .3, 0, 1));
+        return q;
+      };
+      const m = pose(0), l = pose(60), r = pose(-60);
+      return {
+        thumbT: 2, cam: { az: 30, el: 38, dist: 2.8, target: V(0, .15, 0) }, setup: floor(-.9, .9, -.85, .7),
+        custom: poseKeys([[0, m, 'Rückenlage – Arme seitlich, Knie angewinkelt'], [.8, l, 'Knie langsam nach links sinken lassen'], [1.8, l, 'Schultern bleiben am Boden'], [2.6, m, 'Zurück zur Mitte'],
+          [3.4, r, 'Knie nach rechts sinken lassen'], [4.4, r, 'Ruhig weiteratmen'], [5.2, m, 'Zurück zur Mitte']], 6)
+      };
+    }
+
+    /* Tiefe Hocke halten */
+    if (v === 'deepsquat') {
+      const st = stand({ w: .2, toe: 20 });
+      { const K = kin(st); st.hand = sides(sg => shoulder(K, sg).addScaledVector(DOWN, .6).addScaledVector(K.l, sg * .05)); st.elbow = sides(sg => V(sg * .3, 0, -1)); }
+      const sq = { pelvis: V(0, .34, -.1), pitch: 28, flex: -6, head: -2, ankle: { L: V(.22, DIM.ank, 0), R: V(-.22, DIM.ank, 0) }, foot: toeOut(22), knee: sides(sg => V(sg * .5, .1, 1)) };
+      { const K = kin(sq); const c = K.S.clone().addScaledVector(K.u, -.17).addScaledVector(horiz(K.f), .2); sq.hand = both(c.clone().add(V(.012, 0, 0)), c.clone().add(V(-.012, 0, 0))); sq.elbow = sides(sg => V(sg, -.6, .2)); }
+      return {
+        thumbT: 3, cam: { az: 35, el: 10, dist: 3.4, target: V(0, .8, 0) }, setup: floor(-.6, .6, -.6, .6),
+        custom: poseKeys([[0, st, 'Stand – Füße etwas breiter als hüftbreit, Fußspitzen leicht außen'], [.8, sq, 'Langsam tief in die Hocke sinken'], [2.2, sq, 'Halten – Fersen am Boden, Brust aufrecht'],
+          [5.2, sq, 'Ellbogen drücken die Knie sanft nach außen'], [7.4, st, 'Langsam aufrichten']], 8.6)
+      };
+    }
+  };
+
   /* ---------- Viewer ---------- */
   class Viewer {
     constructor(host, opts = {}) {

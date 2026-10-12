@@ -1890,6 +1890,9 @@ function openExModal(dayId, exId) {
     <div class="muted" style="font-size:12px;margin:-8px 0 14px">Tipp: Namen aus dem Übungskatalog wählen – dann ist die 3D-Ausführung automatisch verknüpft.</div>
     <datalist id="ex-names">${[...known].sort((a, b) => a.localeCompare(b, 'de')).map(x => `<option value="${esc(x)}">`).join('')}</datalist>
     <div class="field"><span>Anzahl Sätze</span><div class="radio-seg">${Array.from({ length: CONFIG.MAX_SETS }, (_, i) => `<label><input type="radio" name="targetSets" value="${i + 1}" ${i + 1 === n ? 'checked' : ''}><span>${i + 1}</span></label>`).join('')}</div></div>
+    ${(() => { const un = e ? e.unit : ((katFind(e ? e.name : '') || {}).unit || null);
+      return `<div class="field"><span>Zählweise</span><div class="radio-seg unit-seg"><label><input type="radio" name="unit" value="" ${un !== 's' ? 'checked' : ''}><span>Wiederholungen</span></label><label><input type="radio" name="unit" value="s" ${un === 's' ? 'checked' : ''}><span>Sekunden (halten)</span></label></div>
+      <div class="muted" style="font-size:12px;margin-top:6px">Bei „Sekunden“ trägst du unten statt der Wiederholungen die Haltezeit ein, z. B. 30.</div></div>`; })()}
     <div class="field"><span>Planwerte (optional – erscheinen im Training als Vorschlag)</span>
       ${Array.from({ length: CONFIG.MAX_SETS }, (_, i) => `<div class="target-row ${i >= n ? 'hidden' : ''}" data-tr="${i}"><span class="muted">Satz ${i + 1}</span>
         <input class="input" name="w${i}" inputmode="decimal" placeholder="kg" value="${fmtIn(sets[i] && sets[i].weight)}" autocomplete="off">
@@ -2241,7 +2244,7 @@ document.addEventListener('submit', async ev => {
     const sets = Array.from({ length: n }, (_, i) => ({ weight: parseNum(fd.get('w' + i)), reps: parseNum(fd.get('r' + i)), repsMax: parseNum(fd.get('rm' + i)) }));
     let e = f.dataset.id ? S.exercises.get(f.dataset.id) : null;
     if (!e) { if (exercisesOf(did).length >= CONFIG.MAX_EXERCISES) return toast(T('Maximum erreicht')); e = { id: uid(), dayId: did, order: exercisesOf(did).length, createdAt: Date.now() }; }
-    Object.assign(e, { name, targetSets: n, sets, note: String(fd.get('note') || '').trim(), ss: String(fd.get('ss') || '') || null, amrap: fd.get('amrap') === 'on', rest: (r => r > 0 && r <= 600 ? Math.round(r) : null)(parseNum(fd.get('rest'))) });
+    Object.assign(e, { name, targetSets: n, sets, note: String(fd.get('note') || '').trim(), ss: String(fd.get('ss') || '') || null, amrap: fd.get('amrap') === 'on', unit: fd.get('unit') === 's' ? 's' : null, rest: (r => r > 0 && r <= 600 ? Math.round(r) : null)(parseNum(fd.get('rest'))) });
     const k3 = katFind(name); e.catalogId = k3 ? k3.id : null;
     // Progression – Werte exakt speichern (keine Rundung)
     const ss = fd.get('stepSel');
@@ -2256,6 +2259,10 @@ document.addEventListener('submit', async ev => {
 document.addEventListener('input', ev => {
   const t = ev.target;
   if (t.id === 'search') return filterClients(t.value);
+  if (t.name === 'name' && t.form && t.form.dataset.form === 'exercise' && !t.form.dataset.unitTouched) {
+    const k = katFind(t.value), r = t.form.querySelector(`[name=unit][value="${k && k.unit === 's' ? 's' : ''}"]`); if (r) r.checked = true;
+  }
+  if (t.name === 'unit' && t.form && t.form.dataset.form === 'exercise') t.form.dataset.unitTouched = '1';
   if (t.name === 'name' && t.form && t.form.dataset.form === 'exercise' && !t.form.dataset.stepTouched) {
     const ex = t.form.dataset.id && S.exercises.get(t.form.dataset.id);
     if (!(ex && ex.step > 0)) { const r = t.form.querySelector(`[name=stepSel][value="${defaultStep(t.value)}"]`); if (r) { r.checked = true; t.form.querySelector('.step-custom').classList.add('hidden'); } }
@@ -2469,7 +2476,7 @@ async function thumbWorker() {
       const [exId, fig] = id.split('|'), e = KAT().find(x => x.id === exId); if (!e) continue;
       try {
         v.setFigure(fig); v.load({ ...e, primary: e.prim, secondary: e.sec }); v.playing = false; v.setMuscles(true);
-        if (v.tpl.custom) v.showAt(0, .9); else v.showAt(.62); // Standbild nahe der Endposition
+        if (v.tpl.custom) v.showAt(0, v.tpl.thumbT != null ? v.tpl.thumbT : .9); else v.showAt(.62); // Standbild nahe der Endposition (Vorlage kann den Zeitpunkt vorgeben)
         const blob = dataUrlBlob(v.renderer.domElement.toDataURL('image/jpeg', .82));
         THUMB.mem.set(id, URL.createObjectURL(blob)); thumbToCache(id, blob); paintThumb(id);
       } catch (err) { console.warn('Vorschau', id, err); document.querySelectorAll(thumbSel(id)).forEach(el => el.classList.remove('is-loading')); }
@@ -4390,7 +4397,7 @@ function analyzeSession(s) {
       if (!same) row.cmp = { kind: 'plan' };
       else if (t1 && t0 && t1.weight > t0.weight) { row.cmp = { kind: 'weight', from: t0.weight, to: t1.weight, reps: t1.reps }; A.items.push({ kind: 'weight', name: nm, from: t0.weight, to: t1.weight }); }
       else if (t1 && t0 && t1.weight === t0.weight && t1.reps > t0.reps) { row.cmp = { kind: 'reps', w: t1.weight, from: t0.reps, to: t1.reps }; A.items.push({ kind: 'reps', name: nm, w: t1.weight, from: t0.reps, to: t1.reps }); }
-      else if (!t1 && !t0 && b1 && b0 && b1.reps > b0.reps) { row.cmp = { kind: 'reps', w: null, from: b0.reps, to: b1.reps }; A.items.push({ kind: 'reps', name: nm, w: null, from: b0.reps, to: b1.reps }); }
+      else if (!t1 && !t0 && b1 && b0 && b1.reps > b0.reps) { row.cmp = { kind: 'reps', w: null, from: b0.reps, to: b1.reps, unit: e.unit || null }; A.items.push({ kind: 'reps', name: nm, w: null, from: b0.reps, to: b1.reps, unit: e.unit || null }); }
       else if (t1 && t0 && t1.weight < t0.weight) row.cmp = { kind: 'less', from: t0.weight, to: t1.weight };
       else row.cmp = { kind: 'same' };
     }
@@ -4405,6 +4412,7 @@ function analyzeSession(s) {
 function findingText(f) {
   if (f.kind === 'complete') return T('Trainingsplan vollständig absolviert.');
   if (f.kind === 'weight') return T('Leistungssteigerung erkannt: {x} – heute {b} kg statt {a} kg.', { x: f.name, a: fmtNum(f.from), b: fmtNum(f.to) });
+  if (f.kind === 'reps' && f.unit === 's' && f.w == null) return T('Längere Haltezeit bei {x}: {b} Sek. statt {a} Sek.', { x: f.name, a: fmtNum(f.from), b: fmtNum(f.to) });
   if (f.kind === 'reps') return f.w != null ? T('Mehr Wiederholungen bei {x}: {b} statt {a} mit {w} kg.', { x: f.name, a: fmtNum(f.from), b: fmtNum(f.to), w: fmtNum(f.w) }) : T('Mehr Wiederholungen bei {x}: {b} statt {a}.', { x: f.name, a: fmtNum(f.from), b: fmtNum(f.to) });
   if (f.kind === 'skipped') return T('Ausgelassen: {x}', { x: f.names.join(', ') });
   return '';
@@ -4534,7 +4542,7 @@ function SessionExercises(s) {
   const fs = sets => sets.map(x => hasVal(x.weight) ? `${fmtNum(x.weight)}×${hasVal(x.reps) ? fmtNum(x.reps) : '–'}` : hasVal(x.reps) ? fmtNum(x.reps) : '✓').join(' · ');
   return A.ex.map(r => {
     const e = r.e, sets = workSets(e), missing = r.planned ? Math.max(0, r.planned - sets.length) : 0;
-    const cmp = r.cmp ? ({ weight: `📈 ${T('mehr Gewicht')} (${fmtNum(r.cmp.from)} → ${fmtNum(r.cmp.to)} kg)`, reps: `📈 ${T('mehr Wiederholungen')} (${fmtNum(r.cmp.from)} → ${fmtNum(r.cmp.to)})`, less: T('weniger Gewicht als zuletzt'), same: T('wie beim letzten Mal'), plan: T('Vorgabe wurde geändert – kein direkter Vergleich') }[r.cmp.kind]) : '';
+    const cmp = r.cmp ? ({ weight: `📈 ${T('mehr Gewicht')} (${fmtNum(r.cmp.from)} → ${fmtNum(r.cmp.to)} kg)`, reps: r.cmp.unit === 's' && r.cmp.w == null ? `📈 ${T('längere Haltezeit')} (${fmtNum(r.cmp.from)} → ${fmtNum(r.cmp.to)} ${T('Sek.')})` : `📈 ${T('mehr Wiederholungen')} (${fmtNum(r.cmp.from)} → ${fmtNum(r.cmp.to)})`, less: T('weniger Gewicht als zuletzt'), same: T('wie beim letzten Mal'), plan: T('Vorgabe wurde geändert – kein direkter Vergleich') }[r.cmp.kind]) : '';
     return `<details class="card exd" ${sets.length ? '' : ''}><summary><div class="grow"><div style="font-weight:700">${esc(r.name)}</div>
       <div class="muted" style="font-size:13px">${sets.length ? `${r.planned ? `${sets.length}/${r.planned}` : sets.length} ${T('Sätze')}${cmp ? ' · ' + cmp : ''}` : T('nicht durchgeführt')}${missing && sets.length ? ' · ' + TN(missing, '{n} Satz fehlt', '{n} Sätze fehlen') : ''}</div></div>${ic('down', 18)}</summary>
       ${sets.length ? `<table class="table"><thead><tr><th>${T('Satz')}</th><th>${T('Gewicht')}</th><th>${T('Wdh.')}</th><th>RPE/RIR</th><th>${T('Notiz')}</th></tr></thead><tbody>
@@ -4579,7 +4587,8 @@ function quickReplyTexts(cid, sid) {
   if (A) {
     const w = A.items.find(f => f.kind === 'weight'), r = A.items.find(f => f.kind === 'reps');
     if (w) out.push(TL(L, 'Starkes Training heute! Bei {x} hast du dich von {a} kg auf {b} kg gesteigert. Weiter so!', { x: exn(w.name), a: num(w.from), b: num(w.to) }));
-    if (r) out.push(r.w != null ? TL(L, 'Bei {x} hast du mit {w} kg {b} Wiederholungen geschafft – letztes Mal waren es {a}. Guter Fortschritt!', { x: exn(r.name), w: num(r.w), a: num(r.from), b: num(r.to) }) : TL(L, 'Bei {x} hast du {b} Wiederholungen geschafft – letztes Mal waren es {a}. Guter Fortschritt!', { x: exn(r.name), a: num(r.from), b: num(r.to) }));
+    if (r && r.unit === 's' && r.w == null) out.push(TL(L, 'Bei {x} hast du {b} Sekunden gehalten – letztes Mal waren es {a}. Guter Fortschritt!', { x: exn(r.name), a: num(r.from), b: num(r.to) }));
+    else if (r) out.push(r.w != null ? TL(L, 'Bei {x} hast du mit {w} kg {b} Wiederholungen geschafft – letztes Mal waren es {a}. Guter Fortschritt!', { x: exn(r.name), w: num(r.w), a: num(r.from), b: num(r.to) }) : TL(L, 'Bei {x} hast du {b} Wiederholungen geschafft – letztes Mal waren es {a}. Guter Fortschritt!', { x: exn(r.name), a: num(r.from), b: num(r.to) }));
     if (A.complete) out.push(TL(L, 'Super, dass du dein Training vollständig absolviert hast.'));
     if (A.skipped.length) out.push(TL(L, 'Mir ist aufgefallen, dass du einige Übungen ausgelassen hast. Gibt es einen Grund dafür, bei dem ich dich unterstützen kann?'));
   }
