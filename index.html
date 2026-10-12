@@ -3175,14 +3175,14 @@ function mealSchedule(cfg, trainDay) {
     hints.push(T('Essfenster {a}–{b} Uhr. Außerhalb nur Wasser, ungesüßter Tee oder schwarzer Kaffee.', { a: toHM(S), b: toHM(S + M.win) }));
   }
   let train = null;
-  const T = trainDay ? toMin(cfg.train) : null;
-  if (trainDay && T == null) hints.push(T('Trage im Rhythmus die Trainingszeit ein, dann richtet sich der Plan an Trainingstagen danach.'));
-  if (T != null) {
-    const Tend = T + TRAIN_MIN; train = { t: T, end: Tend, stop: T - NO_FOOD_BEFORE };
-    const pre = meals.filter(m => m.t <= T - NO_FOOD_BEFORE), post = meals.filter(m => m.t > T - NO_FOOD_BEFORE);
+  const tT = trainDay ? toMin(cfg.train) : null;
+  if (trainDay && tT == null) hints.push(T('Trage im Rhythmus die Trainingszeit ein, dann richtet sich der Plan an Trainingstagen danach.'));
+  if (tT != null) {
+    const Tend = tT + TRAIN_MIN; train = { t: tT, end: Tend, stop: tT - NO_FOOD_BEFORE };
+    const pre = meals.filter(m => m.t <= tT - NO_FOOD_BEFORE), post = meals.filter(m => m.t > tT - NO_FOOD_BEFORE);
     const conflict = post.some(m => m.t < Tend);
     if (cfg.mode !== '5' && Tend > (toMin(cfg.win) ?? 0) + MEAL_MODES[cfg.mode].win) warn.push(T('Das Training liegt nach dem Essfenster. Lege das Fenster so, dass du nach dem Training noch essen kannst.'));
-    if (cfg.mode !== '5' && T < (toMin(cfg.win) ?? 0) && Tend <= (toMin(cfg.win) ?? 0) + 60) hints.push(T('Du trainierst vor dem Essfenster, also nüchtern. Die erste Mahlzeit direkt nach dem Training essen.'));
+    if (cfg.mode !== '5' && tT < (toMin(cfg.win) ?? 0) && Tend <= (toMin(cfg.win) ?? 0) + 60) hints.push(T('Du trainierst vor dem Essfenster, also nüchtern. Die erste Mahlzeit direkt nach dem Training essen.'));
     if (conflict && post.length) {
       let n = post.length, start = Math.max(Tend, post[0].t), span = lastAllowed - start, step = n > 1 ? Math.min(180, span / (n - 1)) : 0;
       while (n > 1 && step < 60) { n--; step = Math.min(180, span / (n - 1 || 1)); }
