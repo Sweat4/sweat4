@@ -186,6 +186,32 @@ h1,h2,h3{margin:0;line-height:1.2}
 .day-btn{display:flex;align-items:center;gap:12px;text-align:left;width:100%;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;cursor:pointer;min-height:72px;transition:transform .08s}
 .day-btn:active{transform:scale(.98)}
 .day-btn.next{border-color:var(--accent);background:linear-gradient(180deg,var(--accent-soft),transparent)}
+.next-bar{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:10px}
+.next-bar.warn{border-color:var(--warn,#d9822b)}
+.next-bar .nb-l{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.next-bar .nb-v{font-weight:700;font-size:16px;margin-top:2px}
+.next-bar .nb-s{font-size:12.5px;color:var(--muted);margin-top:2px}
+.next-bar .nb-s svg{vertical-align:-1px;margin-right:2px}
+.next-bar.warn .nb-s{color:var(--warn,#d9822b)}
+.tag svg{vertical-align:-1px}
+.xpick{border:1px solid var(--border);border-radius:14px;padding:10px 12px;background:var(--surface)}
+.xpick>summary{cursor:pointer;font-weight:600;display:flex;align-items:center;gap:8px;flex-wrap:wrap;list-style:none}
+.xpick>summary::-webkit-details-marker{display:none}
+.xpick>summary::before{content:'';width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(-45deg);transition:transform .15s;margin-right:2px}
+.xpick[open]>summary::before{transform:rotate(45deg)}
+.xp-cur{font-size:12.5px;color:var(--accent);font-weight:700;display:inline-flex;align-items:center;gap:4px}
+.xp-search{margin:0 0 8px}
+.xp-groups{margin-bottom:8px}
+.xp-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;max-height:46vh;overflow-y:auto;overscroll-behavior:contain;padding:2px}
+@media(max-width:380px){.xp-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.xp-tile{position:relative;display:flex;flex-direction:column;gap:4px;text-align:left;background:var(--card-grad,var(--surface));border:1px solid var(--border);border-radius:12px;padding:6px;cursor:pointer;min-width:0;color:inherit;font:inherit}
+.xp-tile .xp-media{position:relative;display:block;aspect-ratio:1;border-radius:8px;overflow:hidden}
+.xp-tile .xp-n{font-size:12.5px;font-weight:600;line-height:1.25;hyphens:auto;overflow-wrap:anywhere;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.xp-tile .xp-g{font-size:11px;color:var(--muted)}
+.xp-tile .xp-ok{position:absolute;top:10px;right:10px;width:22px;height:22px;border-radius:50%;background:var(--accent-fill,var(--accent));color:var(--accent-ink);display:none;align-items:center;justify-content:center}
+.xp-tile.sel{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent) inset;background:linear-gradient(180deg,var(--accent-soft),transparent)}
+.xp-tile.sel .xp-ok{display:flex}
+.xp-empty{grid-column:1/-1;padding:16px;text-align:center;font-size:14px}
 .day-no{width:40px;height:40px;border-radius:10px;background:var(--surface-3);display:grid;place-items:center;font-weight:800;flex:none}
 .day-btn.next .day-no{background:var(--accent-fill);color:var(--accent-ink)}
 .day-name{font-weight:700}
@@ -703,6 +729,24 @@ img.ld{opacity:1!important}
 .mi-g{display:flex;align-items:center;gap:4px;flex:none}.mi-g input{width:64px;height:38px;text-align:right;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:0 8px;font-variant-numeric:tabular-nums}.mi-g span{font-size:12px;color:var(--muted)}
 .madd{display:flex;gap:6px;flex-wrap:wrap}.madd .fchip{min-height:32px;font-size:13px;padding:0 10px}
 .mact{display:flex;gap:8px;flex-wrap:wrap}.mact .btn{min-height:42px;flex:1 1 auto}
+/* KI-Fotoanalyse */
+.vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0 0 0 0)}
+.mphoto{border:1px dashed var(--gold-line);border-radius:14px;padding:10px;display:grid;gap:8px;background:var(--accent-soft)}
+.mphoto.inline{background:none;border-style:solid;border-color:var(--border)}
+.mphoto-btns{display:flex;gap:8px;flex-wrap:wrap}.mphoto-btns .btn{flex:1 1 140px;min-height:42px;position:relative;cursor:pointer}
+.mphoto-btns .btn:focus-within{outline:2px solid var(--gold);outline-offset:2px}
+.mphoto-t{font-size:12.5px;color:var(--text-2);text-align:center}
+.ph{display:grid;gap:14px}.ph-img{margin:0;border-radius:18px;overflow:hidden;border:1px solid var(--border);background:var(--surface-2)}
+.ph-img img{display:block;width:100%;max-height:340px;object-fit:cover}
+.ph-act{display:grid;gap:8px}.ph-loading{padding:22px;text-align:center}
+.ph-kcal{font-size:34px;font-weight:700;line-height:1.1;margin:6px 0 10px}.ph-kcal small{font-size:15px;color:var(--muted);font-weight:600}
+.ph-mac{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}.ph-mac span{background:var(--surface-2);border-radius:10px;padding:8px 6px;text-align:center;font-size:11.5px;color:var(--muted);display:grid;gap:2px}.ph-mac b{font-size:16px;color:var(--text)}
+.ph-q{display:grid;gap:8px}.ph-q-a{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.ph-item .mi-n small{display:block;line-height:1.35}.tag-ai{color:var(--gold);font-weight:700}
+.mi-dot.k-x{background:var(--muted)}
+.ph-lines{margin:10px 0 0;padding-left:18px;display:grid;gap:4px;font-size:14px}
+.ph-adv{margin-top:10px;padding:10px 12px;border-radius:12px;background:var(--accent-soft);border:1px solid var(--gold-line);font-size:14px;line-height:1.45}
+@media (max-width:380px){.ph-mac{grid-template-columns:repeat(2,1fr)}}
 .trow{display:flex;gap:12px;align-items:flex-start;padding:12px;border-radius:var(--r-md);border:1px dashed var(--gold-line);background:rgba(199,164,106,.05)}
 .food-opt{display:flex;align-items:center;gap:10px;text-align:left;width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);font:inherit;cursor:pointer}
 .food-opt .grow{display:grid;gap:2px;min-width:0}.food-opt .muted{font-size:12.5px}
@@ -907,7 +951,7 @@ const DB = {
 
 /* ---------------- State ---------------- */
 const S = {}; STORES.forEach(s => S[s] = new Map());
-const UI = { search: '', sort: 'recent', open: {}, metric: 'weight', exName: {}, lastRoute: '' };
+const UI = { search: '', sort: 'recent', open: {}, xp: { q: '', g: 'Alle' }, metric: 'weight', exName: {}, lastRoute: '' };
 const all = s => [...S[s].values()];
 function dbError(e) { console.error(e); toast(T('Speichern fehlgeschlagen: ') + (e && e.message || e)); }
 function put(store, obj) { obj.updatedAt = Date.now(); S[store].set(obj.id, obj); return DB.put(store, obj).catch(dbError); }
@@ -1047,9 +1091,9 @@ const ICONS = {
   up: 'M6 15l6-6 6 6', down: 'M6 9l6 6 6-6', check: 'M5 12.5l4.5 4.5L19 7.5', chart: 'M4 19V11M10 19V5M16 19v-6M2 21h20',
   history: 'M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 3', cube: 'M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3zM12 12l8-4.5M12 12v9M12 12L4 7.5', book: 'M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4zM5 17a3 3 0 0 1 3-3h11', pause: 'M8 5v14M16 5v14', reset: 'M4 12a8 8 0 1 0 2.4-5.7L4 8.5M4 4v4.5h4.5', lock: 'M6 11h12v10H6zM8 11V7a4 4 0 0 1 8 0v4',
   db: 'M4 6c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3zM4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3',
-  search: 'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM21 21l-5-5', download: 'M12 4v12M6 10l6 6 6-6M4 20h16', upload: 'M12 16V4M6 10l6-6 6 6M4 20h16',
+  search: 'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM21 21l-5-5', camera: 'M4 8h3.2l1.8-3h6l1.8 3H20v11H4zM12 16.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z', image: 'M4 5h16v14H4zM4 16l5-5 4 4 2.5-2.5L20 17M15.5 10a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z', download: 'M12 4v12M6 10l6 6 6-6M4 20h16', upload: 'M12 16V4M6 10l6-6 6 6M4 20h16',
   bell: 'M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0', chat: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z',
-  x: 'M6 6l12 12M18 6L6 18', list: 'M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01', dumbbell: 'M6 7v10M3 9v6M18 7v10M21 9v6M6 12h12',
+  x: 'M6 6l12 12M18 6L6 18', pin: 'M12 17v5M9 3h6l-1 6 3 3v2H7v-2l3-3z', list: 'M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01', dumbbell: 'M6 7v10M3 9v6M18 7v10M21 9v6M6 12h12',
 };
 function ic(n, s = 20) {
   if (n === 'more') return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>`;
@@ -1080,12 +1124,35 @@ const sessionVolume = sess => sess.exercises.reduce((t, e) => t + e.sets.filter(
 const sessionSets = sess => sess.exercises.reduce((t, e) => t + e.sets.filter(isPerformed).length, 0);
 const sessLabel = s => dayLabel(s.dayIndex ?? 0, TD(s.dayName));
 
-function nextDay(cid) {
-  const days = clientDays(cid); if (!days.length) return null;
+/* Nächster Trainingstag
+   1. Gültige Festlegung des Trainers (plan.nextSel) hat Vorrang.
+   2. Sonst automatische Reihenfolge: der Tag nach dem zuletzt abgeschlossenen Training.
+   Die Festlegung gilt, bis ein Training abgeschlossen wird, das NACH ihr begonnen wurde (danach läuft die Reihenfolge ab dort weiter).
+   Verweist sie auf einen gelöschten Tag, wird sie ignoriert (Rückfall auf die Reihenfolge) und der Trainer sieht einen Hinweis. */
+function nextDayAuto(cid, days) {
   const last = lastSession(cid); if (!last) return days[0];
   let i = days.findIndex(d => d.id === last.dayId);
   if (i < 0) i = days.findIndex(d => norm(d.name) === norm(last.dayName));
   return i < 0 ? days[0] : days[(i + 1) % days.length];
+}
+const selUsed = (cid, sel) => sessionsOf(cid, true).some(s => s.selId ? s.selId === sel.id : (s.startedAt || 0) > (sel.at || 0));
+function nextDayInfo(cid) {
+  const days = clientDays(cid), p = planOf(cid), sel = p && p.nextSel;
+  if (!days.length) return { day: null, manual: false, invalid: !!(sel && sel.dayId) };
+  if (sel && sel.dayId) {
+    const d = days.find(x => x.id === sel.dayId);
+    if (!d) return { day: nextDayAuto(cid, days), manual: false, invalid: true };
+    if (!selUsed(cid, sel)) return { day: d, manual: true, invalid: false, sel };
+  }
+  return { day: nextDayAuto(cid, days), manual: false, invalid: false };
+}
+const nextDay = cid => nextDayInfo(cid).day;
+/* Trainer: Festlegung speichern (dayId = null → zurück zur automatischen Reihenfolge). Die neueste Festlegung ersetzt die alte. */
+function setNextDay(cid, dayId) {
+  const p = planOf(cid); if (!p) return null;
+  if (dayId && !daysOf(p.id).some(d => d.id === dayId)) throw new Error('Dieser Trainingstag gehört nicht zum aktuellen Plan.');
+  p.nextSel = { id: uid(), dayId: dayId || null, at: Date.now() }; put('plans', p);
+  return p.nextSel;
 }
 function lastResult(cid, exerciseId, name, excludeId) {
   const n = norm(name);
@@ -1342,7 +1409,7 @@ function applyTemplate(cid, tplId) {
   const tpl = SWEAT4_SYSTEM.find(t => t.id === tplId); if (!tpl) return;
   const plan = ensurePlan(cid);
   daysOf(plan.id).forEach(d => { exercisesOf(d.id).forEach(e => del('exercises', e.id)); del('days', d.id); });
-  Object.assign(plan, { name: 'SWEAT4 · ' + tpl.title, templateId: tpl.id }); put('plans', plan);
+  Object.assign(plan, { name: 'SWEAT4 · ' + tpl.title, templateId: tpl.id, nextSel: plan.nextSel && plan.nextSel.dayId ? { id: uid(), dayId: null, at: Date.now() } : plan.nextSel || null }); put('plans', plan);
   tpl.days.slice(0, CONFIG.MAX_DAYS).forEach(([dayName, exs], i) => {
     const day = { id: uid(), planId: plan.id, name: dayName, order: i }; put('days', day);
     exs.slice(0, CONFIG.MAX_EXERCISES).forEach((x, j) => {
@@ -1451,8 +1518,46 @@ function sparkline(vals, w = 120, h = 28) {
   return `<svg class="spark" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 }
 
+/* Trainer: Steuerung „Nächster Trainingstag“ im Bereich Trainingspläne */
+function NextDayBar(c, days, nxi) {
+  const d = nxi.day, i = days.indexOf(d);
+  return `<div class="next-bar ${nxi.invalid ? 'warn' : ''}"><div class="grow"><div class="nb-l">Nächstes Training</div>
+      <div class="nb-v">${d ? `Tag ${i + 1} · ${esc(d.name)}` : '–'}</div>
+      <div class="nb-s">${nxi.invalid ? 'Der festgelegte Tag existiert nicht mehr – es gilt die Reihenfolge. Bitte neu festlegen.' : nxi.manual ? `${ic('pin', 12)} Von dir festgelegt · gilt bis zum nächsten abgeschlossenen Training` : 'Automatisch nach Reihenfolge'}</div></div>
+    <button class="btn btn-sm btn-ghost" data-action="next-pick" data-cid="${c.id}">${ic('edit', 16)} Festlegen</button></div>`;
+}
+function openNextPick(cid) {
+  const c = S.clients.get(cid), days = clientDays(cid), nxi = nextDayInfo(cid); if (!c || !days.length) return;
+  const online = !!(c.access && c.access.code && boxUrl());
+  modal('Nächsten Trainingstag festlegen', `<p class="muted" style="margin:0 0 12px">Welches Training soll ${esc(c.name.split(' ')[0])} als Nächstes machen? Bisherige Trainings bleiben unverändert.</p>
+    <div class="pick-list">${days.map((d, i) => `<button type="button" class="day-btn tap ${nxi.day === d ? 'next' : ''}" data-action="next-set" data-cid="${cid}" data-did="${d.id}" aria-pressed="${nxi.day === d}">
+        <span class="day-no">${i + 1}</span><span class="grow"><span class="day-name">${esc(d.name)}</span><br><span class="muted" style="font-size:13px">${exercisesOf(d.id).length} Übungen</span></span>
+        ${nxi.day === d ? `<span class="tag">${nxi.manual ? ic('pin', 12) + ' ' : ''}Als Nächstes</span>` : ''}</button>`).join('')}
+      <button type="button" class="day-btn tap" data-action="next-set" data-cid="${cid}" data-did=""><span class="day-no">${ic('reset', 16)}</span><span class="grow"><span class="day-name">Automatisch</span><br><span class="muted" style="font-size:13px">Reihenfolge des Plans (Tag nach dem letzten Training)</span></span>${!nxi.manual ? '<span class="tag">aktiv</span>' : ''}</button></div>
+    ${online ? `<label class="toggle" style="margin-top:14px"><input type="checkbox" id="next-inform"><span class="tg"></span><span>${esc(c.name.split(' ')[0])} über die Änderung informieren<small>Schickt zusätzlich eine Nachricht in die App. Die Festlegung wird auch ohne Nachricht übertragen.</small></span></label>`
+      : `<div class="muted" style="font-size:12.5px;margin-top:12px">${esc(c.name.split(' ')[0])} ist noch nicht online verbunden – die Festlegung kommt mit dem nächsten Update bzw. der nächsten Zugangsdatei an.</div>`}`);
+}
+async function nextSetAndSync(cid, dayId, inform) {
+  const c = S.clients.get(cid), sel = setNextDay(cid, dayId), days = clientDays(cid);
+  const d = dayId ? days.find(x => x.id === dayId) : nextDay(cid), label = d ? `Tag ${days.indexOf(d) + 1} · ${d.name}` : '–';
+  render();
+  if (!(c.access && c.access.code && boxUrl())) { toast(dayId ? `${label} ist als Nächstes festgelegt ✓` : 'Automatische Reihenfolge aktiv ✓'); return { sel, sent: false }; }
+  let sent = false, err = '';
+  try { await boxSendUpdate(cid); sent = true; } catch (e) { err = e.message; }
+  if (sent && inform && d) {
+    const en = c.lang === 'en', i = days.indexOf(d) + 1;
+    const m = { id: uid(), clientId: cid, from: 'trainer', at: Date.now(), kind: null, sessionId: null, readAt: null,
+      text: en ? `Your next workout: Day ${i} – ${TD(d.name)}. Open the app to see it.` : `Dein nächstes Training: Tag ${i} – ${d.name}. Öffne die App, dann siehst du es.` };
+    put('messages', m);
+    try { await boxSendMessages(cid); } catch (e) {}
+  }
+  toast(sent ? `${dayId ? label + ' ist als Nächstes festgelegt' : 'Automatische Reihenfolge aktiv'} und an ${c.name.split(' ')[0]} übertragen ✓`
+    : `Gespeichert ✓ – Übertragung fehlgeschlagen (${err}). Später „Update senden“ tippen.`);
+  render();
+  return { sel, sent };
+}
 function viewClient(c) {
-  const days = clientDays(c.id), done = sessionsOf(c.id, true), last = done[0], next = nextDay(c.id), active = activeSession(c.id), trend = volumeTrend(c.id);
+  const days = clientDays(c.id), done = sessionsOf(c.id, true), last = done[0], nxi = nextDayInfo(c.id), next = nxi.day, active = activeSession(c.id), trend = volumeTrend(c.id);
   const n30 = done.filter(s => daysBetween(s.date, today()) <= 30).length;
   const vols = done.slice(0, 12).reverse().map(sessionVolume).filter(v => v > 0);
   const trendHtml = trend ? `<span class="${trend.pct >= 0 ? 'up' : 'down'}">${trend.pct >= 0 ? '+' : ''}${fmtNum(Math.round(trend.pct))} %</span>` : '–';
@@ -1462,7 +1567,7 @@ function viewClient(c) {
     <div class="stats four">
       <div class="stat"><div class="stat-l">Letztes Training</div><div class="stat-v">${last ? fmtDate(last.date) : '–'}</div><div class="stat-s">${last ? relDays(last.date) + ' · ' + esc(sessLabel(last)) : 'noch keins'}</div></div>
       <div class="stat"><div class="stat-l">Trainingsplan</div><div class="stat-v">${days.length} ${days.length === 1 ? 'Tag' : 'Tage'}</div><div class="stat-s">${esc(planOf(c.id)?.name || 'noch nicht angelegt')}</div></div>
-      <div class="stat"><div class="stat-l">Nächstes Training</div><div class="stat-v">${next ? 'Tag ' + (days.indexOf(next) + 1) : '–'}</div><div class="stat-s">${next ? esc(next.name) : 'kein Plan'}</div></div>
+      <div class="stat"><div class="stat-l">Nächstes Training</div><div class="stat-v">${next ? 'Tag ' + (days.indexOf(next) + 1) : '–'}</div><div class="stat-s">${next ? esc(next.name) + (nxi.manual ? ' · festgelegt' : '') : 'kein Plan'}</div></div>
       <div class="stat"><div class="stat-l">Fortschritt</div><div class="stat-v">${trendHtml}</div><div class="stat-s">${trend ? 'Volumen vs. letztes Mal' : 'noch zu wenig Daten'}</div>${sparkline(vols)}</div>
     </div>
     <div style="margin-top:16px">
@@ -1480,11 +1585,11 @@ function viewClient(c) {
 
     <section class="section">
       <div class="section-h"><h2>Trainingspläne</h2><a class="btn btn-sm btn-ghost" href="#/client/${c.id}/plan">${ic('edit', 16)} Plan bearbeiten</a></div>
-      ${days.length ? `<div class="day-grid">${days.map((d, i) => `
+      ${days.length ? `${NextDayBar(c, days, nxi)}<div class="day-grid">${days.map((d, i) => `
         <button class="day-btn ${next && next.id === d.id ? 'next' : ''}" data-action="start-day" data-cid="${c.id}" data-did="${d.id}">
           <span class="day-no">${i + 1}</span>
           <span class="grow"><span class="day-name">${esc(d.name)}</span><br><span class="muted" style="font-size:14px">${exercisesOf(d.id).length} Übungen</span></span>
-          ${next && next.id === d.id ? '<span class="tag">Als Nächstes</span>' : `<span class="muted">${ic('play', 16)}</span>`}
+          ${next && next.id === d.id ? `<span class="tag">${nxi.manual ? ic('pin', 12) + ' ' : ''}Als Nächstes</span>` : `<span class="muted">${ic('play', 16)}</span>`}
         </button>`).join('')}</div><div class="muted" style="font-size:13px;margin-top:8px">Tippe auf einen Trainingstag, um direkt dieses Training zu starten.</div>`
       : `<div class="card empty">Noch kein Trainingsplan angelegt.<br><a class="btn btn-primary" style="margin-top:14px" href="#/client/${c.id}/plan">${ic('plus')} Trainingsplan erstellen</a></div>`}
     </section>
@@ -1882,13 +1987,47 @@ function resizeImage(file, max = 320) {
     r.onerror = () => rej(r.error); r.readAsDataURL(file);
   });
 }
+/* Übungsauswahl im Übungsdialog: Katalog-Raster bleibt offen, jeder Tipp ersetzt die Auswahl, übernommen wird erst mit „Speichern“.
+   Früher: native Vorschlagsliste (datalist) – sie filtert nach dem bereits eingetragenen Namen, nach einem Fehltipp waren die anderen Übungen weg. */
+function xpGridHtml(sel) {
+  const g = UI.xp.g, n = normK(UI.xp.q || '');
+  const L = KAT().filter(e => (g === 'Alle' || e.g === g) && (!n || n.split(' ').every(w => katHay(e).includes(w))));
+  if (!L.length) return `<div class="muted xp-empty">${T('Keine passende Übung')}</div>`;
+  return L.map(e0 => { const e = KL(e0), on = e.id === sel;
+    return `<button type="button" class="xp-tile ${on ? 'sel' : ''}" data-action="xp-pick" data-id="${e.id}" aria-pressed="${on}"><span class="xp-media">${ExercisePreview(e.id, 'xp-prev')}</span>
+      <span class="xp-n">${esc(e.n)}</span><span class="xp-g">${esc(TG(e.g))}</span><span class="xp-ok" aria-hidden="true">${ic('check', 14)}</span></button>`; }).join('');
+}
+function xpRefresh(f) { const gr = f && f.querySelector('#xp-grid'); if (!gr) return; gr.innerHTML = xpGridHtml(f.dataset.cat || ''); hydrateThumbs(gr); }
+function xpMark(f) {
+  const sel = f.dataset.cat || '';
+  f.querySelectorAll('.xp-tile').forEach(b => { const on = b.dataset.id === sel; b.classList.toggle('sel', on); b.setAttribute('aria-pressed', on); });
+  const k = sel && KAT().find(x => x.id === sel), cur = f.querySelector('.xp-cur'); if (cur) cur.innerHTML = k ? `${ic('check', 14)} ${esc(KL(k).n)}` : '';
+}
+/* Name geändert (getippt oder im Raster gewählt): Zählweise und Steigerungsschritt passend vorschlagen, solange nicht selbst gesetzt */
+function exNameChanged(f) {
+  const v = f.querySelector('[name=name]').value;
+  if (!f.dataset.unitTouched) { const k = katFind(v, f.dataset.cat), r = f.querySelector(`[name=unit][value="${k && k.unit === 's' ? 's' : ''}"]`); if (r) r.checked = true; }
+  if (!f.dataset.stepTouched) {
+    const ex = f.dataset.id && S.exercises.get(f.dataset.id);
+    if (!(ex && ex.step > 0)) { const r = f.querySelector(`[name=stepSel][value="${defaultStep(v)}"]`); if (r) { r.checked = true; f.querySelector('.step-custom').classList.add('hidden'); } }
+  }
+}
 function openExModal(dayId, exId) {
   const e = exId ? S.exercises.get(exId) : null, n = e ? e.targetSets || CONFIG.DEFAULT_SETS : CONFIG.DEFAULT_SETS, sets = e ? e.sets || [] : [];
-  const known = new Set(); all('exercises').forEach(x => known.add(x.name)); all('sessions').forEach(s => s.exercises.forEach(x => known.add(x.name))); KAT().forEach(x => known.add(x.n));
-  modal(e ? 'Übung bearbeiten' : 'Neue Übung', `<form data-form="exercise" data-did="${dayId}" data-id="${exId || ''}">
+  const known = new Set(); all('exercises').forEach(x => known.add(x.name)); all('sessions').forEach(s => s.exercises.forEach(x => known.add(x.name)));
+  const own = [...known].filter(x => x && !katFind(x)); // eigene Übungen (nicht im Katalog) weiter als Vorschlag beim Tippen
+  const sel = e ? ((e.catalogId && KAT().some(x => x.id === e.catalogId)) ? e.catalogId : ((katFind(e.name) || {}).id || '')) : '';
+  UI.xp = { q: '', g: 'Alle' };
+  const groups = (window.SW_GRUPPEN || []).filter(g => KAT().some(x => x.g === g));
+  modal(e ? 'Übung bearbeiten' : 'Neue Übung', `<form data-form="exercise" data-did="${dayId}" data-id="${exId || ''}" data-cat="${esc(sel)}" ${e ? 'data-unit-touched="1"' : ''}>
+    ${KAT().length ? `<details class="xpick field" ${e ? '' : 'open'}><summary><span>${e ? 'Andere Übung aus dem Katalog wählen' : 'Übung aus dem Katalog wählen'}</span><span class="xp-cur"></span></summary>
+      <div class="muted" style="font-size:12px;margin:8px 0 10px">Übung antippen – bei einem Fehltipp einfach eine andere antippen. Übernommen wird mit „Speichern“.</div>
+      <label class="search xp-search">${ic('search')}<input id="xp-q" type="search" placeholder="${T('Übung, Muskel oder Gerät suchen')}" autocomplete="off" enterkeyhint="search"></label>
+      <div class="frow xp-groups" role="group" aria-label="${T('Muskelgruppe')}">${FilterChip(T('Alle'), true, 'xp-group', 'Alle')}${groups.map(g => FilterChip(TG(g), false, 'xp-group', g)).join('')}</div>
+      <div class="xp-grid" id="xp-grid">${xpGridHtml(sel)}</div></details>` : ''}
     <label class="field"><span>Name der Übung *</span><input name="name" required maxlength="80" autocomplete="off" list="ex-names" value="${esc(e ? e.name : '')}" placeholder="z. B. Bankdrücken"></label>
-    <div class="muted" style="font-size:12px;margin:-8px 0 14px">Tipp: Namen aus dem Übungskatalog wählen – dann ist die 3D-Ausführung automatisch verknüpft.</div>
-    <datalist id="ex-names">${[...known].sort((a, b) => a.localeCompare(b, 'de')).map(x => `<option value="${esc(x)}">`).join('')}</datalist>
+    <div class="muted" style="font-size:12px;margin:-8px 0 14px">Eigene Übung? Einfach den Namen eintippen. Übungen aus dem Katalog sind automatisch mit der 3D-Ausführung verknüpft.</div>
+    <datalist id="ex-names">${own.sort((a, b) => a.localeCompare(b, 'de')).map(x => `<option value="${esc(x)}">`).join('')}</datalist>
     <div class="field"><span>Anzahl Sätze</span><div class="radio-seg">${Array.from({ length: CONFIG.MAX_SETS }, (_, i) => `<label><input type="radio" name="targetSets" value="${i + 1}" ${i + 1 === n ? 'checked' : ''}><span>${i + 1}</span></label>`).join('')}</div></div>
     ${(() => { const un = e ? e.unit : ((katFind(e ? e.name : '') || {}).unit || null);
       return `<div class="field"><span>Zählweise</span><div class="radio-seg unit-seg"><label><input type="radio" name="unit" value="" ${un !== 's' ? 'checked' : ''}><span>Wiederholungen</span></label><label><input type="radio" name="unit" value="s" ${un === 's' ? 'checked' : ''}><span>Sekunden (halten)</span></label></div>
@@ -1912,7 +2051,10 @@ function openExModal(dayId, exId) {
         <label><span class="muted">Ziel (optional)</span><input class="input" name="goalWeight" inputmode="decimal" placeholder="kg" value="${fmtIn(pg.goal)}" autocomplete="off"></label></div></div>`; })()}
     <label class="field"><span>Übungsnotiz</span><textarea name="note" rows="2" placeholder="z. B. Technik verbessern">${esc(e ? e.note : '')}</textarea></label>
     <div class="sheet-actions"><button type="button" class="btn btn-ghost" data-action="modal-close">Abbrechen</button><button class="btn btn-primary">Speichern</button></div></form>`,
-    el => { if (!e) el.querySelector('[name=name]').focus(); });
+    el => { const f = el.querySelector('form'); xpMark(f); hydrateThumbs(el);
+      const d = f.querySelector('.xpick');
+      if (d) d.addEventListener('toggle', () => { if (d.open) { hydrateThumbs(d); const t = d.querySelector('.xp-tile.sel'); if (t) t.scrollIntoView({ block: 'nearest' }); } });
+      else if (!e) f.querySelector('[name=name]').focus(); });
 }
 const reorder = (list, store) => list.forEach((x, i) => { if (x.order !== i) { x.order = i; put(store, x); } });
 function moveIn(list, id, dir, store) {
@@ -1929,6 +2071,7 @@ function createSession(cid, dayId) {
     sets: Array.from({ length: Math.max(1, Math.min(CONFIG.MAX_SETS, e.targetSets || CONFIG.DEFAULT_SETS)) }, blankSet),
   }));
   const s = { id: uid(), clientId: cid, planId: plan ? plan.id : null, dayId, dayName: day.name, dayIndex: days.findIndex(d => d.id === dayId),
+    selId: plan && plan.nextSel && plan.nextSel.dayId ? plan.nextSel.id : null, // Festlegung, die beim Start galt (wird mit dem Abschluss verbraucht)
     date: today(), startedAt: Date.now(), finishedAt: null, status: 'active', note: '', exercises, createdAt: Date.now() };
   put('sessions', s); return s;
 }
@@ -2104,7 +2247,22 @@ const A = {
   'del-day': async el => {
     const d = S.days.get(el.dataset.id), exs = exercisesOf(d.id);
     if (!await confirmDialog(T('Trainingstag löschen?'), `<b>${esc(d.name)}</b> mit ${exs.length} Übungen wird aus dem Plan entfernt. Bereits dokumentierte Trainings bleiben in der Historie erhalten.`, { ok: T('Löschen'), danger: true })) return;
-    exs.forEach(e => del('exercises', e.id)); del('days', d.id); reorder(daysOf(d.planId), 'days'); render();
+    exs.forEach(e => del('exercises', e.id)); del('days', d.id); reorder(daysOf(d.planId), 'days');
+    const p = S.plans.get(d.planId);
+    if (p && p.nextSel && p.nextSel.dayId === d.id) { p.nextSel = { id: uid(), dayId: null, at: Date.now() }; put('plans', p); toast('Dieser Tag war als Nächstes festgelegt – jetzt gilt wieder die Reihenfolge. Du kannst neu festlegen.'); }
+    render();
+  },
+  'xp-pick': el => { const f = el.closest('form'), k = KAT().find(x => x.id === el.dataset.id); if (!f || !k) return;
+    f.dataset.cat = k.id; f.querySelector('[name=name]').value = k.n; xpMark(f); exNameChanged(f); },
+  'xp-group': el => { const f = el.closest('form'); UI.xp.g = el.dataset.v;
+    f.querySelectorAll('[data-action="xp-group"]').forEach(b => { const on = b === el; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); }); xpRefresh(f); },
+  'next-pick': el => openNextPick(el.dataset.cid),
+  'next-set': async el => {
+    if (el.disabled) return;
+    const inf = document.getElementById('next-inform'), inform = !!(inf && inf.checked);
+    document.querySelectorAll('[data-action="next-set"]').forEach(b => b.disabled = true);
+    closeModal(null);
+    try { await nextSetAndSync(el.dataset.cid, el.dataset.did || null, inform); } catch (e) { toast(e.message); }
   },
   'day-move': el => { const d = S.days.get(el.dataset.id); moveIn(daysOf(d.planId), d.id, +el.dataset.dir, 'days'); render(); },
   'add-ex': el => { if (exercisesOf(el.dataset.did).length >= CONFIG.MAX_EXERCISES) return toast(`Maximal ${CONFIG.MAX_EXERCISES} Übungen pro Tag`); openExModal(el.dataset.did); },
@@ -2245,7 +2403,9 @@ document.addEventListener('submit', async ev => {
     let e = f.dataset.id ? S.exercises.get(f.dataset.id) : null;
     if (!e) { if (exercisesOf(did).length >= CONFIG.MAX_EXERCISES) return toast(T('Maximum erreicht')); e = { id: uid(), dayId: did, order: exercisesOf(did).length, createdAt: Date.now() }; }
     Object.assign(e, { name, targetSets: n, sets, note: String(fd.get('note') || '').trim(), ss: String(fd.get('ss') || '') || null, amrap: fd.get('amrap') === 'on', unit: fd.get('unit') === 's' ? 's' : null, rest: (r => r > 0 && r <= 600 ? Math.round(r) : null)(parseNum(fd.get('rest'))) });
-    const k3 = katFind(name); e.catalogId = k3 ? k3.id : null;
+    // Katalog-Verknüpfung: die im Raster gewählte Übung (eindeutige ID), solange der Name nicht von Hand geändert wurde; sonst Suche über den Namen
+    const kSel = f.dataset.cat && KAT().find(x => x.id === f.dataset.cat), k3 = kSel && normK(kSel.n) === normK(name) ? kSel : katFind(name);
+    e.catalogId = k3 ? k3.id : null;
     // Progression – Werte exakt speichern (keine Rundung)
     const ss = fd.get('stepSel');
     let step = ss === 'custom' ? parseNum(fd.get('stepCustom')) : parseNum(ss);
@@ -2256,17 +2416,15 @@ document.addEventListener('submit', async ev => {
     put('exercises', e); closeModal(null); render();
   }
 });
+document.addEventListener('keydown', ev => { if (ev.key === 'Enter' && ev.target && ev.target.id === 'xp-q') { ev.preventDefault(); ev.target.blur(); } });
 document.addEventListener('input', ev => {
   const t = ev.target;
   if (t.id === 'search') return filterClients(t.value);
-  if (t.name === 'name' && t.form && t.form.dataset.form === 'exercise' && !t.form.dataset.unitTouched) {
-    const k = katFind(t.value), r = t.form.querySelector(`[name=unit][value="${k && k.unit === 's' ? 's' : ''}"]`); if (r) r.checked = true;
+  if (t.name === 'name' && t.form && t.form.dataset.form === 'exercise') {
+    const k = katFind(t.value); t.form.dataset.cat = k ? k.id : ''; xpMark(t.form); exNameChanged(t.form);
   }
+  if (t.id === 'xp-q' && t.form) { UI.xp.q = t.value; xpRefresh(t.form); return; }
   if (t.name === 'unit' && t.form && t.form.dataset.form === 'exercise') t.form.dataset.unitTouched = '1';
-  if (t.name === 'name' && t.form && t.form.dataset.form === 'exercise' && !t.form.dataset.stepTouched) {
-    const ex = t.form.dataset.id && S.exercises.get(t.form.dataset.id);
-    if (!(ex && ex.step > 0)) { const r = t.form.querySelector(`[name=stepSel][value="${defaultStep(t.value)}"]`); if (r) { r.checked = true; t.form.querySelector('.step-custom').classList.add('hidden'); } }
-  }
   const f = t.dataset.tf; if (!f) return;
   const sess = curSession(); if (!sess) return;
   if (f === 'date') { if (t.value) { sess.date = t.value; saveSessionSoon(sess); } return; }
@@ -3274,8 +3432,228 @@ function MealCard(c, m, idx, per, cfg) {
       <div class="mact">${items.length ? `<button class="btn btn-primary" data-action="meal-fit" data-k="${key}" data-p="${tgt.p}" data-c="${tgt.c}" data-f="${tgt.f}">${T('Mengen berechnen')}</button>` : ''}
         <button class="btn btn-ghost" data-action="meal-example" data-k="${key}" data-p="${tgt.p}" data-c="${tgt.c}" data-f="${tgt.f}">${T('Beispiel laden')}</button>
         ${items.length ? `<button class="btn btn-text" data-action="meal-copy" data-k="${key}">${T('Für alle übernehmen')}</button>` : ''}</div>
+      ${PhotoPick(key, tgt)}
     </div></div>`;
 }
+/* =====================================================================
+   KI-FOTOANALYSE FÜR MAHLZEITEN
+   Foto aufnehmen/hochladen → auf dem Gerät verkleinern → an den eigenen SWEAT4-Server
+   (Briefkasten-Worker, Endpunkt /ai/meal) → Bild-KI erkennt Lebensmittel & schätzt Gramm.
+   Nährwerte kommen aus der Lebensmittel-Datenbank (lebensmittel.js); nur Lebensmittel, die dort
+   fehlen, nutzen Richtwerte pro 100 g der KI und sind sichtbar als „KI-Schätzung“ markiert.
+   Das Foto bleibt nur im Arbeitsspeicher und wird nirgends gespeichert.
+   Tagesprotokoll „Heute erfasst“: meta-Eintrag mlog:<Kunde>:<Datum>, je Analyse eine feste ID
+   (erneutes Speichern ersetzt den Eintrag → keine Doppelzählung).
+   ===================================================================== */
+const PHOTO = { MAX_SIDE: 1280, MAX_B64: 1900000, MAX_FILE: 25 * 1024 * 1024, TIMEOUT: 70000 };
+let photoReq = null;   // laufende Anfrage (verhindert Doppelklicks)
+
+async function shrinkImage(file) {
+  if (!file || !/^image\//.test(file.type || 'image/')) throw new Error(T('Bitte wähle ein Foto aus.'));
+  if (file.size > PHOTO.MAX_FILE) throw new Error(T('Das Foto ist zu groß (max. 25 MB).'));
+  let src;
+  try { src = await createImageBitmap(file, { imageOrientation: 'from-image' }); }
+  catch (e) {
+    src = await new Promise((res, rej) => { const u = URL.createObjectURL(file), im = new Image(); im.onload = () => { URL.revokeObjectURL(u); res(im); }; im.onerror = () => { URL.revokeObjectURL(u); rej(new Error(T('Dieses Bildformat kann hier nicht gelesen werden. Bitte als JPG oder PNG versuchen.'))); }; im.src = u; });
+  }
+  const w0 = src.width || src.naturalWidth, h0 = src.height || src.naturalHeight, k = Math.min(1, PHOTO.MAX_SIDE / Math.max(w0, h0));
+  const cv = document.createElement('canvas'); cv.width = Math.round(w0 * k); cv.height = Math.round(h0 * k);
+  cv.getContext('2d').drawImage(src, 0, 0, cv.width, cv.height);
+  if (src.close) src.close();
+  let q = .82, url = cv.toDataURL('image/jpeg', q);
+  while (url.length - 23 > PHOTO.MAX_B64 && q > .4) { q -= .12; url = cv.toDataURL('image/jpeg', q); }
+  return { url, b64: url.slice(url.indexOf(',') + 1), mime: 'image/jpeg' };
+}
+
+/* ---------- Nährwerte ---------- */
+const per100Of = it => { const f = it.foodId && foodById(it.foodId); return f ? { p: f.p, c: f.c, f: f.f, fi: f.fi || 0 } : (it.per100 || null); };
+function photoItemVals(it) {
+  const pc = per100Of(it), k = (Number(it.g) || 0) / 100; if (!pc) return { p: 0, c: 0, f: 0, fi: 0, kcal: 0 };
+  const v = { p: pc.p * k, c: pc.c * k, f: pc.f * k, fi: (pc.fi || 0) * k }; v.kcal = v.p * 4 + v.c * 4 + v.f * 9; return v;
+}
+function photoTotals(items) { const t = { p: 0, c: 0, f: 0, fi: 0, kcal: 0 }; for (const it of items) { const v = photoItemVals(it); for (const k in t) t[k] += v[k]; } return t; }
+const photoName = it => { const f = it.foodId && foodById(it.foodId); return f ? FN(f) : it.name; };
+
+/* ---------- Tagesprotokoll ---------- */
+const mlogKey = (cid, d = today()) => `mlog:${cid}:${d}`;
+const mealLog = (cid, d = today()) => ((S.meta.get(mlogKey(cid, d)) || {}).entries || []);
+function mealLogSave(cid, entry) {
+  const key = mlogKey(cid), entries = mealLog(cid).filter(e => e.id !== entry.id).concat([entry]).sort((a, b) => a.at - b.at);
+  put('meta', { id: key, entries });
+}
+function mealLogRemove(cid, id) { put('meta', { id: mlogKey(cid), entries: mealLog(cid).filter(e => e.id !== id) }); }
+function eatenToday(cid, exceptId) { const t = { p: 0, c: 0, f: 0, fi: 0, kcal: 0 }; for (const e of mealLog(cid)) if (e.id !== exceptId) for (const k in t) t[k] += e.tot[k] || 0; return t; }
+
+/* ---------- Ablauf ---------- */
+async function photoPicked(input) {
+  const file = input.files && input.files[0]; input.value = ''; if (!file) return;
+  const c = mealClient(); if (!c) return;
+  try {
+    const img = await shrinkImage(file);
+    UI.photo = { id: uid(), cid: c.id, key: input.dataset.photo, tgt: { p: +input.dataset.p || 0, c: +input.dataset.c || 0, f: +input.dataset.f || 0 },
+      img, status: 'idle', items: [], questions: [], note: '', err: '', saved: false };
+    go(`/client/${c.id}/foto`);
+  } catch (e) { toast(e.message || T('Das Foto konnte nicht geladen werden.')); }
+}
+async function photoCreds(c) {
+  if (isClientMode()) { const code = BOX.code || await askCode(T('Zugangscode für die Fotoanalyse')); return code ? boxKeys(c.id, code) : null; }
+  return c.access && c.access.code ? boxKeys(c.id, c.access.code) : null;
+}
+const AI_ERR = {
+  ai_not_configured: () => T('Die Fotoanalyse ist auf dem SWEAT4-Server noch nicht eingerichtet (API-Schlüssel fehlt). Bitte gib die Mahlzeit vorerst manuell ein.'),
+  limit: () => T('Das Tageslimit für Fotoanalysen ist erreicht. Morgen geht es wieder – bis dahin bitte manuell eingeben.'),
+  forbidden: () => T('Der Server hat den Zugang abgelehnt. Bitte prüfe deinen Zugangscode.'),
+  image_too_large: () => T('Das Foto ist zu groß. Bitte ein anderes Foto versuchen.'),
+  image_type: () => T('Dieses Bildformat wird nicht unterstützt.'),
+};
+async function photoAnalyze() {
+  const P = UI.photo; if (!P || photoReq) return;
+  const c = S.clients.get(P.cid); if (!c) return;
+  const ctl = new AbortController(); photoReq = ctl;          // sofort sperren → kein Doppelklick
+  const u = boxUrl();
+  const fail = msg => { P.status = 'error'; P.err = msg; photoReq = null; render(); };
+  if (!u) return fail(T('Die Fotoanalyse braucht die Verbindung zum SWEAT4-Server. Bitte wende dich an deinen Trainer.'));
+  P.status = 'loading'; P.err = ''; render();
+  let keys; try { keys = await photoCreds(c); } catch (e) { keys = null; }
+  if (!keys) return fail(isClientMode() ? T('Ohne Zugangscode ist keine Analyse möglich.') : T('Für diesen Kunden ist noch kein Zugang eingerichtet (Einladung fehlt).'));
+  const timer = setTimeout(() => ctl.abort(), PHOTO.TIMEOUT);
+  try {
+    const r = await fetch(`${u}/ai/meal`, { method: 'POST', signal: ctl.signal, headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: keys.id, token: keys.token, image: P.img.b64, mime: P.img.mime, lang: isEN() ? 'en' : 'de', foods: FOODS().map(f => ({ id: f.id, n: f.n })) }) });
+    let j = null; try { j = await r.json(); } catch (e) {}
+    if (!r.ok) return fail((j && AI_ERR[j.error] ? AI_ERR[j.error]() : T('Die Bild-KI ist gerade nicht erreichbar ({s}). Bitte später erneut versuchen.', { s: r.status })));
+    if (UI.photo !== P) { photoReq = null; return; }   // inzwischen anderes Foto gewählt
+    P.items = (j.items || []).map(it => ({ uid: uid(), name: it.name, foodId: it.foodId, g: it.grams, portion: it.portion || '', conf: it.confidence, per100: it.per100 || null }));
+    P.questions = (j.questions || []).map(q => ({ uid: uid(), q: q.q, add: q.add }));
+    P.note = j.note || ''; P.status = 'done'; P.saved = false; photoReq = null; render();
+  } catch (e) {
+    fail(e && e.name === 'AbortError' ? T('Die Analyse hat zu lange gedauert. Bitte erneut versuchen.') : T('Der SWEAT4-Server ist nicht erreichbar. Bist du online?'));
+  } finally { clearTimeout(timer); }
+}
+
+/* ---------- Empfehlungen (aus den echten Zahlen, ohne Verbote) ---------- */
+function photoAdvice(tot, mealT, remain) {
+  const out = [], mk = mealT.p * 4 + mealT.c * 4 + mealT.f * 9, ratio = mk > 0 ? tot.kcal / mk : 1;
+  if (tot.p >= Math.max(20, mealT.p * .8)) out.push(T('Diese Mahlzeit liefert dir bereits eine gute Menge Protein.'));
+  else if (remain.p > 20) out.push(T('Wenn du heute noch Protein brauchst, könntest du später zum Beispiel Skyr, Magerquark oder Hähnchen ergänzen.'));
+  if (remain.kcal < -50) out.push(T('Du liegst heute etwa {k} kcal über deinem Ziel. Kein Problem – ein einzelner Tag entscheidet nicht über deinen Fortschritt.', { k: Math.round(-remain.kcal) }));
+  else if (ratio > 1.3) out.push(T('Die Mahlzeit ist etwas größer als geplant. Wenn du dein Kalorienziel einhalten möchtest, wähle bei der nächsten Mahlzeit eine etwas kleinere Portion einer energiereichen Beilage.'));
+  else if (ratio >= .7) out.push(T('Die Mahlzeit passt gut in deinen Plan. Du musst deshalb auf nichts verzichten.'));
+  else if (ratio < .6 && remain.kcal > 200) out.push(T('Die Mahlzeit ist eher klein. Plane die fehlende Energie gern in einer der nächsten Mahlzeiten ein.'));
+  if (tot.kcal > 300 && tot.fi < 3) out.push(T('Etwas Gemüse oder Obst dazu bringt Ballaststoffe und macht länger satt.'));
+  return out;
+}
+
+/* ---------- Ansicht ---------- */
+const kcalOf = m => m.p * 4 + m.c * 4 + m.f * 9;
+function PhotoPick(key, t, cls = '') {
+  const d = `data-photo="${key}" data-p="${t.p}" data-c="${t.c}" data-f="${t.f}"`;
+  return `<div class="mphoto ${cls}"><div class="mphoto-btns">
+    <label class="btn btn-ghost">${ic('camera', 18)} ${T('Mahlzeit fotografieren')}<input type="file" accept="image/*" capture="environment" class="vh" ${d}></label>
+    <label class="btn btn-ghost">${ic('image', 18)} ${T('Foto hochladen')}<input type="file" accept="image/*" class="vh" ${d}></label></div>
+    <div class="mphoto-t">${T('Erkenne Kalorien und Makros automatisch anhand deines Essens.')}</div></div>`;
+}
+function viewPhoto(c) {
+  const P = UI.photo, back = `/client/${c.id}/food`;
+  if (!P || P.cid !== c.id) return topbar({ back, title: T('Mahlzeit analysieren') }) + `<main class="wrap view"><div class="card empty-state"><p>${T('Kein Foto ausgewählt.')}</p><a class="btn btn-primary" href="#${back}">${T('Zurück zu den Mahlzeiten')}</a></div></main>`;
+  const head = `<figure class="ph-img"><img src="${P.img.url}" alt="${T('Foto deiner Mahlzeit')}"></figure>`;
+  const privacy = `<div class="nut-foot">${T('Das Foto wird nur zur Analyse an die Bild-KI übertragen und nicht gespeichert.')}</div>`;
+  let body = '';
+  if (P.status === 'idle') body = `<div class="ph-act"><button class="btn btn-primary btn-block" data-action="photo-analyze">${ic('check', 18)} ${T('Mahlzeit analysieren')}</button>${PhotoPick(P.key, P.tgt, 'inline')}</div>${privacy}`;
+  else if (P.status === 'loading') body = `<div class="card ph-loading" role="status" aria-live="polite">${LoadingState(T('Wir analysieren deine Mahlzeit …'))}</div>`;
+  else if (P.status === 'error') body = `<div class="food-warn" role="alert">${esc(P.err)}</div><div class="ph-act"><button class="btn btn-primary" data-action="photo-analyze">${T('Erneut versuchen')}</button>
+    <a class="btn btn-ghost" href="#${back}" data-action="photo-manual">${T('Manuell eingeben')}</a></div>`;
+  else body = PhotoResult(c, P);
+  return topbar({ back, title: T('Mahlzeit analysieren'), sub: esc(c.name) }) + `<main class="wrap view ph">${head}${body}</main>`;
+}
+function PhotoResult(c, P) {
+  const tot = photoTotals(P.items), n = nutritionFor(c), dayOk = n && !n.missing && !n.pending;
+  const r = v => Math.round(v);
+  if (!P.items.length) return `<div class="card"><b>${T('Keine Lebensmittel erkannt.')}</b><p class="muted">${esc(P.note || T('Auf dem Foto wurde nichts Essbares erkannt.'))}</p>
+    <div class="ph-act"><button class="btn btn-ghost" data-action="photo-add-pick">${ic('plus', 16)} ${T('Lebensmittel ergänzen')}</button><button class="btn btn-ghost" data-action="photo-analyze">${T('Neu analysieren')}</button></div></div>`;
+  const sum = `<section class="card ph-sum"><div class="nut-eyebrow">${T('Deine Mahlzeit im Überblick')}</div>
+    <div class="ph-kcal">${T('ca.')} ${r(tot.kcal).toLocaleString(LOC())} <small>kcal</small></div>
+    <div class="ph-mac"><span><b>${r(tot.p)} g</b>${T('Eiweiß')}</span><span><b>${r(tot.c)} g</b>${T('Kohlenhydrate')}</span><span><b>${r(tot.f)} g</b>${T('Fett')}</span><span><b>${r(tot.fi)} g</b>${T('Ballaststoffe')}</span></div>
+    <div class="nut-foot">${T('Schätzwerte – die Genauigkeit hängt von Bildqualität, Portionsgröße und nicht sichtbaren Zutaten wie Öl oder Saucen ab.')}${P.note ? ' ' + esc(P.note) : ''}</div></section>`;
+  const qs = P.questions.length ? `<section class="ph-q">${P.questions.map(q => `<div class="food-hint"><b>${esc(q.q)}</b>${q.add ? `<div class="ph-q-a">
+      <button class="btn btn-sm btn-ghost" data-action="photo-q-add" data-id="${q.uid}">${ic('plus', 14)} ${esc(q.add.name)} (${r(q.add.grams)} g)</button>
+      <button class="btn btn-sm btn-text" data-action="photo-q-no" data-id="${q.uid}">${T('Nein')}</button></div>` : `<div class="ph-q-a"><button class="btn btn-sm btn-text" data-action="photo-q-no" data-id="${q.uid}">${T('OK')}</button></div>`}</div>`).join('')}</section>` : '';
+  const list = `<section class="card"><div class="section-h"><h2>${T('Erkannte Lebensmittel')}</h2></div><div class="mitems">${P.items.map((it, i) => {
+      const f = it.foodId && foodById(it.foodId), v = photoItemVals(it), low = it.conf != null && it.conf < .6;
+      return `<div class="mitem ph-item"><span class="mi-dot k-${f ? f.k : 'x'}"></span><span class="grow mi-n">${esc(photoName(it))}
+        <small>${it.portion ? esc(it.portion) + ' · ' : ''}${r(v.kcal)} kcal · ${r(v.p)} ${T('E')} / ${r(v.c)} ${T('KH')} / ${r(v.f)} ${T('F')}${f ? '' : ` · <span class="tag-ai">${T('KI-Schätzung')}</span>`}${low ? ` · <span class="tag-ai">${T('unsicher')}</span>` : ''}</small></span>
+        <label class="mi-g"><input inputmode="numeric" data-pg="${i}" value="${r(it.g)}" aria-label="${T('Gramm')} ${esc(photoName(it))}"><span>g</span></label>
+        <button class="icon-btn sm" data-action="photo-rm" data-i="${i}" aria-label="${T('Entfernen')}">${ic('x', 16)}</button></div>`; }).join('')}</div>
+      <button class="btn btn-ghost btn-sm" style="margin-top:10px" data-action="photo-add-pick">${ic('plus', 14)} ${T('Lebensmittel ergänzen')}</button></section>`;
+  let plan = '';
+  if (dayOk) {
+    const eaten = eatenToday(c.id, P.id), after = { kcal: eaten.kcal + tot.kcal, p: eaten.p + tot.p, c: eaten.c + tot.c, f: eaten.f + tot.f };
+    const remain = { kcal: n.kcal - after.kcal, p: n.p - after.p, c: n.c - after.c, f: n.f - after.f };
+    const lines = [T('Mit dieser Mahlzeit nimmst du ungefähr {k} kcal und {p} g Protein auf.', { k: r(tot.kcal), p: r(tot.p) }),
+      remain.kcal >= 0 ? T('Dir bleiben für heute noch etwa {k} kcal.', { k: r(remain.kcal) }) : T('Du liegst heute etwa {k} kcal über deinem Tagesziel.', { k: r(-remain.kcal) }),
+      remain.p > 0 ? T('Dir fehlen für heute noch etwa {p} g Protein.', { p: r(remain.p) }) : T('Dein Proteinziel für heute ist erreicht.'),
+      T('Bis zu deinem Tagesziel: noch {c} g Kohlenhydrate und {f} g Fett.', { c: r(Math.max(0, remain.c)), f: r(Math.max(0, remain.f)) })];
+    const hasMeal = kcalOf(P.tgt) > 0;
+    plan = `<section class="card"><div class="section-h"><h2>${T('So passt deine Mahlzeit in deinen Ernährungsplan')}</h2></div>
+      ${hasMeal ? `<div class="muted" style="font-size:13px;margin-bottom:6px">${T('Vergleich mit dieser Mahlzeit in deinem Plan')}</div><div class="mbars">${MacroBar(T('Eiweiß'), tot.p, P.tgt.p)}${MacroBar(T('Kohlenhydrate'), tot.c, P.tgt.c)}${MacroBar(T('Fett'), tot.f, P.tgt.f)}</div>` : ''}
+      <div class="muted" style="font-size:13px;margin:12px 0 6px">${T('Heute insgesamt (inkl. bereits gespeicherter Mahlzeiten)')}</div>
+      <div class="mbars">${MacroBar(T('Kalorien'), after.kcal, n.kcal).replace(/ g<\/b>/, ' kcal</b>')}${MacroBar(T('Eiweiß'), after.p, n.p)}</div>
+      <ul class="ph-lines">${lines.map(l => `<li>${esc(l)}</li>`).join('')}</ul>
+      ${photoAdvice(tot, P.tgt, remain).map(a => `<div class="ph-adv">${esc(a)}</div>`).join('')}</section>`;
+  } else plan = `<div class="food-hint">${T('Für den Vergleich mit deinem Tagesplan fehlen noch Angaben im Ernährungsprofil.')}</div>`;
+  const aiOnly = P.items.filter(it => !(it.foodId && foodById(it.foodId))).length;
+  const acts = `<div class="ph-act">
+    <button class="btn btn-primary btn-block" data-action="photo-save" ${P.saved ? 'disabled' : ''}>${P.saved ? ic('check', 18) + ' ' + T('Gespeichert – heute erfasst') : T('Als gegessen speichern')}</button>
+    <button class="btn btn-ghost" data-action="photo-to-meal">${T('In meinen Mahlzeitenplan übernehmen')}</button>
+    <button class="btn btn-ghost" data-action="photo-analyze">${T('Neu analysieren')}</button>
+    ${P.saved ? `<a class="btn btn-text" href="#/client/${c.id}/food">${T('Fertig')}</a>` : ''}</div>
+    ${aiOnly ? `<div class="nut-foot">${T('Lebensmittel mit „KI-Schätzung“ sind nicht in der SWEAT4-Datenbank und werden nicht in den Mahlzeitenplan übernommen.')}</div>` : ''}`;
+  return sum + qs + list + plan + acts;
+}
+/* „Heute erfasst“ in der Mahlzeiten-Übersicht */
+function TodayLog(c, n) {
+  const L = mealLog(c.id); if (!L.length) return '';
+  const t = eatenToday(c.id), r = v => Math.round(v);
+  return `<section class="card ph-today"><div class="section-h"><h2>${T('Heute erfasst')}</h2><span class="muted">${r(t.kcal).toLocaleString(LOC())} / ${n.kcal.toLocaleString(LOC())} kcal</span></div>
+    <div class="mbars">${MacroBar(T('Eiweiß'), t.p, n.p)}${MacroBar(T('Kohlenhydrate'), t.c, n.c)}${MacroBar(T('Fett'), t.f, n.f)}</div>
+    <div class="mitems" style="margin-top:8px">${L.map(e => `<div class="mitem"><span class="grow mi-n">${esc(e.name)}<small>${fmtTime(e.at)} · ${r(e.tot.kcal)} kcal · ${r(e.tot.p)} ${T('E')}</small></span>
+      <button class="icon-btn sm" data-action="mlog-rm" data-cid="${c.id}" data-id="${e.id}" aria-label="${T('Entfernen')}">${ic('trash', 16)}</button></div>`).join('')}</div></section>`;
+}
+function photoRerender() { const y = window.scrollY; render(); window.scrollTo(0, y); }
+Object.assign(A, {
+  'photo-analyze': () => photoAnalyze(),
+  'photo-manual': () => { const P = UI.photo; if (P) UI.mealOpen = { ...(UI.mealOpen || {}), [P.key]: true }; },
+  'photo-rm': el => { const P = UI.photo; if (!P) return; P.items.splice(+el.dataset.i, 1); P.saved = false; photoRerender(); },
+  'photo-q-no': el => { const P = UI.photo; if (!P) return; P.questions = P.questions.filter(q => q.uid !== el.dataset.id); photoRerender(); },
+  'photo-q-add': el => { const P = UI.photo; if (!P) return; const q = P.questions.find(x => x.uid === el.dataset.id); if (!q) return;
+    P.items.push({ uid: uid(), name: q.add.name, foodId: q.add.foodId, g: q.add.grams, portion: '', conf: null, per100: q.add.per100 || null });
+    P.questions = P.questions.filter(x => x !== q); P.saved = false; photoRerender(); },
+  'photo-add-pick': () => {
+    modal(T('Lebensmittel ergänzen'), `<label class="search">${ic('search')}<input id="foodsearch" type="search" placeholder="${T('Suchen …')}" autocomplete="off"></label>
+      <div class="pick-list food-list" style="margin-top:12px">${FOODS().map(f => `<button class="food-opt tap" data-action="photo-add" data-id="${f.id}" data-name="${esc(norm(f.n + ' ' + FN(f)))}"><span class="grow"><b>${esc(FN(f))}</b><span class="muted">${T('pro 100 g')}: ${fmtNum(f.p)} ${T('E')} · ${fmtNum(f.c)} ${T('KH')} · ${fmtNum(f.f)} ${T('F')}</span></span>${ic('plus', 18)}</button>`).join('')}</div>`,
+      el => { const s = el.querySelector('#foodsearch'); s.focus(); s.addEventListener('input', () => { const q = norm(s.value); el.querySelectorAll('.food-opt').forEach(b => b.classList.toggle('hidden', !!q && !b.dataset.name.includes(q))); }); });
+  },
+  'photo-add': el => { const P = UI.photo; if (!P) return; const f = foodById(el.dataset.id); if (!f) return;
+    P.items.push({ uid: uid(), name: f.n, foodId: f.id, g: f.k === 'v' ? (f.fix || 100) : (f.u ? f.u.g : 100), portion: '', conf: null, per100: null }); P.saved = false; closeModal(null); photoRerender(); },
+  'photo-save': el => { const P = UI.photo; if (!P || P.saved || !P.items.length) return; el.disabled = true;
+    const tot = photoTotals(P.items);
+    mealLogSave(P.cid, { id: P.id, at: Date.now(), mealKey: P.key, name: P.items.slice(0, 3).map(photoName).join(', ') + (P.items.length > 3 ? ' …' : ''),
+      items: P.items.map(it => ({ name: it.name, foodId: it.foodId || null, g: Math.round(it.g), per100: it.foodId ? null : it.per100 })), tot: Object.fromEntries(Object.entries(tot).map(([k, v]) => [k, Math.round(v * 10) / 10])) });
+    P.saved = true; toast(T('Mahlzeit gespeichert ✓')); photoRerender(); },
+  'photo-to-meal': async () => { const P = UI.photo; if (!P) return; const c = S.clients.get(P.cid); if (!c) return;
+    const items = P.items.filter(it => it.foodId && foodById(it.foodId)).map(it => ({ id: it.foodId, g: Math.round(it.g) }));
+    if (!items.length) return toast(T('Keines der Lebensmittel ist in der SWEAT4-Datenbank.'));
+    if (((c.meals || {})[P.key] || []).length && !await confirmDialog(T('Mahlzeit ersetzen?'), T('Die bisher zusammengestellte Mahlzeit wird durch die erkannten Lebensmittel ersetzt.'), { ok: T('Ersetzen') })) return;
+    saveMeals(c, P.key, items, false); UI.mealOpen = { ...(UI.mealOpen || {}), [P.key]: true }; toast(T('In den Mahlzeitenplan übernommen')); go(`/client/${c.id}/food`); },
+  'mlog-rm': async el => { if (!await confirmDialog(T('Eintrag löschen?'), T('Die Mahlzeit wird aus „Heute erfasst“ entfernt.'), { ok: T('Löschen'), danger: true })) return;
+    mealLogRemove(el.dataset.cid, el.dataset.id); render(); },
+});
+document.addEventListener('change', ev => {
+  const t = ev.target;
+  if (t.matches && t.matches('input[type=file][data-photo]')) return photoPicked(t);
+  if (t.dataset && t.dataset.pg != null && UI.photo) { const it = UI.photo.items[+t.dataset.pg]; if (!it) return; const g = parseNum(t.value); if (g > 0 && g <= 3000) { it.g = g; UI.photo.saved = false; } photoRerender(); }
+});
+
 function viewFood(c) {
   const own = isClientMode(), n = nutritionFor(c), cfg = mealCfg(c), M = MEAL_MODES[cfg.mode];
   const back = own ? '/' : '/client/' + c.id;
@@ -3291,6 +3669,7 @@ function viewFood(c) {
   return topbar({ back, title: T('Mahlzeiten'), sub: esc(c.name) }) + `<main class="wrap view">
     <div class="food-sum"><div><div class="nut-eyebrow">${esc(n.goal)} · ${T('Woche')} ${Math.min(n.week, 12)}</div><div class="food-kcal">${n.kcal.toLocaleString(LOC())} <small>kcal</small></div></div>
       <div class="food-mac"><span><b>${n.p}</b> g ${T('E')}</span><span><b>${n.c}</b> g ${T('KH')}</span><span><b>${n.f}</b> g ${T('F')}</span><span><b>${fmtNum(n.water)}</b> l</span></div></div>
+    ${TodayLog(c, n)}
     <button class="rhythm tap" data-action="meal-cfg" data-cid="${c.id}">
       <span class="grow"><b>${esc(M.label)}</b><span class="muted">${T('Auf')} ${esc(cfg.wake)} · ${T('Schlaf')} ${esc(cfg.sleep)}${cfg.mode !== '5' ? ` · ${T('Fenster ab')} ${esc(cfg.win)}` : ''} · ${T('Training')} ${cfg.train ? esc(cfg.train) : '–'} (${cfg.days.map(d => WEEKDAYS[d - 1]).join(', ') || T('keine Tage')})</span></span>${ic('edit', 18)}</button>
     <div class="figsw daysw" role="group" aria-label="${T('Tag')}">${[['train', T('Trainingstag')], ['rest', T('Ruhetag')]].map(([v, l]) => `<button class="${v === day ? 'on' : ''}" data-action="food-day" data-v="${v}" aria-pressed="${v === day}">${l}</button>`).join('')}</div>
@@ -4128,6 +4507,8 @@ async function setupFromFile(file, code, opts = {}) {
   if (role.value === 'client') for (const s of all('sessions')) { const o = map.get(s.id); if (s.clientId === pkg.clientId && (!o || (s.updatedAt || 0) > (o.updatedAt || 0))) map.set(s.id, s); }
   if (role.value === 'client') { const loc = S.clients.get(pkg.clientId), pc = pkg.data.clients && pkg.data.clients[0];
     if (loc && pc && (loc.mealsAt || 0) > (pc.mealsAt || 0)) Object.assign(pc, { mealCfg: loc.mealCfg, meals: loc.meals, mealsAt: loc.mealsAt }); } // eigene Mahlzeiten bleiben erhalten
+  if (role.value === 'client') for (const pp of pkg.data.plans) { const lp = S.plans.get(pp.id); // eine neuere Festlegung nie durch eine ältere ersetzen
+    if (lp && lp.nextSel && (lp.nextSel.at || 0) > ((pp.nextSel || {}).at || 0) && (!lp.nextSel.dayId || pkg.data.days.some(d => d.id === lp.nextSel.dayId))) pp.nextSel = lp.nextSel; }
   const lock = await makeLock(code);
   const boxU = pkg.box || opts.box || boxUrl();
   const meta = [{ id: 'role', value: 'client', clientId: pkg.clientId, since: Date.now() }, lock, { id: 'pkgInfo', exportedAt: pkg.exportedAt, boxV: opts.boxV || 0 }];
@@ -4276,8 +4657,26 @@ async function boxClientSync(force, quiet) {
   const info = S.meta.get('pkgInfo') || {};
   const res = await boxGet(cid, BOX.code, 'down', info.boxV || 0).catch(e => { if (force) toast(e.message); return null; });
   BOX.pending = res && !res.missing ? res : null;
+  // Festlegung „nächster Trainingstag“ sofort übernehmen – auch bevor der Kunde den neuen Plan lädt
+  if (BOX.pending && BOX.peeked !== BOX.pending.v) {
+    try { const ch = await peekNextSel(cid, BOX.pending); BOX.peeked = BOX.pending.v; if (ch && !/^#\/train\//.test(location.hash)) render(); } catch (e) {}
+  }
   const b = document.getElementById('box-banner'); if (b) b.innerHTML = boxBanner();
   if (force && !quiet && !BOX.pending) toast(T('Alles aktuell ✓'));
+}
+/* Kunde: nur die Festlegung des Trainers aus dem neuen Paket übernehmen. Ältere Festlegungen überschreiben nie eine neuere.
+   Zeigt sie auf einen Tag, den es hier noch nicht gibt, kommt sie mit „Jetzt laden“ zusammen mit dem neuen Plan. */
+async function peekNextSel(cid, res) {
+  const h = await readHeader(textFile(res.data)); if (h.kind !== 'client-package' || h.clientId !== cid) return false;
+  const pkg = await decryptPayload(h, BOX.code); if (!pkg || pkg.clientId !== cid || !packageIsolated(pkg)) return false;
+  let ch = false;
+  for (const pp of pkg.data.plans) {
+    const lp = S.plans.get(pp.id), ns = pp.nextSel;
+    if (!lp || lp.clientId !== cid || !ns || (ns.at || 0) <= ((lp.nextSel || {}).at || 0)) continue;
+    if (ns.dayId && !(S.days.get(ns.dayId) && S.days.get(ns.dayId).planId === lp.id)) continue;
+    lp.nextSel = { id: ns.id, dayId: ns.dayId || null, at: ns.at }; put('plans', lp); ch = true;
+  }
+  return ch;
 }
 const boxBanner = () => BOX.pending ? `<div class="box-banner"><div class="grow"><b>${T('Neuer Plan von deinem Trainer')}</b><div>${T('Training und Ernährung wurden aktualisiert.')}</div></div>
   <button class="btn btn-primary" data-action="box-apply">${T('Jetzt laden')}</button></div>` : '';
@@ -4714,6 +5113,7 @@ function routeExtra(p) {
     if (p[2] === 'check') return viewCheckForm(c, null);
     if (p[2] === 'planview') return viewPlanRO(c);
     if (p[2] === 'food') return viewFood(c);
+    if (p[2] === 'foto') return viewPhoto(c);
   }
   if (p[0] === 'check') { const ch = S.checks.get(p[1]); if (!ch) return null; const c = S.clients.get(ch.clientId); if (!c) return null; return p[2] === 'edit' ? viewCheckForm(c, ch) : viewCheck(ch); }
   if (p[0] === 'kunde-setup') return viewSetup(p[1], p[2] ? decodeURIComponent(p[2]) : '');
@@ -4730,7 +5130,7 @@ function lockGate() {
 }
 
 /* ---------- Aktionen ---------- */
-const TRAINER_ONLY = new Set(['care-done', 'ev-read-all', 'msg-compose', 'qr-use', 'box-save', 'box-test', 'box-send', 'box-fetch', 'box-link', 'new-client', 'edit-client', 'del-client', 'photo-remove', 'add-day', 'del-day', 'day-move', 'add-ex', 'edit-ex', 'del-ex', 'tpl-apply', 'ud-add', 'ud-add-client', 'ud-add-day', 'ex-move', 'demo', 'wipe', 'backup', 'import', 'check-del', 'pkg-make', 'ret-import', 'lock-set', 'lock-off', 'pslot-rm']);
+const TRAINER_ONLY = new Set(['care-done', 'next-pick', 'next-set', 'ev-read-all', 'msg-compose', 'qr-use', 'box-save', 'box-test', 'box-send', 'box-fetch', 'box-link', 'new-client', 'edit-client', 'del-client', 'photo-remove', 'add-day', 'del-day', 'day-move', 'add-ex', 'edit-ex', 'del-ex', 'tpl-apply', 'ud-add', 'ud-add-client', 'ud-add-day', 'ex-move', 'demo', 'wipe', 'backup', 'import', 'check-del', 'pkg-make', 'ret-import', 'lock-set', 'lock-off', 'pslot-rm']);
 document.addEventListener('click', ev => {
   const el = ev.target.closest('[data-action]');
   if (el && isClientMode() && TRAINER_ONLY.has(el.dataset.action)) { ev.preventDefault(); ev.stopImmediatePropagation(); toast(T('Nur für den Trainer verfügbar')); }
