@@ -834,6 +834,22 @@ img.ld{opacity:1!important}
 /* Laufprogramme */
 .run-ic{font-size:20px;width:26px;text-align:center;flex:none}
 .run-entry{margin:12px 0 0;border-radius:14px}
+.wk{display:flex;flex-direction:column;gap:8px}
+.wk-day{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:8px 10px}
+.wk-day.today{border-color:var(--accent)}
+.wk-h{display:flex;align-items:center;gap:8px;min-height:32px}.wk-h .muted{font-size:12.5px;flex:1}
+.wk-add{width:34px;height:34px}
+.wk-item{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:transparent;border:0;border-top:1px solid var(--border);padding:8px 0;color:inherit;font:inherit;cursor:pointer;min-width:0}
+.wk-item .grow{min-width:0}.wk-t{display:block;font-weight:600;font-size:14.5px}.wk-s{display:block;font-size:12.5px;color:var(--muted);overflow-wrap:anywhere}
+.wk-item.opt .wk-t{font-weight:500}.wk-item .tag{flex:none}
+.wk-ic{flex:none;width:26px;text-align:center;font-size:18px}
+.wk-empty{font-size:13px;padding:2px 0 4px}
+.wk-nav{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.wd-pick{display:flex;gap:6px;flex-wrap:wrap}.wd-pick label{position:relative}.wd-pick input{position:absolute;opacity:0;width:1px;height:1px}
+.wd-pick span{display:inline-flex;align-items:center;justify-content:center;min-width:42px;height:38px;border:1px solid var(--border);border-radius:10px;font-weight:600}
+.wd-pick input:checked+span{background:var(--accent-fill);color:var(--accent-ink);border-color:var(--accent)}
+.asg-prev{padding:10px 12px}
+.test-task{border:1px solid var(--accent);border-radius:14px;margin-top:10px}
 .run-mini{margin-top:6px;font-size:12px;color:var(--muted)}.run-mini span{display:block;margin-top:4px}
 .run-mini-bar{height:6px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}.run-mini-bar i{display:block;height:100%;background:var(--accent-fill,var(--accent));border-radius:99px;transition:width .3s}
 .run-notes{margin:0;padding-left:18px;display:grid;gap:6px;font-size:14px;line-height:1.45}
@@ -845,7 +861,8 @@ img.ld{opacity:1!important}
 .run-unit .ru-r{flex:none}
 .run-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.run-facts>div{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;padding:8px 10px}
 .run-facts span{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}.run-facts b{display:block;font-size:14px;margin-top:2px}
-.run-lv label{flex:1 1 0;min-width:0;position:relative}.run-lv span{font-size:15px;padding:0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.run-lv label{flex:1 1 auto;min-width:0;position:relative}.run-lv span{font-size:14px;padding:0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.run-lv{gap:6px}
+.btn-wrap{white-space:normal;height:auto;min-height:48px;padding-top:8px;padding-bottom:8px;text-align:center;line-height:1.25}
 .run-player select.input,.run-head~section select.input{max-width:100%;min-width:0}
 .run-player .rp-prog{font-size:12.5px;color:var(--muted);margin-bottom:10px}.run-player .rp-prog span{display:block;margin-top:6px}
 .rp-card{position:relative;border-radius:20px;padding:22px 18px;text-align:center;border:1px solid var(--border);background:var(--surface)}
@@ -1596,7 +1613,7 @@ async function nextSetAndSync(cid, dayId, inform) {
 }
 function viewClient(c) {
   const days = clientDays(c.id), done = sessionsOf(c.id, true), last = done[0], nxi = nextDayInfo(c.id), next = nxi.day, active = activeSession(c.id), trend = volumeTrend(c.id);
-  const n30 = done.filter(s => daysBetween(s.date, today()) <= 30).length, recent = sessionsOf(c.id, true, true), ath = progState(c.id, 'athlete');
+  const n30 = done.filter(s => daysBetween(s.date, today()) <= 30).length, recent = sessionsOf(c.id, true, true);
   const vols = done.slice(0, 12).reverse().map(sessionVolume).filter(v => v > 0);
   const trendHtml = trend ? `<span class="${trend.pct >= 0 ? 'up' : 'down'}">${trend.pct >= 0 ? '+' : ''}${fmtNum(Math.round(trend.pct))} %</span>` : '–';
   return topbar({ back: '/', title: esc(c.name), sub: `${done.length} Trainings · ${n30} in den letzten 30 Tagen`, right: `<button class="icon-btn" data-action="edit-client" data-id="${c.id}" aria-label="Kunde bearbeiten">${ic('edit', 22)}</button>` }) +
@@ -1612,7 +1629,8 @@ function viewClient(c) {
       ${active ? `<a class="btn btn-primary btn-big" href="#/train/${active.id}">${ic('play', 22)} Laufendes Training fortsetzen</a><div class="muted" style="text-align:center;font-size:14px;margin-top:6px">${esc(sessLabel(active))} · begonnen ${fmtDate(active.date)}</div>`
                : `<button class="btn btn-primary btn-big" data-action="start-training" data-cid="${c.id}">${ic('play', 22)} Training starten</button>`}
     </div>
-    <a class="list-link card run-entry" href="#/client/${c.id}/lauf">${runIc()}<div class="grow"><b>Laufprogramme</b><div class="muted" style="font-size:13px">${ath ? `Athletenprogramm · ${ath.done}/18 · ${RUN_LV[ath.cfg.level || 'beginner']}` : 'Grundausdauer, Intervalle, Sprints, Leistungstest'}</div></div><span class="muted">${ic('arrow', 18)}</span></a>
+    ${RunCoachEntry(c)}
+
     <div class="quick quick3">
       <a class="btn btn-ghost" href="#/client/${c.id}/food">${ic('food')} Ernährung</a>
       <a class="btn btn-ghost" href="#/client/${c.id}/progress">${ic('chart')} Fortschritt</a>
@@ -4336,6 +4354,7 @@ function viewClientHome() {
     <div id="box-banner">${boxBanner()}</div>
     <div class="hero">${avatar(c, 'xl')}<div class="grow"><h1>${T('Willkommen zurück, {n}', { n: esc(first) })} 👋</h1>${c.goals ? `<div class="muted" style="margin-top:4px">🎯 ${esc(c.goals)}</div>` : ''}</div></div>
     ${ClientMsgCard(cid)}
+    ${MyWeekCard(c)}
     <div class="section-h" style="margin-top:6px"><h2>${T('Dein Fortschritt')}</h2></div>
     <div class="stats">${tile('weight')}${tile('waist')}${tile('chest')}
       <a class="stat" href="#/client/${cid}/history"><div class="stat-l">${T('Training')}</div><div class="stat-v">${done.length}</div><div class="stat-s">${T('Workouts absolviert')}</div></a></div>
@@ -4349,7 +4368,8 @@ function viewClientHome() {
         ${last ? `<a class="list-link" href="#/session/${last.id}">${ic('check')}<div class="grow"><b>${T('Letztes Workout')}</b><div class="muted" style="font-size:13px">${fmtDate(last.date)} · ${esc(sessLabel(last))}</div></div></a>` : ''}
         <a class="list-link" href="#/client/${cid}/history">${ic('history')}<div class="grow"><b>${T('Trainingshistorie')}</b><div class="muted" style="font-size:13px">${TN(done.length, '{n} Workout', '{n} Workouts')}</div></div></a>
         <a class="list-link" href="#/client/${cid}/progress">${ic('chart')}<div class="grow"><b>${T('Kraft-Fortschritt')}</b><div class="muted" style="font-size:13px">${T('Gewichte & Volumen je Übung')}</div></div></a>
-        <a class="list-link" href="#/client/${cid}/lauf">${runIc()}<div class="grow"><b>${T('Laufprogramme')}</b><div class="muted" style="font-size:13px">${(() => { const a = progState(cid, 'athlete'), r = activeRun(cid); return r ? T('Einheit läuft') : a ? T('Athletenprogramm · {a} von {b}', { a: a.done, b: 18 }) : T('Grundausdauer, Intervalle, Sprints'); })()}</div></div></a>
+        ${runsOf(cid).length ? `<a class="list-link" href="#/client/${cid}/lauf/verlauf">${runIc()}<div class="grow"><b>${T('Meine Laufergebnisse')}</b><div class="muted" style="font-size:13px">${activeRun(cid) ? T('Einheit läuft') : TN(runsOf(cid, true).length, '{n} Einheit', '{n} Einheiten')}</div></div></a>` : ''}
+
       </div>
       ${days.length > 1 ? `<div class="day-grid" style="margin-top:12px">${days.map((d, i) => `<button class="day-btn ${next && next.id === d.id ? 'next' : ''}" data-action="start-day" data-cid="${cid}" data-did="${d.id}"><span class="day-no">${i + 1}</span><span class="grow"><span class="day-name">${esc(TD(d.name))}</span><br><span class="muted" style="font-size:14px">${TN(exercisesOf(d.id).length, '{n} Übung', '{n} Übungen')}</span></span><span class="muted">${ic('play', 16)}</span></button>`).join('')}</div>` : ''}
     </section>
@@ -4529,7 +4549,8 @@ async function clientPackage(cid) {
   flushSave();
   const c = S.clients.get(cid), plans = all('plans').filter(p => p.clientId === cid), pids = new Set(plans.map(p => p.id));
   const days = all('days').filter(d => pids.has(d.planId)), dids = new Set(days.map(d => d.id));
-  const cc = { ...c, notes: '' }; delete cc.access;
+  const cc = { ...c, notes: '' }; delete cc.access; delete cc.run;
+  if (c.runPlan) { const r = rpOf(c); cc.runPlan = { pub: r.pub, test: r.test, decision: r.decision ? { level: r.decision.level, at: r.decision.at, testSid: r.decision.testSid } : null }; }
   const photos = (await DB.photosOfClient(cid)).filter(p => p.clientId === cid);
   return { clientId: cid, clientName: c.name, exportedAt: new Date().toISOString(),
     data: { clients: [cc], plans, days, exercises: all('exercises').filter(e => dids.has(e.dayId)), sessions: all('sessions').filter(s => s.clientId === cid), checks: all('checks').filter(x => x.clientId === cid), messages: msgsOf(cid) }, photos };
@@ -4567,7 +4588,7 @@ async function setupFromFile(file, code, opts = {}) {
   if (role.value === 'client') for (const s of all('sessions')) { const o = map.get(s.id); if (s.clientId === pkg.clientId && (!o || (s.updatedAt || 0) > (o.updatedAt || 0))) map.set(s.id, s); }
   if (role.value === 'client') { const loc = S.clients.get(pkg.clientId), pc = pkg.data.clients && pkg.data.clients[0];
     if (loc && pc && (loc.mealsAt || 0) > (pc.mealsAt || 0)) Object.assign(pc, { mealCfg: loc.mealCfg, meals: loc.meals, mealsAt: loc.mealsAt }); // eigene Mahlzeiten bleiben erhalten
-    if (loc && pc && (loc.runAt || 0) > (pc.runAt || 0)) Object.assign(pc, { run: loc.run, runAt: loc.runAt }); } // eigene Laufeinstellungen ebenso
+    if (pc) { delete pc.run; delete pc.runAt; } } // Laufplan kommt ausschließlich vom Trainer
   if (role.value === 'client') for (const pp of pkg.data.plans) { const lp = S.plans.get(pp.id); // eine neuere Festlegung nie durch eine ältere ersetzen
     if (lp && lp.nextSel && (lp.nextSel.at || 0) > ((pp.nextSel || {}).at || 0) && (!lp.nextSel.dayId || pkg.data.days.some(d => d.id === lp.nextSel.dayId))) pp.nextSel = lp.nextSel; }
   const lock = await makeLock(code);
@@ -4589,7 +4610,7 @@ async function makeReturn(code) {
   const sessions = all('sessions').filter(s => s.clientId === cid && s.status === 'done');
   const pushOn = (S.meta.get('pushOn') || {}).on, ch = S.meta.get('pushCh');
   const text = await encryptPayload({ clientId: cid, sessions, meals: c.meals || null, mealCfg: c.mealCfg || null, mealsAt: c.mealsAt || 0, exportedAt: new Date().toISOString(),
-    messages: msgsOf(cid), live: liveState(cid), lang: I18N.cur, run: c.run || null, runAt: c.runAt || 0, notifyCh: pushOn && ch ? ch.ch : null }, code, { kind: 'client-return', v: 1, clientId: cid });
+    messages: msgsOf(cid), live: liveState(cid), lang: I18N.cur, notifyCh: pushOn && ch ? ch.ch : null }, code, { kind: 'client-return', v: 1, clientId: cid });
   return { name: `sweat4-trainings_${(c.name || 'kunde').replace(/[^\wäöüÄÖÜß-]+/g, '_')}_${today()}.json`, text, n: sessions.length };
 }
 async function importReturn(file, codeIn) {
@@ -4604,6 +4625,9 @@ async function importReturn(file, codeIn) {
     if (!s || s.clientId !== c.id || !Array.isArray(s.exercises) || !s.id) { rej++; continue; } // Datenebene: fremde Datensätze werden abgewiesen
     const ex = S.sessions.get(s.id);
     if (ex && ex.clientId !== c.id) { rej++; continue; }
+    // Läufe nur annehmen, wenn sie zu einer veröffentlichten Zuweisung bzw. dem zugewiesenen Lauftest gehören; Trainer-Einträge nicht überschreiben
+    if (s.kind === 'run' && (!runResultValid(S.clients.get(c.id), s) || (ex && ex.run && ex.run.log && ex.run.log.byTrainer))) { if (!ex) rej++; continue; }
+    if (ex && ex.kind === 'run' && s.kind !== 'run') { rej++; continue; }
     const wasDone = !!(ex && ex.status === 'done');
     if (!ex) { put('sessions', s); neu++; } else if ((s.updatedAt || 0) > (ex.updatedAt || 0)) { put('sessions', s); upd++; }
     // Ein ordnungsgemäß beendetes Training erzeugt genau EIN Ereignis (feste ID). Ältere Trainings (> 7 Tage) werden still übernommen.
@@ -4619,7 +4643,6 @@ async function importReturn(file, codeIn) {
     if ('notifyCh' in p) patch.notifyCh = /^[0-9a-f]{64}$/.test(p.notifyCh || '') ? p.notifyCh : null;
     if (Object.keys(patch).some(k => JSON.stringify(cc[k]) !== JSON.stringify(patch[k]))) put('clients', Object.assign(cc, patch)); }
   let meals = false;
-  if (p.runAt && p.runAt > (S.clients.get(c.id).runAt || 0)) { const cc = S.clients.get(c.id); Object.assign(cc, { run: p.run || {}, runAt: p.runAt }); put('clients', cc); }
   if (p.mealsAt && p.mealsAt > (c.mealsAt || 0)) { const cc = S.clients.get(c.id); Object.assign(cc, { meals: p.meals, mealCfg: p.mealCfg, mealsAt: p.mealsAt }); put('clients', cc); meals = true; }
   return { c, neu, upd, rej, meals, doneNew, msgNew };
 }
@@ -4704,9 +4727,9 @@ async function boxClientSync(force, quiet) {
   const myMsgs = msgsOf(cid), lastMsg = Math.max(0, ...myMsgs.map(m => Math.max(m.from === 'client' ? m.at || 0 : 0, m.readAt || 0)));
   const live = liveState(cid), liveSig = live ? live.id + ':' + Math.floor((live.updatedAt || 0) / 180000) : '';   // Live-Status höchstens alle 3 Min.
   const pushCh = (S.meta.get('pushOn') || {}).on ? (S.meta.get('pushCh') || {}).ch || '' : '';
-  const sig = [lastDone, c.mealsAt || 0, lastMsg, liveSig, pushCh, I18N.cur, c.runAt || 0].join('|');
+  const sig = [lastDone, c.mealsAt || 0, lastMsg, liveSig, pushCh, I18N.cur].join('|');
   const up = S.meta.get('boxUp') || {};
-  if ((lastDone || c.mealsAt || lastMsg || live || c.runAt || up.sig) && sig !== up.sig) {
+  if ((lastDone || c.mealsAt || lastMsg || live || up.sig) && sig !== up.sig) {
     try {
       const r = await makeReturn(BOX.code); await boxPut(cid, BOX.code, 'up', r.text);
       put('meta', { id: 'boxUp', at: Math.max(lastDone, c.mealsAt || 0), sig, sent: Date.now(), lastDone, lastClientMsg: lastMsg });
@@ -4722,7 +4745,7 @@ async function boxClientSync(force, quiet) {
   BOX.pending = res && !res.missing ? res : null;
   // Festlegung „nächster Trainingstag“ sofort übernehmen – auch bevor der Kunde den neuen Plan lädt
   if (BOX.pending && BOX.peeked !== BOX.pending.v) {
-    try { const ch = await peekNextSel(cid, BOX.pending); BOX.peeked = BOX.pending.v; if (ch && !/^#\/train\//.test(location.hash)) render(); } catch (e) {}
+    try { const ch = await peekNextSel(cid, BOX.pending); BOX.peeked = BOX.pending.v; if (ch && !/^#\/(train|lauf)\//.test(location.hash)) render(); } catch (e) {}
   }
   const b = document.getElementById('box-banner'); if (b) b.innerHTML = boxBanner();
   if (force && !quiet && !BOX.pending) toast(T('Alles aktuell ✓'));
@@ -4739,6 +4762,9 @@ async function peekNextSel(cid, res) {
     if (ns.dayId && !(S.days.get(ns.dayId) && S.days.get(ns.dayId).planId === lp.id)) continue;
     lp.nextSel = { id: ns.id, dayId: ns.dayId || null, at: ns.at }; put('plans', lp); ch = true;
   }
+  // Laufplan/Lauftest vom Trainer sofort übernehmen (nur veröffentlichter Stand, kein „Jetzt laden“ nötig)
+  const pc = pkg.data.clients[0], lc = S.clients.get(cid);
+  if (pc && lc && (pc.runPlanAt || 0) > (lc.runPlanAt || 0)) { lc.runPlan = pc.runPlan || null; lc.runPlanAt = pc.runPlanAt; put('clients', lc); ch = true; }
   return ch;
 }
 const boxBanner = () => BOX.pending ? `<div class="box-banner"><div class="grow"><b>${T('Neuer Plan von deinem Trainer')}</b><div>${T('Training und Ernährung wurden aktualisiert.')}</div></div>
@@ -4921,6 +4947,8 @@ function careTodos() {
     else if (e.type === 'msg' || e.type === 'issue') { const m = S.messages.get(e.msgId); if (!m) continue;
       out.push({ id: e.id, c, at: e.at, icon: e.type === 'issue' ? '🆘' : '💬', title: e.type === 'issue' ? T('Meldet eine Schwierigkeit') : T('Unbeantwortete Nachricht'), sub: m.text.slice(0, 90), href: `#/client/${c.id}/nachrichten` }); }
   }
+  for (const c of all('clients')) { const t = testState(c); if (t.st !== 'submitted') continue; const id = `dismiss:runtest:${c.id}:${t.s.id}`; if (S.events.has(id)) continue;
+    out.push({ id, c, at: t.s.finishedAt || Date.now(), icon: '⏱️', title: 'Lauftest eingereicht – prüfen', sub: `${fmtDate(t.s.date)} · ${fmtNum(t.s.run.result.km)} km · Ø ${fmtNum(t.s.run.result.speed)} km/h`, href: `#/client/${c.id}/lauf`, computed: true }); }
   for (const c of all('clients')) if (c.status !== 'inactive') {
     const r = clientRhythm(c); if (r.missed < 2 || !r.last) continue;
     const id = `dismiss:missed:${c.id}:${r.last.id}`; if (S.events.has(id)) continue;
@@ -4952,6 +4980,7 @@ function CareDash(rows) {
     <div class="care-h">${T('Rückmeldung erforderlich')}${todos.length ? ` <span class="badge">${todos.length}</span>` : ''}</div>
     ${todos.length ? `<div class="card list-card">${todos.slice(0, 10).map(t => `<div class="list-link care-todo"><a class="grow care-todo-a" href="${t.href}"><span class="care-ic">${t.icon}</span><span class="grow"><b>${esc(t.c.name)}</b> – ${esc(t.title)}<br><span class="muted" style="font-size:13px">${esc(t.sub)}</span></span></a>
       <button class="btn btn-sm btn-ghost" data-action="care-done" data-id="${esc(t.id)}">${T('Erledigt')}</button></div>`).join('')}</div>` : `<div class="card empty-s">${T('Alles erledigt ✓')}</div>`}
+    ${RunTestsDash(cs)}
     <div class="care-h">${T('Trainingsstatus')}</div>
     <div class="care-chips">${['ontrack', 'overdue', 'inactive', 'notstarted'].map(k => `<span class="tag ${RHYTHM_CLS[k]}">${RHYTHM_LABEL[k]}: ${cnt(k)}</span>`).join('')}</div>
     ${rh.filter(x => x.r.st !== 'ontrack').length ? `<div class="card list-card" style="margin-top:8px">${rh.filter(x => x.r.st !== 'ontrack').sort((a, b) => (b.r.since ?? 999) - (a.r.since ?? 999)).slice(0, 8).map(({ c, r }) => `<a class="list-link" href="#/client/${c.id}">${avatar(c, 'sm')}<div class="grow"><div style="font-weight:600">${esc(c.name)}</div>
@@ -5328,10 +5357,10 @@ function runSpecFor(cid, prog, opts = {}) {
   const sp = { prog, type: prog, level, reps: RUN_REPS[prog][level], rest100: opts.rest100 || cfg.rest100 || RUN_CFG.rest100Def };
   return opts.reduce ? reduceSpec(sp) : sp;
 }
-function startRun(cid, spec) {
+function startRun(cid, spec, steps = null) {
   const s = { id: uid(), clientId: cid, kind: 'run', planId: null, dayId: null, dayIndex: null, dayName: RUN_NAME[spec.prog === 'athlete' && spec.type === 'combo' ? 'combo' : spec.prog] || spec.prog,
     date: today(), startedAt: Date.now(), finishedAt: null, status: 'active', note: '', exercises: [], createdAt: Date.now(), updatedAt: Date.now(),
-    run: { ...spec, steps: buildSteps(spec), pos: { i: 0, t0: Date.now(), paused: 0, pausedAt: null }, log: { times: [], doneIdx: [] }, status: null } };
+    run: { ...spec, steps: steps || buildSteps(spec), pos: { i: 0, t0: Date.now(), paused: 0, pausedAt: null }, log: { times: [], doneIdx: [] }, status: null } };
   put('sessions', s); return s;
 }
 const stepElapsed = (pos, now = Date.now()) => Math.max(0, now - pos.t0 - (pos.paused || 0) - (pos.pausedAt ? now - pos.pausedAt : 0)) / 1000;
@@ -5423,127 +5452,6 @@ const runBase = cid => `/client/${cid}/lauf`;
 const lvSelect = (name, cur, attrs = '') => `<div class="radio-seg run-lv">${RUN_LEVELS.map(l => `<label><input type="radio" name="${name}" value="${l}" ${l === cur ? 'checked' : ''} ${attrs}><span>${RUN_LV[l]}</span></label>`).join('')}</div>`;
 const stTag = st => `<span class="tag ${RUN_ST_CLS[st] || ''}">${RUN_ST[st] || st}</span>`;
 
-function viewRunHome(c) {
-  const cid = c.id, cfg = runCfgOf(c), act = activeRun(cid), t = lastTest(cid);
-  const ath = progState(cid, 'athlete'), end = progState(cid, 'endurance');
-  const card = (prog, sub, extra = '') => `<a class="list-link run-prog" href="#${runBase(cid)}/${prog}">${runIc()}<div class="grow"><b>${esc(RUN_NAME[prog])}</b><div class="muted" style="font-size:13px">${sub}</div>${extra}</div><span class="muted">${ic('arrow', 18)}</span></a>`;
-  const prog = st => st ? `<div class="run-mini"><div class="run-mini-bar"><i style="width:${Math.round(st.done / st.units.length * 100)}%"></i></div><span>${T('{a} von {b} Einheiten', { a: st.done, b: st.units.length })} · ${RUN_LV[st.cfg.level || 'beginner']}</span></div>` : '';
-  return topbar({ back: isClientMode() ? '/' : '/client/' + cid, title: T('Laufprogramme'), sub: esc(c.name) }) + `<main class="wrap view">
-    ${act ? `<a class="btn btn-primary btn-big" href="#/lauf/${act.id}">${ic('play', 22)} ${T('Laufende Einheit fortsetzen')}</a><div class="muted" style="text-align:center;font-size:13px;margin:6px 0 10px">${esc(runTitle(act))}</div>` : ''}
-    ${ath && ath.next != null && !act ? `<button class="btn btn-primary btn-big btn-next" data-action="run-unit" data-cid="${cid}" data-prog="athlete" data-u="${ath.next}"><span class="nx-ic">${ic('play', 22)}</span><span class="nx-tx"><small>${T('Athletenprogramm')} · ${T('Woche {w}', { w: Math.floor(ath.next / 3) + 1 })}</small><b>${T('Einheit {n}', { n: ath.next + 1 })} · ${esc(specInfo(unitOf('athlete', ath.cfg, ath.next, t ? t.run.result.speed : 0)).desc)}</b></span></button>` : ''}
-    <section class="section"><div class="section-h"><h2>${T('Programme')}</h2><a class="btn btn-sm btn-ghost" href="#${runBase(cid)}/verlauf">${ic('chart', 16)} ${T('Verlauf')}</a></div>
-      <div class="card list-card">
-        ${card('athlete', T('18 Einheiten · 3 pro Woche · Grundausdauer, Intervalle, Sprints'), prog(ath))}
-        ${card('endurance', T('12 Einheiten · 3 pro Woche · 60 Min. in steigender Geschwindigkeit'), prog(end))}
-        ${card('interval', T('80 m in 15 s, 15 s Trab · 20 / 40 / 60 Abschnitte'))}
-        ${card('ka', T('80 m traben + 120 m intensiv · 8 / 16 / 24 Durchgänge'))}
-        ${card('marker', T('0 → 5 → 0 → 10 → 0 → 15 → 0 m · 3 / 6 / 9 Wiederholungen'))}
-        ${card('sprint100', T('100 m mit 3–5 Min. Pause · 3 / 6 / 10 Sprints'))}
-      </div></section>
-    <section class="section"><div class="section-h"><h2>${T('Leistungstest')}</h2></div>
-      <div class="card list-card">${card('test60', t ? T('Letzter Test {d}: {km} km in 60 Min. = Ø {v} km/h', { d: fmtDate(t.date), km: fmtNum(t.run.result.km), v: fmtNum(t.run.result.speed) }) : T('Noch kein Test – 60 Min. laufen, Distanz eintragen, Ø-Geschwindigkeit wird berechnet'))}</div></section>
-    <div class="info run-safe" style="margin-top:14px">${esc(RUN_SAFETY())}</div>
-  </main>`;
-}
-
-/* Programmseite mit Einheiten (Athletenprogramm, Grundausdauer 4 Wochen) */
-function viewRunPlan(c, prog) {
-  const cid = c.id, st = progState(cid, prog), t = lastTest(cid), ts = t ? t.run.result.speed : 0;
-  const intro = prog === 'athlete'
-    ? T('Sechs Wochen, drei Einheiten pro Woche: Woche 1–2 Grundausdauer, Woche 3–4 Intervall- und Kraftausdauer im Wechsel, Woche 5–6 kombiniertes Sprinttraining.')
-    : T('Vier Wochen, drei Einheiten pro Woche à 60 Min. Jede Geschwindigkeitsstufe wird in zwei aufeinanderfolgenden Einheiten gelaufen, dann folgt die nächste Stufe.');
-  const notes = prog === 'athlete'
-    ? [T('Woche 1–2: Einheiten 1–6 der Grundausdauer (Beginner 8 / 8 / 9 / 9 / 10 / 10 km/h × 60 Min.).'), T('Woche 3–4: Einheit 7, 9, 11 Intervalllauf · Einheit 8, 10, 12 Kraftausdauer – jede Methode 3×, nie zwei gleiche hintereinander.'),
-       T('Woche 5–6: jede Einheit = Aufwärmen, 100-m-Sprints, 3 Min. Wechselpause, Markierungssprints, Abkühlen. Reihenfolge einstellbar.'), T('Wiederholungen je Stufe: Intervall 20 / 40 / 60, Kraftausdauer 8 / 16 / 24, 100 m 3 / 6 / 10, Markierungen 3 / 6 / 9.')]
-    : [T('Beginner: 8, 8, 9, 9, 10, 10 km/h, danach in 0,5-km/h-Schritten: 10,5, 10,5, 11, 11, 11,5, 11,5 km/h.'), T('Normal startet bei 10 km/h, Fortgeschritten bei 11,5 km/h – gleiche Stufung (Annahme, anpassbar über Stufe/Reduzieren).')];
-  const testNote = T('Individuell nach Test: Start = Testgeschwindigkeit − 1 km/h (auf 0,5 abgerundet), dann +0,5 km/h alle zwei Einheiten. Der Testwert selbst ist kein Trainingstempo.');
-  if (!st) {
-    return topbar({ back: runBase(cid), title: esc(RUN_NAME[prog]), sub: esc(c.name) }) + `<main class="wrap view">
-      <div class="card stack"><p style="margin:0">${esc(intro)}</p><ul class="ul run-notes">${notes.map(n => `<li>${esc(n)}</li>`).join('')}</ul>
-        <form data-form="run-enroll" data-cid="${cid}" data-prog="${prog}" class="stack">
-          <div class="field" style="margin:0"><span>${T('Leistungsstufe')}</span>${lvSelect('level', 'beginner')}</div>
-          ${t ? `<label class="toggle"><input type="checkbox" name="endBase"><span class="tg"></span><span>${T('Grundausdauer individuell nach meinem Test ({v} km/h)', { v: fmtNum(ts) })}<small>${esc(testNote)}</small></span></label>` : `<div class="muted" style="font-size:13px">${T('Tipp: Mit einem 60-Minuten-Leistungstest kann die Grundausdauer individuell angepasst werden.')} <a class="accent" href="#${runBase(cid)}/test60">${T('Zum Test')}</a></div>`}
-          <button class="btn btn-primary btn-big">${ic('play', 20)} ${T('Programm beginnen')}</button></form></div></main>`;
-  }
-  const cfg = st.cfg, n = st.units.length;
-  const weeks = [...new Set(st.units.map((_, u) => Math.floor(u / 3) + 1))];
-  const row = (x, u) => {
-    const sp = unitOf(prog, cfg, u, ts), inf = specInfo(sp), nx = st.next === u;
-    return `<button class="run-unit ${nx ? 'next' : ''}" data-action="run-unit" data-cid="${cid}" data-prog="${prog}" data-u="${u}">
-      <span class="day-no">${u + 1}</span><span class="grow"><span class="ru-h">${esc(sp.type === 'interval' ? RUN_NAME.interval : sp.type === 'ka' ? RUN_NAME.ka : sp.type === 'combo' ? RUN_NAME.combo : sp.focus)}</span>
-      <span class="ru-d">${esc(inf.desc)}</span><span class="ru-s">${sp.type === 'endurance' ? `${T('Distanz')}: ${esc(inf.distTxt)}${sp.indiv ? ' · ' + T('individuell') : ''}` : `${T('Wdh.')}: ${esc(String(inf.reps))} · ${T('Pausen')}: ${esc(inf.pause)} · ${esc(inf.distTxt)}`}</span></span>
-      <span class="ru-r">${nx && x.st === 'planned' ? `<span class="tag">${T('Als Nächstes')}</span>` : stTag(x.st)}</span></button>`;
-  };
-  return topbar({ back: runBase(cid), title: esc(RUN_NAME[prog]), sub: esc(c.name) }) + `<main class="wrap view">
-    <div class="card run-head"><div class="row" style="justify-content:space-between;gap:10px;align-items:flex-start"><div><div class="run-k">${T('Leistungsstufe')}</div><div class="run-v">${RUN_LV[cfg.level || 'beginner']}${cfg.endBase === 'test' && ts ? ' · ' + T('Grundausdauer individuell') : ''}</div></div>
-      <div style="text-align:right"><div class="run-k">${T('Fortschritt')}</div><div class="run-v">${st.done} / ${n}</div></div></div>
-      <div class="run-mini-bar" style="margin-top:10px"><i style="width:${Math.round(st.done / n * 100)}%"></i></div>
-      ${st.next != null ? `<button class="btn btn-primary btn-block" style="margin-top:12px" data-action="run-unit" data-cid="${cid}" data-prog="${prog}" data-u="${st.next}">${ic('play', 18)} ${T('Nächste Einheit: {n}', { n: st.next + 1 })}</button>` : `<div class="done-banner" style="margin-top:12px"><div class="done-ic">✓</div><div><b>${T('Programm abgeschlossen')}</b></div></div>`}
-    </div>
-    ${weeks.map(w => { const us = st.units.map((x, u) => ({ x, u })).filter(o => Math.floor(o.u / 3) + 1 === w); const f = unitOf(prog, cfg, us[0].u, ts).focus;
-      return `<div class="care-h">${T('Woche {w}', { w })} · ${esc(f)}</div><div class="stack">${us.map(o => row(o.x, o.u)).join('')}</div>`; }).join('')}
-    <section class="section"><div class="section-h"><h2>${T('Einstellungen')}</h2></div><div class="card stack">
-      <div class="field" style="margin:0"><span>${T('Leistungsstufe')}</span>${lvSelect('rlv', cfg.level || 'beginner', `data-runcfg="${prog}.level" data-cid="${cid}"`)}</div>
-      ${t ? `<label class="toggle"><input type="checkbox" data-runcfg="${prog}.endBase" data-cid="${cid}" ${cfg.endBase === 'test' ? 'checked' : ''}><span class="tg"></span><span>${T('Grundausdauer individuell nach Test ({v} km/h)', { v: fmtNum(ts) })}<small>${esc(testNote)}</small></span></label>` : ''}
-      ${prog === 'athlete' ? `<label class="field" style="margin:0"><span>${T('Pause zwischen 100-m-Sprints')}</span><select class="input" data-runcfg="athlete.rest100" data-cid="${cid}">${RUN_CFG.rest100.map(v => `<option value="${v}" ${(cfg.rest100 || RUN_CFG.rest100Def) === v ? 'selected' : ''}>${T('{m} Min.', { m: v / 60 })}</option>`).join('')}</select></label>
-      <label class="field" style="margin:0"><span>${T('Reihenfolge im Sprinttraining')}</span><select class="input" data-runcfg="athlete.order" data-cid="${cid}"><option value="100first" ${(cfg.order || '100first') === '100first' ? 'selected' : ''}>${T('100-m-Sprints zuerst, dann Markierungssprints')}</option><option value="markerFirst" ${cfg.order === 'markerFirst' ? 'selected' : ''}>${T('Markierungssprints zuerst, dann 100-m-Sprints')}</option></select></label>` : ''}
-      <div class="muted" style="font-size:12.5px">${T('Eine neue Stufe gilt für kommende Einheiten. Abgeschlossene Einheiten bleiben unverändert.')}</div>
-      <button class="btn btn-ghost btn-block" data-action="run-restart" data-cid="${cid}" data-prog="${prog}">${ic('reset', 18)} ${T('Programm neu beginnen')}</button>
-    </div></section>
-    <section class="section"><div class="section-h"><h2>${T('So ist der Plan aufgebaut')}</h2></div><div class="card"><ul class="ul run-notes">${notes.map(x => `<li>${esc(x)}</li>`).join('')}<li>${esc(testNote)}</li></ul></div></section>
-    <div class="info run-safe">${esc(RUN_SAFETY())}</div>
-  </main>`;
-}
-
-/* Einzelprogramm (Intervall, Kraftausdauer, Markierungen, 100 m) */
-function viewRunSingle(c, prog) {
-  const cid = c.id, cfg = runCfgOf(c); UI.runLv = UI.runLv || {};
-  const lv = UI.runLv[prog] || cfg['lv_' + prog] || 'beginner';
-  const sp = runSpecFor(cid, prog, { level: lv }), inf = specInfo(sp);
-  const last = runsOf(cid, true).filter(s => s.run.prog === prog).slice(0, 5);
-  const about = {
-    interval: [T('Ablauf: 80 m in 15 Sekunden laufen, dann 15 Sekunden locker traben – wiederholen.'), T('Zielgeschwindigkeit der schnellen 80 m: 19,2 km/h. Das ist sehr schnell – laufe dieses Tempo nur, wenn du es sicher und kontrolliert schaffst.'), T('Die Zahl gilt für die schnellen Abschnitte, die Trabpausen kommen dazu.')],
-    ka: [T('Ein Durchgang = 80 m locker traben + 120 m mit hoher Intensität (200 m).'), T('120 m mit etwa 80–90 % deiner maximalen Laufintensität: kraftvoll und schnell wie ein intensiver Antritt, aber kein Maximalsprint.'), T('Es gibt keine feste Geschwindigkeit – die Intensität richtet sich nach dir.')],
-    marker: [T('Markierungen bei 5, 10 und 15 m. Eine Wiederholung: zur 5-m-Markierung und zurück, zur 10-m-Markierung und zurück, zur 15-m-Markierung und zurück.'), T('6 Laufabschnitte = 60 m pro Wiederholung. Danach 1:50 Min. Pause.')],
-    sprint100: [T('100 m mit hoher Sprintintensität, danach 3–5 Min. vollständige Erholung.'), T('Die Sprintzeit kannst du mit der Stoppuhr messen oder eintragen – so siehst du deine Entwicklung.')],
-  }[prog];
-  const hint = recoveryHint(cid, prog);
-  return topbar({ back: runBase(cid), title: esc(RUN_NAME[prog]), sub: esc(c.name) }) + `<main class="wrap view">
-    <div class="card stack"><ul class="ul run-notes" style="margin:0">${about.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>
-    <div class="card stack" style="margin-top:12px">
-      <div class="field" style="margin:0"><span>${T('Leistungsstufe')}</span>${lvSelect('slv', lv, `data-runlv="${prog}"`)}</div>
-      <div class="run-facts"><div><span>${T('Wiederholungen')}</span><b>${esc(String(inf.reps))}</b></div><div><span>${T('Pausen')}</span><b>${esc(inf.pause)}</b></div><div><span>${T('Strecke')}</span><b>${esc(inf.distTxt)}</b></div></div>
-      ${prog === 'sprint100' ? `<label class="field" style="margin:0"><span>${T('Pause zwischen den Sprints')}</span><select class="input" data-runcfg="rest100" data-cid="${cid}">${RUN_CFG.rest100.map(v => `<option value="${v}" ${(cfg.rest100 || RUN_CFG.rest100Def) === v ? 'selected' : ''}>${T('{m} Min.', { m: v / 60 })}</option>`).join('')}</select></label>` : ''}
-      <div class="muted" style="font-size:13px">${T('Mit Aufwärmen (10 Min.) und Abkühlen – zählen nicht zu den Wiederholungen.')}</div>
-      ${hint ? `<div class="info warn-info">${esc(hint)}</div>` : ''}
-      <button class="btn btn-primary btn-big" data-action="run-start" data-cid="${cid}" data-prog="${prog}" data-level="${lv}">${ic('play', 20)} ${T('Training starten')}</button>
-    </div>
-    ${last.length ? `<section class="section"><div class="section-h"><h2>${T('Letzte Einheiten')}</h2></div><div class="card list-card">${last.map(runLink).join('')}</div></section>` : ''}
-    <div class="info run-safe" style="margin-top:14px">${esc(RUN_SAFETY())}</div>
-  </main>`;
-}
-
-/* 60-Minuten-Leistungstest */
-function viewRunTest(c) {
-  const cid = c.id, tests = runsOf(cid, true).filter(s => s.run.type === 'test60' && s.run.result && s.run.status === 'completed').slice().reverse();
-  return topbar({ back: runBase(cid), title: esc(RUN_NAME.test60), sub: esc(c.name) }) + `<main class="wrap view">
-    <div class="card stack"><ul class="ul run-notes" style="margin:0">
-      <li>${T('60 Minuten laufen und dabei die größtmögliche Distanz schaffen, die du kontrolliert durchhältst.')}</li>
-      <li>${T('Danach die Distanz eintragen – die App berechnet die Ø-Geschwindigkeit: km ÷ Stunden. Bei genau 60 Min. entspricht die Distanz in km der Geschwindigkeit in km/h.')}</li>
-      <li>${T('Der Testwert ist ein Ausgangspunkt – kein Tempo für jede Einheit.')}</li></ul>
-      <button class="btn btn-primary btn-big" data-action="run-start" data-cid="${cid}" data-prog="test60">${ic('play', 20)} ${T('Test mit Timer starten')}</button></div>
-    <section class="section"><div class="section-h"><h2>${T('Ergebnis eintragen')}</h2></div>
-      <form class="card stack" data-form="run-test" data-cid="${cid}">
-        <div class="grid2"><label class="field" style="margin:0"><span>${T('Distanz (km)')}</span><input class="input" name="km" inputmode="decimal" placeholder="z. B. 9,5" required></label>
-        <label class="field" style="margin:0"><span>${T('Dauer (Min.)')}</span><input class="input" name="min" inputmode="numeric" value="60"></label></div>
-        <label class="field" style="margin:0"><span>${T('Datum')}</span><input class="input" type="date" name="date" value="${today()}"></label>
-        <button class="btn btn-ghost btn-block">${ic('check', 18)} ${T('Testergebnis speichern')}</button></form></section>
-    ${tests.length ? `<section class="section"><div class="section-h"><h2>${T('Deine Tests')}</h2></div><div class="card">${lineChart(tests.map(s => ({ y: s.run.result.speed, label: fmtDate(s.date) })), 'km/h')}</div>
-      <div class="card list-card" style="margin-top:10px">${tests.slice().reverse().map(runLink).join('')}</div></section>` : ''}
-  </main>`;
-}
-
-/* Verlauf + Entwicklung */
 function runLink(s) {
   return `<a class="list-link" href="#/session/${s.id}"><div class="grow"><div style="font-weight:600">${fmtDate(s.date)} – ${esc(runTitle(s))}</div><div class="muted" style="font-size:13px">${esc(runLine(s))}</div></div>${stTag(s.status === 'active' ? 'active' : s.run.status)}</a>`;
 }
@@ -5681,45 +5589,8 @@ function runTick() {
   if (UI.sw && UI.sw.sid === s.id && UI.sw.t0) { const tf = document.getElementById('rp-time'); if (tf && document.activeElement !== tf) tf.value = fmtNum(Math.round((Date.now() - UI.sw.t0) / 100) / 10); }
 }
 
-/* Einheit-Blatt (Start / reduziert / überspringen / wiederholen) */
-function openRunUnit(cid, prog, u) {
-  const st = progState(cid, prog); if (!st) return;
-  const t = lastTest(cid), sp = unitOf(prog, st.cfg, u, t ? t.run.result.speed : 0), inf = specInfo(sp), us = st.units[u], red = specInfo(reduceSpec(sp));
-  const hint = recoveryHint(cid, sp.type);
-  modal(T('Einheit {n} · Woche {w}', { n: u + 1, w: sp.week }), `<div class="stack">
-    <div class="row" style="justify-content:space-between"><b>${esc(sp.focus)}</b>${stTag(us.st)}</div>
-    <div>${esc(inf.desc)}</div>
-    <div class="run-facts"><div><span>${T('Wiederholungen')}</span><b>${esc(String(inf.reps))}</b></div><div><span>${T('Pausen')}</span><b>${esc(inf.pause)}</b></div><div><span>${T('Strecke')}</span><b>${esc(inf.distTxt)}</b></div></div>
-    ${sp.type === 'interval' ? `<div class="muted" style="font-size:13px">${T('Zielgeschwindigkeit der schnellen 80 m: 19,2 km/h. Das ist sehr schnell – laufe dieses Tempo nur, wenn du es sicher und kontrolliert schaffst.')}</div>` : ''}
-    ${sp.indiv ? `<div class="muted" style="font-size:13px">${T('Individuell nach deinem Leistungstest berechnet.')}</div>` : ''}
-    ${hint ? `<div class="info warn-info">${esc(hint)}</div>` : ''}
-    <button class="btn btn-primary btn-big" data-action="run-start" data-cid="${cid}" data-prog="${prog}" data-u="${u}">${ic('play', 20)} ${us.st === 'completed' ? T('Einheit wiederholen') : T('Einheit starten')}</button>
-    <button class="btn btn-ghost btn-block" data-action="run-start" data-cid="${cid}" data-prog="${prog}" data-u="${u}" data-reduce="1">${T('Mit reduzierter Belastung starten')} <span class="muted">(${esc(red.desc)})</span></button>
-    ${us.st !== 'completed' && us.st !== 'skipped' ? `<button class="btn btn-text btn-block" data-action="run-skip" data-cid="${cid}" data-prog="${prog}" data-u="${u}">${T('Einheit überspringen')}</button>` : ''}
-  </div>`);
-}
-
+/* Player-Aktionen */
 Object.assign(A, {
-  'run-unit': el => openRunUnit(el.dataset.cid, el.dataset.prog, +el.dataset.u),
-  'run-start': async el => {
-    const cid = el.dataset.cid, prog = el.dataset.prog, act = activeRun(cid);
-    if (act) { closeModal(null); if (await confirmDialog(T('Einheit läuft bereits'), T('Es läuft noch {x}. Bitte zuerst beenden.', { x: `<b>${esc(runTitle(act))}</b>` }), { ok: T('Zur laufenden Einheit') })) go('/lauf/' + act.id); return; }
-    runAudio();
-    const opts = { reduce: el.dataset.reduce === '1' };
-    if (el.dataset.u != null && el.dataset.u !== '') opts.unit = +el.dataset.u;
-    if (el.dataset.level) { opts.level = el.dataset.level; runSetCfg(cid, { ['lv_' + prog]: el.dataset.level }); }
-    const s = startRun(cid, runSpecFor(cid, prog, opts)); closeModal(null); go('/lauf/' + s.id);
-  },
-  'run-skip': async el => {
-    const cid = el.dataset.cid, prog = el.dataset.prog, u = +el.dataset.u; closeModal(null);
-    if (!await confirmDialog(T('Einheit überspringen?'), T('Die Einheit wird als „übersprungen“ markiert. Du kannst sie später trotzdem noch laufen.'), { ok: T('Überspringen') })) return;
-    const s = startRun(cid, runSpecFor(cid, prog, { unit: u })); runFinish(s, 'skipped'); render();
-  },
-  'run-restart': async el => {
-    const cid = el.dataset.cid, prog = el.dataset.prog;
-    if (!await confirmDialog(T('Programm neu beginnen?'), T('Der Fortschritt startet wieder bei Einheit 1. Bisherige Einheiten bleiben im Verlauf gespeichert.'), { ok: T('Neu beginnen') })) return;
-    const cfg = runCfgOf(S.clients.get(cid))[prog] || {}; runSetCfg(cid, { [prog]: { ...cfg, inst: uid(), start: today() } }); render();
-  },
   'rp-pause': el => { const s = S.sessions.get(el.dataset.sid); if (!s || s.run.pos.pausedAt) return; s.run.pos.pausedAt = Date.now(); s.updatedAt = Date.now(); put('sessions', s); render(); },
   'rp-resume': el => { const s = S.sessions.get(el.dataset.sid); if (!s || !s.run.pos.pausedAt) return; runAudio(); s.run.pos.paused = (s.run.pos.paused || 0) + Date.now() - s.run.pos.pausedAt; s.run.pos.pausedAt = null; s.updatedAt = Date.now(); put('sessions', s); render(); },
   'rp-next': el => { const s = S.sessions.get(el.dataset.sid); if (!s || s.status !== 'active') return; runAudio(); if (s.run.pos.pausedAt) A['rp-resume'](el); runAdvance(s); put('sessions', s); render(); },
@@ -5735,30 +5606,485 @@ Object.assign(A, {
     if (!await confirmDialog(T('Einheit beenden?'), T('Die Einheit wird als „abgebrochen“ gespeichert – nicht als vollständig absolviert. Bereits gelaufene Abschnitte bleiben erfasst.'), { ok: T('Beenden'), danger: true })) return;
     runFinish(s, 'aborted'); UI.sw = null; go('/session/' + s.id); },
 });
-document.addEventListener('change', ev => {
-  const t = ev.target;
-  if (t.dataset && t.dataset.runlv) { UI.runLv = UI.runLv || {}; UI.runLv[t.dataset.runlv] = t.value; return render(); }
-  if (t.dataset && t.dataset.runcfg) {
-    const cid = t.dataset.cid, [prog, key] = t.dataset.runcfg.includes('.') ? t.dataset.runcfg.split('.') : [null, t.dataset.runcfg];
-    const val = t.type === 'checkbox' ? (t.checked ? 'test' : 'std') : /^\d+$/.test(t.value) ? +t.value : t.value;
-    if (prog) runSetCfg(cid, { [prog]: { ...(runCfgOf(S.clients.get(cid))[prog] || {}), [key]: val } }); else runSetCfg(cid, { [key]: val });
-    toast(T('Gespeichert ✓')); render();
-  }
-});
 document.addEventListener('submit', ev => {
   const f = ev.target; if (!f.dataset) return;
-  if (f.dataset.form === 'run-enroll') { ev.preventDefault(); const fd = new FormData(f), cid = f.dataset.cid, prog = f.dataset.prog;
-    runSetCfg(cid, { [prog]: { inst: uid(), level: fd.get('level') || 'beginner', start: today(), endBase: fd.get('endBase') === 'on' ? 'test' : 'std', order: '100first', rest100: RUN_CFG.rest100Def } });
-    toast(T('Programm gestartet ✓')); render(); }
-  if (f.dataset.form === 'run-test') { ev.preventDefault(); const fd = new FormData(f), cid = f.dataset.cid, km = parseNum(fd.get('km')), min = parseNum(fd.get('min')) || 60;
-    if (!(km > 0 && km < 40)) return toast(T('Bitte eine gültige Distanz eintragen.'));
-    const s = startRun(cid, runSpecFor(cid, 'test60')); s.date = fd.get('date') || today(); s.run.log.manual = true; runFinish(s, min >= RUN_CFG.testMin * RUN_CFG.endDoneShare ? 'completed' : 'aborted', { km, min });
-    toast(T('Testergebnis gespeichert: Ø {v} km/h', { v: fmtNum(speedOf(km, min)) })); render(); }
   if (f.dataset.form === 'run-result') { ev.preventDefault(); const s = S.sessions.get(f.dataset.sid); if (!s) return; const fd = new FormData(f), st = s.run.steps[s.run.pos.i];
     const km = parseNum(fd.get('km')), min = parseNum(fd.get('min')); if (!(km > 0 && km < 60) || !(min > 0)) return toast(T('Bitte Distanz und Dauer eintragen.'));
     const planned = st.t === 'endurance' ? st.min : RUN_CFG.testMin;
     s.run.log.doneIdx.push(s.run.pos.i);
     runFinish(s, min >= planned * RUN_CFG.endDoneShare ? 'completed' : 'aborted', { km, min }); go('/session/' + s.id); }
+}, true);
+
+/* =====================================================================
+   LAUFEN: Trainer-Kunden-Workflow (Zuweisung, Wochenplan, Test, Kontrolle)
+   Die Laufprogramme oben sind die interne Trainingsbibliothek (Vorlagen). Kunden sehen nur, was der Trainer
+   zuweist und veröffentlicht.
+
+   Datenmodell (am Kundendatensatz, wird nur auf dem Trainer-Gerät verändert):
+   c.runPlan = {
+     draft:     { items: [Item] }        Arbeitsstand des Trainers (bleibt auf dem Trainer-Gerät)
+     pub:       { items: [Item], at }     veröffentlichter Wochenplan – nur dieser geht an den Kunden
+     issued:    { [itemId]: { type, level, at } }  jemals veröffentlichte Zuweisungen (Prüfung eingehender Ergebnisse)
+     test:      { id, assignedAt, reviewedAt } | null    zugewiesener 60-Minuten-Laufleistungstest
+     decision:  { level, at, testSid, speed, note }      Trainerentscheidung (Leistungsstufe)
+     decisions: [ … ]                    frühere Entscheidungen (nachvollziehbar)
+     log:       [ { at, what } ]         Änderungsprotokoll
+   }
+   Item (geplante Einheit = Kunden-Zuweisung mit Datum):
+     { id, date, kind: 'run'|'strength'|'rest'|'note', mandatory, createdAt, updatedAt, removed,
+       run:      tpl { prog, level, unit } = stabile Referenz auf die Vorlage, spec + steps = Vorgaben zum Zeitpunkt der Zuweisung,
+                 src { prog, inst, unit } wenn aus einem ganzen Programm erzeugt
+       strength: dayId (null = nächstes Workout laut Plan), label
+       rest/note: text }
+   Trainingsergebnis = Laufeinheit (session kind:'run') mit run.asg = Item-ID bzw. Test-ID.
+   Rechte: Der Kunde bekommt nur pub + test (clientPackage). Ergebnisse vom Kunden-Gerät werden beim Trainer nur
+   angenommen, wenn sie zu einer veröffentlichten Zuweisung passen (runResultValid in importReturn).
+   ===================================================================== */
+const WD = () => [T('Montag'), T('Dienstag'), T('Mittwoch'), T('Donnerstag'), T('Freitag'), T('Samstag'), T('Sonntag')];
+const WDS = () => [T('Mo'), T('Di'), T('Mi'), T('Do'), T('Fr'), T('Sa'), T('So')];
+const isoAdd = (iso, n) => { const d = new Date(iso + 'T12:00:00'); d.setDate(d.getDate() + n); return isoOf(d); };
+const weekdayIdx = iso => (new Date(iso + 'T12:00:00').getDay() + 6) % 7; // 0 = Montag
+const weekStart = iso => isoAdd(iso, -weekdayIdx(iso));
+const weekDates = ws => Array.from({ length: 7 }, (_, i) => isoAdd(ws, i));
+const kwOf = iso => { const d = new Date(iso + 'T12:00:00'); d.setDate(d.getDate() + 3 - (d.getDay() + 6) % 7); const y = new Date(d.getFullYear(), 0, 4); return 1 + Math.round(((d - y) / 864e5 - 3 + (y.getDay() + 6) % 7) / 7); };
+const clone = o => JSON.parse(JSON.stringify(o));
+function rpOf(c) { const r = (c && c.runPlan) || {}; return { draft: r.draft || { items: (r.pub && clone(r.pub.items)) || [] }, pub: r.pub || null, issued: r.issued || {}, test: r.test || null, decision: r.decision || null, decisions: r.decisions || [], log: r.log || [] }; }
+function rpSave(cid, fn, what) {
+  const c = S.clients.get(cid), r = rpOf(c); fn(r);
+  if (what) r.log = [{ at: Date.now(), what }, ...r.log].slice(0, 200);
+  c.runPlan = r; c.runPlanAt = Date.now(); put('clients', c); return r;
+}
+const liveItems = (list, date) => (list || []).filter(i => !i.removed && (!date || i.date === date)).sort((a, b) => a.date.localeCompare(b.date) || (a.createdAt || 0) - (b.createdAt || 0));
+const sigItems = l => JSON.stringify(liveItems(l).map(i => [i.id, i.date, i.kind, i.mandatory, i.dayId || '', i.text || '', i.run ? JSON.stringify(i.run.spec) : '']));
+const rpDirty = c => { const r = rpOf(c); return sigItems(r.draft.items) !== sigItems(r.pub ? r.pub.items : []); };
+const itemSessions = (cid, id, type) => runsOf(cid).filter(s => s.run.asg === id && (!type || s.run.type === type)).sort((a, b) => (b.startedAt || 0) - (a.startedAt || 0));
+function itemStatus(cid, it) {
+  if (it.kind === 'run') {
+    const l = itemSessions(cid, it.id, it.run.spec.type), ok = l.find(s => s.run.status === 'completed');
+    if (ok) return { st: 'completed', s: ok }; if (l[0] && l[0].status === 'active') return { st: 'active', s: l[0] };
+    if (l[0]) return { st: l[0].run.status, s: l[0] };
+    return { st: it.date < today() ? 'missed' : 'open' };
+  }
+  if (it.kind === 'strength') { const s = sessionsOf(cid, true).find(x => x.date === it.date); return s ? { st: 'completed', s } : { st: it.date < today() ? 'missed' : 'open' }; }
+  return { st: 'none' };
+}
+const IT_ST = { get open() { return T('offen'); }, get missed() { return T('offen – Termin vorbei'); }, get active() { return T('begonnen'); }, get completed() { return T('abgeschlossen'); }, get aborted() { return T('abgebrochen'); }, get skipped() { return T('übersprungen'); }, none: '' };
+const IT_CLS = { open: 'neutral', missed: 'warn', active: 'live', completed: 'ok', aborted: 'warn', skipped: 'off', none: '' };
+const itTag = st => st === 'none' ? '' : `<span class="tag ${IT_CLS[st]}">${IT_ST[st]}</span>`;
+
+/* ---------- Laufleistungstest ---------- */
+function testState(c) {
+  const r = rpOf(c), t = r.test; if (!t) return { st: 'none' };
+  const l = itemSessions(c.id, t.id, 'test60'), done = l.find(s => s.run.status === 'completed' && s.run.result);
+  if (done) { const decided = r.decision && r.decision.testSid === done.id; return { st: decided ? 'done' : t.reviewedAt ? 'reviewed' : 'submitted', s: done, t }; }
+  if (l[0] && l[0].status === 'active') return { st: 'started', s: l[0], t };
+  return { st: 'assigned', t };
+}
+const TEST_ST = { get none() { return T('Noch nicht zugewiesen'); }, get assigned() { return T('Zugewiesen'); }, get started() { return T('Begonnen'); }, get submitted() { return T('Vom Kunden eingereicht'); }, get reviewed() { return T('Vom Trainer geprüft'); }, get done() { return T('Abgeschlossen'); } };
+const TEST_CLS = { none: 'off', assigned: 'neutral', started: 'live', submitted: 'warn', reviewed: 'neutral', done: 'ok' };
+const testTag = st => `<span class="tag ${TEST_CLS[st]}">${TEST_ST[st]}</span>`;
+// Vorschlag (nur Orientierung, eigene Annahme): unter 9 km/h Beginner, bis 11,5 km/h Normal, darüber Fortgeschritten
+const levelSuggest = v => !(v > 0) ? null : v < 9 ? 'beginner' : v < 11.5 ? 'normal' : 'advanced';
+const curLevel = c => (rpOf(c).decision || {}).level || null;
+
+/* ---------- Vorlagen → Zuweisung (Snapshot) ---------- */
+const TPL_LIST = () => [
+  ['endFree', 'Grundausdauerlauf (frei einstellbar)'], ['endurance', 'Grundausdauer – Einheit aus dem 4-Wochen-Programm'], ['interval', RUN_NAME.interval], ['ka', RUN_NAME.ka],
+  ['marker', RUN_NAME.marker], ['sprint100', RUN_NAME.sprint100], ['athlete', 'Athletenprogramm – einzelne Einheit']];
+function specFromTpl(c, o) {
+  const level = o.level || 'beginner', test = testState(c), ts = o.indiv && test.s ? test.s.run.result.speed : 0;
+  if (o.prog === 'endFree') { const speed = +o.speed || 8, min = +o.min || 60; return { prog: 'endurance', type: 'endurance', level, speed, min, km: kmOf(speed, min), custom: true }; }
+  if (o.prog === 'endurance' || o.prog === 'athlete') {
+    const u = Math.max(0, Math.min(unitCount(o.prog) - 1, +o.unit || 0));
+    const sp = { ...unitOf(o.prog, { level, endBase: o.indiv ? 'test' : 'std', rest100: +o.rest100 || RUN_CFG.rest100Def, order: o.order || '100first' }, u, ts), level, prog: o.prog, unit: u };
+    if (sp.type === 'endurance' && (+o.speed > 0)) { sp.speed = +o.speed; sp.km = kmOf(sp.speed, sp.min); sp.custom = true; }
+    if (sp.type === 'sprint100' || sp.type === 'combo') sp.rest100 = +o.rest100 || RUN_CFG.rest100Def;
+    return sp;
+  }
+  return { prog: o.prog, type: o.prog, level, reps: RUN_REPS[o.prog][level], rest100: +o.rest100 || RUN_CFG.rest100Def };
+}
+function mkRunItem(c, o, date, mandatory = true, src = null) {
+  const spec = specFromTpl(c, o);
+  return { id: uid(), kind: 'run', date, mandatory, createdAt: Date.now(), updatedAt: Date.now(),
+    run: { tpl: { prog: o.prog, level: spec.level, unit: spec.unit ?? null, opts: { speed: o.speed || null, min: o.min || null, rest100: o.rest100 || null, order: o.order || null, indiv: !!o.indiv } }, spec, steps: buildSteps(spec) }, src };
+}
+const runItemTitle = it => it.run.spec.type === 'combo' ? RUN_NAME.combo : it.run.spec.type === 'endurance' ? T('Grundausdauerlauf') : RUN_NAME[it.run.spec.type] || '';
+function itemTitle(c, it) {
+  if (it.kind === 'run') return runItemTitle(it) + (it.run.spec.type === 'endurance' ? ' – ' + T('{m} Min.', { m: it.run.spec.min }) : '');
+  if (it.kind === 'strength') { const d = it.dayId && S.days.get(it.dayId), days = clientDays(c.id); return T('Krafttraining') + (d ? ` – ${T('Tag')} ${days.indexOf(d) + 1} · ${TD(d.name)}` : ''); }
+  if (it.kind === 'rest') return it.text || T('Ruhetag');
+  return it.text || T('Frei oder optionale Aktivität');
+}
+
+/* ---------- Veröffentlichen ---------- */
+async function rpPublish(cid) {
+  const c = S.clients.get(cid), r0 = rpOf(c), before = new Set(liveItems(r0.pub ? r0.pub.items : []).map(i => i.id)), now = liveItems(r0.draft.items);
+  const added = now.filter(i => !before.has(i.id)).length, removed = [...before].filter(id => !now.some(i => i.id === id)).length;
+  rpSave(cid, r => {
+    r.pub = { items: clone(r.draft.items), at: Date.now() };
+    for (const it of r.draft.items) if (it.kind === 'run' && !r.issued[it.id]) r.issued[it.id] = { type: it.run.spec.type, level: it.run.spec.level, at: Date.now() };
+  }, `Wochenplan veröffentlicht (${added} neu, ${removed} entfernt, ${now.length} gesamt)`);
+  return rpSync(cid);
+}
+async function rpSync(cid) {
+  const c = S.clients.get(cid);
+  if (!(c.access && c.access.code && boxUrl())) return { sent: false, offline: true };
+  try { await boxSendUpdate(cid); return { sent: true }; } catch (e) { return { sent: false, err: e.message }; }
+}
+const syncToast = (r, ok) => toast(r.sent ? ok + ' und an den Kunden übertragen ✓' : r.offline ? ok + ' ✓ – kommt mit der nächsten Zugangsdatei an' : ok + ` ✓ – Übertragung fehlgeschlagen (${r.err}). Später „Update senden“.`);
+/* Ergebnis vom Kunden-Gerät nur annehmen, wenn es zu einer veröffentlichten Zuweisung (oder dem Test) passt */
+function runResultValid(c, s) {
+  const r = rpOf(c), a = s.run && s.run.asg; if (!a) return false;
+  if (r.test && r.test.id === a) return s.run.type === 'test60';
+  const iss = r.issued[a]; return !!iss && iss.type === s.run.type && iss.level === s.run.level;
+}
+
+/* ---------- Trainer: Laufen & Wochenplan ---------- */
+function weekRows(c, items, ws, mode) {
+  const cid = c.id, t = today();
+  return weekDates(ws).map((d, i) => {
+    const its = liveItems(items, d);
+    return `<div class="wk-day ${d === t ? 'today' : ''}"><div class="wk-h"><b>${WD()[i]}</b><span class="muted">${fmtDate(d)}</span>${mode === 'coach' ? `<button class="icon-btn wk-add" data-action="asg-add" data-cid="${cid}" data-date="${d}" aria-label="Hinzufügen">${ic('plus', 18)}</button>` : ''}</div>
+      ${its.length ? its.map(it => { const st = mode === 'draft' ? { st: 'none' } : itemStatus(cid, it);
+        return `<button class="wk-item k-${it.kind} ${it.mandatory === false ? 'opt' : ''}" data-action="${mode === 'coach' ? 'asg-edit' : 'my-item'}" data-cid="${cid}" data-id="${it.id}">
+          <span class="wk-ic">${it.kind === 'run' ? '🏃' : it.kind === 'strength' ? '🏋️' : it.kind === 'rest' ? '🛌' : '•'}</span><span class="grow"><span class="wk-t">${esc(itemTitle(c, it))}</span>${it.kind === 'run' ? `<span class="wk-s">${esc(specInfo(it.run.spec).desc)}</span>` : ''}</span>
+          ${it.mandatory === false && it.kind !== 'rest' ? `<span class="tag off">${T('optional')}</span>` : ''}${itTag(st.st)}</button>`; }).join('')
+        : `<div class="wk-empty muted">${mode === 'coach' ? 'Nichts geplant' : T('Kein Training geplant')}</div>`}</div>`;
+  }).join('');
+}
+function viewRunCoach(c) {
+  const cid = c.id, r = rpOf(c), ts = testState(c), dec = r.decision, sug = ts.s ? levelSuggest(ts.s.run.result.speed) : null;
+  UI.wk = UI.wk || {}; const ws = UI.wk[cid] || weekStart(today());
+  const dirty = rpDirty(c), pubItems = r.pub ? liveItems(r.pub.items).filter(i => i.kind === 'run') : [];
+  const stc = pubItems.map(i => itemStatus(cid, i).st), cnt = k => stc.filter(x => x === k).length;
+  const res = ts.s ? ts.s.run.result : null;
+  const lim = isoAdd(today(), 7), ctrl = pubItems.filter(i => i.date <= lim || itemStatus(cid, i).st !== 'open').sort((a, b) => b.date.localeCompare(a.date)).slice(0, 20);
+  return topbar({ back: '/client/' + cid, title: 'Laufen & Wochenplan', sub: esc(c.name) }) + `<main class="wrap view">
+    <section class="section" style="margin-top:4px"><div class="section-h"><h2>1 · Laufleistungstest</h2>${testTag(ts.st)}</div><div class="card stack">
+      ${ts.st === 'none' ? `<div class="muted" style="font-size:14px">60 Minuten laufen, größtmögliche kontrollierte Distanz. Der Kunde trägt die Distanz ein, die App berechnet die Ø-Geschwindigkeit.</div>
+        <button class="btn btn-primary btn-block" data-action="test-assign" data-cid="${cid}">${ic('plus', 18)} Lauftest zuweisen</button>`
+      : `<div class="muted" style="font-size:13px">Zugewiesen am ${fmtDateTs(ts.t.assignedAt)}</div>`}
+      ${res ? `<table class="table"><tbody><tr><td class="muted">Kunde</td><td>${esc(c.name)}</td></tr><tr><td class="muted">Testdatum</td><td>${fmtDate(ts.s.date)}</td></tr>
+        <tr><td class="muted">Distanz</td><td><b>${fmtNum(res.km)} km</b></td></tr><tr><td class="muted">Dauer</td><td>${fmtNum(res.min)} Min.</td></tr>
+        <tr><td class="muted">Ø-Geschwindigkeit</td><td><b>${fmtNum(res.speed)} km/h</b></td></tr><tr><td class="muted">Erfassung</td><td>${ts.s.run.log.manual ? 'manuell eingetragen' : 'mit App-Timer, Distanz manuell eingetragen'}</td></tr>
+        <tr><td class="muted">Status</td><td>${TEST_ST[ts.st]}</td></tr></tbody></table>
+        ${ts.st === 'submitted' ? `<button class="btn btn-ghost btn-block" data-action="test-review" data-cid="${cid}">${ic('check', 18)} Als geprüft markieren</button>` : ''}` : ''}
+      ${ts.st === 'assigned' || ts.st === 'started' ? `<div class="grid2"><button class="btn btn-ghost" data-action="test-manual" data-cid="${cid}">Ergebnis selbst eintragen</button><button class="btn btn-text" data-action="test-unassign" data-cid="${cid}">Zuweisung zurücknehmen</button></div>` : ''}
+      ${ts.st === 'done' || ts.st === 'reviewed' ? `<button class="btn btn-text btn-block" data-action="test-assign" data-cid="${cid}">Neuen Lauftest zuweisen</button>` : ''}
+    </div></section>
+
+    <section class="section"><div class="section-h"><h2>2 · Leistungsstufe</h2>${dec ? `<span class="tag ok">${RUN_LV[dec.level]}</span>` : ''}</div>
+      <form class="card stack" data-form="run-decision" data-cid="${cid}">
+        ${sug ? `<div class="info">Vorschlag laut Test (${fmtNum(res.speed)} km/h): <b>${RUN_LV[sug]}</b> – nur Orientierung, du entscheidest.</div>` : ''}
+        ${lvSelect('level', (dec && dec.level) || sug || 'beginner')}
+        <label class="field" style="margin:0"><span>Begründung / Notiz (nur für dich)</span><input class="input" name="note" maxlength="200" value="" placeholder="z. B. Knie beobachten, erst Beginner"></label>
+        <button class="btn btn-primary btn-block">${ic('check', 18)} Leistungsstufe festlegen</button>
+        ${dec ? `<div class="muted" style="font-size:12.5px">Aktuell: ${RUN_LV[dec.level]} · festgelegt am ${fmtDateTs(dec.at)}${dec.speed ? ` · Test ${fmtNum(dec.speed)} km/h` : ' · ohne Test'}${dec.note ? ` · „${esc(dec.note)}“` : ''}</div>` : ''}
+        ${r.decisions.length ? `<details><summary class="muted" style="font-size:13px">Frühere Entscheidungen (${r.decisions.length})</summary><ul class="ul" style="font-size:13px">${r.decisions.map(d => `<li>${fmtDateTs(d.at)}: ${RUN_LV[d.level]}${d.speed ? ` (Test ${fmtNum(d.speed)} km/h)` : ''}${d.note ? ` – ${esc(d.note)}` : ''}</li>`).join('')}</ul></details>` : ''}
+      </form></section>
+
+    <section class="section"><div class="section-h"><h2>3 · Wochenplan</h2>${dirty ? '<span class="tag warn">Entwurf</span>' : r.pub ? '<span class="tag ok">veröffentlicht</span>' : ''}</div>
+      <div class="wk-nav"><button class="icon-btn" data-action="wk-nav" data-cid="${cid}" data-d="-7" aria-label="Vorige Woche">${ic('back', 20)}</button><div class="grow" style="text-align:center"><b>KW ${kwOf(ws)}</b><div class="muted" style="font-size:12.5px">${fmtDate(ws)} – ${fmtDate(isoAdd(ws, 6))}</div></div><button class="icon-btn" data-action="wk-nav" data-cid="${cid}" data-d="7" aria-label="Nächste Woche"><span style="display:inline-block;transform:scaleX(-1)">${ic('back', 20)}</span></button></div>
+      <div class="wk">${weekRows(c, r.draft.items, ws, 'coach')}</div>
+      <div class="grid2" style="margin-top:10px"><button class="btn btn-ghost btn-wrap" data-action="asg-program" data-cid="${cid}">${ic('list', 18)} Programm zuweisen</button><button class="btn btn-ghost btn-wrap" data-action="wk-copy" data-cid="${cid}" data-ws="${ws}">${ic('reset', 18)} Vorwoche übernehmen</button></div>
+      <button class="btn btn-primary btn-big" style="margin-top:10px" data-action="rp-publish" data-cid="${cid}" ${dirty ? '' : 'disabled'}>${ic('upload', 20)} ${dirty ? 'Wochenplan veröffentlichen' : 'Alles veröffentlicht'}</button>
+      <div class="muted" style="font-size:12.5px;margin-top:6px">Änderungen sind erst nach „Veröffentlichen“ beim Kunden sichtbar. Krafttraining, Läufe und Ruhetage gehören zum selben Plan.</div>
+    </section>
+
+    <section class="section"><div class="section-h"><h2>4 · Kontrolle</h2><a class="btn btn-sm btn-ghost" href="#/client/${cid}/lauf/verlauf">${ic('chart', 16)} Verlauf</a></div>
+      <div class="care-chips"><span class="tag neutral">Zugewiesen: ${pubItems.length}</span><span class="tag neutral">Offen: ${cnt('open') + cnt('missed') + cnt('active')}</span><span class="tag ok">Abgeschlossen: ${cnt('completed')}</span><span class="tag warn">Abgebrochen: ${cnt('aborted')}</span><span class="tag off">Übersprungen: ${cnt('skipped')}</span></div>
+      ${ctrl.length ? `<div class="card list-card" style="margin-top:8px">${ctrl.map(it => { const st = itemStatus(cid, it); return `<a class="list-link" href="#/client/${cid}/lauf/e/${it.id}"><div class="grow"><div style="font-weight:600">${WDS()[weekdayIdx(it.date)]} ${fmtDate(it.date)} – ${esc(itemTitle(c, it))}</div><div class="muted" style="font-size:13px">${esc(st.s ? runLine(st.s) : specInfo(it.run.spec).desc)}</div></div>${itTag(st.st)}</a>`; }).join('')}</div>` : (pubItems.length ? '<div class="card empty-s">Noch keine fälligen Laufeinheiten – alle weiteren siehst du im Wochenplan.</div>' : '<div class="card empty-s">Noch keine Laufeinheiten veröffentlicht.</div>')}
+    </section>
+
+    <section class="section"><div class="section-h"><h2>Trainingsbibliothek</h2></div>
+      <a class="list-link card" href="#/client/${cid}/lauf/bib">${runIc()}<div class="grow"><b>Laufprogramme ansehen &amp; zuweisen</b><div class="muted" style="font-size:13px">Grundausdauer, Intervalle, Kraftausdauer, Sprints, Athletenprogramm – Beginner/Normal/Fortgeschritten</div></div><span class="muted">${ic('arrow', 18)}</span></a></section>
+    ${r.log.length ? `<details class="section"><summary class="muted" style="font-size:13px">Änderungsprotokoll (${r.log.length})</summary><ul class="ul" style="font-size:12.5px">${r.log.slice(0, 40).map(l => `<li>${fmtDateTs(l.at)} ${fmtTime(l.at)} – ${esc(l.what)}</li>`).join('')}</ul></details>` : ''}
+  </main>`;
+}
+
+/* ---------- Trainer: Trainingsbibliothek ---------- */
+function viewRunLib(c) {
+  const cid = c.id, card = (prog, sub) => `<a class="list-link run-prog" href="#/client/${cid}/lauf/bib/${prog}">${runIc()}<div class="grow"><b>${esc(RUN_NAME[prog])}</b><div class="muted" style="font-size:13px">${sub}</div></div><span class="muted">${ic('arrow', 18)}</span></a>`;
+  return topbar({ back: `/client/${cid}/lauf`, title: 'Trainingsbibliothek', sub: esc(c.name) }) + `<main class="wrap view">
+    <div class="info">Vorlagen ansehen und einzelne Einheiten oder ganze Programme <b>${esc(c.name.split(' ')[0])}</b> zuweisen. Der Kunde sieht nur, was du zuweist und veröffentlichst.</div>
+    <div class="card list-card" style="margin-top:12px">
+      ${card('athlete', '18 Einheiten · 3 pro Woche · Grundausdauer, Intervalle, Sprints')}${card('endurance', '12 Einheiten · 60 Min. in steigender Geschwindigkeit')}
+      ${card('interval', '80 m in 15 s, 15 s Trab · 20 / 40 / 60')}${card('ka', '80 m traben + 120 m intensiv · 8 / 16 / 24')}
+      ${card('marker', '0 → 5 → 0 → 10 → 0 → 15 → 0 m · 3 / 6 / 9')}${card('sprint100', '100 m, 3–5 Min. Pause · 3 / 6 / 10')}
+    </div></main>`;
+}
+function viewRunLibProg(c, prog) {
+  const cid = c.id; UI.runLv = UI.runLv || {}; const lv = UI.runLv[prog] || curLevel(c) || 'beginner';
+  const units = unitCount(prog);
+  const rows = units ? Array.from({ length: units }, (_, u) => { const sp = specFromTpl(c, { prog, level: lv, unit: u }), inf = specInfo(sp);
+    return `<button class="run-unit" data-action="asg-add" data-cid="${cid}" data-prog="${prog}" data-unit="${u}" data-level="${lv}"><span class="day-no">${u + 1}</span><span class="grow"><span class="ru-h">${T('Woche {w}', { w: Math.floor(u / 3) + 1 })} · ${esc(sp.type === 'endurance' ? T('Grundausdauer') : sp.type === 'combo' ? RUN_NAME.combo : RUN_NAME[sp.type])}</span><span class="ru-d">${esc(inf.desc)}</span><span class="ru-s">${esc(inf.distTxt)}</span></span><span class="muted">${ic('plus', 18)}</span></button>`; }).join('') : '';
+  const sp = units ? null : specFromTpl(c, { prog, level: lv }), inf = sp ? specInfo(sp) : null;
+  return topbar({ back: `/client/${cid}/lauf/bib`, title: esc(RUN_NAME[prog]), sub: 'Bibliothek · ' + esc(c.name) }) + `<main class="wrap view">
+    <div class="card stack"><div class="field" style="margin:0"><span>Stufe ansehen</span>${lvSelect('blv', lv, `data-runlv="${prog}"`)}</div>
+      ${inf ? `<div class="run-facts"><div><span>Wiederholungen</span><b>${esc(String(inf.reps))}</b></div><div><span>Pausen</span><b>${esc(inf.pause)}</b></div><div><span>Strecke</span><b>${esc(inf.distTxt)}</b></div></div>
+        <div>${esc(inf.desc)}</div><button class="btn btn-primary btn-block" data-action="asg-add" data-cid="${cid}" data-prog="${prog}" data-level="${lv}">${ic('plus', 18)} Einheit zuweisen …</button>` : ''}
+      ${units ? `<button class="btn btn-primary btn-block" data-action="asg-program" data-cid="${cid}" data-prog="${prog}" data-level="${lv}">${ic('list', 18)} Ganzes Programm zuweisen …</button><div class="muted" style="font-size:12.5px">Oder unten eine einzelne Einheit antippen.</div>` : ''}
+    </div>
+    ${rows ? `<div class="stack" style="margin-top:12px">${rows}</div>` : ''}
+  </main>`;
+}
+
+/* ---------- Trainer: Zuweisungs-Dialoge ---------- */
+function asgPrevHtml(sp) { const inf = specInfo(sp);
+  return `<b>${esc(inf.desc)}</b><div class="muted" style="font-size:13px">Wdh.: ${esc(String(inf.reps))} · Pausen: ${esc(inf.pause)} · ${esc(inf.distTxt)}</div>
+      <div class="muted" style="font-size:12.5px">${buildSteps(sp).some(s => s.k === 'warmup') ? 'Mit Aufwärmen und Abkühlen.' : ''} ${sp.type === 'interval' ? 'Hinweis an den Kunden: 19,2 km/h ist sehr schnell – nur wenn sicher machbar.' : ''}</div>`; }
+function asgFormHtml(c, o) {
+  const prog = o.prog || 'endFree', lv = o.level || curLevel(c) || 'beginner', ts = testState(c);
+  const sp = specFromTpl(c, { ...o, prog, level: lv }), inf = specInfo(sp), ws = o.ws || weekStart(o.date || today());
+  const dates = weekDates(ws), units = unitCount(prog);
+  const opt = (v, l, cur) => `<option value="${v}" ${String(v) === String(cur) ? 'selected' : ''}>${esc(l)}</option>`;
+  return `<input type="hidden" name="ws" value="${ws}">
+    <label class="field" style="margin:0"><span>Vorlage</span><select class="input" name="prog" data-asgf>${TPL_LIST().map(([k, l]) => opt(k, l, prog)).join('')}</select></label>
+    ${units ? `<label class="field" style="margin:0"><span>Einheit</span><select class="input" name="unit" data-asgf>${Array.from({ length: units }, (_, u) => opt(u, `${T('Einheit {n}', { n: u + 1 })} · ${T('Woche {w}', { w: Math.floor(u / 3) + 1 })} · ${specInfo(specFromTpl(c, { prog, level: lv, unit: u })).desc}`, o.unit || 0)).join('')}</select></label>` : ''}
+    <div class="field" style="margin:0"><span>Leistungsstufe${curLevel(c) ? ` (festgelegt: ${RUN_LV[curLevel(c)]})` : ''}</span>${lvSelect('level', lv, 'data-asgf')}</div>
+    ${sp.type === 'endurance' ? `<div class="grid2"><label class="field" style="margin:0"><span>km/h</span><input class="input" name="speed" inputmode="decimal" value="${fmtNum(sp.speed)}" data-asgf></label><label class="field" style="margin:0"><span>Minuten</span><input class="input" name="min" inputmode="numeric" value="${sp.min}" ${prog === 'endFree' ? '' : 'disabled'} data-asgf></label></div>
+      ${ts.s ? `<label class="toggle"><input type="checkbox" name="indiv" ${o.indiv ? 'checked' : ''} data-asgf><span class="tg"></span><span>Individuell nach Test (${fmtNum(ts.s.run.result.speed)} km/h)<small>Start = Test − 1 km/h, +0,5 km/h je 2 Einheiten</small></span></label>` : ''}` : ''}
+    ${sp.type === 'sprint100' || sp.type === 'combo' ? `<label class="field" style="margin:0"><span>Pause zwischen 100-m-Sprints</span><select class="input" name="rest100" data-asgf>${RUN_CFG.rest100.map(v => opt(v, v / 60 + ' Min.', sp.rest100)).join('')}</select></label>` : ''}
+    ${sp.type === 'combo' ? `<label class="field" style="margin:0"><span>Reihenfolge</span><select class="input" name="order" data-asgf>${opt('100first', '100 m zuerst, dann Markierungen', o.order || '100first')}${opt('markerFirst', 'Markierungen zuerst, dann 100 m', o.order)}</select></label>` : ''}
+    <div class="card asg-prev">${asgPrevHtml(sp)}</div>
+    <label class="field" style="margin:0"><span>Tag</span><select class="input" name="date">${dates.map((d, i) => opt(d, `${WD()[i]}, ${fmtDate(d)}`, o.date || dates[0])).join('')}</select></label>
+    <label class="toggle"><input type="checkbox" name="mandatory" ${o.mandatory === false ? '' : 'checked'}><span class="tg"></span><span>Verpflichtende Einheit<small>Aus = optionale Ergänzung</small></span></label>`;
+}
+function openAsgRun(cid, o = {}) {
+  const c = S.clients.get(cid); UI.asgCtx = { cid, edit: o.edit || null };
+  modal(o.edit ? 'Laufeinheit bearbeiten' : 'Laufeinheit zuweisen', `<form class="stack" data-form="asg-run" data-cid="${cid}"><div id="asg-body" class="stack">${asgFormHtml(c, o)}</div>
+    <div class="sheet-actions"><button type="button" class="btn btn-ghost" data-action="modal-close">Abbrechen</button><button class="btn btn-primary">${o.edit ? 'Speichern' : 'Zum Wochenplan hinzufügen'}</button></div></form>`);
+}
+function asgFormValues(f) { const fd = new FormData(f); return { prog: fd.get('prog'), unit: fd.get('unit'), level: fd.get('level'), speed: parseNum(fd.get('speed')), min: parseNum(fd.get('min')), rest100: fd.get('rest100'), order: fd.get('order'), indiv: fd.get('indiv') === 'on', date: fd.get('date'), ws: fd.get('ws'), mandatory: fd.get('mandatory') === 'on' }; }
+function openAsgAdd(cid, date) {
+  modal(`${WD()[weekdayIdx(date)]}, ${fmtDate(date)}`, `<div class="stack">
+    <button class="day-btn tap" data-action="asg-run-open" data-cid="${cid}" data-date="${date}"><span class="wk-ic">🏃</span><span class="grow"><span class="day-name">Laufeinheit aus der Bibliothek</span><br><span class="muted" style="font-size:13px">Einzellauf oder Einheit aus einem Programm</span></span></button>
+    <div class="card stack"><b>🏋️ Krafttraining</b><select class="input" id="asg-day"><option value="">Nächstes Workout laut Plan</option>${clientDays(cid).map((d, i) => `<option value="${d.id}">Tag ${i + 1} · ${esc(d.name)}</option>`).join('')}</select>
+      <button class="btn btn-ghost btn-block" data-action="asg-strength" data-cid="${cid}" data-date="${date}">Krafttraining eintragen</button></div>
+    <div class="grid2"><button class="btn btn-ghost" data-action="asg-rest" data-cid="${cid}" data-date="${date}" data-kind="rest">🛌 Ruhetag</button><button class="btn btn-ghost" data-action="asg-rest" data-cid="${cid}" data-date="${date}" data-kind="note">• Frei / optional</button></div>
+  </div>`);
+}
+function openAsgEdit(cid, id) {
+  const c = S.clients.get(cid), r = rpOf(c), it = r.draft.items.find(i => i.id === id); if (!it) return;
+  const has = it.kind === 'run' && itemSessions(cid, id).length > 0;
+  if (it.kind === 'run') {
+    const t = it.run.tpl, o = t.opts || {};
+    openAsgRun(cid, { edit: id, prog: o.speed && t.prog === 'endurance' && t.unit == null ? 'endFree' : t.prog, unit: t.unit, level: t.level, speed: it.run.spec.type === 'endurance' ? it.run.spec.speed : null, min: it.run.spec.min, rest100: o.rest100, order: o.order, indiv: o.indiv, date: it.date, ws: weekStart(it.date), mandatory: it.mandatory });
+    const f = document.querySelector('form[data-form=asg-run]');
+    if (f) f.insertAdjacentHTML('beforeend', `<div class="stack" style="margin-top:6px">${has ? '<div class="info">Für diese Einheit liegen schon Ergebnisse vor. Speichern legt eine neue Zuweisung an – die alte bleibt mit ihren Ergebnissen erhalten.</div>' : ''}
+      <label class="field" style="margin:0"><span>Auf anderes Datum verschieben</span><input class="input" type="date" name="dateAny" value="${it.date}"></label>
+      <button type="button" class="btn btn-danger-ghost btn-block" data-action="asg-remove" data-cid="${cid}" data-id="${id}">${ic('trash', 18)} Aus dem Plan entfernen</button></div>`);
+    return;
+  }
+  modal(itemTitle(c, it), `<div class="stack"><label class="field" style="margin:0"><span>Datum</span><input class="input" type="date" id="asg-move" value="${it.date}"></label>
+    <div class="grid2"><button class="btn btn-ghost" data-action="asg-move" data-cid="${cid}" data-id="${id}">Verschieben</button><button class="btn btn-danger-ghost" data-action="asg-remove" data-cid="${cid}" data-id="${id}">Entfernen</button></div></div>`);
+}
+function openAsgProgram(cid, o = {}) {
+  const c = S.clients.get(cid), lv = o.level || curLevel(c) || 'beginner', ts = testState(c), start = weekStart(isoAdd(today(), 7));
+  modal('Programm zuweisen', `<form class="stack" data-form="asg-program" data-cid="${cid}">
+    <label class="field" style="margin:0"><span>Programm</span><select class="input" name="prog"><option value="athlete" ${o.prog !== 'endurance' ? 'selected' : ''}>${esc(RUN_NAME.athlete)} (18 Einheiten)</option><option value="endurance" ${o.prog === 'endurance' ? 'selected' : ''}>${esc(RUN_NAME.endurance)} (12 Einheiten)</option></select></label>
+    <div class="field" style="margin:0"><span>Leistungsstufe</span>${lvSelect('level', lv)}</div>
+    <label class="field" style="margin:0"><span>Beginn</span><input class="input" type="date" name="start" value="${start}"></label>
+    <div class="field" style="margin:0"><span>Lauftage (3 pro Woche)</span><div class="wd-pick">${WDS().map((w, i) => `<label><input type="checkbox" name="wd" value="${i}" ${[0, 2, 4].includes(i) ? 'checked' : ''}><span>${w}</span></label>`).join('')}</div></div>
+    ${ts.s ? `<label class="toggle"><input type="checkbox" name="indiv"><span class="tg"></span><span>Grundausdauer individuell nach Test (${fmtNum(ts.s.run.result.speed)} km/h)<small>Sonst die festen Werte der Stufe (Beginner 8 / 8 / 9 / 9 / 10 / 10 km/h)</small></span></label>` : ''}
+    <label class="field" style="margin:0"><span>Pause zwischen 100-m-Sprints</span><select class="input" name="rest100">${RUN_CFG.rest100.map(v => `<option value="${v}" ${v === RUN_CFG.rest100Def ? 'selected' : ''}>${v / 60} Min.</option>`).join('')}</select></label>
+    <label class="field" style="margin:0"><span>Reihenfolge im Sprinttraining</span><select class="input" name="order"><option value="100first">100 m zuerst, dann Markierungen</option><option value="markerFirst">Markierungen zuerst, dann 100 m</option></select></label>
+    <div class="muted" style="font-size:12.5px">Die Einheiten landen als Entwurf im Wochenplan. Du kannst jede einzeln verschieben, ändern oder entfernen und veröffentlichst danach.</div>
+    <div class="sheet-actions"><button type="button" class="btn btn-ghost" data-action="modal-close">Abbrechen</button><button class="btn btn-primary">Einheiten planen</button></div></form>`);
+}
+function assignProgram(cid, o) {
+  const c = S.clients.get(cid), n = unitCount(o.prog), wds = o.wd.length ? o.wd : [0, 2, 4], inst = uid(), items = [];
+  let d = o.start, u = 0, guard = 0;
+  while (u < n && guard++ < 400) { if (wds.includes(weekdayIdx(d))) { items.push(mkRunItem(c, { prog: o.prog, level: o.level, unit: u, indiv: o.indiv, rest100: o.rest100, order: o.order }, d, true, { prog: o.prog, inst, unit: u })); u++; } d = isoAdd(d, 1); }
+  rpSave(cid, r => { r.draft.items.push(...items); }, `${RUN_NAME[o.prog]} (${RUN_LV[o.level]}) ab ${fmtDate(o.start)} geplant – ${items.length} Einheiten`);
+  return items;
+}
+
+/* ---------- Kunde: persönlicher Wochenplan ---------- */
+function myPub(c) { const r = rpOf(c); return r.pub ? liveItems(r.pub.items) : []; }
+function nextMyItem(c) { const t = today(); return myPub(c).filter(i => (i.kind === 'run' || i.kind === 'strength') && i.date >= t && !['completed', 'skipped'].includes(itemStatus(c.id, i).st))[0] || null; }
+function viewMyPlan(c) {
+  const cid = c.id, r = rpOf(c), ts = testState(c); UI.wk = UI.wk || {}; const ws = UI.wk[cid] || weekStart(today());
+  const nx = nextMyItem(c);
+  return topbar({ back: '/', title: T('Mein Trainingsplan'), sub: T('KW {k} · {a} – {b}', { k: kwOf(ws), a: fmtDate(ws), b: fmtDate(isoAdd(ws, 6)) }) }) + `<main class="wrap view">
+    ${ts.st === 'assigned' || ts.st === 'started' ? `<a class="list-link card test-task" href="#/client/${cid}/lauf/e/${ts.t.id}">${runIc()}<div class="grow"><b>${T('Deine Aufgabe: 60-Minuten-Laufleistungstest')}</b><div class="muted" style="font-size:13px">${ts.st === 'started' ? T('Begonnen – fortsetzen') : T('Von deinem Trainer zugewiesen')}</div></div><span class="muted">${ic('arrow', 18)}</span></a>` : ''}
+    ${ts.st === 'submitted' || ts.st === 'reviewed' ? `<div class="info">${T('Dein Lauftest ist bei deinem Trainer: {km} km = Ø {v} km/h.', { km: fmtNum(ts.s.run.result.km), v: fmtNum(ts.s.run.result.speed) })}</div>` : ''}
+    ${nx ? `<button class="btn btn-primary btn-big btn-next" data-action="my-item" data-cid="${cid}" data-id="${nx.id}" style="margin-top:10px"><span class="nx-ic">${ic('play', 22)}</span><span class="nx-tx"><small>${T('Nächste Einheit')} · ${WD()[weekdayIdx(nx.date)]}</small><b>${esc(itemTitle(c, nx))}</b></span></button>` : ''}
+    ${r.pub ? `<div class="wk-nav" style="margin-top:12px"><button class="icon-btn" data-action="wk-nav" data-cid="${cid}" data-d="-7" aria-label="${T('Vorige Woche')}">${ic('back', 20)}</button><div class="grow" style="text-align:center"><b>${ws === weekStart(today()) ? T('Diese Woche') : T('KW {k}', { k: kwOf(ws) })}</b></div><button class="icon-btn" data-action="wk-nav" data-cid="${cid}" data-d="7" aria-label="${T('Nächste Woche')}"><span style="display:inline-block;transform:scaleX(-1)">${ic('back', 20)}</span></button></div>
+      <div class="wk">${weekRows(c, r.pub.items, ws, 'client')}</div>` : `<div class="card empty" style="margin-top:12px">${T('Dein Trainer hat dir noch keinen Wochenplan freigegeben.')}</div>`}
+    ${runsOf(cid).length ? `<a class="list-link card" style="margin-top:12px" href="#/client/${cid}/lauf/verlauf">${ic('chart')}<div class="grow"><b>${T('Meine Laufergebnisse')}</b></div></a>` : ''}
+  </main>`;
+}
+/* Kunde/Trainer: eine Einheit (Beschreibung, Vorgaben, Start, Ergebnis) */
+function findItem(c, id) {
+  const r = rpOf(c); if (r.test && r.test.id === id) return { test: true, it: { id, kind: 'run', date: today(), run: { spec: { type: 'test60', prog: 'test60' }, steps: buildSteps({ type: 'test60' }) } } };
+  const list = isClientMode() ? (r.pub ? r.pub.items : []) : [...r.draft.items, ...((r.pub && r.pub.items) || []).filter(x => !r.draft.items.some(y => y.id === x.id))];
+  const it = list.find(i => i.id === id); return it ? { it } : null;
+}
+function viewRunItem(c, id) {
+  const cid = c.id, f = findItem(c, id); if (!f) return null; const it = f.it, cm = isClientMode();
+  if (it.kind !== 'run') {
+    const d = it.dayId ? S.days.get(it.dayId) : nextDay(cid);
+    return topbar({ back: `/client/${cid}/lauf`, title: esc(itemTitle(c, it)), sub: `${WD()[weekdayIdx(it.date)]}, ${fmtDate(it.date)}` }) + `<main class="wrap view">
+      ${it.kind === 'strength' && d ? `<button class="btn btn-primary btn-big" data-action="start-day" data-cid="${cid}" data-did="${d.id}">${ic('play', 22)} ${T('Training starten')}</button>` : `<div class="card empty">${esc(itemTitle(c, it))}</div>`}</main>`;
+  }
+  const sp = it.run.spec, inf = specInfo(sp), st = f.test ? { st: testState(c).st } : itemStatus(cid, it), sess = f.test ? testState(c).s : st.s;
+  const act = activeRun(cid), mine = act && act.run.asg === id;
+  const steps = it.run.steps, warm = steps.find(s => s.k === 'warmup'), cool = steps.find(s => s.k === 'cooldown');
+  const instr = f.test ? [T('60 Minuten laufen und dabei die größtmögliche Distanz schaffen, die du kontrolliert durchhältst.'), T('Danach die Distanz eintragen – die App berechnet die Ø-Geschwindigkeit: km ÷ Stunden. Bei genau 60 Min. entspricht die Distanz in km der Geschwindigkeit in km/h.'), T('Die Distanz trägst du selbst ein (z. B. vom Laufband oder deiner Uhr) – die App misst keine Strecke.')]
+    : sp.type === 'endurance' ? [T('Gleichmäßig im vorgegebenen Tempo laufen – du solltest dich dabei noch unterhalten können.'), T('Nach dem Lauf gelaufene Distanz und Dauer eintragen.')]
+    : sp.type === 'interval' ? [T('Ablauf: 80 m in 15 Sekunden laufen, dann 15 Sekunden locker traben – wiederholen.'), T('Zielgeschwindigkeit der schnellen 80 m: 19,2 km/h. Das ist sehr schnell – laufe dieses Tempo nur, wenn du es sicher und kontrolliert schaffst.')]
+    : sp.type === 'ka' ? [T('Ein Durchgang = 80 m locker traben + 120 m mit hoher Intensität (200 m).'), T('120 m mit etwa 80–90 % deiner maximalen Laufintensität: kraftvoll und schnell wie ein intensiver Antritt, aber kein Maximalsprint.')]
+    : sp.type === 'marker' ? [T('Markierungen bei 5, 10 und 15 m. Eine Wiederholung: zur 5-m-Markierung und zurück, zur 10-m-Markierung und zurück, zur 15-m-Markierung und zurück.'), T('6 Laufabschnitte = 60 m pro Wiederholung. Danach 1:50 Min. Pause.')]
+    : sp.type === 'sprint100' ? [T('100 m mit hoher Sprintintensität, danach 3–5 Min. vollständige Erholung.'), T('Die Sprintzeit kannst du mit der Stoppuhr messen oder eintragen – so siehst du deine Entwicklung.')]
+    : [T('Erst die 100-m-Sprints mit Pausen, dann 3 Min. Erholung, dann die Markierungssprints – oder in der Reihenfolge, die dein Trainer festgelegt hat.'), T('Markierungen bei 5, 10 und 15 m. Eine Wiederholung: zur 5-m-Markierung und zurück, zur 10-m-Markierung und zurück, zur 15-m-Markierung und zurück.')];
+  const title = f.test ? T('60-Minuten-Laufleistungstest') : runItemTitle(it);
+  const fact = (l, v) => `<div><span>${l}</span><b>${esc(String(v))}</b></div>`;
+  const facts = f.test ? fact(T('Dauer'), '60 Min.') + fact(T('Ziel'), T('max. Distanz')) + fact(T('Ergebnis'), 'km → km/h')
+    : sp.type === 'endurance' ? fact(T('Dauer'), `${sp.min} Min.`) + fact(T('Tempo'), `${fmtNum(sp.speed)} km/h`) + fact(T('Distanz'), `${fmtNum(sp.km)} km`)
+    : fact(T('Wiederholungen'), inf.reps) + fact(T('Pausen'), inf.pause) + fact(T('Strecke'), inf.distTxt);
+  const hint = recoveryHint(cid, sp.type);
+  return topbar({ back: `/client/${cid}/lauf`, title: esc(title), sub: f.test ? T('Aufgabe von deinem Trainer') : `${WD()[weekdayIdx(it.date)]}, ${fmtDate(it.date)}${it.mandatory === false ? ' · ' + T('optional') : ''}` }) + `<main class="wrap view">
+    <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:8px"><b>${esc(f.test ? '' : inf.desc)}</b>${f.test ? testTag(st.st) : itTag(st.st)}</div>
+    <div class="run-facts">${facts}</div>
+    <div class="card" style="margin-top:12px"><ul class="ul run-notes" style="margin:0">${instr.map(x => `<li>${esc(x)}</li>`).join('')}
+      ${warm ? `<li><b>${T('Aufwärmen')}:</b> ${esc(warm.text)}</li>` : ''}${cool ? `<li><b>${T('Abkühlen')}:</b> ${esc(cool.text)}</li>` : ''}</ul></div>
+    ${hint ? `<div class="info warn-info" style="margin-top:10px">${esc(hint)}</div>` : ''}
+    ${sess && sess.status === 'done' ? `<a class="list-link card" style="margin-top:12px" href="#/session/${sess.id}">${ic('check')}<div class="grow"><b>${T('Dein Ergebnis')}</b><div class="muted" style="font-size:13px">${esc(runLine(sess))}</div></div>${stTag(sess.run.status)}</a>` : ''}
+    <div class="stack" style="margin-top:12px">
+      ${mine ? `<a class="btn btn-primary btn-big" href="#/lauf/${act.id}">${ic('play', 22)} ${T('Einheit fortsetzen')}</a>`
+        : st.st !== 'completed' && st.st !== 'submitted' && st.st !== 'reviewed' && st.st !== 'done' ? `<button class="btn btn-primary btn-big" data-action="my-start" data-cid="${cid}" data-id="${id}">${ic('play', 22)} ${T('Training starten')}</button>
+          <button class="btn btn-ghost btn-block btn-wrap" data-action="my-quick" data-cid="${cid}" data-id="${id}">${ic('check', 18)} ${T('Ohne Timer abschließen und Ergebnis eintragen')}</button>
+          ${f.test ? '' : `<button class="btn btn-text btn-block" data-action="my-skip" data-cid="${cid}" data-id="${id}">${T('Einheit überspringen')}</button>`}` : ''}
+      ${!cm && !f.test ? `<button class="btn btn-ghost btn-block" data-action="asg-edit" data-cid="${cid}" data-id="${id}">${ic('edit', 18)} Zuweisung bearbeiten</button>` : ''}
+    </div>
+    <div class="info run-safe" style="margin-top:12px">${esc(RUN_SAFETY())}</div>
+  </main>`;
+}
+/* Ergebnis ohne Timer: erfasste Wiederholungen/Distanz → gleiche Speicherung wie der Player */
+function openQuickResult(cid, id) {
+  const c = S.clients.get(cid), f = findItem(c, id); if (!f) return; const sp = f.it.run.spec;
+  const end = sp.type === 'endurance' || sp.type === 'test60';
+  const reps = sp.type === 'combo' ? null : sp.reps;
+  modal(T('Ergebnis eintragen'), `<form class="stack" data-form="my-quick" data-cid="${cid}" data-id="${id}">
+    ${end ? `<div class="grid2"><label class="field" style="margin:0"><span>${T('Distanz (km)')}</span><input class="input" name="km" inputmode="decimal" required ${sp.type === 'endurance' ? `value="${fmtNum(sp.km)}"` : 'placeholder="z. B. 9,5"'}></label>
+      <label class="field" style="margin:0"><span>${T('Dauer (Min.)')}</span><input class="input" name="min" inputmode="numeric" value="${sp.type === 'endurance' ? sp.min : 60}"></label></div>
+      <label class="field" style="margin:0"><span>${T('Datum')}</span><input class="input" type="date" name="date" value="${today()}"></label>`
+    : sp.type === 'combo' ? `<div class="grid2"><label class="field" style="margin:0"><span>${T('100-m-Sprints geschafft')} (${sp.reps100})</span><input class="input" name="r1" inputmode="numeric" value="${sp.reps100}"></label><label class="field" style="margin:0"><span>${T('Markierungs-Wdh. geschafft')} (${sp.repsMarker})</span><input class="input" name="r2" inputmode="numeric" value="${sp.repsMarker}"></label></div>`
+    : `<label class="field" style="margin:0"><span>${T('Geschaffte Wiederholungen (von {n})', { n: reps })}</span><input class="input" name="r1" inputmode="numeric" value="${reps}"></label>`}
+    ${sp.type === 'sprint100' || sp.type === 'combo' ? `<label class="field" style="margin:0"><span>${T('Sprintzeiten in Sek. (optional, mit Leerzeichen getrennt)')}</span><input class="input" name="times" placeholder="14,8 14,5 14,9"></label>` : ''}
+    <div class="muted" style="font-size:12.5px">${T('Weniger als vorgegeben bzw. unter 90 % der Dauer wird als „abgebrochen“ gespeichert.')}</div>
+    <div class="sheet-actions"><button type="button" class="btn btn-ghost" data-action="modal-close">${T('Abbrechen')}</button><button class="btn btn-primary">${T('Speichern')}</button></div></form>`);
+}
+function runFromItem(cid, id) {
+  const c = S.clients.get(cid), f = findItem(c, id); if (!f) return null; const it = f.it;
+  const spec = f.test ? { prog: 'test60', type: 'test60', level: null, asg: id } : { ...it.run.spec, asg: id, prog: it.run.spec.prog || it.run.tpl.prog, unit: null, inst: null };
+  const s = startRun(cid, spec, clone(it.run.steps)); if (!isClientMode()) { s.run.log.byTrainer = true; put('sessions', s); } return s;
+}
+function markDoneQuick(s, groupCounts) {
+  const r = s.run, doneSet = new Set(r.log.doneIdx);
+  for (const [grp, n] of Object.entries(groupCounts)) {
+    const reps = new Set(); r.steps.forEach((st, i) => { if (st.grp === grp && st.rep && st.rep <= n && isMainStep(st)) { reps.add(st.rep); doneSet.add(i); } });
+  }
+  r.steps.forEach((st, i) => { if (st.t === 'info' || st.ph === 'prep') doneSet.add(i); });
+  r.log.doneIdx = [...doneSet].sort((a, b) => a - b);
+}
+
+/* Kunden-Startseite: Wochenkarte · Trainer-Kundenseite: Einstieg */
+function MyWeekCard(c) {
+  const r = rpOf(c), ts = testState(c); if (!r.pub && ts.st === 'none') return '';
+  const t = today(), items = myPub(c).filter(i => i.date >= t && i.date <= isoAdd(t, 6)).slice(0, 5);
+  return `<section class="section"><div class="section-h"><h2>${T('Mein Trainingsplan')}</h2><a class="btn btn-sm btn-ghost" href="#/client/${c.id}/lauf">${T('Woche ansehen')}</a></div>
+    ${ts.st === 'assigned' || ts.st === 'started' ? `<a class="list-link card test-task" href="#/client/${c.id}/lauf/e/${ts.t.id}">${runIc()}<div class="grow"><b>${T('Deine Aufgabe: 60-Minuten-Laufleistungstest')}</b><div class="muted" style="font-size:13px">${T('Von deinem Trainer zugewiesen')}</div></div><span class="muted">${ic('arrow', 18)}</span></a>` : ''}
+    ${items.length ? `<div class="card list-card" style="margin-top:8px">${items.map(it => `<button class="list-link" data-action="my-item" data-cid="${c.id}" data-id="${it.id}"><span class="wk-ic">${it.kind === 'run' ? '🏃' : it.kind === 'strength' ? '🏋️' : '🛌'}</span><div class="grow" style="text-align:left"><b>${it.date === t ? T('Heute') : WD()[weekdayIdx(it.date)]}</b> · ${esc(itemTitle(c, it))}</div>${itTag(itemStatus(c.id, it).st)}</button>`).join('')}</div>` : ''}
+  </section>`;
+}
+function RunCoachEntry(c) {
+  const ts = testState(c), r = rpOf(c), lv = curLevel(c), dirty = rpDirty(c);
+  const bits = [`Lauftest: ${TEST_ST[ts.st]}`, lv ? `Stufe ${RUN_LV[lv]}` : '', dirty ? 'Entwurf nicht veröffentlicht' : r.pub ? 'Plan veröffentlicht' : ''].filter(Boolean).join(' · ');
+  return `<a class="list-link card run-entry" href="#/client/${c.id}/lauf">${runIc()}<div class="grow"><b>Laufen &amp; Wochenplan</b><div class="muted" style="font-size:13px">${esc(bits)}</div></div>${ts.st === 'submitted' ? '<span class="tag warn">prüfen</span>' : ''}<span class="muted">${ic('arrow', 18)}</span></a>`;
+}
+/* Trainer-Dashboard: Status der Laufleistungstests */
+function RunTestsDash(cs) {
+  const L = cs.map(c => ({ c, t: testState(c) })).filter(x => x.t.st !== 'none'); if (!L.length) return '';
+  const n = k => L.filter(x => x.t.st === k).length;
+  const rev = L.filter(x => x.t.st === 'submitted');
+  return `<div class="care-h">Laufleistungstests</div><div class="care-chips"><span class="tag neutral">Zugewiesen, offen: ${n('assigned') + n('started')}</span><span class="tag warn">Zur Prüfung: ${rev.length}</span><span class="tag ok">Abgeschlossen: ${n('done')}</span></div>
+    ${rev.length ? `<div class="card list-card" style="margin-top:8px">${rev.map(({ c, t }) => `<a class="list-link" href="#/client/${c.id}/lauf">${avatar(c, 'sm')}<div class="grow"><b>${esc(c.name)}</b><div class="muted" style="font-size:13px">${fmtDate(t.s.date)} · ${fmtNum(t.s.run.result.km)} km · Ø ${fmtNum(t.s.run.result.speed)} km/h</div></div><span class="tag warn">prüfen</span></a>`).join('')}</div>` : ''}`;
+}
+
+/* ---------- Aktionen ---------- */
+Object.assign(A, {
+  'wk-nav': el => { const cid = el.dataset.cid; UI.wk = UI.wk || {}; UI.wk[cid] = isoAdd(UI.wk[cid] || weekStart(today()), +el.dataset.d); render(); },
+  'test-assign': async el => { const cid = el.dataset.cid; rpSave(cid, r => { r.test = { id: uid(), assignedAt: Date.now() }; }, '60-Minuten-Laufleistungstest zugewiesen'); render(); syncToast(await rpSync(cid), 'Lauftest zugewiesen'); render(); },
+  'test-unassign': async el => { const cid = el.dataset.cid; if (!await confirmDialog('Zuweisung zurücknehmen?', 'Der Kunde sieht den Lauftest dann nicht mehr.', { ok: 'Zurücknehmen' })) return; rpSave(cid, r => { r.test = null; }, 'Lauftest-Zuweisung zurückgenommen'); render(); syncToast(await rpSync(cid), 'Zurückgenommen'); render(); },
+  'test-review': el => { rpSave(el.dataset.cid, r => { r.test = { ...r.test, reviewedAt: Date.now() }; }, 'Lauftest-Ergebnis geprüft'); toast('Als geprüft markiert ✓'); render(); },
+  'test-manual': el => { const cid = el.dataset.cid, t = rpOf(S.clients.get(cid)).test; if (t) openQuickResult(cid, t.id); },
+  'asg-add': el => { const cid = el.dataset.cid; if (el.dataset.date) return openAsgAdd(cid, el.dataset.date); openAsgRun(cid, { prog: el.dataset.prog, unit: el.dataset.unit, level: el.dataset.level, ws: (UI.wk || {})[cid] || weekStart(today()) }); },
+  'asg-run-open': el => { closeModal(null); openAsgRun(el.dataset.cid, { date: el.dataset.date, ws: weekStart(el.dataset.date) }); },
+  'asg-strength': el => { const cid = el.dataset.cid, dayId = (document.getElementById('asg-day') || {}).value || null; closeModal(null);
+    rpSave(cid, r => { r.draft.items.push({ id: uid(), kind: 'strength', date: el.dataset.date, dayId, mandatory: true, createdAt: Date.now(), updatedAt: Date.now() }); }, `Krafttraining am ${fmtDate(el.dataset.date)} eingetragen`); render(); },
+  'asg-rest': el => { const cid = el.dataset.cid; closeModal(null);
+    rpSave(cid, r => { r.draft.items.push({ id: uid(), kind: el.dataset.kind, date: el.dataset.date, mandatory: false, createdAt: Date.now(), updatedAt: Date.now(), text: el.dataset.kind === 'rest' ? 'Ruhetag' : 'Frei oder optionale Aktivität' }); }, `${el.dataset.kind === 'rest' ? 'Ruhetag' : 'Freier Tag'} am ${fmtDate(el.dataset.date)}`); render(); },
+  'asg-edit': el => { const cid = el.dataset.cid; if (location.hash.includes('/lauf/e/')) { go(`/client/${cid}/lauf`); setTimeout(() => openAsgEdit(cid, el.dataset.id), 50); } else openAsgEdit(cid, el.dataset.id); },
+  'asg-move': el => { const cid = el.dataset.cid, id = el.dataset.id, d = (document.getElementById('asg-move') || {}).value; if (!d) return; closeModal(null);
+    rpSave(cid, r => { const it = r.draft.items.find(i => i.id === id); if (it) { it.date = d; it.updatedAt = Date.now(); } }, `Eintrag auf ${fmtDate(d)} verschoben`); render(); },
+  'asg-remove': async el => { const cid = el.dataset.cid, id = el.dataset.id; closeModal(null);
+    if (!await confirmDialog('Aus dem Plan entfernen?', 'Bereits erfasste Ergebnisse bleiben im Verlauf erhalten.', { ok: 'Entfernen', danger: true })) return;
+    rpSave(cid, r => { const it = r.draft.items.find(i => i.id === id); if (!it) return; if (it.kind === 'run' && itemSessions(cid, id).length) { it.removed = true; it.updatedAt = Date.now(); } else r.draft.items = r.draft.items.filter(i => i.id !== id); }, 'Eintrag entfernt'); render(); },
+  'asg-program': el => openAsgProgram(el.dataset.cid, { prog: el.dataset.prog, level: el.dataset.level }),
+  'wk-copy': async el => { const cid = el.dataset.cid, ws = el.dataset.ws, prev = weekDates(isoAdd(ws, -7)), c = S.clients.get(cid);
+    const src = liveItems(rpOf(c).draft.items).filter(i => prev.includes(i.date)); if (!src.length) return toast('In der Vorwoche ist nichts geplant.');
+    rpSave(cid, r => { for (const i of src) r.draft.items.push({ ...clone(i), id: uid(), date: isoAdd(i.date, 7), createdAt: Date.now(), updatedAt: Date.now(), removed: false }); }, `Vorwoche übernommen (${src.length} Einträge) in KW ${kwOf(ws)}`); toast(`${src.length} Einträge übernommen`); render(); },
+  'rp-publish': async el => { const cid = el.dataset.cid; el.disabled = true; const res = await rpPublish(cid); render(); syncToast(res, 'Wochenplan veröffentlicht'); },
+  'my-item': el => go(`/client/${el.dataset.cid}/lauf/e/${el.dataset.id}`),
+  'my-start': async el => { const cid = el.dataset.cid, act = activeRun(cid);
+    if (act) { if (await confirmDialog(T('Einheit läuft bereits'), T('Es läuft noch {x}. Bitte zuerst beenden.', { x: `<b>${esc(runTitle(act))}</b>` }), { ok: T('Zur laufenden Einheit') })) go('/lauf/' + act.id); return; }
+    runAudio(); const s = runFromItem(cid, el.dataset.id); if (s) go('/lauf/' + s.id); },
+  'my-quick': el => openQuickResult(el.dataset.cid, el.dataset.id),
+  'my-skip': async el => { const cid = el.dataset.cid; if (!await confirmDialog(T('Einheit überspringen?'), T('Die Einheit wird als „übersprungen“ markiert. Du kannst sie später trotzdem noch laufen.'), { ok: T('Überspringen') })) return;
+    const s = runFromItem(cid, el.dataset.id); if (s) { runFinish(s, 'skipped'); toast(T('Als übersprungen markiert')); render(); } },
+});
+const TRAINER_RUN_ACTIONS = ['test-assign', 'test-unassign', 'test-review', 'test-manual', 'asg-add', 'asg-run-open', 'asg-strength', 'asg-rest', 'asg-edit', 'asg-move', 'asg-remove', 'asg-program', 'wk-copy', 'rp-publish'];
+document.addEventListener('change', ev => {
+  const t = ev.target;
+  if (t.dataset && t.dataset.runlv) { UI.runLv = UI.runLv || {}; UI.runLv[t.dataset.runlv] = t.value; return render(); }
+  if (t.hasAttribute && t.hasAttribute('data-asgf')) { const f = t.closest('form'), b = document.getElementById('asg-body'); if (!f || !b) return; const v = asgFormValues(f);
+    if (t.name === 'speed' || t.name === 'min') { const pv = b.querySelector('.asg-prev'); if (pv) pv.innerHTML = asgPrevHtml(specFromTpl(S.clients.get(f.dataset.cid), { ...v, level: v.level || 'beginner' })); return; } // Textfelder: nur Vorschau, Fokus bleibt
+    if (t.name === 'prog') { v.unit = 0; v.speed = null; } if (t.name === 'level' || t.name === 'unit' || t.name === 'indiv') v.speed = null;
+    b.innerHTML = asgFormHtml(S.clients.get(f.dataset.cid), { ...v, edit: (UI.asgCtx || {}).edit }); }
+});
+document.addEventListener('submit', ev => {
+  const f = ev.target; if (!f.dataset) return;
+  if (f.dataset.form === 'asg-run') { ev.preventDefault(); if (isClientMode()) return;
+    const cid = f.dataset.cid, c = S.clients.get(cid), v = asgFormValues(f), any = (f.querySelector('[name=dateAny]') || {}).value, edit = (UI.asgCtx || {}).edit;
+    const date = any && any !== (edit && (rpOf(c).draft.items.find(i => i.id === edit) || {}).date) ? any : v.date;
+    const it = mkRunItem(c, v, date, v.mandatory);
+    rpSave(cid, r => {
+      if (edit) { const old = r.draft.items.find(i => i.id === edit), has = itemSessions(cid, edit).length > 0;
+        if (old && !has) { Object.assign(old, { date, mandatory: v.mandatory, run: it.run, updatedAt: Date.now() }); return; }
+        if (old) old.removed = true; }
+      r.draft.items.push(it);
+    }, `${edit ? 'Laufeinheit geändert' : 'Laufeinheit zugewiesen'}: ${runItemTitle(it)} (${RUN_LV[it.run.spec.level] || ''}) am ${fmtDate(date)}`);
+    closeModal(null); toast(edit ? 'Gespeichert ✓ – noch veröffentlichen' : 'Im Wochenplan – noch veröffentlichen'); UI.wk = UI.wk || {}; UI.wk[cid] = weekStart(date); go(`/client/${cid}/lauf`); render(); }
+  if (f.dataset.form === 'asg-program') { ev.preventDefault(); if (isClientMode()) return; const fd = new FormData(f), cid = f.dataset.cid;
+    const wd = fd.getAll('wd').map(Number); if (wd.length !== 3 && !confirm(`${wd.length} Lauftage gewählt – das Programm ist für 3 pro Woche gedacht. Trotzdem so planen?`)) return;
+    const items = assignProgram(cid, { prog: fd.get('prog'), level: fd.get('level') || 'beginner', start: fd.get('start') || today(), wd, indiv: fd.get('indiv') === 'on', rest100: +fd.get('rest100'), order: fd.get('order') });
+    closeModal(null); UI.wk = UI.wk || {}; UI.wk[cid] = weekStart(items[0].date); toast(`${items.length} Einheiten geplant – prüfen und veröffentlichen`); go(`/client/${cid}/lauf`); render(); }
+  if (f.dataset.form === 'run-decision') { ev.preventDefault(); if (isClientMode()) return; const fd = new FormData(f), cid = f.dataset.cid, c = S.clients.get(cid), ts = testState(c);
+    const d = { level: fd.get('level') || 'beginner', at: Date.now(), testSid: ts.s ? ts.s.id : null, speed: ts.s ? ts.s.run.result.speed : null, note: String(fd.get('note') || '').trim() };
+    rpSave(cid, r => { if (r.decision) r.decisions = [r.decision, ...r.decisions].slice(0, 50); r.decision = d; if (r.test && ts.s && !r.test.reviewedAt) r.test.reviewedAt = Date.now(); }, `Leistungsstufe festgelegt: ${RUN_LV[d.level]}${d.speed ? ` (Test ${fmtNum(d.speed)} km/h)` : ''}`);
+    toast('Leistungsstufe gespeichert ✓'); render(); }
+  if (f.dataset.form === 'my-quick') { ev.preventDefault(); const cid = f.dataset.cid, id = f.dataset.id, fd = new FormData(f), c = S.clients.get(cid), fi = findItem(c, id); if (!fi) return;
+    const sp = fi.test ? { type: 'test60' } : fi.it.run.spec, s = runFromItem(cid, id); if (!s) return; s.run.log.manual = true; if (fd.get('date')) s.date = fd.get('date');
+    let status = 'completed';
+    if (sp.type === 'endurance' || sp.type === 'test60') { const km = parseNum(fd.get('km')), min = parseNum(fd.get('min')); if (!(km > 0 && km < 60) || !(min > 0)) { del('sessions', s.id); return toast(T('Bitte Distanz und Dauer eintragen.')); }
+      const planned = sp.type === 'endurance' ? sp.min : RUN_CFG.testMin; s.run.log.doneIdx = s.run.steps.map((_, i) => i); closeModal(null); runFinish(s, min >= planned * RUN_CFG.endDoneShare ? 'completed' : 'aborted', { km, min }); go('/session/' + s.id); return; }
+    const r1 = Math.max(0, parseInt(fd.get('r1'), 10) || 0), r2 = Math.max(0, parseInt(fd.get('r2'), 10) || 0);
+    if (sp.type === 'combo') { markDoneQuick(s, { sprint100: Math.min(r1, sp.reps100), marker: Math.min(r2, sp.repsMarker) }); if (r1 < sp.reps100 || r2 < sp.repsMarker) status = 'aborted'; }
+    else { markDoneQuick(s, { [sp.type]: Math.min(r1, sp.reps) }); if (r1 < sp.reps) status = 'aborted'; }
+    const times = String(fd.get('times') || '').split(/[\s;]+/).map(x => parseNum(x)).filter(x => x > 0 && x < 120); if (times.length) s.run.log.times = times;
+    closeModal(null); runFinish(s, status); go('/session/' + s.id); }
 }, true);
 
 /* ---------- Router-Erweiterung ---------- */
@@ -5769,6 +6095,8 @@ function routeGuard(p) {
   if (p[0] === 'client') { if (p[1] !== cid || !p[2] || p[2] === 'check') return '/'; if (p[2] === 'plan') return `/client/${cid}/planview`; if (p[2] === 'nachrichten') return '/nachrichten'; }
   if ((p[0] === 'train' || p[0] === 'session' || p[0] === 'lauf') && S.sessions.get(p[1]) && S.sessions.get(p[1]).clientId !== cid) return '/';
   if (p[0] === 'check' && (!S.checks.get(p[1]) || S.checks.get(p[1]).clientId !== cid || p[2] === 'edit')) return '/';
+  if (p[0] === 'client' && p[2] === 'lauf' && p[3] && !['verlauf', 'e'].includes(p[3])) return `/client/${cid}/lauf`;
+  if (p[0] === 'client' && p[2] === 'lauf' && p[3] === 'e' && !findItem(S.clients.get(cid), p[4])) return `/client/${cid}/lauf`;
   return null;
 }
 function routeExtra(p) {
@@ -5783,7 +6111,12 @@ function routeExtra(p) {
     if (p[2] === 'planview') return viewPlanRO(c);
     if (p[2] === 'food') return viewFood(c);
     if (p[2] === 'foto') return viewPhoto(c);
-    if (p[2] === 'lauf') return !p[3] ? viewRunHome(c) : p[3] === 'verlauf' ? viewRunHistory(c) : p[3] === 'test60' ? viewRunTest(c) : (p[3] === 'athlete' || p[3] === 'endurance') ? viewRunPlan(c, p[3]) : RUN_PROGS.includes(p[3]) ? viewRunSingle(c, p[3]) : null;
+    if (p[2] === 'lauf') { const cm = isClientMode();
+      if (!p[3]) return cm ? viewMyPlan(c) : viewRunCoach(c);
+      if (p[3] === 'verlauf') return viewRunHistory(c);
+      if (p[3] === 'e' && p[4]) return viewRunItem(c, p[4]);
+      if (p[3] === 'bib' && !cm) return !p[4] ? viewRunLib(c) : (RUN_PROGS.includes(p[4]) || p[4] === 'athlete' || p[4] === 'endurance') ? viewRunLibProg(c, p[4]) : null;
+      return null; }
   }
   if (p[0] === 'lauf') { const s = S.sessions.get(p[1]); return s && s.kind === 'run' ? viewRunPlayer(s) : null; }
   if ((p[0] === 'train' || p[0] === 'session') && S.sessions.get(p[1]) && S.sessions.get(p[1]).kind === 'run') { const s = S.sessions.get(p[1]); return p[0] === 'train' && s.status === 'active' ? viewRunPlayer(s) : viewRunSession(s); }
@@ -5802,7 +6135,7 @@ function lockGate() {
 }
 
 /* ---------- Aktionen ---------- */
-const TRAINER_ONLY = new Set(['care-done', 'next-pick', 'next-set', 'ev-read-all', 'msg-compose', 'qr-use', 'box-save', 'box-test', 'box-send', 'box-fetch', 'box-link', 'new-client', 'edit-client', 'del-client', 'photo-remove', 'add-day', 'del-day', 'day-move', 'add-ex', 'edit-ex', 'del-ex', 'tpl-apply', 'ud-add', 'ud-add-client', 'ud-add-day', 'ex-move', 'demo', 'wipe', 'backup', 'import', 'check-del', 'pkg-make', 'ret-import', 'lock-set', 'lock-off', 'pslot-rm']);
+const TRAINER_ONLY = new Set(['care-done', 'next-pick', 'next-set', 'ev-read-all', 'msg-compose', 'qr-use', 'box-save', 'box-test', 'box-send', 'box-fetch', 'box-link', 'new-client', 'edit-client', 'del-client', 'photo-remove', 'add-day', 'del-day', 'day-move', 'add-ex', 'edit-ex', 'del-ex', 'tpl-apply', 'ud-add', 'ud-add-client', 'ud-add-day', 'ex-move', 'demo', 'wipe', 'backup', 'import', 'check-del', 'pkg-make', 'ret-import', 'lock-set', 'lock-off', 'pslot-rm', ...TRAINER_RUN_ACTIONS]);
 document.addEventListener('click', ev => {
   const el = ev.target.closest('[data-action]');
   if (el && isClientMode() && TRAINER_ONLY.has(el.dataset.action)) { ev.preventDefault(); ev.stopImmediatePropagation(); toast(T('Nur für den Trainer verfügbar')); }
