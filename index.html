@@ -608,6 +608,11 @@ img.ld{opacity:1!important}
 .ud-steps li::before{content:counter(st);grid-row:span 2;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--accent-soft);color:var(--gold);font-weight:800;font-size:13px}
 .ud-steps b{font-size:14px}.ud-steps span{color:var(--text-2);font-size:15px;line-height:1.5}
 .ud-list{margin:0;padding:0;list-style:none;display:grid;gap:10px}
+.ud-exec{margin:4px 0 0;padding-left:20px;display:grid;gap:6px;list-style:decimal;counter-reset:none}.ud-exec li{padding-left:2px}
+.ud-steps .ud-exec li{counter-increment:none;display:list-item;grid-template-columns:none}.ud-steps .ud-exec li::before{content:none;display:none}
+.ud-steps .ud-exec li::marker{color:var(--gold);font-weight:700}
+.ud-p{margin:0;color:var(--text-2);font-size:15px;line-height:1.5}
+.ud-safe{border-color:rgba(217,130,43,.45)}
 .ud-list li{display:grid;grid-template-columns:24px 1fr;gap:10px;line-height:1.45}
 .ud-li-ic{width:24px;height:24px;border-radius:50%;display:grid;place-items:center}
 .ud-list.ok .ud-li-ic{background:rgba(74,222,128,.12);color:var(--ok)}
@@ -2505,7 +2510,7 @@ function katForSessionEx(e) { const pe = e.exerciseId && S.exercises.get(e.exerc
 function KL(e) {
   if (!e || !isEN()) return e;
   const x = ((L10N() || {}).kat || {})[e.id]; if (!x) return e;
-  return { ...e, n: x[0], sub: x[1], eq: x[2], start: x[3], exec: x[4], dir: x[5], tips: x[6], errs: x[7] };
+  return { ...e, n: x[0], sub: x[1], eq: x[2], start: x[3], exec: x[4], dir: x[5], tips: x[6], errs: x[7], breath: x[8] || e.breath, safety: x[9] || e.safety };
 }
 const TG = g => { const d = L10N(); return (d && d.groups && d.groups[g]) || g; };
 /* Anzeigename einer Plan-/Trainingsübung: Katalogname in der gewählten Sprache, sonst übersetzter bzw. eigener Name */
@@ -2516,16 +2521,19 @@ function exName(name, catalogId) {
 }
 const exNameS = e => { const pe = e.exerciseId && S.exercises.get(e.exerciseId); return exName(e.name, (pe && pe.catalogId) || e.catalogId); };
 
+const execHtml = (x, cls = 'ud-exec') => Array.isArray(x) ? `<ol class="${cls}">${x.map(t => `<li>${esc(t)}</li>`).join('')}</ol>` : esc(x);
 function infoHtml(e0) {
   const e = KL(e0);
   const li = a => `<ul class="ul">${a.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`;
   return `<table class="table"><tbody>
       <tr><td class="muted">${T('Muskelgruppe')}</td><td>${esc(TG(e.g))}</td></tr><tr><td class="muted">${T('Zielmuskel')}</td><td>${esc(e.sub)}</td></tr><tr><td class="muted">${T('Equipment')}</td><td>${esc(e.eq)}</td></tr></tbody></table>
     <h3>${T('Ausgangsposition')}</h3><div>${esc(e.start)}</div>
-    <h3>${T('Ausführung')}</h3><div>${esc(e.exec)}</div>
+    <h3>${T('Ausführung')}</h3><div>${execHtml(e.exec)}</div>
     <h3>${T('Bewegungsrichtung')}</h3><div>${esc(e.dir)}</div>
     <h3>${T('Wichtige Hinweise')}</h3>${li(e.tips)}
     <h3>${T('Häufige Fehler')}</h3>${li(e.errs)}
+    ${e.breath ? `<h3>${T('Atmung')}</h3><div>${esc(e.breath)}</div>` : ''}
+    ${e.safety ? `<h3>${T('Sicherheit')}</h3><div>${esc(e.safety)}</div>` : ''}
     <h3>${T('Beanspruchte Muskulatur')}</h3><div class="mchips">${e.prim.map(m => `<span class="mchip p">${esc(MUSKEL(m))}</span>`).join('')}${e.sec.map(m => `<span class="mchip">${esc(MUSKEL(m))}</span>`).join('')}</div>
     <div class="muted" style="font-size:12px;margin-top:6px">${T('Gold = primär, grau = sekundär')}</div>`;
 }
@@ -2682,29 +2690,40 @@ const _hay = new Map();
 function katHay(e) {
   const k = e.id + '|' + I18N.cur; if (_hay.has(k)) return _hay.get(k);
   const en = (((window.SW_I18N || {}).en || {}).kat || {})[e.id] || [], d = ((window.SW_I18N || {}).en || {}), mus = id => [(window.SW_MUSKELN || {})[id], (d.muscles || {})[id]].join(' ');
-  const h = normK([e.n, e.sub, e.eq, e.g, (d.groups || {})[e.g], (e.alias || []).join(' '), en[0], en[1], en[2], e.prim.map(mus).join(' ')].filter(Boolean).join(' '));
+  const h = normK([e.n, e.sub, e.eq, e.g, (d.groups || {})[e.g], e.sg, e.sg && (d.groups || {})[e.sg], (e.alias || []).join(' '), en[0], en[1], en[2], e.prim.map(mus).join(' ')].filter(Boolean).join(' '));
   _hay.set(k, h); return h;
 }
 function katFiltered() {
-  const g = UI.katGroup || 'Alle', eq = UI.katEq || 'Alle', n = normK(UI.katSearch || '');
-  return KAT().filter(e => (g === 'Alle' || e.g === g) && (eq === 'Alle' || eqCats(e).includes(eq))
+  const g = UI.katGroup || 'Alle', eq = UI.katEq || 'Alle', n = normK(UI.katSearch || ''), sg = g !== 'Alle' && UI.katSub && UI.katSub !== 'Alle' ? UI.katSub : null;
+  return KAT().filter(e => (g === 'Alle' || e.g === g) && (!sg || e.sg === sg) && (eq === 'Alle' || eqCats(e).includes(eq))
     && (!n || n.split(' ').every(w => katHay(e).includes(w))));
 }
 function katResultsHtml() {
   const L = katFiltered(), g = UI.katGroup || 'Alle', eq = UI.katEq || 'Alle', q = (UI.katSearch || '').trim();
-  const active = [g !== 'Alle' ? TG(g) : null, eq !== 'Alle' ? T(eq) : null, q ? (isEN() ? `“${q}”` : `„${q}“`) : null].filter(Boolean);
+  const subOn = g !== 'Alle' && UI.katSub && UI.katSub !== 'Alle' ? UI.katSub : null;
+  const active = [g !== 'Alle' ? TG(g) + (subOn ? ' · ' + TG(subOn) : '') : null, eq !== 'Alle' ? T(eq) : null, q ? (isEN() ? `“${q}”` : `„${q}“`) : null].filter(Boolean);
   const bar = `<div class="kat-status"><span><b>${L.length}</b> ${L.length === 1 ? T('Übung') : T('Übungen')}${active.length ? ' · ' + active.map(esc).join(' · ') : ''}</span>
     ${active.length ? `<button class="btn-text kat-reset" data-action="kat-reset">${ic('x', 14)} ${T('Zurücksetzen')}</button>` : ''}</div>`;
   if (!L.length) return bar + EmptyState(T('Keine passende Übung'), T('Ändere die Suche oder setze die Filter zurück.'), `<button class="btn btn-ghost" data-action="kat-reset">${T('Filter zurücksetzen')}</button>`);
   const groups = (window.SW_GRUPPEN || []).filter(x => L.some(e => e.g === x));
   const sectioned = g === 'Alle' && !q && groups.length > 1;
   const grid = items => `<div class="xgrid">${items.map(ExerciseCard).join('')}</div>`;
+  const subs = g !== 'Alle' && !subOn && !q ? [...new Set(L.map(e => e.sg).filter(Boolean))] : [];
+  const sec = (title, it) => `<section class="kat-sec">${SectionHeader(title, TN(it.length, '{n} Übung', '{n} Übungen'))}${grid(it)}</section>`;
   return bar + (sectioned
-    ? groups.map(gr => { const it = L.filter(e => e.g === gr); return `<section class="kat-sec">${SectionHeader(TG(gr), TN(it.length, '{n} Übung', '{n} Übungen'))}${grid(it)}</section>`; }).join('')
+    ? groups.map(gr => sec(TG(gr), L.filter(e => e.g === gr))).join('')
+    : subs.length > 1 ? subs.map(x => sec(TG(x), L.filter(e => e.sg === x))).join('') + (L.some(e => !e.sg) ? sec(TG(g), L.filter(e => !e.sg)) : '')
     : grid(L));
+}
+const katSubs = g => [...new Set(KAT().filter(e => e.g === g && e.sg).map(e => e.sg))];
+function KatSubRow() {
+  const g = UI.katGroup || 'Alle', subs = g === 'Alle' ? [] : katSubs(g); if (!subs.length) return '';
+  const cur = UI.katSub || 'Alle', cnt = x => KAT().filter(e => e.g === g && e.sg === x).length;
+  return `<div class="frow frow-sub" role="group" aria-label="${T('Muskel')}"><span class="frow-l">${T('Muskel')}</span>${FilterChip(T('Alle'), cur === 'Alle', 'kat-sub', 'Alle')}${subs.map(x => FilterChip(TG(x), x === cur, 'kat-sub', x, cnt(x))).join('')}</div>`;
 }
 function refreshKat() {
   const r = document.getElementById('kat-results'); if (!r) return;
+  const sr = document.getElementById('kat-subrow'); if (sr) sr.innerHTML = KatSubRow();
   r.innerHTML = katResultsHtml(); hydrateThumbs(r);
   document.querySelectorAll('[data-action="kat-group"]').forEach(b => { const on = b.dataset.v === (UI.katGroup || 'Alle'); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
   document.querySelectorAll('[data-action="kat-eq"]').forEach(b => { const on = b.dataset.v === (UI.katEq || 'Alle'); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
@@ -2722,6 +2741,7 @@ function viewKatalog() {
       <div class="kat-figrow"><span class="frow-l">${videoMode() ? T('Video') : T('Figur')}</span>${FigureSwitch(curFig())}</div>
       <label class="search">${ic('search')}<input id="katsearch" type="search" placeholder="${T('Übung, Muskel oder Gerät suchen')}" value="${esc(UI.katSearch || '')}" autocomplete="off" aria-label="${T('Übungen durchsuchen')}"></label>
       <div class="frow" role="group" aria-label="${T('Muskelgruppe')}">${FilterChip(T('Alle'), g === 'Alle', 'kat-group', 'Alle', L.length)}${groups.map(x => FilterChip(TG(x), x === g, 'kat-group', x, cnt(x))).join('')}</div>
+      <div id="kat-subrow">${KatSubRow()}</div>
       <div class="frow frow-sub" role="group" aria-label="${T('Gerät')}"><span class="frow-l">${T('Gerät')}</span>${FilterChip(T('Alle'), eq === 'Alle', 'kat-eq', 'Alle')}${eqNames.map(x => FilterChip(T(x), x === eq, 'kat-eq', x)).join('')}</div>
     </div>
     <div id="kat-results">${katResultsHtml()}</div>
@@ -2779,7 +2799,7 @@ function ExerciseDetailView(e0) {
         ${(videoMode() || mediaFor(e.id, curFig())) ? '' : `<button class="icon-btn glass" data-action="open3d" data-id="${e.id}" aria-label="${T('Vollbild mit Ansichten, Tempo und Technik')}">${ic('expand', 18)}</button>`}</div>
     </div>
     <div class="ud-head">
-      <div class="ud-tags"><span class="pill pill-gold">${esc(TG(e.g))}</span><span class="pill">${esc(eqShort(e))}</span><span class="grow"></span>${FigureSwitch(curFig())}</div>
+      <div class="ud-tags"><span class="pill pill-gold">${esc(TG(e.g))}${e.sg ? ' · ' + esc(TG(e.sg)) : ''}</span><span class="pill">${esc(eqShort(e))}</span><span class="grow"></span>${FigureSwitch(curFig())}</div>
       <h1 class="ud-title">${esc(e.n)}</h1>
       <div class="ud-sub">${esc(e.sub)}</div>
     </div>
@@ -2792,12 +2812,14 @@ function ExerciseDetailView(e0) {
       <section class="ud-card">${SectionHeader(T('Ausführung'))}
         <ol class="ud-steps">
           <li><b>${T('Ausgangsposition')}</b><span>${esc(e.start)}</span></li>
-          <li><b>${T('Bewegung')}</b><span>${esc(e.exec)}</span></li>
+          <li><b>${T('Bewegung')}</b><span>${execHtml(e.exec)}</span></li>
           <li><b>${T('Bewegungsrichtung')}</b><span>${esc(e.dir)}</span></li>
         </ol>
       </section>
       <section class="ud-card">${SectionHeader(T('Technik'))}${li(e.tips, 'ok', ic('check', 16))}</section>
       <section class="ud-card">${SectionHeader(T('Häufige Fehler'))}${li(e.errs, 'bad', ic('x', 16))}</section>
+      ${e.breath ? `<section class="ud-card">${SectionHeader(T('Atmung'))}<p class="ud-p">${esc(e.breath)}</p></section>` : ''}
+      ${e.safety ? `<section class="ud-card ud-safe">${SectionHeader(T('Sicherheit'))}<p class="ud-p">${esc(e.safety)}</p></section>` : ''}
     </div>
     ${trainer ? `<div class="ud-cta"><button class="btn btn-primary btn-big" data-action="ud-add" data-id="${e.id}">${ic('plus', 20)} ${T('Zum Trainingsplan hinzufügen')}</button></div>` : ''}
   </div>`;
@@ -2873,9 +2895,10 @@ function ControlSystemCard(c, plan) {
 }
 
 Object.assign(A, {
-  'kat-group': el => { UI.katGroup = el.dataset.v; refreshKat(); },
+  'kat-group': el => { UI.katGroup = el.dataset.v; UI.katSub = 'Alle'; refreshKat(); },
+  'kat-sub': el => { UI.katSub = el.dataset.v; refreshKat(); },
   'kat-eq': el => { UI.katEq = el.dataset.v; refreshKat(); },
-  'kat-reset': () => { UI.katGroup = 'Alle'; UI.katEq = 'Alle'; UI.katSearch = ''; const s = document.getElementById('katsearch'); if (s) s.value = ''; refreshKat(); },
+  'kat-reset': () => { UI.katGroup = 'Alle'; UI.katSub = 'Alle'; UI.katEq = 'Alle'; UI.katSearch = ''; const s = document.getElementById('katsearch'); if (s) s.value = ''; refreshKat(); },
   'ud-play': () => { const vid = document.getElementById('ud-video'); if (vid) { vid.paused ? vid.play().catch(() => {}) : vid.pause(); return; } if (!VD) return; if (VD._done) VD.reset(); VD.playing = !VD.playing; udPlayBtn(); },
   'ud-add': el => openAddToPlan(el.dataset.id),
   'ud-add-client': el => openAddToPlan(el.dataset.id, el.dataset.cid),

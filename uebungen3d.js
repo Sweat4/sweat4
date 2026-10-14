@@ -129,7 +129,7 @@
         abdomen: [.88, 1, .9], abs: [.84, 1, .8], obl: [.82, 1, .84], lowBack: [.88, 1, .9],
         pelvis: [1.08, 1, 1.05], glute: [1.13, 1.08, 1.14], abd: [1.05, 1, 1.05],
         shJ: [.84, .84, .84], dF: [.8, .9, .8], dS: [.8, .9, .8], dR: [.8, .9, .8], uArm: [.8, 1, .8], bic: [.74, .9, .74], tri: [.8, .95, .8],
-        elJ: [.85, .85, .85], fArm: [.82, 1, .82], fMus: [.78, .95, .78], hand: [.88, .92, .88],
+        elJ: [.85, .85, .85], brac: [.75, .9, .75], brad: [.78, .95, .78], fArm: [.82, 1, .82], fMus: [.78, .95, .78], hand: [.88, .92, .88],
         thigh: [.97, 1, .97], quad: [.92, 1, .92], ham: [.96, 1, .96], knJ: [.9, .9, .9], shin: [.86, 1, .86], calf: [.88, .95, .88],
         neck: [.82, 1, .82], head: [.94, .95, .94], jaw: [.86, .9, .9], nose: [.85, .85, .85], hair: [1.05, 1.06, 1.07] },
       ponytail: true,
@@ -159,7 +159,7 @@
         add('glute' + s, S, MT.shorts, 'glutes'); add('abd' + s, S, MT.shorts, 'abductors'); add('hipf' + s, S, MT.shorts, 'hipFlexors');
         add('shJ' + s, S, MT.skin); add('dF' + s, S, MT.skin, 'frontDelt'); add('dS' + s, S, MT.skin, 'sideDelt'); add('dR' + s, S, MT.skin, 'rearDelt');
         add('uArm' + s, C, MT.skin); add('bic' + s, S, MT.skin, 'biceps'); add('tri' + s, S, MT.skin, 'triceps');
-        add('elJ' + s, S, MT.skin); add('fArm' + s, C, MT.skin); add('fMus' + s, S, MT.skin, 'forearms'); add('hand' + s, S, MT.skin);
+        add('brac' + s, S, MT.skin, 'brachialis'); add('elJ' + s, S, MT.skin); add('fArm' + s, C, MT.skin); add('brad' + s, S, MT.skin, 'brachioradialis'); add('fMus' + s, S, MT.skin, 'forearms'); add('hand' + s, S, MT.skin);
         add('thigh' + s, C, MT.skin); add('short' + s, C, MT.shorts); add('quad' + s, S, MT.skin, 'quads'); add('ham' + s, S, MT.skin, 'hamstrings'); add('add' + s, S, MT.skin, 'adductors');
         add('knJ' + s, S, MT.skin); add('shin' + s, C, MT.skin); add('calf' + s, S, MT.skin, 'calves'); add('shoe' + s, S, MT.shoe); add('sole' + s, S, MT.sole);
       }
@@ -221,6 +221,10 @@
         placeSeg(m['fArm' + side], wrist, j.el, az, .041);
         place(m['fMus' + side], j.el.clone().addScaledVector(fd, .075), basisFromY(fd, az), .044, .088, .039);
         place(m['hand' + side], j.hand.clone().addScaledVector(fd, -.012), basisFromY(fd, az), .03, .054, .038);
+        // Brachialis (unter dem Bizeps, außen am unteren Oberarm) · Brachioradialis (Daumenseite, vom Ellbogen in den Unterarm)
+        place(m['brac' + side], j.sh.clone().lerp(j.el, .74).addScaledVector(az, .012).addScaledVector(outw, .026), abs_, .027, .062, .026);
+        const fo = perp(outw, fd);
+        place(m['brad' + side], j.el.clone().addScaledVector(fd, .055).addScaledVector(fo, .028).addScaledVector(perp(az, fd), .012), basisFromY(fd, az), .028, .075, .027);
         // Bein
         const ld = nz(j.knee.clone().sub(j.hip)), lz = perp(j.kpole, ld), inw = perp(P.l.clone().multiplyScalar(-s), ld);
         const lb = { x: V().crossVectors(ld, lz).normalize(), y: ld, z: lz };
@@ -273,6 +277,17 @@
       const grp = new T.Group(); this.g.add(grp);
       const b = this.mesh(new T.CylinderGeometry(.015, .015, len, 10), this.MT.steel, grp); b.rotation.z = Math.PI / 2;
       return { grp, set: (c, dirX) => { grp.position.copy(c); orientX(grp, dirX); } };
+    }
+    ezBar(len = 1.2) { // SZ-Stange: gewellter Mittelteil (Griffe innen ±0,11 m, außen ±0,19 m)
+      const grp = new T.Group(); this.g.add(grp);
+      const h = [[.6, 0], [.25, 0], [.215, .03], [.165, -.025], [.12, .028], [.07, -.02], [0, 0]];
+      const pts = [...h.map(([x, y]) => V(-x, y, 0)), ...h.slice(0, -1).reverse().map(([x, y]) => V(x, y, 0))];
+      for (let i = 0; i < pts.length - 1; i++) { const m = this.mesh(new T.CylinderGeometry(.014, .014, 1, 8), this.MT.steel, grp); placeSeg(m, pts[i], pts[i + 1], V(0, 0, 1), 1); m.scale.set(1, pts[i].distanceTo(pts[i + 1]), 1); }
+      for (const s of [-1, 1]) {
+        const p = this.mesh(new T.CylinderGeometry(.16, .16, .04, 26), this.MT.dark, grp); p.rotation.z = Math.PI / 2; p.position.x = s * (len / 2 - .12);
+        const c = this.mesh(new T.CylinderGeometry(.028, .028, .03, 12), this.MT.gold, grp); c.rotation.z = Math.PI / 2; c.position.x = s * (len / 2 - .16);
+      }
+      return { grp, set: (c, dirX, upHint) => { grp.position.copy(c); const x = nz(dirX), y = perp(upHint || UP, x), z = V().crossVectors(x, y).normalize(); _m4.makeBasis(x, y, z); grp.quaternion.setFromRotationMatrix(_m4); } };
     }
     dumbbell(size = 1) {
       const grp = new T.Group(); this.g.add(grp);
@@ -381,7 +396,8 @@
     const touch = inc ? .4 : .32;
     const chestPt = K => K.pel.clone().addScaledVector(K.u, touch).addScaledVector(K.f, .17);
     const K0 = kin(base), cp0 = chestPt(K0);
-    const w = p.impl === 'db' ? [.2, .13] : [.3, .29];
+    const close = p.grip === 'close'; // enges Bankdrücken: Hände ca. schulterbreit, Ellbogen eng am Körper
+    const w = p.impl === 'db' ? [.2, .13] : close ? [.15, .145] : [.3, .29];
     return {
       cam: { az: 38, el: 24, dist: 2.7, target: V(0, .75, base.pelvis.z - .25) },
       timing: LBL.lower('Startposition – Arme gestreckt über der Brust', 'Gewicht kontrolliert zur Brust senken', 'Umkehrpunkt – kurz vor/an der Brust', 'Gewicht kraftvoll nach oben drücken'),
@@ -396,10 +412,10 @@
       },
       pose(s) {
         const K = kin(base), cp = chestPt(K);
-        const top = cp.clone().add(V(0, .47, 0)); if (inc) top.z = cp.z + .03;
+        const top = cp.clone().add(V(0, close ? .43 : .47, 0)); if (inc) top.z = cp.z + .03;
         const hands = sides(sg => V(sg * lerp(w[1], w[0], s), lerp(top.y, cp.y + (p.impl === 'db' ? .06 : .03), s), lerp(top.z, cp.z + (p.impl === 'smith' ? 0 : .02), s)));
         if (p.impl === 'smith') { hands.L.z = cp.z; hands.R.z = cp.z; }
-        return Object.assign({}, base, { hand: hands, elbow: sides(sg => V(sg * .9, -1, inc ? -.1 : .3)) });
+        return Object.assign({}, base, { hand: hands, elbow: sides(sg => close ? V(sg * .28, -1, .45) : V(sg * .9, -1, inc ? -.1 : .3)) });
       },
       props(J) { if (props.bar) props.bar.set(bothHands(J), J.L.hand.clone().sub(J.R.hand)); if (props.dL) { props.dL.set(J.L.hand, J.K.l); props.dR.set(J.R.hand, J.K.l); } }
     };
@@ -507,21 +523,22 @@
     };
   };
 
-  TPL.dips = () => {
-    const props = {}, hy = 1.3;
+  TPL.dips = (p = {}) => {
+    const props = {}, hy = 1.3, tri = p.v === 'tri', bx = tri ? .23 : .27; // tri: enge Holme, Oberkörper aufrecht, Ellbogen nach hinten
     return {
       cam: { az: 70, el: 10, dist: 3.3, target: V(0, 1.2, 0) },
-      timing: LBL.lower('Start – Arme gestreckt, Körper leicht nach vorne geneigt', 'Kontrolliert absenken, Ellbogen nach hinten', 'Tiefster Punkt – Oberarme etwa waagerecht', 'Kraftvoll nach oben drücken'),
+      timing: tri ? LBL.lower('Start – Arme gestreckt, Oberkörper aufrecht, enge Holme', 'Kontrolliert absenken, Ellbogen eng nach hinten', 'Tiefster Punkt – Oberarme etwa waagerecht', 'Mit Trizepskraft nach oben drücken')
+        : LBL.lower('Start – Arme gestreckt, Körper leicht nach vorne geneigt', 'Kontrolliert absenken, Ellbogen nach hinten', 'Tiefster Punkt – Oberarme etwa waagerecht', 'Kraftvoll nach oben drücken'),
       setup(kit, MT) {
-        for (const s of [-1, 1]) { kit.rod(V(s * .27, hy, -.35), V(s * .27, hy, .45), .022, MT.steel); kit.rod(V(s * .27, 0, -.3), V(s * .27, hy, -.3), .03); kit.rod(V(s * .27, 0, .4), V(s * .27, hy, .4), .03); }
+        for (const s of [-1, 1]) { kit.rod(V(s * bx, hy, -.35), V(s * bx, hy, .45), .022, MT.steel); kit.rod(V(s * bx, 0, -.3), V(s * bx, hy, -.3), .03); kit.rod(V(s * bx, 0, .4), V(s * bx, hy, .4), .03); }
       },
       pose(s) {
-        const pel = V(0, lerp(1.32, 1.02, s), lerp(-.04, -.1, s)), pitch = lerp(12, 28, s);
+        const pel = V(0, lerp(1.32, 1.02, s), lerp(-.04, tri ? -.12 : -.1, s)), pitch = tri ? lerp(4, 9, s) : lerp(12, 28, s);
         const o = { pelvis: pel, pitch, head: -pitch * .5, knee: { L: V(.05, -.2, 1), R: V(-.05, -.2, 1) } };
         o.ankle = { L: pel.clone().add(V(.05, -.55, -.32)), R: pel.clone().add(V(-.05, -.58, -.3)) };
         o.foot = { L: V(0, -.6, -.3), R: V(0, -.6, -.3) };
-        o.hand = sides(sg => V(sg * .27, hy + .02, .06));
-        o.elbow = sides(sg => V(sg * .25, 0, -1));
+        o.hand = sides(sg => V(sg * bx, hy + .02, tri ? .0 : .06));
+        o.elbow = sides(sg => tri ? V(sg * .08, 0, -1) : V(sg * .25, 0, -1));
         return o;
       }
     };
@@ -720,13 +737,14 @@
       const hy = 2.22;
       return {
         cam: { az: 150, el: 10, dist: 3.6, target: V(0, 1.55, 0) },
-        timing: LBL.std('Start – Hängen mit fast gestreckten Armen', 'Brust zur Stange ziehen, Ellbogen nach unten', 'Oben – Kinn über der Stange', 'kontrolliert absenken'),
+        timing: p.under ? LBL.std('Start – Hängen im engen Untergriff, Arme fast gestreckt', 'Brust zur Stange ziehen, Ellbogen nach unten-vorne', 'Oben – Kinn über der Stange, Bizeps angespannt', 'kontrolliert absenken')
+          : LBL.std('Start – Hängen mit fast gestreckten Armen', 'Brust zur Stange ziehen, Ellbogen nach unten', 'Oben – Kinn über der Stange', 'kontrolliert absenken'),
         setup(kit, MT) { kit.rod(V(-.75, hy, 0), V(.75, hy, 0), .018, MT.steel); for (const s of [-1, 1]) kit.rod(V(s * .75, 0, 0), V(s * .75, hy + .05, 0), .035); },
         pose(s) {
-          const pel = V(0, lerp(1.08, 1.53, s), lerp(-.03, -.07, s)), pitch = lerp(-4, -14, s);
+          const pel = V(0, lerp(p.under ? 1.12 : 1.08, 1.53, s), lerp(-.03, -.07, s)), pitch = lerp(-4, -14, s);
           const o = { pelvis: pel, pitch, head: lerp(0, 10, s) };
-          o.hand = sides(sg => V(sg * .4, hy, 0));
-          const K = kin(o); o.elbow = sides(sg => DOWN.clone().addScaledVector(K.l, sg * .8).addScaledVector(K.f, -.3));
+          o.hand = sides(sg => V(sg * (p.w || .4), hy, 0));
+          const K = kin(o); o.elbow = sides(sg => p.under ? DOWN.clone().addScaledVector(K.l, sg * .3).addScaledVector(K.f, .55) : DOWN.clone().addScaledVector(K.l, sg * .8).addScaledVector(K.f, -.3));
           o.knee = { L: V(.05, 0, 1), R: V(-.05, 0, 1) }; o.ankle = { L: pel.clone().add(V(-.02, -.62, -.32)), R: pel.clone().add(V(.02, -.66, -.3)) };
           o.foot = { L: V(0, -.8, -.2), R: V(0, -.8, -.2) };
           return o;
@@ -1642,6 +1660,324 @@
     }
   };
 
+  /* === ARME – Bizeps & Trizeps =============================================
+     Prinzip: Bei Isolationsübungen bleibt der Oberarm (Ellbogen) fest, nur der Unterarm dreht im
+     Ellbogengelenk (armFK). Bei Geräten mit beiden Händen (Seil, eine Kurzhantel, SZ-Stange) dreht
+     ein gemeinsamer Unterarm-Bogen um die Ellbogenmitte (arcHands) – die Hände bleiben am Gerät. */
+  function armFK(sh, ud, bend, th, k = 1) {
+    ud = nz(ud); const b = perp(bend, ud), a = Math.max(3, th) * D2R;
+    const fd = nz(ud.clone().multiplyScalar(Math.cos(a)).addScaledVector(b, Math.sin(a)));
+    const el = sh.clone().addScaledVector(ud, DIM.up * k);
+    return { hand: el.clone().addScaledVector(fd, DIM.fore * k), pole: ud.clone(), el, fd };
+  }
+  function arcHands(K, ud, bend, th, half) {
+    const mid = K.S.clone().addScaledVector(K.u, -.015);
+    const k = Math.sqrt(Math.max(.05, .615 * .615 - Math.pow(DIM.shW - half, 2))) / ARM; // gestreckt = Arm gerade, nicht überdehnt
+    const a = armFK(mid, ud, bend, th, k);
+    return { c: a.hand, fd: a.fd, hand: sides(sg => a.hand.clone().addScaledVector(K.l, sg * half)) };
+  }
+  // Griff mit beiden Händen an EINEM Gerät, Ellbogen exakt fest: Unterarme laufen um den konstanten Winkel β zusammen
+  function gripArms(K, ud, bend, th, half, out = .06) {
+    ud = nz(ud); const b = perp(bend, ud), a = Math.max(3, th) * D2R;
+    const fd = nz(ud.clone().multiplyScalar(Math.cos(a)).addScaledVector(b, Math.sin(a))), lat = perp(K.l, fd);
+    const hand = {}, elbow = {};
+    for (const [side, sg] of [['L', 1], ['R', -1]]) {
+      const sh = shoulder(K, sg), uds = nz(ud.clone().addScaledVector(K.l, sg * out)), E = sh.clone().addScaledVector(uds, DIM.up);
+      const ex = E.clone().sub(K.S).dot(lat) * sg, sb = clamp((ex - half) / DIM.fore, -.9, .9), cb = Math.sqrt(1 - sb * sb);
+      hand[side] = E.clone().addScaledVector(fd, DIM.fore * cb).addScaledVector(lat, -sg * DIM.fore * sb); elbow[side] = uds;
+    }
+    return { hand, elbow, fd };
+  }
+  // beide Arme einzeln: spec(sg, side, K) → { ud, bend, th } oder { hand, pole } oder null (Arm hängt)
+  function armsPose(base, spec) {
+    const K = kin(base), hand = {}, elbow = {}, fd = {};
+    for (const [side, sg] of [['L', 1], ['R', -1]]) {
+      const r = spec(sg, side, K); if (!r) continue;
+      if (r.hand) { hand[side] = r.hand; elbow[side] = r.pole; continue; }
+      const a = armFK(shoulder(K, sg, base.shrug || 0), r.ud, r.bend, r.th);
+      hand[side] = a.hand; elbow[side] = a.pole; fd[side] = a.fd;
+    }
+    return Object.assign({}, base, { hand, elbow, _fd: fd });
+  }
+  const foreDir = (J, side) => nz(J[side].hand.clone().sub(J[side].el));
+  const neutralAxis = (J, side) => nz(V().crossVectors(foreDir(J, side), J.K.l)); // Hammergriff: Griff senkrecht zum Unterarm
+  const ropeSet = (props, J, pul, len = .13) => { // Seil: Knoten zwischen den Händen, Richtung Rolle
+    const m = bothHands(J); const hk = m.clone().addScaledVector(nz(pul.clone().sub(m)), len);
+    props.c.set(pul, hk); props.rL.set(hk, J.L.hand); props.rR.set(hk, J.R.hand); props.kn.m.position.copy(hk);
+  };
+  const ropeKit = (kit, props) => { props.c = kit.line(); props.rL = kit.line(kit.MT.dark, .012); props.rR = kit.line(kit.MT.dark, .012); props.kn = { m: kit.ball(V(), .02, kit.MT.dark) }; };
+  function benchAcross(kit, z, top = .44, len = 1.1, depth = .3) { // Flachbank quer zur Blickrichtung
+    kit.box(len, .07, depth, V(0, top - .035, z));
+    for (const x of [-len / 2 + .12, len / 2 - .12]) { kit.box(.07, top - .07, .07, V(x, (top - .07) / 2, z), null, kit.MT.frame); kit.box(.07, .04, depth + .12, V(x, .02, z), null, kit.MT.frame); }
+  }
+  const seatedCurlBase = () => seatedUpright(-2, 0);
+
+  TPL.arm = p => {
+    const v = p.v, impl = p.impl, props = {};
+
+    /* ---------- Trizepsdrücken am Turm (gerade Stange / Seil) ---------- */
+    if (v === 'pushdown') {
+      const rope = impl === 'rope';
+      const base = stand({ w: .16, p: { pitch: 9, pelvis: V(0, STAND_Y - .02, 0) } });
+      const pul = V(0, 2.12, .52);
+      return {
+        cam: { az: 62, el: 10, dist: 3.1, target: V(0, 1.25, .15) },
+        timing: LBL.std(rope ? 'Start – Seil auf Brusthöhe, Oberarme fest am Körper' : 'Start – Stange auf Brusthöhe, Oberarme fest am Körper',
+          rope ? 'Seil nach unten drücken und die Enden nach außen ziehen' : 'Stange nach unten drücken – nur das Ellbogengelenk bewegt sich',
+          'Unten – Arme gestreckt, Trizeps fest anspannen', 'kontrolliert zurück, bis die Unterarme etwa waagerecht sind'),
+        setup(kit) { kit.tower(pul, V(0, 0, 1)); if (rope) ropeKit(kit, props); else { props.c = kit.line(); props.bar = kit.shortBar(.5); } },
+        pose(s) {
+          return armsPose(base, (sg, side, K) => rope
+            ? { ud: nz(DOWN.clone().addScaledVector(K.f, .12).addScaledVector(K.l, sg * lerp(.03, .1, s))), bend: nz(K.f.clone().addScaledVector(K.l, -sg * lerp(.3, -.1, s))), th: lerp(100, 6, s) }
+            : { ud: nz(DOWN.clone().addScaledVector(K.f, .12).addScaledVector(K.l, -sg * .05)), bend: nz(K.f.clone().addScaledVector(K.l, -sg * .12)), th: lerp(100, 6, s) });
+        },
+        props(J) {
+          if (rope) return ropeSet(props, J, pul);
+          const c = bothHands(J); props.bar.set(c, J.L.hand.clone().sub(J.R.hand)); props.c.set(pul, c);
+        }
+      };
+    }
+
+    /* ---------- Trizepsdrücken hinter dem Kopf am Kabelzug mit Seil ---------- */
+    if (v === 'overheadCable') {
+      const base = stand({ w: .14, p: { pitch: 30, pelvis: V(0, STAND_Y - .05, 0), head: -6 } });
+      base.ankle = { L: V(.14, DIM.ank, .34), R: V(-.14, DIM.ank, -.32) }; base.knee = { L: V(.1, .1, 1), R: V(-.1, -.2, 1) };
+      const pul = V(0, 1.78, -.9);
+      return {
+        cam: { az: 78, el: 10, dist: 3.3, target: V(0, 1.4, 0) },
+        timing: LBL.std('Start – Seil hinter dem Kopf, Oberarme neben dem Kopf', 'Arme nach vorne-oben strecken – die Oberarme bleiben ruhig', 'Arme gestreckt – Trizeps in voller Länge anspannen', 'Seil kontrolliert hinter den Kopf zurückführen – Dehnung'),
+        setup(kit) { kit.tower(pul, V(0, 0, -1)); ropeKit(kit, props); },
+        pose(s) {
+          const K = kin(base), ud = nz(K.u.clone().addScaledVector(K.f, .28));
+          const r = gripArms(K, ud, K.f.clone().multiplyScalar(-1), lerp(128, 6, s), lerp(.05, .09, s), .1);
+          return Object.assign({}, base, { hand: r.hand, elbow: r.elbow });
+        },
+        props(J) { ropeSet(props, J, pul, .12); }
+      };
+    }
+
+    /* ---------- Reverse Crossbody Pushdown (einarmig, über Kreuz) ---------- */
+    if (v === 'crossbody') {
+      const base = stand({ w: .16, p: { pitch: 4 } });
+      const pul = V(.62, 1.98, .45);
+      return {
+        cam: { az: 18, el: 10, dist: 3.2, target: V(0, 1.2, .1) },
+        timing: LBL.std('Start – Griff im Untergriff vor der Gegenseite, Ellbogen seitlich am Körper', 'Arm diagonal nach unten-außen strecken', 'Arm gestreckt neben dem Körper – Trizeps anspannen', 'kontrolliert über Kreuz zurückführen'),
+        setup(kit) { kit.tower(pul, V(1, 0, .4)); props.c = kit.line(); props.h = kit.shortBar(.12); },
+        pose(s) {
+          return armsPose(base, (sg, side, K) => side === 'L'
+            ? { hand: relP(K, 1, .21, .03, .03), pole: V(1, 0, -.6) }
+            : { ud: nz(DOWN.clone().addScaledVector(K.f, .3).addScaledVector(K.l, sg * .3 * s)), bend: nz(UP.clone().multiplyScalar(.5).addScaledVector(K.l, -sg).addScaledVector(K.f, .3)), th: lerp(112, 6, s) });
+        },
+        props(J) { props.c.set(pul, J.R.hand); props.h.set(J.R.hand, nz(V().crossVectors(foreDir(J, 'R'), J.K.f))); }
+      };
+    }
+
+    /* ---------- Dips zwischen zwei Bänken ---------- */
+    if (v === 'benchDips') {
+      return {
+        cam: { az: 72, el: 12, dist: 3.1, target: V(0, .65, .3) },
+        timing: LBL.lower('Start – Arme gestreckt, Hände an der Bankkante, Fersen auf der zweiten Bank', 'Körper senkrecht absenken, Ellbogen zeigen nach hinten', 'Unten – Oberarme etwa waagerecht', 'mit Trizepskraft wieder nach oben drücken'),
+        setup(kit) { benchAcross(kit, -.3); benchAcross(kit, .9); },
+        pose(s) {
+          const o = { pelvis: V(0, lerp(.56, .3, s), lerp(.07, .03, s)), pitch: lerp(-4, 4, s), head: 0 };
+          o.ankle = sides(sg => V(sg * .11, .52, .86)); o.knee = sides(sg => V(sg * .1, 1, .1)); o.foot = sides(sg => nz(V(sg * .1, .8, .6)));
+          o.hand = sides(sg => V(sg * .2, .47, -.2)); o.elbow = sides(sg => V(sg * .15, .05, -1));
+          return o;
+        }
+      };
+    }
+
+    /* ---------- Trizeps-Kickbacks (Kurzhantel, einarmig, auf der Bank abgestützt) ---------- */
+    if (v === 'kickback') {
+      const base = { pelvis: V(.02, .93, -.28), pitch: 82, head: -10, knee: { L: V(0, -1, .4), R: V(-.1, -.2, 1) }, ankle: { L: V(.12, .52, -.7), R: V(-.3, DIM.ank, -.05) }, foot: { L: V(0, -.3, -1), R: V(-.1, 0, 1) } };
+      return {
+        cam: { az: -72, el: 14, dist: 3.0, target: V(0, .8, -.05) },
+        timing: LBL.std('Start – Oberarm parallel zum Oberkörper, Unterarm hängt senkrecht', 'Unterarm nach hinten strecken, bis der Arm gerade ist', 'Arm gestreckt – Trizeps kurz fest anspannen', 'Unterarm kontrolliert zurück nach unten'),
+        setup(kit) { flatBench(kit, -.95, .55, .45, .13, .3); props.d = kit.dumbbell(.95); },
+        pose(s) {
+          return armsPose(base, (sg, side, K) => side === 'L'
+            ? { hand: V(.16, .47, K.S.z + .05), pole: V(.4, 0, -1) }
+            : { ud: nz(K.u.clone().multiplyScalar(-1).addScaledVector(DOWN, .14).addScaledVector(K.l, sg * .1)), bend: DOWN, th: lerp(92, 5, s) });
+        },
+        props(J) { props.d.set(J.R.hand, neutralAxis(J, 'R')); }
+      };
+    }
+
+    /* ---------- Trizepsdrücken mit einer Kurzhantel hinter dem Kopf (sitzend) ---------- */
+    if (v === 'dbOverhead') {
+      const base = seatedUpright(-4);
+      return {
+        cam: { az: 72, el: 10, dist: 3.0, target: V(0, 1.25, 0) },
+        timing: LBL.std('Start – Kurzhantel mit beiden Händen hinter dem Kopf, Ellbogen zeigen nach oben', 'Arme senkrecht nach oben strecken', 'Oben – Arme gestreckt, Rumpf stabil', 'Hantel kontrolliert hinter den Kopf absenken – Dehnung'),
+        setup(kit) { seatFor(kit, base.pelvis, base.pitch, { seatY: .47, backLen: .42 }); props.d = kit.dumbbell(1.15); },
+        pose(s) {
+          const K = kin(base), ud = nz(K.u.clone().addScaledVector(K.f, .07));
+          const r = gripArms(K, ud, K.f.clone().multiplyScalar(-1), lerp(138, 6, s), .045, .1);
+          return Object.assign({}, base, { hand: r.hand, elbow: r.elbow });
+        },
+        props(J) {
+          const c = bothHands(J), fd = nz(c.clone().sub(midOf(J.L.el, J.R.el)));
+          props.d.set(c.clone().addScaledVector(fd, -.1), fd);
+        }
+      };
+    }
+
+    /* ---------- French Press (SZ-Stange liegend / Schrägbank / Multipresse sitzend) ---------- */
+    if (v === 'french') {
+      if (impl === 'smith') {
+        const base = seatedUpright(-4);
+        const K0 = kin(base), zb = K0.S.z - .1;
+        return {
+          cam: { az: 70, el: 10, dist: 3.2, target: V(0, 1.3, 0) },
+          timing: LBL.lower('Start – Arme über dem Kopf gestreckt, enger Griff', 'Stange in der Führung hinter den Kopf senken – nur die Ellbogen beugen', 'Unten – Stange auf Nackenhöhe, Ellbogen zeigen nach oben', 'Arme senkrecht nach oben strecken'),
+          setup(kit, MT) {
+            seatFor(kit, base.pelvis, base.pitch, { seatY: .47, backLen: .4 });
+            for (const sg of [-1, 1]) kit.rod(V(sg * .7, 0, zb), V(sg * .7, 2.3, zb), .03, MT.steel);
+            kit.rod(V(-.7, 2.3, zb), V(.7, 2.3, zb), .035); props.bar = kit.barbell(1.9, .2);
+          },
+          pose(s) {
+            const K = kin(base);
+            const hand = sides(sg => V(sg * .12, K.S.y + lerp(.57, .17, s), zb));
+            return Object.assign({}, base, { hand, elbow: sides(sg => nz(UP.clone().addScaledVector(K.f, .55).addScaledVector(K.l, sg * .3))) });
+          },
+          props(J) { props.bar.set(bothHands(J), J.L.hand.clone().sub(J.R.hand)); }
+        };
+      }
+      const inc = impl === 'incline' ? 35 : 0, base = supineBase(inc);
+      return {
+        cam: { az: 62, el: 16, dist: 2.8, target: V(0, inc ? 1.0 : .85, base.pelvis.z - .3) },
+        timing: LBL.lower('Start – SZ-Stange mit gestreckten Armen über der Stirn', 'Stange Richtung Stirn senken – nur die Ellbogen beugen', 'Unten – Stange knapp über der Stirn, Oberarme ruhig', 'Arme kraftvoll strecken'),
+        setup(kit) { benchFor(kit, base, inc); props.bar = kit.ezBar(); },
+        pose(s) {
+          const K = kin(base), ud = nz(K.f.clone().addScaledVector(K.u, .32));
+          const r = gripArms(K, ud, K.u, lerp(6, 112, s), .11, .05);
+          return Object.assign({}, base, { hand: r.hand, elbow: r.elbow });
+        },
+        props(J) { const c = bothHands(J); props.bar.set(c, J.L.hand.clone().sub(J.R.hand), nz(c.clone().sub(midOf(J.L.el, J.R.el)))); }
+      };
+    }
+
+    /* ---------- Curls stehend / sitzend: Langhantel, SZ weit/eng, Kurzhanteln, Hammer ---------- */
+    if (v === 'curl') {
+      const seated = !!p.seated, base = seated ? seatedCurlBase() : stand({ w: .15 });
+      const two = impl === 'bb' || impl === 'ezW' || impl === 'ezN', hammer = impl === 'hammer';
+      const what = impl === 'bb' ? 'Langhantel' : two ? 'SZ-Stange' : 'Kurzhanteln';
+      return {
+        cam: { az: 48, el: 10, dist: seated ? 2.8 : 3.0, target: V(0, seated ? .95 : 1.15, 0) },
+        timing: LBL.std(`Start – Arme gestreckt, ${what} ${hammer ? 'im Hammergriff (Daumen oben)' : 'im Untergriff'}`, hammer ? 'Hanteln mit neutralem Griff nach oben beugen – Ellbogen bleiben am Körper' : 'Gewicht nach oben beugen – Ellbogen bleiben am Körper',
+          'Oben – Bizeps fest anspannen, kurz halten', 'langsam und kontrolliert absenken'),
+        setup(kit) {
+          if (seated) seatFor(kit, base.pelvis, base.pitch, { seatY: .47, backLen: .7 });
+          if (impl === 'bb') props.bar = kit.barbell(1.5, .17, 1);
+          else if (two) props.bar = kit.ezBar();
+          else { props.dL = kit.dumbbell(.9); props.dR = kit.dumbbell(.9); }
+        },
+        pose(s) {
+          const th = lerp(8, 136, s), fw = lerp(.1, .2, s);
+          return armsPose(base, (sg, side, K) => {
+            if (impl === 'ezN') return { ud: nz(DOWN.clone().addScaledVector(K.f, fw).addScaledVector(K.l, -sg * .13)), bend: nz(K.f.clone().addScaledVector(K.l, -sg * .31)), th };
+            if (two) return { ud: nz(DOWN.clone().addScaledVector(K.f, fw).addScaledVector(K.l, sg * (impl === 'bb' ? .025 : .0))), bend: K.f, th };
+            return { ud: nz(DOWN.clone().addScaledVector(K.f, lerp(.02, .18, s)).addScaledVector(K.l, sg * .11)), bend: nz(K.f.clone().addScaledVector(K.l, -sg * (hammer ? .05 : .18))), th };
+          });
+        },
+        props(J) {
+          if (props.bar) { const c = bothHands(J); props.bar.set(c, J.L.hand.clone().sub(J.R.hand), foreDir(J, 'L')); }
+          else for (const sd of ['L', 'R']) props['d' + sd].set(J[sd].hand, hammer ? neutralAxis(J, sd) : J.K.l);
+        }
+      };
+    }
+
+    /* ---------- Bizeps-Curls an der Scottbank (SZ-Stange) ---------- */
+    if (v === 'preacher') {
+      const base = { pelvis: V(0, .62, -.08), pitch: 16, head: -6, ankle: { L: V(.17, DIM.ank, .32), R: V(-.17, DIM.ank, .32) }, knee: { L: V(.15, 1, .3), R: V(-.15, 1, .3) }, foot: toeOut(8) };
+      const K0 = kin(base), udOf = (K, sg) => nz(horiz(K.f).clone().addScaledVector(DOWN, 1.05).addScaledVector(K.l, -sg * .1));
+      return {
+        cam: { az: 70, el: 12, dist: 2.9, target: V(0, 1.0, .2) },
+        timing: LBL.std('Start – Oberarme flach auf dem Polster, Arme fast gestreckt', 'SZ-Stange nach oben beugen – Oberarme bleiben auf dem Polster', 'Oben – Bizeps anspannen, Unterarme nicht senkrecht', 'langsam absenken, bis die Arme fast gestreckt sind'),
+        setup(kit, MT) {
+          seatFor(kit, base.pelvis, 0, { seatY: .52, back: false });
+          const ud = udOf(K0, 1), n = perp(UP, ud), c = K0.S.clone().addScaledVector(ud, .2).addScaledVector(n, -.075);
+          kit.box(.52, .06, .38, c, { x: V(1, 0, 0), y: n, z: V().crossVectors(V(1, 0, 0), n).normalize() });
+          kit.rod(c.clone().addScaledVector(n, -.04), V(0, 0, c.z + .05), .035);
+          kit.box(.5, .04, .1, V(0, .02, c.z + .05), null, MT.frame);
+          props.bar = kit.ezBar();
+        },
+        pose(s) { return armsPose(base, (sg, side, K) => ({ ud: udOf(K, sg), bend: UP, th: lerp(12, 122, s) })); },
+        props(J) { const c = bothHands(J); props.bar.set(c, J.L.hand.clone().sub(J.R.hand), foreDir(J, 'L')); }
+      };
+    }
+
+    /* ---------- Konzentrations-Curls sitzend (Kurzhantel / Kabel vom Turm) ---------- */
+    if (v === 'conc') {
+      const cable = impl === 'cable';
+      const base = { pelvis: V(0, .55, 0), pitch: 38, head: -22, ankle: { L: V(.36, DIM.ank, .52), R: V(-.36, DIM.ank, .52) }, knee: { L: V(.7, .5, 1), R: V(-.7, .5, 1) }, foot: toeOut(25) };
+      const J0 = solve(base), pul = V(-.22, .12, 1.0);
+      return {
+        cam: { az: cable ? -78 : -38, el: 14, dist: cable ? 3.1 : 2.8, target: V(0, .75, cable ? .4 : .25) },
+        timing: LBL.std(cable ? 'Start – Ellbogen an der Innenseite des Oberschenkels, Griff vom unteren Kabel' : 'Start – Ellbogen an der Innenseite des Oberschenkels, Arm hängt gestreckt',
+          'Unterarm Richtung Schulter beugen – Oberarm bleibt am Oberschenkel', 'Oben – Bizeps maximal anspannen', 'langsam absenken, bis der Arm fast gestreckt ist'),
+        setup(kit) {
+          flatBench(kit, -.62, .24, .45, 0, .3);
+          if (cable) { kit.tower(pul, V(0, 0, 1)); props.c = kit.line(); props.h = kit.shortBar(.12); } else props.d = kit.dumbbell(.95);
+        },
+        pose(s) {
+          return armsPose(base, (sg, side, K) => side === 'L'
+            ? { hand: J0.L.knee.clone().add(V(-.04, .06, -.06)), pole: V(1, .2, -.4) }
+            : { ud: nz(DOWN.clone().addScaledVector(horiz(K.f), .12).addScaledVector(K.l, .1)), bend: nz(horiz(K.f).clone().addScaledVector(K.l, .35)), th: lerp(6, 134, s) });
+        },
+        props(J) { if (cable) { props.c.set(pul, J.R.hand); props.h.set(J.R.hand, J.K.l); } else props.d.set(J.R.hand, J.K.l); }
+      };
+    }
+
+    /* ---------- Konzentrations-Curls am Crossover (beidarmig, obere Rollen) ---------- */
+    if (v === 'crossover') {
+      const base = stand({ w: .16 });
+      const pL = V(1.02, 1.74, .05), pR = V(-1.02, 1.74, .05);
+      return {
+        cam: { az: 22, el: 8, dist: 3.4, target: V(0, 1.35, 0) },
+        timing: LBL.std('Start – Arme seitlich auf Schulterhöhe gestreckt, Griffe im Untergriff', 'Hände Richtung Kopf beugen – Oberarme bleiben waagerecht', 'Doppelbizeps-Position – kurz halten', 'Arme kontrolliert seitlich strecken'),
+        setup(kit) { kit.tower(pL, V(1, 0, 0)); kit.tower(pR, V(-1, 0, 0)); props.cL = kit.line(); props.cR = kit.line(); props.hL = kit.shortBar(.12); props.hR = kit.shortBar(.12); },
+        pose(s) { return armsPose(base, (sg, side, K) => ({ ud: nz(K.l.clone().multiplyScalar(sg).addScaledVector(K.f, .08).addScaledVector(UP, .04)), bend: nz(UP.clone().addScaledVector(K.f, .15)), th: lerp(10, 124, s) })); },
+        props(J) { props.cL.set(pL, J.L.hand); props.cR.set(pR, J.R.hand); props.hL.set(J.L.hand, J.K.f); props.hR.set(J.R.hand, J.K.f); }
+      };
+    }
+
+    /* ---------- Langhantel-Curls auf der Schrägbank – bäuchlings (Spider Curls) ---------- */
+    if (v === 'spider') {
+      const base = { pelvis: V(0, .84, -.22), pitch: 46, head: -12, knee: { L: V(.1, 0, 1), R: V(-.1, 0, 1) }, ankle: { L: V(.15, DIM.ank, -.74), R: V(-.15, DIM.ank, -.74) }, foot: toeOut(5) };
+      return {
+        cam: { az: 76, el: 12, dist: 3.1, target: V(0, .85, .15) },
+        timing: LBL.std('Start – Brust an der Schrägbank, Arme hängen senkrecht', 'Langhantel nach oben beugen – Oberarme bleiben senkrecht', 'Oben – Bizeps anspannen', 'langsam absenken, bis die Arme gestreckt sind'),
+        setup(kit) {
+          const K = kin(base), c = K.mid.clone().addScaledVector(K.f, .145).addScaledVector(K.u, -.26);
+          kit.box(.32, .9, .07, c, { x: K.l, y: K.u, z: K.f });
+          kit.rod(c.clone().addScaledVector(K.f, .05), V(0, 0, c.z + .25), .03); kit.rod(V(0, .02, c.z - .2), V(0, .02, c.z + .7), .03);
+          props.bar = kit.barbell(1.4, .16, 1);
+        },
+        pose(s) { return armsPose(base, (sg, side, K) => ({ ud: nz(DOWN.clone().addScaledVector(horiz(K.f), .03).addScaledVector(K.l, sg * .025)), bend: horiz(K.f), th: lerp(8, 128, s) })); },
+        props(J) { props.bar.set(bothHands(J), J.L.hand.clone().sub(J.R.hand)); }
+      };
+    }
+
+    /* ---------- Enge Liegestütze ---------- */
+    if (v === 'pushup') {
+      const A = V(0, .1, -.95), hz = .41;
+      return {
+        cam: { az: 72, el: 14, dist: 2.9, target: V(0, .3, -.1) },
+        timing: LBL.lower('Start – Hände unter den Schultern, enger als schulterbreit, Körper in einer Linie', 'Brust zum Boden senken – Ellbogen eng am Körper nach hinten', 'Unten – Brust knapp über dem Boden', 'kraftvoll nach oben drücken'),
+        setup(kit) { kit.floorMat(-1.15, .75); },
+        pose(s) {
+          const a = lerp(22, 7, s) * D2R, dir = V(0, Math.sin(a), Math.cos(a));
+          const pel = A.clone().addScaledVector(dir, LEG + .03);
+          const o = { pelvis: pel, pitch: 90 - a / D2R, head: -10, ankle: sides(sg => V(sg * .08, A.y, A.z)), foot: sides(() => V(0, -1, .35)), knee: sides(() => V(0, -1, 0)) };
+          o.hand = sides(sg => V(sg * .11, .03, hz)); o.elbow = sides(sg => V(sg * .25, .55, -1));
+          return o;
+        }
+      };
+    }
+  };
+
   /* ---------- Viewer ---------- */
   class Viewer {
     constructor(host, opts = {}) {
@@ -1747,5 +2083,5 @@
     }
   }
 
-  window.SW3D = { Viewer, TPL, FIG_STYLES, version: 3 };
+  window.SW3D = { Viewer, TPL, FIG_STYLES, solve, version: 3 };
 })();
