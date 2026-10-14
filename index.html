@@ -831,6 +831,38 @@ img.ld{opacity:1!important}
 .empty-s{padding:14px 16px;color:var(--muted);font-size:14px}
 .badge{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-size:11.5px;font-weight:800;letter-spacing:0}
 .dot-new{width:10px;height:10px;border-radius:50%;background:var(--accent);flex:none;box-shadow:0 0 0 3px var(--accent-soft)}
+/* Laufprogramme */
+.run-ic{font-size:20px;width:26px;text-align:center;flex:none}
+.run-entry{margin:12px 0 0;border-radius:14px}
+.run-mini{margin-top:6px;font-size:12px;color:var(--muted)}.run-mini span{display:block;margin-top:4px}
+.run-mini-bar{height:6px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}.run-mini-bar i{display:block;height:100%;background:var(--accent-fill,var(--accent));border-radius:99px;transition:width .3s}
+.run-notes{margin:0;padding-left:18px;display:grid;gap:6px;font-size:14px;line-height:1.45}
+.run-safe{font-size:13px}.warn-info{border-color:rgba(217,130,43,.5);color:var(--warn,#d9822b)}
+.run-head .run-k{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}.run-head .run-v{font-size:17px;font-weight:700;margin-top:2px}
+.run-unit{display:flex;gap:12px;align-items:center;width:100%;text-align:left;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px;cursor:pointer;color:inherit;font:inherit}
+.run-unit.next{border-color:var(--accent);background:linear-gradient(180deg,var(--accent-soft),transparent)}.run-unit.next .day-no{background:var(--accent-fill);color:var(--accent-ink)}
+.run-unit .ru-h{display:block;font-weight:700;font-size:15px}.run-unit .ru-d{display:block;font-size:14px;margin-top:2px}.run-unit .ru-s{display:block;font-size:12px;color:var(--muted);margin-top:3px}
+.run-unit .ru-r{flex:none}
+.run-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.run-facts>div{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;padding:8px 10px}
+.run-facts span{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}.run-facts b{display:block;font-size:14px;margin-top:2px}
+.run-lv label{flex:1 1 0;min-width:0;position:relative}.run-lv span{font-size:15px;padding:0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.run-player select.input,.run-head~section select.input{max-width:100%;min-width:0}
+.run-player .rp-prog{font-size:12.5px;color:var(--muted);margin-bottom:10px}.run-player .rp-prog span{display:block;margin-top:6px}
+.rp-card{position:relative;border-radius:20px;padding:22px 18px;text-align:center;border:1px solid var(--border);background:var(--surface)}
+.rp-card.high{background:linear-gradient(180deg,rgba(190,155,92,.28),rgba(190,155,92,.06));border-color:var(--accent)}
+.rp-card.easy{background:linear-gradient(180deg,rgba(74,222,128,.14),rgba(74,222,128,.03));border-color:rgba(74,222,128,.35)}
+.rp-card.rest{background:linear-gradient(180deg,rgba(120,160,255,.14),rgba(120,160,255,.03));border-color:rgba(120,160,255,.35)}
+.rp-card.paused{opacity:.7}
+.rp-tag{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;background:var(--accent-fill,var(--accent));color:var(--accent-ink);padding:4px 10px;border-radius:99px;margin-bottom:8px}
+.rp-rep{font-size:13px;font-weight:700;color:var(--muted);letter-spacing:.04em}
+.rp-title{font-size:24px;font-weight:800;margin-top:4px}
+.rp-big{font-size:64px;font-weight:800;line-height:1.05;margin:8px 0 4px;font-variant-numeric:tabular-nums}
+.rp-el{font-size:14px;color:var(--muted)}
+.rp-sub{font-size:14px;color:var(--text-2);margin-top:6px}
+.rp-next{margin-top:12px;font-size:14px;color:var(--muted);text-align:center}
+.rp-done{min-height:76px;font-size:20px}
+.run-track{width:100%;max-width:360px;margin:12px auto 0;display:block}.run-track text{fill:var(--muted);font-size:11px}
+
 .bell{position:relative}
 .bell-n{position:absolute;top:4px;right:2px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-size:10.5px;font-weight:800;display:grid;place-items:center}
 .care-todo{gap:10px}
@@ -1120,14 +1152,15 @@ const clientDays = cid => { const p = planOf(cid); return p ? daysOf(p.id) : [];
 const exercisesOf = did => all('exercises').filter(e => e.dayId === did).sort(byOrder);
 const sessKey = s => s.date + '|' + String(s.finishedAt || s.startedAt || 0).padStart(15, '0');
 const sessCmp = (a, b) => sessKey(b).localeCompare(sessKey(a));
-const sessionsOf = (cid, doneOnly = false) => all('sessions').filter(s => s.clientId === cid && (!doneOnly || s.status === 'done')).sort(sessCmp);
-const activeSession = cid => all('sessions').find(s => s.clientId === cid && s.status === 'active') || null;
+// runs: false = nur Krafttrainings (Standard), true = alles, 'only' = nur Laufeinheiten (kind:'run')
+const sessionsOf = (cid, doneOnly = false, runs = false) => all('sessions').filter(s => s.clientId === cid && (!doneOnly || s.status === 'done') && (runs === true || (runs === 'only' ? s.kind === 'run' : s.kind !== 'run'))).sort(sessCmp);
+const activeSession = cid => all('sessions').find(s => s.clientId === cid && s.status === 'active' && s.kind !== 'run') || null;
 const lastSession = cid => sessionsOf(cid, true)[0] || null;
 const isPerformed = s => s.done || hasVal(s.reps) || hasVal(s.weight);
 const setVol = s => (hasVal(s.weight) && hasVal(s.reps)) ? s.weight * s.reps : 0;
 const sessionVolume = sess => sess.exercises.reduce((t, e) => t + e.sets.filter(isPerformed).reduce((a, s) => a + setVol(s), 0), 0);
 const sessionSets = sess => sess.exercises.reduce((t, e) => t + e.sets.filter(isPerformed).length, 0);
-const sessLabel = s => dayLabel(s.dayIndex ?? 0, TD(s.dayName));
+const sessLabel = s => s.kind === 'run' ? runTitle(s) : dayLabel(s.dayIndex ?? 0, TD(s.dayName));
 
 /* Nächster Trainingstag
    1. Gültige Festlegung des Trainers (plan.nextSel) hat Vorrang.
@@ -1563,7 +1596,7 @@ async function nextSetAndSync(cid, dayId, inform) {
 }
 function viewClient(c) {
   const days = clientDays(c.id), done = sessionsOf(c.id, true), last = done[0], nxi = nextDayInfo(c.id), next = nxi.day, active = activeSession(c.id), trend = volumeTrend(c.id);
-  const n30 = done.filter(s => daysBetween(s.date, today()) <= 30).length;
+  const n30 = done.filter(s => daysBetween(s.date, today()) <= 30).length, recent = sessionsOf(c.id, true, true), ath = progState(c.id, 'athlete');
   const vols = done.slice(0, 12).reverse().map(sessionVolume).filter(v => v > 0);
   const trendHtml = trend ? `<span class="${trend.pct >= 0 ? 'up' : 'down'}">${trend.pct >= 0 ? '+' : ''}${fmtNum(Math.round(trend.pct))} %</span>` : '–';
   return topbar({ back: '/', title: esc(c.name), sub: `${done.length} Trainings · ${n30} in den letzten 30 Tagen`, right: `<button class="icon-btn" data-action="edit-client" data-id="${c.id}" aria-label="Kunde bearbeiten">${ic('edit', 22)}</button>` }) +
@@ -1579,6 +1612,7 @@ function viewClient(c) {
       ${active ? `<a class="btn btn-primary btn-big" href="#/train/${active.id}">${ic('play', 22)} Laufendes Training fortsetzen</a><div class="muted" style="text-align:center;font-size:14px;margin-top:6px">${esc(sessLabel(active))} · begonnen ${fmtDate(active.date)}</div>`
                : `<button class="btn btn-primary btn-big" data-action="start-training" data-cid="${c.id}">${ic('play', 22)} Training starten</button>`}
     </div>
+    <a class="list-link card run-entry" href="#/client/${c.id}/lauf">${runIc()}<div class="grow"><b>Laufprogramme</b><div class="muted" style="font-size:13px">${ath ? `Athletenprogramm · ${ath.done}/18 · ${RUN_LV[ath.cfg.level || 'beginner']}` : 'Grundausdauer, Intervalle, Sprints, Leistungstest'}</div></div><span class="muted">${ic('arrow', 18)}</span></a>
     <div class="quick quick3">
       <a class="btn btn-ghost" href="#/client/${c.id}/food">${ic('food')} Ernährung</a>
       <a class="btn btn-ghost" href="#/client/${c.id}/progress">${ic('chart')} Fortschritt</a>
@@ -1606,13 +1640,14 @@ function viewClient(c) {
     </section>
 
     <section class="section">
-      <div class="section-h"><h2>Letzte Trainings</h2>${done.length > 5 ? `<a class="btn btn-sm btn-text" href="#/client/${c.id}/history">Alle (${done.length})</a>` : ''}</div>
-      ${done.length ? `<div class="card list-card">${done.slice(0, 5).map(sessionLink).join('')}</div>` : '<div class="card empty">Noch keine Trainings dokumentiert.</div>'}
+      <div class="section-h"><h2>Letzte Trainings</h2>${recent.length > 5 ? `<a class="btn btn-sm btn-text" href="#/client/${c.id}/history">Alle (${recent.length})</a>` : ''}</div>
+      ${recent.length ? `<div class="card list-card">${recent.slice(0, 5).map(sessionLink).join('')}</div>` : '<div class="card empty">Noch keine Trainings dokumentiert.</div>'}
     </section>
     ${clientExtraSections(c, 'bottom')}
   </main>`;
 }
 function sessionLink(s) {
+  if (s.kind === 'run') return runLink(s);
   return `<a class="list-link" href="#/session/${s.id}"><div class="grow"><div style="font-weight:600">${fmtDate(s.date)} – ${esc(sessLabel(s))}</div>
     <div class="muted" style="font-size:13px">${sessionSets(s)} ${T('Sätze')} · ${fmtVol(sessionVolume(s))} ${T('Volumen')}${s.note ? ' · 📝 ' + esc(s.note.slice(0, 60)) : ''}</div></div><span class="muted">${ic('back', 18).replace('M15 18l-6-6 6-6', 'M9 6l6 6-6 6')}</span></a>`;
 }
@@ -1771,11 +1806,11 @@ function viewSession(s) {
 }
 
 function viewHistory(c) {
-  const list = sessionsOf(c.id);
+  const list = sessionsOf(c.id, false, true);
   return topbar({ back: '/client/' + c.id, title: T('Trainingshistorie'), sub: esc(c.name) }) +
   `<main class="wrap view">
     ${list.length ? `<div class="card list-card">${list.map(s => s.status === 'active'
-      ? `<a class="list-link" href="#/train/${s.id}"><div class="grow"><div style="font-weight:600">${fmtDate(s.date)} – ${esc(sessLabel(s))}</div><div class="muted" style="font-size:13px">${T('läuft noch')}</div></div><span class="tag live">${T('läuft')}</span></a>`
+      ? `<a class="list-link" href="#/${s.kind === 'run' ? 'lauf' : 'train'}/${s.id}"><div class="grow"><div style="font-weight:600">${fmtDate(s.date)} – ${esc(sessLabel(s))}</div><div class="muted" style="font-size:13px">${T('läuft noch')}</div></div><span class="tag live">${T('läuft')}</span></a>`
       : sessionLink(s)).join('')}</div>
       <button class="btn btn-ghost btn-block" style="margin-top:14px" data-action="csv" data-cid="${c.id}">${ic('download')} ${T('Trainingsdaten als CSV exportieren')}</button>`
       : `<div class="card empty">${T('Noch keine Trainings dokumentiert.')}</div>`}
@@ -1962,7 +1997,8 @@ function render() {
   if (typeof BOX !== 'undefined') { if (!p.length && isClientMode()) setTimeout(() => boxClientSync(false).catch(() => {}), 300); else if (p[0] === 'client' && p[1] && !p[2]) setTimeout(() => boxAutoFetch(p[1]), 300); }
   hydrateThumbs(app);
   if (p[0] === 'uebung') { mountDetail3D(p[1]); mountDetailVideo(p[1]); }
-  if (!isClientMode()) { if (p[0] === 'session' && S.events.has('done:' + p[1]) && !S.events.get('done:' + p[1]).read) markEvent('done:' + p[1], { read: true }); if (!p.length || p[0] === 'meldungen') setTimeout(() => careFetchAll(), 400); }
+  runAfterRender(p);
+  if (!isClientMode()) { if (p[0] === 'session') for (const k of ['done:', 'run:']) if (S.events.has(k + p[1]) && !S.events.get(k + p[1]).read) markEvent(k + p[1], { read: true }); if (!p.length || p[0] === 'meldungen') setTimeout(() => careFetchAll(), 400); }
   hydratePhotos(app);
 }
 const curSession = () => { const p = location.hash.slice(1).split('/').filter(Boolean); return p[0] === 'train' ? S.sessions.get(p[1]) : null; };
@@ -2221,10 +2257,10 @@ const A = {
   'photo-remove': () => { UI.photoDraft = null; const n = document.querySelector('[data-form=client] [name=name]').value; document.getElementById('photo-prev').innerHTML = avatar({ name: n || '?', photo: null }, 'xl'); },
   'del-client': async el => {
     const c = S.clients.get(el.dataset.id); closeModal(null);
-    const n = sessionsOf(c.id).length;
+    const n = sessionsOf(c.id, false, true).length;
     if (!await confirmDialog(T('Kunde löschen?'), `<b>${esc(c.name)}</b> und alle zugehörigen Daten (Trainingsplan und <b>${n}</b> Trainings) werden endgültig gelöscht.<br><br>Tipp: Erstelle vorher ein Backup.`, { ok: T('Endgültig löschen'), danger: true })) return;
     all('plans').filter(p => p.clientId === c.id).forEach(p => { daysOf(p.id).forEach(d => { exercisesOf(d.id).forEach(e => del('exercises', e.id)); del('days', d.id); }); del('plans', p.id); });
-    sessionsOf(c.id).forEach(s => del('sessions', s.id)); del('clients', c.id);
+    sessionsOf(c.id, false, true).forEach(s => del('sessions', s.id)); del('clients', c.id);
     toast(T('Kunde gelöscht')); go('/');
   },
   'start-training': async el => {
@@ -4313,6 +4349,7 @@ function viewClientHome() {
         ${last ? `<a class="list-link" href="#/session/${last.id}">${ic('check')}<div class="grow"><b>${T('Letztes Workout')}</b><div class="muted" style="font-size:13px">${fmtDate(last.date)} · ${esc(sessLabel(last))}</div></div></a>` : ''}
         <a class="list-link" href="#/client/${cid}/history">${ic('history')}<div class="grow"><b>${T('Trainingshistorie')}</b><div class="muted" style="font-size:13px">${TN(done.length, '{n} Workout', '{n} Workouts')}</div></div></a>
         <a class="list-link" href="#/client/${cid}/progress">${ic('chart')}<div class="grow"><b>${T('Kraft-Fortschritt')}</b><div class="muted" style="font-size:13px">${T('Gewichte & Volumen je Übung')}</div></div></a>
+        <a class="list-link" href="#/client/${cid}/lauf">${runIc()}<div class="grow"><b>${T('Laufprogramme')}</b><div class="muted" style="font-size:13px">${(() => { const a = progState(cid, 'athlete'), r = activeRun(cid); return r ? T('Einheit läuft') : a ? T('Athletenprogramm · {a} von {b}', { a: a.done, b: 18 }) : T('Grundausdauer, Intervalle, Sprints'); })()}</div></div></a>
       </div>
       ${days.length > 1 ? `<div class="day-grid" style="margin-top:12px">${days.map((d, i) => `<button class="day-btn ${next && next.id === d.id ? 'next' : ''}" data-action="start-day" data-cid="${cid}" data-did="${d.id}"><span class="day-no">${i + 1}</span><span class="grow"><span class="day-name">${esc(TD(d.name))}</span><br><span class="muted" style="font-size:14px">${TN(exercisesOf(d.id).length, '{n} Übung', '{n} Übungen')}</span></span><span class="muted">${ic('play', 16)}</span></button>`).join('')}</div>` : ''}
     </section>
@@ -4529,7 +4566,8 @@ async function setupFromFile(file, code, opts = {}) {
   const map = new Map(pkg.data.sessions.map(s => [s.id, s]));
   if (role.value === 'client') for (const s of all('sessions')) { const o = map.get(s.id); if (s.clientId === pkg.clientId && (!o || (s.updatedAt || 0) > (o.updatedAt || 0))) map.set(s.id, s); }
   if (role.value === 'client') { const loc = S.clients.get(pkg.clientId), pc = pkg.data.clients && pkg.data.clients[0];
-    if (loc && pc && (loc.mealsAt || 0) > (pc.mealsAt || 0)) Object.assign(pc, { mealCfg: loc.mealCfg, meals: loc.meals, mealsAt: loc.mealsAt }); } // eigene Mahlzeiten bleiben erhalten
+    if (loc && pc && (loc.mealsAt || 0) > (pc.mealsAt || 0)) Object.assign(pc, { mealCfg: loc.mealCfg, meals: loc.meals, mealsAt: loc.mealsAt }); // eigene Mahlzeiten bleiben erhalten
+    if (loc && pc && (loc.runAt || 0) > (pc.runAt || 0)) Object.assign(pc, { run: loc.run, runAt: loc.runAt }); } // eigene Laufeinstellungen ebenso
   if (role.value === 'client') for (const pp of pkg.data.plans) { const lp = S.plans.get(pp.id); // eine neuere Festlegung nie durch eine ältere ersetzen
     if (lp && lp.nextSel && (lp.nextSel.at || 0) > ((pp.nextSel || {}).at || 0) && (!lp.nextSel.dayId || pkg.data.days.some(d => d.id === lp.nextSel.dayId))) pp.nextSel = lp.nextSel; }
   const lock = await makeLock(code);
@@ -4551,7 +4589,7 @@ async function makeReturn(code) {
   const sessions = all('sessions').filter(s => s.clientId === cid && s.status === 'done');
   const pushOn = (S.meta.get('pushOn') || {}).on, ch = S.meta.get('pushCh');
   const text = await encryptPayload({ clientId: cid, sessions, meals: c.meals || null, mealCfg: c.mealCfg || null, mealsAt: c.mealsAt || 0, exportedAt: new Date().toISOString(),
-    messages: msgsOf(cid), live: liveState(cid), lang: I18N.cur, notifyCh: pushOn && ch ? ch.ch : null }, code, { kind: 'client-return', v: 1, clientId: cid });
+    messages: msgsOf(cid), live: liveState(cid), lang: I18N.cur, run: c.run || null, runAt: c.runAt || 0, notifyCh: pushOn && ch ? ch.ch : null }, code, { kind: 'client-return', v: 1, clientId: cid });
   return { name: `sweat4-trainings_${(c.name || 'kunde').replace(/[^\wäöüÄÖÜß-]+/g, '_')}_${today()}.json`, text, n: sessions.length };
 }
 async function importReturn(file, codeIn) {
@@ -4569,7 +4607,8 @@ async function importReturn(file, codeIn) {
     const wasDone = !!(ex && ex.status === 'done');
     if (!ex) { put('sessions', s); neu++; } else if ((s.updatedAt || 0) > (ex.updatedAt || 0)) { put('sessions', s); upd++; }
     // Ein ordnungsgemäß beendetes Training erzeugt genau EIN Ereignis (feste ID). Ältere Trainings (> 7 Tage) werden still übernommen.
-    if (s.status === 'done' && !wasDone && s.finishedAt && Date.now() - s.finishedAt < CARE.EVENT_MAX_AGE && addEvent({ id: 'done:' + s.id, type: 'done', clientId: c.id, sessionId: s.id, at: s.finishedAt })) doneNew.push(s);
+    if (s.status === 'done' && !wasDone && s.finishedAt && Date.now() - s.finishedAt < CARE.EVENT_MAX_AGE && !(s.kind === 'run' && s.run && s.run.status === 'skipped')
+      && addEvent(s.kind === 'run' ? { id: 'run:' + s.id, type: 'run', clientId: c.id, sessionId: s.id, at: s.finishedAt } : { id: 'done:' + s.id, type: 'done', clientId: c.id, sessionId: s.id, at: s.finishedAt })) doneNew.push(s);
   }
   // Nachrichten des Kunden + Lesebestätigungen
   const msgNew = mergeMessages(p.messages, c.id, 'client');
@@ -4580,6 +4619,7 @@ async function importReturn(file, codeIn) {
     if ('notifyCh' in p) patch.notifyCh = /^[0-9a-f]{64}$/.test(p.notifyCh || '') ? p.notifyCh : null;
     if (Object.keys(patch).some(k => JSON.stringify(cc[k]) !== JSON.stringify(patch[k]))) put('clients', Object.assign(cc, patch)); }
   let meals = false;
+  if (p.runAt && p.runAt > (S.clients.get(c.id).runAt || 0)) { const cc = S.clients.get(c.id); Object.assign(cc, { run: p.run || {}, runAt: p.runAt }); put('clients', cc); }
   if (p.mealsAt && p.mealsAt > (c.mealsAt || 0)) { const cc = S.clients.get(c.id); Object.assign(cc, { meals: p.meals, mealCfg: p.mealCfg, mealsAt: p.mealsAt }); put('clients', cc); meals = true; }
   return { c, neu, upd, rej, meals, doneNew, msgNew };
 }
@@ -4664,9 +4704,9 @@ async function boxClientSync(force, quiet) {
   const myMsgs = msgsOf(cid), lastMsg = Math.max(0, ...myMsgs.map(m => Math.max(m.from === 'client' ? m.at || 0 : 0, m.readAt || 0)));
   const live = liveState(cid), liveSig = live ? live.id + ':' + Math.floor((live.updatedAt || 0) / 180000) : '';   // Live-Status höchstens alle 3 Min.
   const pushCh = (S.meta.get('pushOn') || {}).on ? (S.meta.get('pushCh') || {}).ch || '' : '';
-  const sig = [lastDone, c.mealsAt || 0, lastMsg, liveSig, pushCh, I18N.cur].join('|');
+  const sig = [lastDone, c.mealsAt || 0, lastMsg, liveSig, pushCh, I18N.cur, c.runAt || 0].join('|');
   const up = S.meta.get('boxUp') || {};
-  if ((lastDone || c.mealsAt || lastMsg || live || up.sig) && sig !== up.sig) {
+  if ((lastDone || c.mealsAt || lastMsg || live || c.runAt || up.sig) && sig !== up.sig) {
     try {
       const r = await makeReturn(BOX.code); await boxPut(cid, BOX.code, 'up', r.text);
       put('meta', { id: 'boxUp', at: Math.max(lastDone, c.mealsAt || 0), sig, sent: Date.now(), lastDone, lastClientMsg: lastMsg });
@@ -4854,7 +4894,7 @@ function clientRhythm(c) {
   const md = c.mealCfg && Array.isArray(c.mealCfg.days) && c.mealCfg.days.length ? c.mealCfg.days.length : 0;
   const pd = clientDays(c.id).length;
   const perWeek = md || pd || 3, interval = 7 / perWeek;
-  const done = sessionsOf(c.id, true), last = done[0] || null, cfg = careCfg();
+  const done = sessionsOf(c.id, true, true).filter(s => s.kind !== 'run' || s.run.status !== 'skipped'), last = done[0] || null, cfg = careCfg();
   const since = last ? daysBetween(last.date, today()) : null;
   let st;
   if (!pd && !done.length) st = 'noplan';
@@ -4876,6 +4916,8 @@ function careTodos() {
     const c = S.clients.get(e.clientId);
     if (e.type === 'done') { const s = S.sessions.get(e.sessionId); if (!s) continue; const A = analyzeSession(s);
       out.push({ id: e.id, c, at: e.at, icon: progressCount(A) ? '📈' : '🏋️', title: progressCount(A) ? T('Leistungssteigerung – Rückmeldung geben') : T('Neues Training – Rückmeldung geben'), sub: `${sessLabel(s)} · ${sessionSummaryLine(s, A)}`, href: '#/session/' + s.id }); }
+    else if (e.type === 'run') { const s = S.sessions.get(e.sessionId); if (!s || !s.run) continue; const ab = s.run.status === 'aborted';
+      out.push({ id: e.id, c, at: e.at, icon: ab ? '⚠️' : '🏃', title: ab ? T('Laufeinheit abgebrochen – nachfragen') : T('Neue Laufeinheit – Rückmeldung geben'), sub: `${runTitle(s)} · ${runLine(s)}`, href: '#/session/' + s.id }); }
     else if (e.type === 'msg' || e.type === 'issue') { const m = S.messages.get(e.msgId); if (!m) continue;
       out.push({ id: e.id, c, at: e.at, icon: e.type === 'issue' ? '🆘' : '💬', title: e.type === 'issue' ? T('Meldet eine Schwierigkeit') : T('Unbeantwortete Nachricht'), sub: m.text.slice(0, 90), href: `#/client/${c.id}/nachrichten` }); }
   }
@@ -4891,11 +4933,14 @@ function careTodos() {
 function CareDash(rows) {
   if (!rows.length) return '';
   const cs = rows.map(r => r.c).filter(c => c.status !== 'inactive');
-  const fresh = careEvents().filter(e => e.type === 'done' && !e.read).slice(0, 8);
+  const fresh = careEvents().filter(e => (e.type === 'done' || e.type === 'run') && !e.read).slice(0, 8);
   const live = cs.map(c => ({ c, l: liveOf(c) })).filter(x => x.l);
   const todos = careTodos();
   const rh = cs.map(c => ({ c, r: clientRhythm(c) })), cnt = k => rh.filter(x => x.r.st === k).length;
-  const doneCard = e => { const s = S.sessions.get(e.sessionId), c = S.clients.get(e.clientId); if (!s || !c) return ''; const A = analyzeSession(s);
+  const doneCard = e => { const s = S.sessions.get(e.sessionId), c = S.clients.get(e.clientId); if (!s || !c) return '';
+    if (s.kind === 'run') return `<a class="list-link care-row" href="#/session/${s.id}" data-ev="${e.id}">${avatar(c, 'sm')}<div class="grow"><div style="font-weight:600">${esc(s.run.status === 'aborted' ? T('{n} hat eine Laufeinheit abgebrochen', { n: c.name.split(' ')[0] }) : T('{n} hat eine Laufeinheit abgeschlossen', { n: c.name.split(' ')[0] }))}</div>
+      <div class="muted" style="font-size:13px">${esc(runTitle(s))} · ${fmtDateTs(s.finishedAt || e.at)} ${fmtTime(s.finishedAt || e.at)}</div><div class="muted" style="font-size:13px">${esc(runLine(s))}</div></div>${e.read ? '' : '<span class="dot-new" aria-label="neu"></span>'}</a>`;
+    const A = analyzeSession(s);
     return `<a class="list-link care-row" href="#/session/${s.id}" data-ev="${e.id}">${avatar(c, 'sm')}<div class="grow"><div style="font-weight:600">${esc(T('{n} hat ein Training abgeschlossen', { n: c.name.split(' ')[0] }))}</div>
       <div class="muted" style="font-size:13px">${esc(sessLabel(s))} · ${fmtDateTs(s.finishedAt || e.at)} ${fmtTime(s.finishedAt || e.at)}</div><div class="muted" style="font-size:13px">${esc(sessionSummaryLine(s, A))}</div></div><span class="dot-new" aria-label="${T('neu')}"></span></a>`; };
   return `<section class="care">
@@ -4921,6 +4966,8 @@ function eventLine(e) {
   const c = S.clients.get(e.clientId); if (!c) return null;
   if (e.type === 'done') { const s = S.sessions.get(e.sessionId); if (!s) return null; const A = analyzeSession(s);
     return { icon: progressCount(A) ? '📈' : '🏋️', title: T('{n} hat ein Training abgeschlossen', { n: c.name }), sub: `${sessLabel(s)} · ${sessionSummaryLine(s, A)}`, href: '#/session/' + s.id }; }
+  if (e.type === 'run') { const s = S.sessions.get(e.sessionId); if (!s || !s.run) return null;
+    return { icon: s.run.status === 'aborted' ? '⚠️' : '🏃', title: s.run.status === 'aborted' ? T('{n} hat eine Laufeinheit abgebrochen', { n: c.name }) : T('{n} hat eine Laufeinheit abgeschlossen', { n: c.name }), sub: `${runTitle(s)} · ${runLine(s)}`, href: '#/session/' + s.id }; }
   if (e.type === 'msg' || e.type === 'issue') { const m = S.messages.get(e.msgId); if (!m) return null;
     return { icon: e.type === 'issue' ? '🆘' : '💬', title: e.type === 'issue' ? T('{n} meldet eine Schwierigkeit', { n: c.name }) : T('Neue Nachricht von {n}', { n: c.name }), sub: m.text.slice(0, 120), href: `#/client/${c.id}/nachrichten` }; }
   return null;
@@ -5003,7 +5050,7 @@ function TL(lang, s, v) { const d = lang === 'de' ? null : ((window.SW_I18N || {
 const withLang = (L, fn) => { const o = I18N.cur; I18N.cur = L; try { return fn(); } finally { I18N.cur = o; } };
 function quickReplyTexts(cid, sid) {
   const c = S.clients.get(cid), L = (c && c.lang) || (isEN() ? 'en' : 'de'), out = [];
-  const s = sid && S.sessions.get(sid), A = s && s.status === 'done' ? withLang(L, () => analyzeSession(s)) : null;   // Übungsnamen in der Sprache des Kunden
+  const s = sid && S.sessions.get(sid), A = s && s.status === 'done' && s.kind !== 'run' ? withLang(L, () => analyzeSession(s)) : null;   // Übungsnamen in der Sprache des Kunden
   const num = n => Number(n).toLocaleString(L === 'en' ? 'en-GB' : 'de-DE', { maximumFractionDigits: 2 });
   const exn = name => name; // Übungsname wie in der App angezeigt
   if (A) {
@@ -5043,7 +5090,7 @@ async function sendMessage(cid, text, opts = {}) {
   put('messages', m);
   if (cm) { await boxClientSync(true, true); return { m, delivered: !!boxUrl() }; }
   // Trainer: zugehörige offene Punkte gelten als beantwortet
-  markEventsWhere(e => e.clientId === cid && !e.handled && ((e.type === 'msg' || e.type === 'issue') || (opts.sessionId && e.type === 'done' && e.sessionId === opts.sessionId)), { handled: true, read: true });
+  markEventsWhere(e => e.clientId === cid && !e.handled && ((e.type === 'msg' || e.type === 'issue') || (opts.sessionId && (e.type === 'done' || e.type === 'run') && e.sessionId === opts.sessionId)), { handled: true, read: true });
   let delivered = false;
   try { delivered = await boxSendMessages(cid); } catch (e) { delivered = false; m.err = e.message; }
   return { m, delivered };
@@ -5115,13 +5162,612 @@ function PushCard(role) {
   </div>`;
 }
 
+/* =====================================================================
+   LAUFPROGRAMME (Laufbereich)
+   Speicherung: Läufe sind Trainingseinheiten im vorhandenen Speicher „sessions“ mit kind:'run'
+   (gleiche Synchronisierung Kunde ↔ Trainer, gleiche Historie). Die Kraft-Logik (nächster Trainingstag,
+   Analyse, Volumen) ignoriert Läufe (sessionsOf ohne Läufe). Einstellungen/Einschreibung: c.run + c.runAt
+   (Abgleich wie die Mahlzeiten – die neuere Änderung gilt).
+
+   Verbindliche Vorgaben (unverändert umgesetzt):
+   - Intervall: 80 m in 15 s (= 19,2 km/h), 15 s Trab/Erholung, 20 / 40 / 60 schnelle Abschnitte.
+   - Kraftausdauer: 80 m locker traben + 120 m mit 80–90 % Intensität, 8 / 16 / 24 Durchgänge (200 m je Durchgang).
+   - Markierungssprints: 0→5→0→10→0→15→0 = 6 Abschnitte, 60 m je Wiederholung, 3 / 6 / 9 Wiederholungen,
+     1:50 Min. Pause nach jeder vollständigen Wiederholung (nach der letzten folgt das Abkühlen statt einer Pause).
+   - 100 m: 3 / 6 / 10 Sprints, Pause 3 / 4 / 5 Min. (Standard 4), nach dem letzten Sprint keine Pause.
+   - Grundausdauer Beginner Einheit 1–6: 8, 8, 9, 9, 10, 10 km/h × 60 Min.
+   - Athletenprogramm: 18 Einheiten, 3 pro Woche; Woche 1–2 Grundausdauer (Einheiten 1–6 der Grundausdauer),
+     Woche 3–4 im Wechsel Intervall / Kraftausdauer (je 3×), Woche 5–6 kombiniertes Sprinttraining.
+
+   Ergänzte Annahmen (transparent, keine wissenschaftlichen Trainingszonen):
+   - Grundausdauer Einheit 7–12: in 0,5-km/h-Schritten weiter, jede Stufe 2 Einheiten (Beginner 10,5 / 10,5 / 11 / 11 / 11,5 / 11,5).
+   - Startgeschwindigkeit Normal 10 km/h, Fortgeschritten 11,5 km/h; gleiche Stufung wie Beginner.
+   - Individuell nach 60-Min.-Test (nur wenn gewählt): Start = Testgeschwindigkeit − 1 km/h (auf 0,5 abgerundet, min. 6),
+     danach +0,5 km/h alle 2 Einheiten. Der Testwert wird nicht als Trainingstempo übernommen.
+   - Aufwärmen 10 Min., Abkühlen 8 Min. (Richtwerte, zählen nicht zu den Wiederholungen); 10 s „Bereit machen“ vor Intervallen.
+   - Zusätzliche Erholung vor der zweiten Sprintform: 3 Min.
+   - Grundausdauer gilt als abgeschlossen ab 90 % der geplanten Dauer, sonst „abgebrochen“.
+   ===================================================================== */
+const RUN_LEVELS = ['beginner', 'normal', 'advanced'];
+const RUN_LV = { get beginner() { return T('Beginner'); }, get normal() { return T('Normal'); }, get advanced() { return T('Fortgeschritten'); } };
+const RUN_REPS = {
+  interval: { beginner: 20, normal: 40, advanced: 60 },
+  ka: { beginner: 8, normal: 16, advanced: 24 },
+  marker: { beginner: 3, normal: 6, advanced: 9 },
+  sprint100: { beginner: 3, normal: 6, advanced: 10 },
+};
+const RUN_CFG = { iM: 80, iRun: 15, iJog: 15, kaJog: 80, kaRun: 120, markerRest: 110, rest100: [180, 240, 300], rest100Def: 240, extraRest: 180, warmup: 600, cooldown: 480, prep: 10, endMin: 60, testMin: 60, endDoneShare: .9, recoveryH: 48 };
+const MARKER_SEGS = [[0, 5], [5, 0], [0, 10], [10, 0], [0, 15], [15, 0]];
+const END_START = { beginner: 8, normal: 10, advanced: 11.5 };
+const END_STEP = [0, 0, 1, 1, 2, 2, 2.5, 2.5, 3, 3, 3.5, 3.5];
+const END_STEP_TEST = [0, 0, .5, .5, 1, 1, 1.5, 1.5, 2, 2, 2.5, 2.5];
+const kmOf = (speed, min) => Math.round(speed * min / 60 * 1000) / 1000;      // Distanz = km/h × Min. / 60
+const speedOf = (km, min) => min > 0 ? Math.round(km / (min / 60) * 100) / 100 : 0; // km/h = km / Stunden
+function endSpeed(level, u, testSpeed) {
+  if (testSpeed > 0) return Math.max(6, Math.floor((testSpeed - 1) * 2) / 2) + END_STEP_TEST[u];
+  return (END_START[level] || 8) + END_STEP[u];
+}
+const RUN_PROGS = ['endurance', 'interval', 'ka', 'marker', 'sprint100', 'athlete'];
+const RUN_NAME = {
+  get endurance() { return T('Grundausdauer – 4 Wochen'); }, get interval() { return T('Intervalllauf 80 m / 15 s'); }, get ka() { return T('Kraftausdauerlauf 80 / 120 m'); },
+  get marker() { return T('Sprintintervalle 5 – 10 – 15 m'); }, get sprint100() { return T('100-Meter-Sprints'); }, get athlete() { return T('Athletenprogramm – 6 Wochen'); },
+  get test60() { return T('60-Minuten-Leistungstest'); }, get combo() { return T('Kombiniertes Sprinttraining'); },
+};
+const HIGH_TYPES = new Set(['interval', 'ka', 'marker', 'sprint100', 'combo']);
+
+/* ---------- Daten ---------- */
+const runsOf = (cid, doneOnly = false) => sessionsOf(cid, doneOnly, 'only');
+const activeRun = cid => all('sessions').find(s => s.clientId === cid && s.kind === 'run' && s.status === 'active') || null;
+const runCfgOf = c => (c && c.run) || {};
+function runSetCfg(cid, patch) {
+  const c = S.clients.get(cid); const r = { ...runCfgOf(c), ...patch };
+  c.run = r; c.runAt = Date.now(); put('clients', c); return r;
+}
+function lastTest(cid) { return runsOf(cid, true).find(s => s.run.type === 'test60' && s.run.status === 'completed' && s.run.result && s.run.result.speed > 0) || null; }
+
+/* ---------- Einheiten der Programme ---------- */
+// Grundausdauer-Einheit u (0–11)
+function endUnit(level, u, testSpeed) {
+  const speed = endSpeed(level, u, testSpeed), min = RUN_CFG.endMin;
+  return { type: 'endurance', speed, min, km: kmOf(speed, min), indiv: testSpeed > 0 };
+}
+// Athletenprogramm: Einheit u (0–17) → Woche, Schwerpunkt, Typ
+const ATH_MID = ['interval', 'ka', 'interval', 'ka', 'interval', 'ka']; // Woche 3–4: Intervall und Kraftausdauer im Wechsel (je 3×)
+function athUnit(cfg, u, testSpeed) {
+  const level = cfg.level || 'beginner', week = Math.floor(u / 3) + 1;
+  if (u < 6) return { week, focus: T('Grundausdauer'), ...endUnit(level, u, cfg.endBase === 'test' ? testSpeed : 0) };
+  if (u < 12) { const type = ATH_MID[u - 6]; return { week, focus: T('Intervall- & Kraftausdauer'), type, reps: RUN_REPS[type][level] }; }
+  return { week, focus: T('Sprinttraining'), type: 'combo', reps100: RUN_REPS.sprint100[level], repsMarker: RUN_REPS.marker[level], rest100: cfg.rest100 || RUN_CFG.rest100Def, order: cfg.order || '100first' };
+}
+function unitOf(prog, cfg, u, testSpeed) {
+  if (prog === 'athlete') return athUnit(cfg, u, testSpeed);
+  if (prog === 'endurance') return { week: Math.floor(u / 3) + 1, focus: T('Grundausdauer'), ...endUnit(cfg.level || 'beginner', u, cfg.endBase === 'test' ? testSpeed : 0) };
+  return null;
+}
+const unitCount = prog => prog === 'athlete' ? 18 : prog === 'endurance' ? 12 : 0;
+// „Reduzierte Belastung“: Grundausdauer −1 km/h (min. 6); Wiederholungsprogramme eine Stufe niedriger (Beginner: halbe Wiederholungen, aufgerundet)
+function reduceSpec(sp) {
+  const x = { ...sp, reduced: true };
+  if (sp.type === 'endurance') { x.speed = Math.max(6, sp.speed - 1); x.km = kmOf(x.speed, x.min); return x; }
+  const down = (tbl, n) => { const lv = RUN_LEVELS.find(l => tbl[l] === n); const i = RUN_LEVELS.indexOf(lv); return i > 0 ? tbl[RUN_LEVELS[i - 1]] : Math.ceil(n / 2); };
+  if (sp.reps) x.reps = down(RUN_REPS[sp.type], sp.reps);
+  if (sp.reps100) { x.reps100 = down(RUN_REPS.sprint100, sp.reps100); x.repsMarker = down(RUN_REPS.marker, sp.repsMarker); }
+  return x;
+}
+// Beschreibung, Wiederholungen, Pausen, Distanz einer Einheit (für Übersicht und Player)
+function specInfo(sp) {
+  const n = fmtNum;
+  if (sp.type === 'endurance') return { desc: T('{v} km/h für {m} Min.', { v: n(sp.speed), m: sp.min }), reps: '–', pause: '–', dist: sp.km, distTxt: `${n(sp.km)} km` };
+  if (sp.type === 'test60') return { desc: T('60 Min. so weit wie kontrolliert möglich'), reps: '–', pause: '–', dist: null, distTxt: '–' };
+  if (sp.type === 'interval') { const m = sp.reps * RUN_CFG.iM; return { desc: T('{n} × 80 m in 15 s, je 15 s Trab', { n: sp.reps }), reps: sp.reps, pause: T('15 s Trab'), dist: m / 1000, distTxt: T('{d} km schnell + Trabpausen', { d: n(m / 1000) }) }; }
+  if (sp.type === 'ka') { const m = sp.reps * 200; return { desc: T('{n} × (80 m traben + 120 m intensiv)', { n: sp.reps }), reps: sp.reps, pause: T('80 m Traben'), dist: m / 1000, distTxt: `${n(m / 1000)} km` }; }
+  if (sp.type === 'marker') { const m = sp.reps * 60; return { desc: T('{n} × Markierungssprint 5 – 10 – 15 m (je 60 m)', { n: sp.reps }), reps: sp.reps, pause: T('1:50 Min. nach jeder Wiederholung'), dist: m / 1000, distTxt: `${m} m` }; }
+  if (sp.type === 'sprint100') { const m = sp.reps * 100; return { desc: T('{n} × 100 m Sprint', { n: sp.reps }), reps: sp.reps, pause: T('{m} Min. zwischen den Sprints', { m: n((sp.rest100 || RUN_CFG.rest100Def) / 60) }), dist: m / 1000, distTxt: `${m} m` }; }
+  if (sp.type === 'combo') { const m = sp.reps100 * 100 + sp.repsMarker * 60;
+    return { desc: T('{a} × 100 m Sprint + {b} × Markierungssprint', { a: sp.reps100, b: sp.repsMarker }), reps: `${sp.reps100} + ${sp.repsMarker}`, pause: T('{m} Min. / 1:50 Min. + 3 Min. Wechsel', { m: n((sp.rest100 || RUN_CFG.rest100Def) / 60) }), dist: m / 1000, distTxt: `${m} m` }; }
+  return { desc: '', reps: '', pause: '', dist: null, distTxt: '' };
+}
+
+/* ---------- Schrittfolge einer Einheit ---------- */
+const stWarm = () => ({ t: 'info', k: 'warmup', sec: RUN_CFG.warmup, title: T('Aufwärmen'), text: T('10 Min. locker einlaufen, Lauf-ABC (Skippings, Anfersen, Hopserlauf) und 2–3 lockere Steigerungen. Zählt nicht zu den Wiederholungen.') });
+const stCool = () => ({ t: 'info', k: 'cooldown', sec: RUN_CFG.cooldown, title: T('Abkühlen'), text: T('5–10 Min. locker auslaufen oder gehen, danach leicht dehnen. Zählt nicht zu den Wiederholungen.') });
+function stepsInterval(N) {
+  const out = [{ t: 'timed', ph: 'prep', sec: RUN_CFG.prep, title: T('Bereit machen'), grp: 'interval' }];
+  for (let i = 1; i <= N; i++) {
+    out.push({ t: 'timed', ph: 'run', sec: RUN_CFG.iRun, m: RUN_CFG.iM, rep: i, reps: N, high: true, grp: 'interval' });
+    if (i < N) out.push({ t: 'timed', ph: 'jog', sec: RUN_CFG.iJog, rep: i, reps: N, grp: 'interval' });
+  }
+  return out;
+}
+function stepsKa(N) {
+  const out = [];
+  for (let i = 1; i <= N; i++) { out.push({ t: 'dist', ph: 'jog', m: RUN_CFG.kaJog, rep: i, reps: N, grp: 'ka' }); out.push({ t: 'dist', ph: 'run', m: RUN_CFG.kaRun, rep: i, reps: N, high: true, grp: 'ka' }); }
+  return out;
+}
+function stepsMarker(N) {
+  const out = [];
+  for (let r = 1; r <= N; r++) {
+    MARKER_SEGS.forEach(([from, to], k) => out.push({ t: 'seg', from, to, k: k + 1, m: Math.abs(to - from), rep: r, reps: N, high: true, grp: 'marker' }));
+    if (r < N) out.push({ t: 'timed', ph: 'rest', sec: RUN_CFG.markerRest, rep: r, reps: N, grp: 'marker' });
+  }
+  return out;
+}
+function steps100(N, rest) {
+  const out = [];
+  for (let i = 1; i <= N; i++) { out.push({ t: 'sprint', m: 100, rep: i, reps: N, high: true, grp: 'sprint100' }); if (i < N) out.push({ t: 'timed', ph: 'rest', sec: rest, rep: i, reps: N, grp: 'sprint100' }); }
+  return out;
+}
+function buildSteps(sp) {
+  if (sp.type === 'endurance') return [{ t: 'endurance', speed: sp.speed, min: sp.min, km: sp.km, grp: 'endurance' }];
+  if (sp.type === 'test60') return [{ ...stWarm(), optional: true }, { t: 'test', min: RUN_CFG.testMin, grp: 'test60' }];
+  if (sp.type === 'interval') return [stWarm(), ...stepsInterval(sp.reps), stCool()];
+  if (sp.type === 'ka') return [stWarm(), ...stepsKa(sp.reps), stCool()];
+  if (sp.type === 'marker') return [stWarm(), ...stepsMarker(sp.reps), stCool()];
+  if (sp.type === 'sprint100') return [stWarm(), ...steps100(sp.reps, sp.rest100 || RUN_CFG.rest100Def), stCool()];
+  if (sp.type === 'combo') {
+    const a = steps100(sp.reps100, sp.rest100 || RUN_CFG.rest100Def), b = stepsMarker(sp.repsMarker);
+    const sw = { t: 'timed', ph: 'rest', sec: RUN_CFG.extraRest, title: T('Zusätzliche Erholung vor der zweiten Sprintform'), grp: 'switch' };
+    return [stWarm(), ...(sp.order === 'markerFirst' ? [...b, sw, ...a] : [...a, sw, ...b]), stCool()];
+  }
+  return [];
+}
+const isMainStep = st => st.t !== 'info' && !(st.t === 'timed' && (st.ph === 'prep' || st.grp === 'switch'));
+const isWorkStep = st => isMainStep(st) && !(st.t === 'timed' && (st.ph === 'rest' || st.ph === 'jog')); // Laufabschnitte ohne Pausen/Trabpausen (Fortschrittsanzeige)
+
+/* ---------- Start, Fortschritt, Abschluss ---------- */
+function runSpecFor(cid, prog, opts = {}) {
+  const c = S.clients.get(cid), cfg = runCfgOf(c), t = lastTest(cid), ts = t ? t.run.result.speed : 0;
+  if (prog === 'athlete' || prog === 'endurance') {
+    const pc = cfg[prog] || {};
+    let sp = { ...unitOf(prog, pc, opts.unit, ts), level: pc.level || 'beginner' };
+    if (opts.reduce) sp = reduceSpec(sp);
+    return { prog, inst: pc.inst, unit: opts.unit, ...sp };
+  }
+  if (prog === 'test60') return { prog, type: 'test60', level: null };
+  const level = opts.level || 'beginner';
+  const sp = { prog, type: prog, level, reps: RUN_REPS[prog][level], rest100: opts.rest100 || cfg.rest100 || RUN_CFG.rest100Def };
+  return opts.reduce ? reduceSpec(sp) : sp;
+}
+function startRun(cid, spec) {
+  const s = { id: uid(), clientId: cid, kind: 'run', planId: null, dayId: null, dayIndex: null, dayName: RUN_NAME[spec.prog === 'athlete' && spec.type === 'combo' ? 'combo' : spec.prog] || spec.prog,
+    date: today(), startedAt: Date.now(), finishedAt: null, status: 'active', note: '', exercises: [], createdAt: Date.now(), updatedAt: Date.now(),
+    run: { ...spec, steps: buildSteps(spec), pos: { i: 0, t0: Date.now(), paused: 0, pausedAt: null }, log: { times: [], doneIdx: [] }, status: null } };
+  put('sessions', s); return s;
+}
+const stepElapsed = (pos, now = Date.now()) => Math.max(0, now - pos.t0 - (pos.paused || 0) - (pos.pausedAt ? now - pos.pausedAt : 0)) / 1000;
+// Schritt abschließen und zum nächsten; zeitgesteuerte Schritte holen verpasste Zeit nach (App war im Hintergrund)
+function runAdvance(s, data = {}, endTs) {
+  const r = s.run, st = r.steps[r.pos.i]; if (!st) return;
+  if (st.t === 'sprint') r.log.times[st.rep - 1] = data.time > 0 ? data.time : null;
+  if (data.km != null) r.log.km = data.km; if (data.min != null) r.log.min = data.min;
+  r.log.doneIdx.push(r.pos.i);
+  const now = endTs || Date.now();
+  r.pos = { i: r.pos.i + 1, t0: now, paused: 0, pausedAt: null };
+  s.updatedAt = Date.now();
+  if (r.pos.i >= r.steps.length) runFinish(s, 'completed');
+}
+function runCatchUp(s, now = Date.now()) {
+  let n = 0;
+  while (s.status === 'active' && n < 500) {
+    const r = s.run, st = r.steps[r.pos.i]; if (!st || r.pos.pausedAt) break;
+    if (st.t !== 'timed') break;
+    const end = r.pos.t0 + (r.pos.paused || 0) + (st.sec + (r.pos.extra || 0)) * 1000; if (end > now) break;
+    runAdvance(s, {}, end); n++;
+  }
+  if (n) put('sessions', s); return n;
+}
+function runSummary(s) {
+  const r = s.run, done = new Set(r.log.doneIdx || []);
+  const main = r.steps.map((st, i) => ({ st, i })).filter(x => isMainStep(x.st));
+  const highAll = main.filter(x => x.st.high), highDone = highAll.filter(x => done.has(x.i));
+  let m = 0; for (const x of main) if (done.has(x.i) && x.st.m) m += x.st.m;
+  const times = (r.log.times || []).filter(t => t > 0);
+  const by = g => ({ all: highAll.filter(x => x.st.grp === g).length, done: highDone.filter(x => x.st.grp === g).length });
+  const repsDone = g => { const xs = main.filter(x => x.st.grp === g && x.st.high); const reps = new Set(xs.filter(x => done.has(x.i)).map(x => x.st.rep)); return [...reps].filter(rep => xs.filter(x => x.st.rep === rep).every(x => done.has(x.i))).length; };
+  return { m, km: r.log.km != null ? r.log.km : m / 1000, min: r.log.min, times, best: times.length ? Math.min(...times) : null, avg: times.length ? times.reduce((a, b) => a + b, 0) / times.length : null,
+    high: { all: highAll.length, done: highDone.length }, groups: { interval: by('interval'), ka: by('ka'), marker: by('marker'), sprint100: by('sprint100') },
+    markerReps: repsDone('marker'), stepsDone: done.size, steps: r.steps.length };
+}
+function runFinish(s, status, data = {}) {
+  const r = s.run; r.status = status; s.status = 'done'; s.finishedAt = Date.now(); s.updatedAt = Date.now(); r.pos.pausedAt = null;
+  if (data.km != null) r.log.km = data.km; if (data.min != null) r.log.min = data.min;
+  if (r.type === 'test60' && status === 'completed') { const km = r.log.km, min = r.log.min || RUN_CFG.testMin; r.result = { km, min, speed: speedOf(km, min) }; }
+  if (r.type === 'endurance' && r.log.km != null) r.result = { km: r.log.km, min: r.log.min, speed: speedOf(r.log.km, r.log.min) };
+  put('sessions', s);
+}
+// Status einer Programmeinheit: letzter Eintrag zählt (Wiederholen überschreibt ältere Ergebnisse nicht, nur den Status)
+function unitStatus(cid, prog, inst, u) {
+  const l = runsOf(cid).filter(s => s.run.prog === prog && s.run.inst === inst && s.run.unit === u).sort((a, b) => (b.startedAt || 0) - (a.startedAt || 0));
+  if (!l.length) return { st: 'planned' };
+  const s = l[0], ok = l.find(x => x.run.status === 'completed'), n = l.filter(x => x.run.status === 'completed').length;
+  if (s.status === 'active') return { st: 'active', s, n };
+  return ok ? { st: 'completed', s: ok, n } : { st: s.run.status, s, n };
+}
+function progState(cid, prog) {
+  const cfg = runCfgOf(S.clients.get(cid))[prog]; if (!cfg || !cfg.inst) return null;
+  const n = unitCount(prog), units = Array.from({ length: n }, (_, u) => unitStatus(cid, prog, cfg.inst, u));
+  const next = units.findIndex(x => x.st !== 'completed' && x.st !== 'skipped');
+  return { cfg, units, next: next < 0 ? null : next, done: units.filter(x => x.st === 'completed').length, skipped: units.filter(x => x.st === 'skipped').length };
+}
+function lastHighRun(cid) { return runsOf(cid, true).find(s => s.run.status === 'completed' && HIGH_TYPES.has(s.run.type)) || null; }
+function recoveryHint(cid, type) {
+  if (!HIGH_TYPES.has(type)) return '';
+  const l = lastHighRun(cid); if (!l) return '';
+  const h = (Date.now() - (l.finishedAt || 0)) / 3600e3; if (h >= RUN_CFG.recoveryH) return '';
+  return T('Deine letzte intensive Einheit war vor {h} Std. Empfehlung: mindestens 48 Std. Erholung zwischen intensiven Einheiten.', { h: Math.max(1, Math.round(h)) });
+}
+const RUN_ST = { get planned() { return T('geplant'); }, get completed() { return T('abgeschlossen'); }, get skipped() { return T('übersprungen'); }, get aborted() { return T('abgebrochen'); }, get active() { return T('läuft'); } };
+const RUN_ST_CLS = { planned: 'neutral', completed: 'ok', skipped: 'off', aborted: 'warn', active: 'live' };
+const runTitle = s => { const r = s.run || {}; return `${RUN_NAME[r.type === 'combo' ? 'combo' : r.prog] || ''}${r.unit != null && unitCount(r.prog) ? ' · ' + T('Einheit {n}', { n: r.unit + 1 }) : ''}`; };
+function runLine(s) {
+  const r = s.run, x = runSummary(s), lv = r.level ? RUN_LV[r.level] : '';
+  const bits = [lv, r.reduced ? T('reduziert') : ''];
+  if (r.type === 'endurance') bits.push(r.result ? T('{km} km in {m} Min. · Ø {v} km/h', { km: fmtNum(r.result.km), m: fmtNum(r.result.min), v: fmtNum(r.result.speed) }) : T('{v} km/h geplant', { v: fmtNum(r.speed) }));
+  else if (r.type === 'test60') bits.push(r.result ? T('{km} km · Ø {v} km/h', { km: fmtNum(r.result.km), v: fmtNum(r.result.speed) }) : '');
+  else {
+    if (x.groups.interval.all) bits.push(T('{a}/{b} schnelle Abschnitte', { a: x.groups.interval.done, b: x.groups.interval.all }));
+    if (x.groups.ka.all) bits.push(T('{a}/{b} Durchgänge', { a: x.groups.ka.done, b: x.groups.ka.all }));
+    if (x.groups.sprint100.all) bits.push(T('{a}/{b} Sprints', { a: x.groups.sprint100.done, b: x.groups.sprint100.all }) + (x.best ? ' · ' + T('beste {t} s', { t: fmtNum(x.best) }) : ''));
+    if (x.groups.marker.all) bits.push(T('{a}/{b} Markierungs-Wdh.', { a: x.markerReps, b: x.groups.marker.all / 6 }));
+    if (x.m) bits.push(`${fmtNum(x.m)} m`);
+  }
+  return bits.filter(Boolean).join(' · ');
+}
+
+
+/* ---------- Laufbereich: Ansichten ---------- */
+const RUN_SAFETY = () => T('Bei Schmerzen, Schwindel oder deutlichem Verlust der Lauftechnik: Einheit sofort beenden.');
+const runIc = () => `<span class="run-ic" aria-hidden="true">🏃</span>`;
+const mmssR = sec => { sec = Math.max(0, Math.ceil(sec)); return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`; };
+const runBase = cid => `/client/${cid}/lauf`;
+const lvSelect = (name, cur, attrs = '') => `<div class="radio-seg run-lv">${RUN_LEVELS.map(l => `<label><input type="radio" name="${name}" value="${l}" ${l === cur ? 'checked' : ''} ${attrs}><span>${RUN_LV[l]}</span></label>`).join('')}</div>`;
+const stTag = st => `<span class="tag ${RUN_ST_CLS[st] || ''}">${RUN_ST[st] || st}</span>`;
+
+function viewRunHome(c) {
+  const cid = c.id, cfg = runCfgOf(c), act = activeRun(cid), t = lastTest(cid);
+  const ath = progState(cid, 'athlete'), end = progState(cid, 'endurance');
+  const card = (prog, sub, extra = '') => `<a class="list-link run-prog" href="#${runBase(cid)}/${prog}">${runIc()}<div class="grow"><b>${esc(RUN_NAME[prog])}</b><div class="muted" style="font-size:13px">${sub}</div>${extra}</div><span class="muted">${ic('arrow', 18)}</span></a>`;
+  const prog = st => st ? `<div class="run-mini"><div class="run-mini-bar"><i style="width:${Math.round(st.done / st.units.length * 100)}%"></i></div><span>${T('{a} von {b} Einheiten', { a: st.done, b: st.units.length })} · ${RUN_LV[st.cfg.level || 'beginner']}</span></div>` : '';
+  return topbar({ back: isClientMode() ? '/' : '/client/' + cid, title: T('Laufprogramme'), sub: esc(c.name) }) + `<main class="wrap view">
+    ${act ? `<a class="btn btn-primary btn-big" href="#/lauf/${act.id}">${ic('play', 22)} ${T('Laufende Einheit fortsetzen')}</a><div class="muted" style="text-align:center;font-size:13px;margin:6px 0 10px">${esc(runTitle(act))}</div>` : ''}
+    ${ath && ath.next != null && !act ? `<button class="btn btn-primary btn-big btn-next" data-action="run-unit" data-cid="${cid}" data-prog="athlete" data-u="${ath.next}"><span class="nx-ic">${ic('play', 22)}</span><span class="nx-tx"><small>${T('Athletenprogramm')} · ${T('Woche {w}', { w: Math.floor(ath.next / 3) + 1 })}</small><b>${T('Einheit {n}', { n: ath.next + 1 })} · ${esc(specInfo(unitOf('athlete', ath.cfg, ath.next, t ? t.run.result.speed : 0)).desc)}</b></span></button>` : ''}
+    <section class="section"><div class="section-h"><h2>${T('Programme')}</h2><a class="btn btn-sm btn-ghost" href="#${runBase(cid)}/verlauf">${ic('chart', 16)} ${T('Verlauf')}</a></div>
+      <div class="card list-card">
+        ${card('athlete', T('18 Einheiten · 3 pro Woche · Grundausdauer, Intervalle, Sprints'), prog(ath))}
+        ${card('endurance', T('12 Einheiten · 3 pro Woche · 60 Min. in steigender Geschwindigkeit'), prog(end))}
+        ${card('interval', T('80 m in 15 s, 15 s Trab · 20 / 40 / 60 Abschnitte'))}
+        ${card('ka', T('80 m traben + 120 m intensiv · 8 / 16 / 24 Durchgänge'))}
+        ${card('marker', T('0 → 5 → 0 → 10 → 0 → 15 → 0 m · 3 / 6 / 9 Wiederholungen'))}
+        ${card('sprint100', T('100 m mit 3–5 Min. Pause · 3 / 6 / 10 Sprints'))}
+      </div></section>
+    <section class="section"><div class="section-h"><h2>${T('Leistungstest')}</h2></div>
+      <div class="card list-card">${card('test60', t ? T('Letzter Test {d}: {km} km in 60 Min. = Ø {v} km/h', { d: fmtDate(t.date), km: fmtNum(t.run.result.km), v: fmtNum(t.run.result.speed) }) : T('Noch kein Test – 60 Min. laufen, Distanz eintragen, Ø-Geschwindigkeit wird berechnet'))}</div></section>
+    <div class="info run-safe" style="margin-top:14px">${esc(RUN_SAFETY())}</div>
+  </main>`;
+}
+
+/* Programmseite mit Einheiten (Athletenprogramm, Grundausdauer 4 Wochen) */
+function viewRunPlan(c, prog) {
+  const cid = c.id, st = progState(cid, prog), t = lastTest(cid), ts = t ? t.run.result.speed : 0;
+  const intro = prog === 'athlete'
+    ? T('Sechs Wochen, drei Einheiten pro Woche: Woche 1–2 Grundausdauer, Woche 3–4 Intervall- und Kraftausdauer im Wechsel, Woche 5–6 kombiniertes Sprinttraining.')
+    : T('Vier Wochen, drei Einheiten pro Woche à 60 Min. Jede Geschwindigkeitsstufe wird in zwei aufeinanderfolgenden Einheiten gelaufen, dann folgt die nächste Stufe.');
+  const notes = prog === 'athlete'
+    ? [T('Woche 1–2: Einheiten 1–6 der Grundausdauer (Beginner 8 / 8 / 9 / 9 / 10 / 10 km/h × 60 Min.).'), T('Woche 3–4: Einheit 7, 9, 11 Intervalllauf · Einheit 8, 10, 12 Kraftausdauer – jede Methode 3×, nie zwei gleiche hintereinander.'),
+       T('Woche 5–6: jede Einheit = Aufwärmen, 100-m-Sprints, 3 Min. Wechselpause, Markierungssprints, Abkühlen. Reihenfolge einstellbar.'), T('Wiederholungen je Stufe: Intervall 20 / 40 / 60, Kraftausdauer 8 / 16 / 24, 100 m 3 / 6 / 10, Markierungen 3 / 6 / 9.')]
+    : [T('Beginner: 8, 8, 9, 9, 10, 10 km/h, danach in 0,5-km/h-Schritten: 10,5, 10,5, 11, 11, 11,5, 11,5 km/h.'), T('Normal startet bei 10 km/h, Fortgeschritten bei 11,5 km/h – gleiche Stufung (Annahme, anpassbar über Stufe/Reduzieren).')];
+  const testNote = T('Individuell nach Test: Start = Testgeschwindigkeit − 1 km/h (auf 0,5 abgerundet), dann +0,5 km/h alle zwei Einheiten. Der Testwert selbst ist kein Trainingstempo.');
+  if (!st) {
+    return topbar({ back: runBase(cid), title: esc(RUN_NAME[prog]), sub: esc(c.name) }) + `<main class="wrap view">
+      <div class="card stack"><p style="margin:0">${esc(intro)}</p><ul class="ul run-notes">${notes.map(n => `<li>${esc(n)}</li>`).join('')}</ul>
+        <form data-form="run-enroll" data-cid="${cid}" data-prog="${prog}" class="stack">
+          <div class="field" style="margin:0"><span>${T('Leistungsstufe')}</span>${lvSelect('level', 'beginner')}</div>
+          ${t ? `<label class="toggle"><input type="checkbox" name="endBase"><span class="tg"></span><span>${T('Grundausdauer individuell nach meinem Test ({v} km/h)', { v: fmtNum(ts) })}<small>${esc(testNote)}</small></span></label>` : `<div class="muted" style="font-size:13px">${T('Tipp: Mit einem 60-Minuten-Leistungstest kann die Grundausdauer individuell angepasst werden.')} <a class="accent" href="#${runBase(cid)}/test60">${T('Zum Test')}</a></div>`}
+          <button class="btn btn-primary btn-big">${ic('play', 20)} ${T('Programm beginnen')}</button></form></div></main>`;
+  }
+  const cfg = st.cfg, n = st.units.length;
+  const weeks = [...new Set(st.units.map((_, u) => Math.floor(u / 3) + 1))];
+  const row = (x, u) => {
+    const sp = unitOf(prog, cfg, u, ts), inf = specInfo(sp), nx = st.next === u;
+    return `<button class="run-unit ${nx ? 'next' : ''}" data-action="run-unit" data-cid="${cid}" data-prog="${prog}" data-u="${u}">
+      <span class="day-no">${u + 1}</span><span class="grow"><span class="ru-h">${esc(sp.type === 'interval' ? RUN_NAME.interval : sp.type === 'ka' ? RUN_NAME.ka : sp.type === 'combo' ? RUN_NAME.combo : sp.focus)}</span>
+      <span class="ru-d">${esc(inf.desc)}</span><span class="ru-s">${sp.type === 'endurance' ? `${T('Distanz')}: ${esc(inf.distTxt)}${sp.indiv ? ' · ' + T('individuell') : ''}` : `${T('Wdh.')}: ${esc(String(inf.reps))} · ${T('Pausen')}: ${esc(inf.pause)} · ${esc(inf.distTxt)}`}</span></span>
+      <span class="ru-r">${nx && x.st === 'planned' ? `<span class="tag">${T('Als Nächstes')}</span>` : stTag(x.st)}</span></button>`;
+  };
+  return topbar({ back: runBase(cid), title: esc(RUN_NAME[prog]), sub: esc(c.name) }) + `<main class="wrap view">
+    <div class="card run-head"><div class="row" style="justify-content:space-between;gap:10px;align-items:flex-start"><div><div class="run-k">${T('Leistungsstufe')}</div><div class="run-v">${RUN_LV[cfg.level || 'beginner']}${cfg.endBase === 'test' && ts ? ' · ' + T('Grundausdauer individuell') : ''}</div></div>
+      <div style="text-align:right"><div class="run-k">${T('Fortschritt')}</div><div class="run-v">${st.done} / ${n}</div></div></div>
+      <div class="run-mini-bar" style="margin-top:10px"><i style="width:${Math.round(st.done / n * 100)}%"></i></div>
+      ${st.next != null ? `<button class="btn btn-primary btn-block" style="margin-top:12px" data-action="run-unit" data-cid="${cid}" data-prog="${prog}" data-u="${st.next}">${ic('play', 18)} ${T('Nächste Einheit: {n}', { n: st.next + 1 })}</button>` : `<div class="done-banner" style="margin-top:12px"><div class="done-ic">✓</div><div><b>${T('Programm abgeschlossen')}</b></div></div>`}
+    </div>
+    ${weeks.map(w => { const us = st.units.map((x, u) => ({ x, u })).filter(o => Math.floor(o.u / 3) + 1 === w); const f = unitOf(prog, cfg, us[0].u, ts).focus;
+      return `<div class="care-h">${T('Woche {w}', { w })} · ${esc(f)}</div><div class="stack">${us.map(o => row(o.x, o.u)).join('')}</div>`; }).join('')}
+    <section class="section"><div class="section-h"><h2>${T('Einstellungen')}</h2></div><div class="card stack">
+      <div class="field" style="margin:0"><span>${T('Leistungsstufe')}</span>${lvSelect('rlv', cfg.level || 'beginner', `data-runcfg="${prog}.level" data-cid="${cid}"`)}</div>
+      ${t ? `<label class="toggle"><input type="checkbox" data-runcfg="${prog}.endBase" data-cid="${cid}" ${cfg.endBase === 'test' ? 'checked' : ''}><span class="tg"></span><span>${T('Grundausdauer individuell nach Test ({v} km/h)', { v: fmtNum(ts) })}<small>${esc(testNote)}</small></span></label>` : ''}
+      ${prog === 'athlete' ? `<label class="field" style="margin:0"><span>${T('Pause zwischen 100-m-Sprints')}</span><select class="input" data-runcfg="athlete.rest100" data-cid="${cid}">${RUN_CFG.rest100.map(v => `<option value="${v}" ${(cfg.rest100 || RUN_CFG.rest100Def) === v ? 'selected' : ''}>${T('{m} Min.', { m: v / 60 })}</option>`).join('')}</select></label>
+      <label class="field" style="margin:0"><span>${T('Reihenfolge im Sprinttraining')}</span><select class="input" data-runcfg="athlete.order" data-cid="${cid}"><option value="100first" ${(cfg.order || '100first') === '100first' ? 'selected' : ''}>${T('100-m-Sprints zuerst, dann Markierungssprints')}</option><option value="markerFirst" ${cfg.order === 'markerFirst' ? 'selected' : ''}>${T('Markierungssprints zuerst, dann 100-m-Sprints')}</option></select></label>` : ''}
+      <div class="muted" style="font-size:12.5px">${T('Eine neue Stufe gilt für kommende Einheiten. Abgeschlossene Einheiten bleiben unverändert.')}</div>
+      <button class="btn btn-ghost btn-block" data-action="run-restart" data-cid="${cid}" data-prog="${prog}">${ic('reset', 18)} ${T('Programm neu beginnen')}</button>
+    </div></section>
+    <section class="section"><div class="section-h"><h2>${T('So ist der Plan aufgebaut')}</h2></div><div class="card"><ul class="ul run-notes">${notes.map(x => `<li>${esc(x)}</li>`).join('')}<li>${esc(testNote)}</li></ul></div></section>
+    <div class="info run-safe">${esc(RUN_SAFETY())}</div>
+  </main>`;
+}
+
+/* Einzelprogramm (Intervall, Kraftausdauer, Markierungen, 100 m) */
+function viewRunSingle(c, prog) {
+  const cid = c.id, cfg = runCfgOf(c); UI.runLv = UI.runLv || {};
+  const lv = UI.runLv[prog] || cfg['lv_' + prog] || 'beginner';
+  const sp = runSpecFor(cid, prog, { level: lv }), inf = specInfo(sp);
+  const last = runsOf(cid, true).filter(s => s.run.prog === prog).slice(0, 5);
+  const about = {
+    interval: [T('Ablauf: 80 m in 15 Sekunden laufen, dann 15 Sekunden locker traben – wiederholen.'), T('Zielgeschwindigkeit der schnellen 80 m: 19,2 km/h. Das ist sehr schnell – laufe dieses Tempo nur, wenn du es sicher und kontrolliert schaffst.'), T('Die Zahl gilt für die schnellen Abschnitte, die Trabpausen kommen dazu.')],
+    ka: [T('Ein Durchgang = 80 m locker traben + 120 m mit hoher Intensität (200 m).'), T('120 m mit etwa 80–90 % deiner maximalen Laufintensität: kraftvoll und schnell wie ein intensiver Antritt, aber kein Maximalsprint.'), T('Es gibt keine feste Geschwindigkeit – die Intensität richtet sich nach dir.')],
+    marker: [T('Markierungen bei 5, 10 und 15 m. Eine Wiederholung: zur 5-m-Markierung und zurück, zur 10-m-Markierung und zurück, zur 15-m-Markierung und zurück.'), T('6 Laufabschnitte = 60 m pro Wiederholung. Danach 1:50 Min. Pause.')],
+    sprint100: [T('100 m mit hoher Sprintintensität, danach 3–5 Min. vollständige Erholung.'), T('Die Sprintzeit kannst du mit der Stoppuhr messen oder eintragen – so siehst du deine Entwicklung.')],
+  }[prog];
+  const hint = recoveryHint(cid, prog);
+  return topbar({ back: runBase(cid), title: esc(RUN_NAME[prog]), sub: esc(c.name) }) + `<main class="wrap view">
+    <div class="card stack"><ul class="ul run-notes" style="margin:0">${about.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>
+    <div class="card stack" style="margin-top:12px">
+      <div class="field" style="margin:0"><span>${T('Leistungsstufe')}</span>${lvSelect('slv', lv, `data-runlv="${prog}"`)}</div>
+      <div class="run-facts"><div><span>${T('Wiederholungen')}</span><b>${esc(String(inf.reps))}</b></div><div><span>${T('Pausen')}</span><b>${esc(inf.pause)}</b></div><div><span>${T('Strecke')}</span><b>${esc(inf.distTxt)}</b></div></div>
+      ${prog === 'sprint100' ? `<label class="field" style="margin:0"><span>${T('Pause zwischen den Sprints')}</span><select class="input" data-runcfg="rest100" data-cid="${cid}">${RUN_CFG.rest100.map(v => `<option value="${v}" ${(cfg.rest100 || RUN_CFG.rest100Def) === v ? 'selected' : ''}>${T('{m} Min.', { m: v / 60 })}</option>`).join('')}</select></label>` : ''}
+      <div class="muted" style="font-size:13px">${T('Mit Aufwärmen (10 Min.) und Abkühlen – zählen nicht zu den Wiederholungen.')}</div>
+      ${hint ? `<div class="info warn-info">${esc(hint)}</div>` : ''}
+      <button class="btn btn-primary btn-big" data-action="run-start" data-cid="${cid}" data-prog="${prog}" data-level="${lv}">${ic('play', 20)} ${T('Training starten')}</button>
+    </div>
+    ${last.length ? `<section class="section"><div class="section-h"><h2>${T('Letzte Einheiten')}</h2></div><div class="card list-card">${last.map(runLink).join('')}</div></section>` : ''}
+    <div class="info run-safe" style="margin-top:14px">${esc(RUN_SAFETY())}</div>
+  </main>`;
+}
+
+/* 60-Minuten-Leistungstest */
+function viewRunTest(c) {
+  const cid = c.id, tests = runsOf(cid, true).filter(s => s.run.type === 'test60' && s.run.result && s.run.status === 'completed').slice().reverse();
+  return topbar({ back: runBase(cid), title: esc(RUN_NAME.test60), sub: esc(c.name) }) + `<main class="wrap view">
+    <div class="card stack"><ul class="ul run-notes" style="margin:0">
+      <li>${T('60 Minuten laufen und dabei die größtmögliche Distanz schaffen, die du kontrolliert durchhältst.')}</li>
+      <li>${T('Danach die Distanz eintragen – die App berechnet die Ø-Geschwindigkeit: km ÷ Stunden. Bei genau 60 Min. entspricht die Distanz in km der Geschwindigkeit in km/h.')}</li>
+      <li>${T('Der Testwert ist ein Ausgangspunkt – kein Tempo für jede Einheit.')}</li></ul>
+      <button class="btn btn-primary btn-big" data-action="run-start" data-cid="${cid}" data-prog="test60">${ic('play', 20)} ${T('Test mit Timer starten')}</button></div>
+    <section class="section"><div class="section-h"><h2>${T('Ergebnis eintragen')}</h2></div>
+      <form class="card stack" data-form="run-test" data-cid="${cid}">
+        <div class="grid2"><label class="field" style="margin:0"><span>${T('Distanz (km)')}</span><input class="input" name="km" inputmode="decimal" placeholder="z. B. 9,5" required></label>
+        <label class="field" style="margin:0"><span>${T('Dauer (Min.)')}</span><input class="input" name="min" inputmode="numeric" value="60"></label></div>
+        <label class="field" style="margin:0"><span>${T('Datum')}</span><input class="input" type="date" name="date" value="${today()}"></label>
+        <button class="btn btn-ghost btn-block">${ic('check', 18)} ${T('Testergebnis speichern')}</button></form></section>
+    ${tests.length ? `<section class="section"><div class="section-h"><h2>${T('Deine Tests')}</h2></div><div class="card">${lineChart(tests.map(s => ({ y: s.run.result.speed, label: fmtDate(s.date) })), 'km/h')}</div>
+      <div class="card list-card" style="margin-top:10px">${tests.slice().reverse().map(runLink).join('')}</div></section>` : ''}
+  </main>`;
+}
+
+/* Verlauf + Entwicklung */
+function runLink(s) {
+  return `<a class="list-link" href="#/session/${s.id}"><div class="grow"><div style="font-weight:600">${fmtDate(s.date)} – ${esc(runTitle(s))}</div><div class="muted" style="font-size:13px">${esc(runLine(s))}</div></div>${stTag(s.status === 'active' ? 'active' : s.run.status)}</a>`;
+}
+function viewRunHistory(c) {
+  const cid = c.id, all_ = runsOf(cid), done = all_.filter(s => s.status === 'done').slice().reverse();
+  const tests = done.filter(s => s.run.type === 'test60' && s.run.result && s.run.status === 'completed');
+  const ends = done.filter(s => s.run.type === 'endurance' && s.run.result && s.run.result.speed > 0);
+  const spr = done.map(s => ({ s, x: runSummary(s) })).filter(o => o.x.best);
+  const chart = (title, pts, unit, note) => pts.length ? `<div class="care-h">${title}</div><div class="card">${lineChart(pts, unit)}${note ? `<div class="muted" style="font-size:12px;margin-top:4px">${note}</div>` : ''}</div>` : '';
+  return topbar({ back: runBase(cid), title: T('Laufverlauf'), sub: esc(c.name) }) + `<main class="wrap view">
+    ${chart(T('Leistungstest – Ø km/h'), tests.map(s => ({ y: s.run.result.speed, label: fmtDate(s.date) })), 'km/h')}
+    ${chart(T('Grundausdauer – gelaufene Ø-Geschwindigkeit'), ends.map(s => ({ y: s.run.result.speed, label: fmtDate(s.date) })), 'km/h')}
+    ${chart(T('100 m – beste Zeit pro Einheit'), spr.map(o => ({ y: Math.round(o.x.best * 100) / 100, label: fmtDate(o.s.date) })), T('s'), T('Niedriger ist besser.'))}
+    <div class="care-h">${T('Alle Laufeinheiten')}</div>
+    ${all_.length ? `<div class="card list-card">${all_.map(runLink).join('')}</div>` : `<div class="card empty">${T('Noch keine Laufeinheiten.')}</div>`}
+  </main>`;
+}
+
+/* Einheit-Details (Historie / Meldung) */
+function viewRunSession(s) {
+  const c = S.clients.get(s.clientId), r = s.run, x = runSummary(s), cm = isClientMode();
+  const dur = s.finishedAt && s.startedAt ? Math.round((s.finishedAt - s.startedAt) / 60000) : null;
+  const kv = (l, v) => `<div class="stat"><div class="stat-l">${l}</div><div class="stat-v" style="font-size:18px">${v}</div></div>`;
+  const inf = specInfo(r);
+  return topbar({ back: runBase(s.clientId) + '/verlauf', title: esc(runTitle(s)), sub: `${fmtDate(s.date)} · ${esc(c ? c.name : '')}` }) + `<main class="wrap view">
+    ${s.status === 'active' ? `<div class="banner"><div><b>${T('Einheit läuft noch')}</b></div><a class="btn btn-sm btn-primary" href="#/lauf/${s.id}">${T('Fortsetzen')}</a></div>` : ''}
+    <div class="card sum-card"><div class="row" style="justify-content:space-between;align-items:center;margin-bottom:8px"><b>${esc(RUN_NAME[r.type === 'combo' ? 'combo' : r.prog] || '')}</b>${stTag(s.status === 'active' ? 'active' : r.status)}</div>
+      <div class="stats four" style="margin:0">${kv(T('Stufe'), r.level ? RUN_LV[r.level] + (r.reduced ? ' ↓' : '') : '–')}${kv(T('Dauer'), r.log.min ? fmtNum(r.log.min) + ' ' + T('min') : dur != null ? dur + ' ' + T('min') : '–')}
+        ${kv(T('Strecke'), r.type === 'endurance' || r.type === 'test60' ? (r.result ? fmtNum(r.result.km) + ' km' : '–') : fmtNum(x.m) + ' m')}${kv(r.result && r.result.speed ? T('Ø km/h') : T('Abschnitte'), r.result && r.result.speed ? fmtNum(r.result.speed) : `${x.high.done}/${x.high.all}`)}</div>
+      <div class="muted" style="font-size:13px;margin-top:8px">${T('Vorgabe')}: ${esc(inf.desc)}${r.reduced ? ' · ' + T('reduzierte Belastung') : ''}</div>
+      <div style="margin-top:6px;font-size:14px">${esc(runLine(s))}</div>
+      ${(r.log.times || []).length ? `<table class="table" style="margin-top:10px"><thead><tr><th>${T('Sprint')}</th><th>${T('Zeit')}</th></tr></thead><tbody>${r.log.times.map((t, i) => `<tr><td>${i + 1}</td><td>${t ? fmtNum(t) + ' s' : '–'}</td></tr>`).join('')}</tbody></table>` : ''}
+      ${cm ? '' : `<button class="btn btn-primary btn-block" style="margin-top:12px" data-action="msg-compose" data-cid="${s.clientId}" data-sid="${s.id}">${ic('chat', 18)} ${T('Rückmeldung senden')}</button>`}
+    </div>
+    <div class="quick" style="margin-top:18px"><button class="btn btn-danger-ghost" data-action="del-session" data-id="${s.id}">${ic('trash')} ${T('Löschen')}</button></div>
+  </main>`;
+}
+
+/* ---------- Player (Training) ---------- */
+function stepView(st) {
+  const hi = !!st.high;
+  if (st.t === 'info') return { cls: 'info', title: st.title, sub: st.text, big: 'down' };
+  if (st.t === 'timed') {
+    if (st.ph === 'prep') return { cls: 'rest', title: st.title, sub: T('Gleich geht es los: 80 m in 15 s.'), big: 'down' };
+    if (st.ph === 'run') return { cls: 'high', title: T('80 m schnell'), sub: T('Ziel: 80 m in 15 s · 19,2 km/h'), big: 'down', tag: T('Hohe Intensität') };
+    if (st.ph === 'jog') return { cls: 'easy', title: T('Locker traben'), sub: T('15 s Erholung'), big: 'down' };
+    return { cls: 'rest', title: st.title || T('Pause'), sub: st.grp === 'marker' ? T('Erholung nach der vollständigen Wiederholung') : st.grp === 'sprint100' ? T('Vollständige Erholung vor dem nächsten Sprint') : T('Erholung'), big: 'down' };
+  }
+  if (st.t === 'dist') return st.ph === 'run' ? { cls: 'high', title: T('120 m intensiv'), sub: T('80–90 % – kraftvoll, kein Maximalsprint'), big: 'm', tag: T('Hohe Intensität') } : { cls: 'easy', title: T('Locker traben'), sub: T('80 m'), big: 'm' };
+  if (st.t === 'seg') return { cls: 'high', title: st.to ? T('Sprint zur {m}-m-Markierung', { m: st.to }) : T('Zurück zum Start'), sub: T('{m} m · Abschnitt {k} von 6', { m: st.m, k: st.k }), big: 'm', tag: T('Hohe Intensität') };
+  if (st.t === 'sprint') return { cls: 'high', title: T('100 m Sprint'), sub: T('Hohe Sprintintensität'), big: 'sw', tag: T('Hohe Intensität') };
+  if (st.t === 'endurance') return { cls: 'easy', title: T('Grundausdauerlauf'), sub: T('{v} km/h · {m} Min. · {km} km', { v: fmtNum(st.speed), m: st.min, km: fmtNum(st.km) }), big: 'down' };
+  if (st.t === 'test') return { cls: 'easy', title: T('Leistungstest'), sub: T('So weit wie kontrolliert möglich'), big: 'down' };
+  return { cls: '', title: '', sub: '' };
+}
+const stepSec = (st, pos) => (st.t === 'timed' || st.t === 'info' ? st.sec : st.t === 'endurance' ? st.min * 60 : st.t === 'test' ? st.min * 60 : 0) + ((pos && pos.extra) || 0);
+function stepShort(st) {
+  if (!st) return T('Ende der Einheit');
+  const v = stepView(st); const rep = st.rep && st.reps && st.t !== 'info' ? ` (${st.rep}/${st.reps})` : '';
+  return v.title + rep;
+}
+function markerSvg(st) {
+  const X = m => 26 + m * 18, y = 54, done = st.k - 1;
+  const cones = [0, 5, 10, 15].map(m => `<g><path d="M${X(m) - 7},${y + 14} L${X(m)},${y - 4} L${X(m) + 7},${y + 14}Z" fill="${m === st.to || (m === 0 && !st.to) ? 'var(--accent)' : 'rgba(255,255,255,.35)'}"/><text x="${X(m)}" y="${y + 32}" text-anchor="middle">${m === 0 ? T('Start') : m + ' m'}</text></g>`).join('');
+  const segs = MARKER_SEGS.map(([a, b], k) => { const yy = 18 + k * 5, cur = k === done;
+    return `<line x1="${X(a)}" y1="${yy}" x2="${X(b)}" y2="${yy}" stroke="${cur ? 'var(--accent)' : k < done ? 'rgba(190,155,92,.35)' : 'rgba(255,255,255,.12)'}" stroke-width="${cur ? 4 : 2}" stroke-linecap="round" ${cur ? `marker-end="url(#rpar)"` : ''}/>`; }).join('');
+  return `<svg class="run-track" viewBox="0 0 330 96" role="img" aria-label="${esc(T('Streckengrafik'))}"><defs><marker id="rpar" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="var(--accent)"/></marker></defs>
+    <line x1="${X(0)}" y1="${y + 14}" x2="${X(15)}" y2="${y + 14}" stroke="rgba(255,255,255,.2)" stroke-width="2"/>${segs}${cones}</svg>`;
+}
+function viewRunPlayer(s) {
+  runCatchUp(s);
+  const c = S.clients.get(s.clientId), r = s.run;
+  if (s.status !== 'active') return viewRunSession(s);
+  const st = r.steps[r.pos.i], nx = r.steps[r.pos.i + 1], v = stepView(st), paused = !!r.pos.pausedAt;
+  const main = r.steps.filter(isWorkStep).length, mainDone = r.steps.filter((x, i) => isWorkStep(x) && (r.log.doneIdx || []).includes(i)).length;
+  const remM = r.steps.slice(r.pos.i).filter(isMainStep).reduce((a, x) => a + (x.m || 0), 0);
+  const el = stepElapsed(r.pos), sec = stepSec(st, r.pos);
+  const big = v.big === 'down' ? mmssR(sec - el) : v.big === 'm' ? `${st.m} m` : '';
+  const repTxt = st.rep && st.reps && st.t !== 'info' ? (st.grp === 'marker' ? T('Wiederholung {a} von {b}', { a: st.rep, b: st.reps }) : st.grp === 'ka' ? T('Durchgang {a} von {b}', { a: st.rep, b: st.reps }) : st.grp === 'sprint100' ? T('Sprint {a} von {b}', { a: st.rep, b: st.reps }) : T('Abschnitt {a} von {b}', { a: st.rep, b: st.reps })) : '';
+  const form = r.pos.form;
+  let ctl = '';
+  if (form && (st.t === 'endurance' || st.t === 'test')) {
+    const planned = st.t === 'endurance' ? st.min : RUN_CFG.testMin, mins = Math.min(planned, Math.round(el / 60)) || planned;
+    ctl = `<form class="card stack" data-form="run-result" data-sid="${s.id}"><b>${st.t === 'test' ? T('Wie weit bist du gelaufen?') : T('Ergebnis eintragen')}</b>
+      <div class="grid2"><label class="field" style="margin:0"><span>${T('Distanz (km)')}</span><input class="input" name="km" inputmode="decimal" ${st.t === 'test' ? 'required placeholder="z. B. 9,5"' : `value="${fmtNum(kmOf(st.speed, mins))}"`}></label>
+      <label class="field" style="margin:0"><span>${T('Dauer (Min.)')}</span><input class="input" name="min" inputmode="numeric" value="${mins}"></label></div>
+      <div class="muted" style="font-size:12.5px">${T('Unter 90 % der geplanten Dauer wird die Einheit als abgebrochen gespeichert.')}</div>
+      <button class="btn btn-primary btn-big">${ic('check', 20)} ${T('Speichern')}</button></form>`;
+  } else if (st.t === 'info') ctl = `<button class="btn btn-primary btn-big" data-action="rp-next" data-sid="${s.id}">${ic('check', 20)} ${T('Fertig – weiter')}</button><button class="btn btn-ghost btn-block" data-action="rp-skipinfo" data-sid="${s.id}">${T('Überspringen')}</button>`;
+  else if (st.t === 'timed') ctl = st.ph === 'rest' ? `<div class="grid2"><button class="btn btn-ghost" data-action="rp-add30" data-sid="${s.id}">+30 s</button><button class="btn btn-ghost" data-action="rp-next" data-sid="${s.id}">${T('Pause beenden')}</button></div>` : '';
+  else if (st.t === 'dist' || st.t === 'seg') ctl = `<button class="btn btn-primary btn-big rp-done" data-action="rp-next" data-sid="${s.id}">${ic('check', 22)} ${st.t === 'seg' ? T('Markierung erreicht') : T('Abschnitt geschafft')}</button>`;
+  else if (st.t === 'sprint') { const sw = UI.sw && UI.sw.sid === s.id ? UI.sw : null;
+    ctl = `<div class="grid2"><button class="btn ${sw && sw.t0 ? 'btn-danger-ghost' : 'btn-ghost'}" data-action="rp-sw" data-sid="${s.id}">${sw && sw.t0 ? T('Stopp') : T('Stoppuhr starten')}</button>
+      <label class="field" style="margin:0"><input class="input" id="rp-time" inputmode="decimal" placeholder="${T('Zeit in Sek., z. B. 14,2')}" value="${sw && sw.val ? fmtNum(sw.val) : ''}"></label></div>
+      <button class="btn btn-primary btn-big" data-action="rp-sprint" data-sid="${s.id}">${ic('check', 22)} ${T('Sprint erledigt')}</button>`; }
+  else if (st.t === 'endurance' || st.t === 'test') ctl = `<button class="btn btn-primary btn-big" data-action="rp-endstop" data-sid="${s.id}">${ic('check', 22)} ${st.t === 'test' ? T('Test beenden und Distanz eintragen') : T('Lauf beendet')}</button>`;
+  const pct = main ? Math.round(mainDone / main * 100) : 0;
+  return topbar({ back: runBase(s.clientId), title: esc(runTitle(s)), sub: `${r.level ? RUN_LV[r.level] : ''}${r.reduced ? ' · ' + T('reduziert') : ''} · ${esc(c ? c.name : '')}` }) + `<main class="wrap view run-player">
+    <div class="rp-prog"><div class="run-mini-bar"><i id="rp-bar" style="width:${pct}%"></i></div><span>${T('{a} von {b} Abschnitten', { a: mainDone, b: main })}${remM ? ' · ' + T('noch {m} m', { m: fmtNum(remM) }) : ''}</span></div>
+    <div class="rp-card ${v.cls} ${paused ? 'paused' : ''}">
+      ${v.tag ? `<span class="rp-tag">${esc(v.tag)}</span>` : ''}${repTxt ? `<div class="rp-rep">${esc(repTxt)}</div>` : ''}
+      <div class="rp-title">${esc(v.title)}</div>
+      <div class="rp-big" id="rp-big">${paused ? T('Pausiert') : big}</div>
+      ${v.big === 'm' || st.t === 'sprint' ? `<div class="rp-el">${T('Zeit')}: <span id="rp-el">${mmssR(el)}</span></div>` : ''}
+      <div class="rp-sub">${esc(v.sub)}</div>
+      ${st.t === 'seg' ? markerSvg(st) : ''}
+    </div>
+    <div class="stack" style="margin-top:12px">${ctl}</div>
+    <div class="rp-next">${T('Danach')}: <b>${esc(stepShort(nx))}</b></div>
+    <div class="grid2" style="margin-top:12px">${form ? '' : paused ? `<button class="btn btn-primary" data-action="rp-resume" data-sid="${s.id}">${ic('play', 18)} ${T('Fortsetzen')}</button>` : `<button class="btn btn-ghost" data-action="rp-pause" data-sid="${s.id}">${ic('pause', 18)} ${T('Pausieren')}</button>`}
+      <button class="btn btn-danger-ghost" data-action="rp-abort" data-sid="${s.id}">${ic('x', 18)} ${T('Beenden')}</button></div>
+    <div class="info run-safe" style="margin-top:12px">${esc(RUN_SAFETY())}</div>
+  </main>`;
+}
+/* Ticker: aktualisiert Zeiten ohne komplettes Neuzeichnen; zeitgesteuerte Abschnitte laufen automatisch weiter */
+const RUNP = { iv: 0, sid: null, i: -1, wl: null };
+function runAudio() { try { RT.ac = RT.ac || new (window.AudioContext || window.webkitAudioContext)(); if (RT.ac.state === 'suspended') RT.ac.resume(); } catch (e) {} }
+function runAfterRender(p) {
+  if (p[0] !== 'lauf' && !(p[0] === 'train' && S.sessions.get(p[1]) && S.sessions.get(p[1]).kind === 'run')) { if (RUNP.iv) { clearInterval(RUNP.iv); RUNP.iv = 0; } if (RUNP.wl) { try { RUNP.wl.release(); } catch (e) {} RUNP.wl = null; } RUNP.sid = null; return; }
+  const s = S.sessions.get(p[1]); if (!s || s.status !== 'active') return;
+  if (RUNP.sid === s.id && RUNP.i !== s.run.pos.i && RUNP.i >= 0) { const st = s.run.steps[s.run.pos.i]; if (st && (st.high || st.ph === 'run')) { beep(); if (navigator.vibrate) navigator.vibrate([150, 80, 150]); } else if (st) { beep(); } }
+  RUNP.sid = s.id; RUNP.i = s.run.pos.i;
+  if (!RUNP.wl && navigator.wakeLock) navigator.wakeLock.request('screen').then(w => { RUNP.wl = w; }).catch(() => {});
+  if (!RUNP.iv) RUNP.iv = setInterval(runTick, 250);
+}
+function runTick() {
+  const p = location.hash.slice(1).split('/').filter(Boolean); if (p[0] !== 'lauf') return;
+  const s = S.sessions.get(p[1]); if (!s || s.status !== 'active') return;
+  const r = s.run, st = r.steps[r.pos.i]; if (!st || r.pos.pausedAt || r.pos.form) return;
+  const el = stepElapsed(r.pos), sec = stepSec(st, r.pos);
+  if (st.t === 'timed' && el >= sec) { runCatchUp(s); return render(); }
+  if ((st.t === 'endurance' || st.t === 'test') && el >= sec) { r.pos.form = true; s.updatedAt = Date.now(); put('sessions', s); beep(); return render(); }
+  const b = document.getElementById('rp-big'); if (b && (st.t === 'timed' || st.t === 'info' || st.t === 'endurance' || st.t === 'test')) b.textContent = mmssR(sec - el);
+  const e = document.getElementById('rp-el'); if (e) e.textContent = mmssR(el);
+  if (UI.sw && UI.sw.sid === s.id && UI.sw.t0) { const tf = document.getElementById('rp-time'); if (tf && document.activeElement !== tf) tf.value = fmtNum(Math.round((Date.now() - UI.sw.t0) / 100) / 10); }
+}
+
+/* Einheit-Blatt (Start / reduziert / überspringen / wiederholen) */
+function openRunUnit(cid, prog, u) {
+  const st = progState(cid, prog); if (!st) return;
+  const t = lastTest(cid), sp = unitOf(prog, st.cfg, u, t ? t.run.result.speed : 0), inf = specInfo(sp), us = st.units[u], red = specInfo(reduceSpec(sp));
+  const hint = recoveryHint(cid, sp.type);
+  modal(T('Einheit {n} · Woche {w}', { n: u + 1, w: sp.week }), `<div class="stack">
+    <div class="row" style="justify-content:space-between"><b>${esc(sp.focus)}</b>${stTag(us.st)}</div>
+    <div>${esc(inf.desc)}</div>
+    <div class="run-facts"><div><span>${T('Wiederholungen')}</span><b>${esc(String(inf.reps))}</b></div><div><span>${T('Pausen')}</span><b>${esc(inf.pause)}</b></div><div><span>${T('Strecke')}</span><b>${esc(inf.distTxt)}</b></div></div>
+    ${sp.type === 'interval' ? `<div class="muted" style="font-size:13px">${T('Zielgeschwindigkeit der schnellen 80 m: 19,2 km/h. Das ist sehr schnell – laufe dieses Tempo nur, wenn du es sicher und kontrolliert schaffst.')}</div>` : ''}
+    ${sp.indiv ? `<div class="muted" style="font-size:13px">${T('Individuell nach deinem Leistungstest berechnet.')}</div>` : ''}
+    ${hint ? `<div class="info warn-info">${esc(hint)}</div>` : ''}
+    <button class="btn btn-primary btn-big" data-action="run-start" data-cid="${cid}" data-prog="${prog}" data-u="${u}">${ic('play', 20)} ${us.st === 'completed' ? T('Einheit wiederholen') : T('Einheit starten')}</button>
+    <button class="btn btn-ghost btn-block" data-action="run-start" data-cid="${cid}" data-prog="${prog}" data-u="${u}" data-reduce="1">${T('Mit reduzierter Belastung starten')} <span class="muted">(${esc(red.desc)})</span></button>
+    ${us.st !== 'completed' && us.st !== 'skipped' ? `<button class="btn btn-text btn-block" data-action="run-skip" data-cid="${cid}" data-prog="${prog}" data-u="${u}">${T('Einheit überspringen')}</button>` : ''}
+  </div>`);
+}
+
+Object.assign(A, {
+  'run-unit': el => openRunUnit(el.dataset.cid, el.dataset.prog, +el.dataset.u),
+  'run-start': async el => {
+    const cid = el.dataset.cid, prog = el.dataset.prog, act = activeRun(cid);
+    if (act) { closeModal(null); if (await confirmDialog(T('Einheit läuft bereits'), T('Es läuft noch {x}. Bitte zuerst beenden.', { x: `<b>${esc(runTitle(act))}</b>` }), { ok: T('Zur laufenden Einheit') })) go('/lauf/' + act.id); return; }
+    runAudio();
+    const opts = { reduce: el.dataset.reduce === '1' };
+    if (el.dataset.u != null && el.dataset.u !== '') opts.unit = +el.dataset.u;
+    if (el.dataset.level) { opts.level = el.dataset.level; runSetCfg(cid, { ['lv_' + prog]: el.dataset.level }); }
+    const s = startRun(cid, runSpecFor(cid, prog, opts)); closeModal(null); go('/lauf/' + s.id);
+  },
+  'run-skip': async el => {
+    const cid = el.dataset.cid, prog = el.dataset.prog, u = +el.dataset.u; closeModal(null);
+    if (!await confirmDialog(T('Einheit überspringen?'), T('Die Einheit wird als „übersprungen“ markiert. Du kannst sie später trotzdem noch laufen.'), { ok: T('Überspringen') })) return;
+    const s = startRun(cid, runSpecFor(cid, prog, { unit: u })); runFinish(s, 'skipped'); render();
+  },
+  'run-restart': async el => {
+    const cid = el.dataset.cid, prog = el.dataset.prog;
+    if (!await confirmDialog(T('Programm neu beginnen?'), T('Der Fortschritt startet wieder bei Einheit 1. Bisherige Einheiten bleiben im Verlauf gespeichert.'), { ok: T('Neu beginnen') })) return;
+    const cfg = runCfgOf(S.clients.get(cid))[prog] || {}; runSetCfg(cid, { [prog]: { ...cfg, inst: uid(), start: today() } }); render();
+  },
+  'rp-pause': el => { const s = S.sessions.get(el.dataset.sid); if (!s || s.run.pos.pausedAt) return; s.run.pos.pausedAt = Date.now(); s.updatedAt = Date.now(); put('sessions', s); render(); },
+  'rp-resume': el => { const s = S.sessions.get(el.dataset.sid); if (!s || !s.run.pos.pausedAt) return; runAudio(); s.run.pos.paused = (s.run.pos.paused || 0) + Date.now() - s.run.pos.pausedAt; s.run.pos.pausedAt = null; s.updatedAt = Date.now(); put('sessions', s); render(); },
+  'rp-next': el => { const s = S.sessions.get(el.dataset.sid); if (!s || s.status !== 'active') return; runAudio(); if (s.run.pos.pausedAt) A['rp-resume'](el); runAdvance(s); put('sessions', s); render(); },
+  'rp-skipinfo': async el => { const s = S.sessions.get(el.dataset.sid); if (!s) return; const st = s.run.steps[s.run.pos.i];
+    if (st && st.k === 'warmup' && !st.optional && !await confirmDialog(T('Aufwärmen überspringen?'), T('Ohne Aufwärmen steigt bei schnellen Läufen das Verletzungsrisiko. Trotzdem überspringen?'), { ok: T('Überspringen') })) return;
+    A['rp-next'](el); },
+  'rp-add30': el => { const s = S.sessions.get(el.dataset.sid); if (!s) return; s.run.pos.extra = (s.run.pos.extra || 0) + 30; s.updatedAt = Date.now(); put('sessions', s); runTick(); },
+  'rp-sw': el => { const sid = el.dataset.sid; runAudio(); const sw = UI.sw && UI.sw.sid === sid ? UI.sw : (UI.sw = { sid }); if (sw.t0) { sw.val = Math.round((Date.now() - sw.t0) / 100) / 10; sw.t0 = null; } else { sw.t0 = Date.now(); sw.val = null; } render(); },
+  'rp-sprint': el => { const s = S.sessions.get(el.dataset.sid); if (!s) return; const f = document.getElementById('rp-time'); const v = parseNum(f && f.value);
+    UI.sw = null; runAudio(); runAdvance(s, { time: v > 0 && v < 120 ? v : null }); put('sessions', s); render(); },
+  'rp-endstop': el => { const s = S.sessions.get(el.dataset.sid); if (!s) return; s.run.pos.form = true; if (s.run.pos.pausedAt) { s.run.pos.paused += Date.now() - s.run.pos.pausedAt; s.run.pos.pausedAt = null; } s.run.pos.formAt = Date.now(); put('sessions', s); render(); },
+  'rp-abort': async el => { const s = S.sessions.get(el.dataset.sid); if (!s) return;
+    if (!await confirmDialog(T('Einheit beenden?'), T('Die Einheit wird als „abgebrochen“ gespeichert – nicht als vollständig absolviert. Bereits gelaufene Abschnitte bleiben erfasst.'), { ok: T('Beenden'), danger: true })) return;
+    runFinish(s, 'aborted'); UI.sw = null; go('/session/' + s.id); },
+});
+document.addEventListener('change', ev => {
+  const t = ev.target;
+  if (t.dataset && t.dataset.runlv) { UI.runLv = UI.runLv || {}; UI.runLv[t.dataset.runlv] = t.value; return render(); }
+  if (t.dataset && t.dataset.runcfg) {
+    const cid = t.dataset.cid, [prog, key] = t.dataset.runcfg.includes('.') ? t.dataset.runcfg.split('.') : [null, t.dataset.runcfg];
+    const val = t.type === 'checkbox' ? (t.checked ? 'test' : 'std') : /^\d+$/.test(t.value) ? +t.value : t.value;
+    if (prog) runSetCfg(cid, { [prog]: { ...(runCfgOf(S.clients.get(cid))[prog] || {}), [key]: val } }); else runSetCfg(cid, { [key]: val });
+    toast(T('Gespeichert ✓')); render();
+  }
+});
+document.addEventListener('submit', ev => {
+  const f = ev.target; if (!f.dataset) return;
+  if (f.dataset.form === 'run-enroll') { ev.preventDefault(); const fd = new FormData(f), cid = f.dataset.cid, prog = f.dataset.prog;
+    runSetCfg(cid, { [prog]: { inst: uid(), level: fd.get('level') || 'beginner', start: today(), endBase: fd.get('endBase') === 'on' ? 'test' : 'std', order: '100first', rest100: RUN_CFG.rest100Def } });
+    toast(T('Programm gestartet ✓')); render(); }
+  if (f.dataset.form === 'run-test') { ev.preventDefault(); const fd = new FormData(f), cid = f.dataset.cid, km = parseNum(fd.get('km')), min = parseNum(fd.get('min')) || 60;
+    if (!(km > 0 && km < 40)) return toast(T('Bitte eine gültige Distanz eintragen.'));
+    const s = startRun(cid, runSpecFor(cid, 'test60')); s.date = fd.get('date') || today(); s.run.log.manual = true; runFinish(s, min >= RUN_CFG.testMin * RUN_CFG.endDoneShare ? 'completed' : 'aborted', { km, min });
+    toast(T('Testergebnis gespeichert: Ø {v} km/h', { v: fmtNum(speedOf(km, min)) })); render(); }
+  if (f.dataset.form === 'run-result') { ev.preventDefault(); const s = S.sessions.get(f.dataset.sid); if (!s) return; const fd = new FormData(f), st = s.run.steps[s.run.pos.i];
+    const km = parseNum(fd.get('km')), min = parseNum(fd.get('min')); if (!(km > 0 && km < 60) || !(min > 0)) return toast(T('Bitte Distanz und Dauer eintragen.'));
+    const planned = st.t === 'endurance' ? st.min : RUN_CFG.testMin;
+    s.run.log.doneIdx.push(s.run.pos.i);
+    runFinish(s, min >= planned * RUN_CFG.endDoneShare ? 'completed' : 'aborted', { km, min }); go('/session/' + s.id); }
+}, true);
+
 /* ---------- Router-Erweiterung ---------- */
 function routeGuard(p) {
   if (!isClientMode()) return null;
   const cid = roleInfo().clientId;
   if (p[0] === 'meldungen') return '/';
   if (p[0] === 'client') { if (p[1] !== cid || !p[2] || p[2] === 'check') return '/'; if (p[2] === 'plan') return `/client/${cid}/planview`; if (p[2] === 'nachrichten') return '/nachrichten'; }
-  if ((p[0] === 'train' || p[0] === 'session') && S.sessions.get(p[1]) && S.sessions.get(p[1]).clientId !== cid) return '/';
+  if ((p[0] === 'train' || p[0] === 'session' || p[0] === 'lauf') && S.sessions.get(p[1]) && S.sessions.get(p[1]).clientId !== cid) return '/';
   if (p[0] === 'check' && (!S.checks.get(p[1]) || S.checks.get(p[1]).clientId !== cid || p[2] === 'edit')) return '/';
   return null;
 }
@@ -5137,7 +5783,10 @@ function routeExtra(p) {
     if (p[2] === 'planview') return viewPlanRO(c);
     if (p[2] === 'food') return viewFood(c);
     if (p[2] === 'foto') return viewPhoto(c);
+    if (p[2] === 'lauf') return !p[3] ? viewRunHome(c) : p[3] === 'verlauf' ? viewRunHistory(c) : p[3] === 'test60' ? viewRunTest(c) : (p[3] === 'athlete' || p[3] === 'endurance') ? viewRunPlan(c, p[3]) : RUN_PROGS.includes(p[3]) ? viewRunSingle(c, p[3]) : null;
   }
+  if (p[0] === 'lauf') { const s = S.sessions.get(p[1]); return s && s.kind === 'run' ? viewRunPlayer(s) : null; }
+  if ((p[0] === 'train' || p[0] === 'session') && S.sessions.get(p[1]) && S.sessions.get(p[1]).kind === 'run') { const s = S.sessions.get(p[1]); return p[0] === 'train' && s.status === 'active' ? viewRunPlayer(s) : viewRunSession(s); }
   if (p[0] === 'check') { const ch = S.checks.get(p[1]); if (!ch) return null; const c = S.clients.get(ch.clientId); if (!c) return null; return p[2] === 'edit' ? viewCheckForm(c, ch) : viewCheck(ch); }
   if (p[0] === 'kunde-setup') return viewSetup(p[1], p[2] ? decodeURIComponent(p[2]) : '');
   if (p[0] === 'rechtliches') return viewLegal(p[1]);
