@@ -7,6 +7,9 @@
 
    Zusatzfelder (optional): sg = Untergruppe (z. B. Bizeps/Trizeps), exec auch als Schrittliste,
    breath = Atmung, safety = Sicherheitshinweis.
+   typ = Übungstyp (dynamisch / plyometrisch / isometrisch), lvl = Schwierigkeit (Einsteiger / Mittel / Fortgeschritten / Profi),
+   cats = zusätzliche Rubriken mit Untergruppe, z. B. { Bodyweight: 'Push-ups' } – die Übung erscheint dann auch dort (kein Duplikat),
+   animBase = Hinweis, wenn die 3D-Figur nur die Grundbewegung zeigt; anim: null = noch keine 3D-Animation (Anleitung als Text).
 
    Neue Übung: einfach einen weiteren Eintrag anhängen. Für anim eine vorhandene
    Vorlage aus uebungen3d.js verwenden (z. B. {t:'press', impl:'db', incline:30}).
@@ -18,11 +21,13 @@ window.SW_MUSKELN = {
   glutes: 'Gesäß', quads: 'Quadrizeps (Oberschenkel vorne)', hamstrings: 'Beinbeuger (Oberschenkel hinten)', adductors: 'Adduktoren (Innenseite)',
   abductors: 'Abduktoren (Gesäß seitlich)', calves: 'Waden', hipFlexors: 'Hüftbeuger'
 };
-window.SW_GRUPPEN = ['Brust', 'Schulter', 'Rücken', 'Arme', 'Beine', 'Bauch', 'Stabilisation', 'Athletik', 'Mobility'];
+window.SW_GRUPPEN = ['Brust', 'Schulter', 'Rücken', 'Arme', 'Beine', 'Bauch', 'Stabilisation', 'Athletik', 'Mobility', 'Bodyweight'];
 (function () {
   const E = (id, n, g, sub, eq, anim, prim, sec, start, exec, dir, tips, errs, alias) => ({ id, n, g, sub, eq, anim, prim, sec, start, exec, dir, tips, errs, alias: alias || [] });
   // Arm-Übungen: gleiche Felder + sg (Untergruppe Bizeps/Trizeps), exec als Schrittliste, breath (Atmung), safety (Sicherheit)
   const A = o => ({ g: 'Arme', sec: [], ...o, alias: o.alias || [] });
+  // Bodyweight-Übungen: gleiche Felder wie Arme + typ (Übungstyp) und lvl (Schwierigkeit)
+  const B = o => ({ g: 'Bodyweight', sec: [], ...o, alias: o.alias || [] });
   const L = [
   /* ---------------- BRUST ---------------- */
   E('schraegbank-kh', 'Schrägbankdrücken mit Kurzhanteln', 'Brust', 'obere Brust', 'Kurzhanteln, Schrägbank (30–45°)', { t: 'press', impl: 'db', incline: 30 }, ['chest', 'frontDelt'], ['triceps'],
@@ -574,7 +579,10 @@ window.SW_GRUPPEN = ['Brust', 'Schulter', 'Rücken', 'Arme', 'Beine', 'Bauch', '
     ['Fersen heben ab', 'Knie fallen nach innen', 'Rundrücken'], ['Deep Squat Hold', 'Deep Squat', 'Tiefe Hocke']),
   /* ---------------- ARME – TRIZEPS ----------------
      Zusatzfelder (nur hier genutzt): sg = Untergruppe (Bizeps/Trizeps), exec als Schrittliste,
-     breath = Atmung, safety = Sicherheitshinweis. */
+     breath = Atmung, safety = Sicherheitshinweis.
+   typ = Übungstyp (dynamisch / plyometrisch / isometrisch), lvl = Schwierigkeit (Einsteiger / Mittel / Fortgeschritten / Profi),
+   cats = zusätzliche Rubriken mit Untergruppe, z. B. { Bodyweight: 'Push-ups' } – die Übung erscheint dann auch dort (kein Duplikat),
+   animBase = Hinweis, wenn die 3D-Figur nur die Grundbewegung zeigt; anim: null = noch keine 3D-Animation (Anleitung als Text). */
   A({ id: 'trizeps-turm-stange', n: 'Trizepsdrücken am Turm mit gerader Stange', sg: 'Trizeps', sub: 'Trizeps (alle drei Köpfe, v. a. seitlicher Kopf)', eq: 'Kabelzug (obere Rolle), gerade Stange',
     anim: { t: 'arm', v: 'pushdown', impl: 'bar' }, prim: ['triceps'], sec: ['forearms'],
     start: 'Aufrecht vor dem Turm, Füße hüftbreit, Knie locker, Oberkörper leicht nach vorne geneigt. Stange im Obergriff etwa schulterbreit greifen, Oberarme fest seitlich am Körper, Unterarme etwa waagerecht.',
@@ -835,10 +843,135 @@ window.SW_GRUPPEN = ['Brust', 'Schulter', 'Rücken', 'Arme', 'Beine', 'Bauch', '
     errs: ['Kipping (Schwung)', 'Nur halbe Wiederholungen', 'Schultern ziehen zu den Ohren'],
     breath: 'Beim Hochziehen ausatmen, beim Absenken einatmen.',
     safety: 'Unten nicht passiv in die Schultern fallen lassen – leichte Spannung halten.',
-    alias: ['Chin-ups', 'Chin ups', 'Klimmzüge Untergriff', 'Enge Klimmzüge'] })
+    alias: ['Chin-ups', 'Chin ups', 'Klimmzüge Untergriff', 'Enge Klimmzüge'] }),
+  /* ---------------- BODYWEIGHT (Eigengewicht, Calisthenics) ----------------
+     Weitere Bodyweight-Übungen stehen bereits in anderen Rubriken und werden über „cats“ zusätzlich hier gezeigt
+     (Enge Liegestütze, Mountain Climbers, Dips zwischen zwei Bänken, Klimmzüge, Enge Klimmzüge im Untergriff, Dips). */
+  B({ id: 'liegestuetze', n: 'Liegestütze', sg: 'Push-ups', sub: 'Brust, Trizeps & vordere Schulter', eq: 'Körpergewicht, Matte', typ: 'dynamisch', lvl: 'Einsteiger',
+    anim: { t: 'arm', v: 'pushup', w: .2, lbl: ['Start – Hände etwas breiter als schulterbreit, Körper in einer Linie', 'Brust zum Boden senken – Ellbogen ca. 45° vom Körper', 'Unten – Brust knapp über dem Boden', 'kraftvoll nach oben drücken'] },
+    prim: ['chest', 'triceps', 'frontDelt'], sec: ['abs', 'glutes'],
+    start: 'Liegestützposition: Hände etwas breiter als schulterbreit unter den Schultern, Finger zeigen nach vorne. Körper von Kopf bis Ferse in einer Linie, Bauch und Gesäß angespannt.',
+    exec: ['Körperspannung aufbauen.', 'Brust kontrolliert zum Boden senken – die Ellbogen zeigen etwa 45° schräg nach hinten.', 'Unten kurz vor dem Boden umkehren.', 'Kraftvoll nach oben drücken, bis die Arme gestreckt sind.'],
+    dir: 'Der ganze Körper senkt und hebt sich als Brett.',
+    tips: ['Ellbogen nicht seitlich wegklappen (kein „T“)', 'Zu schwer? Hände auf eine Bank oder auf den Knien', 'Schwerer: Füße erhöht oder langsam absenken (3 Sek.)'],
+    errs: ['Hüfte hängt durch', 'Gesäß zu hoch', 'Kopf hängt nach unten', 'Halbe Wiederholungen'],
+    breath: 'Beim Absenken einatmen, beim Hochdrücken ausatmen.',
+    safety: 'Bei Handgelenkschmerzen Liegestützgriffe oder Kurzhanteln als Griffe nutzen.',
+    alias: ['Push-ups', 'Push ups', 'Pushups', 'Liegestütz', 'Liegestützen', 'Standard-Liegestütze'] }),
+  B({ id: 'spiderman-liegestuetze', n: 'Spider-Man-Liegestütze', sg: 'Push-ups', sub: 'Brust, Trizeps & seitlicher Rumpf', eq: 'Körpergewicht, Matte', typ: 'dynamisch', lvl: 'Fortgeschritten',
+    anim: { t: 'arm', v: 'pushup', w: .2 }, animBase: 'Die 3D-Figur zeigt die Grundbewegung (Liegestütze). Das Knie zum Ellbogen ist in der Anleitung beschrieben.',
+    prim: ['chest', 'triceps', 'obliques'], sec: ['frontDelt', 'abs', 'hipFlexors'],
+    start: 'Liegestützposition, Hände etwas breiter als schulterbreit, Körper in einer Linie.',
+    exec: ['Brust kontrolliert zum Boden senken.', 'Gleichzeitig ein Knie seitlich außen Richtung Ellbogen ziehen – das Bein bleibt knapp über dem Boden.', 'Unten kurz halten, dann hochdrücken und das Bein zurückstellen.', 'Bei der nächsten Wiederholung die Seite wechseln.'],
+    dir: 'Körper senkt sich als Brett, das Knie wandert seitlich zum Ellbogen.',
+    tips: ['Hüfte bleibt tief und ruhig – nicht verdrehen', 'Erst die Liegestütze sauber, dann das Knie dazu', 'Leichter: Knie erst oben in der gestreckten Position zum Ellbogen'],
+    errs: ['Hüfte schiebt nach oben', 'Rumpf dreht sich weg', 'Knie wird nur halb herangezogen'],
+    breath: 'Beim Absenken einatmen, beim Hochdrücken ausatmen.',
+    safety: 'Nur so weit, wie Hüfte und Leiste es ohne Ziehen zulassen.',
+    alias: ['Spiderman Push-ups', 'Spider-Man Push-ups', 'Spiderman Liegestütze'] }),
+  B({ id: 'plyo-liegestuetze', n: 'Plyometrische Liegestütze (mit Absprung)', sg: 'Push-ups', sub: 'Brust, Trizeps & Schnellkraft', eq: 'Körpergewicht, Matte', typ: 'plyometrisch', lvl: 'Fortgeschritten',
+    anim: { t: 'arm', v: 'pushup', w: .2 }, animBase: 'Die 3D-Figur zeigt die Grundbewegung (Liegestütze). Der Absprung der Hände ist in der Anleitung beschrieben.',
+    prim: ['chest', 'triceps', 'frontDelt'], sec: ['abs'],
+    start: 'Liegestützposition auf einer Matte, Hände etwas breiter als schulterbreit, Körper fest angespannt.',
+    exec: ['Brust kontrolliert zum Boden senken.', 'Explosiv nach oben drücken, sodass die Hände kurz vom Boden abheben.', 'Mit leicht gebeugten Ellbogen weich landen.', 'Direkt in die nächste Wiederholung absenken.'],
+    dir: 'Absenken wie bei der Liegestütze, Hochdrücken so schnell, dass der Körper kurz abhebt.',
+    tips: ['Qualität vor Menge: wenige, explosive Wiederholungen (z. B. 3–6)', 'Vorher: saubere Liegestütze (mind. 15) beherrschen', 'Leichter: Hände auf einer Bank (erhöht)'],
+    errs: ['Mit gestreckten Armen landen', 'Hüfte bricht bei der Landung ein', 'Zu müde weitermachen'],
+    breath: 'Beim Absenken einatmen, beim Absprung kräftig ausatmen.',
+    safety: 'Nur ausgeruht und auf weichem Untergrund. Bei Handgelenk- oder Ellbogenbeschwerden weglassen.',
+    alias: ['Plyo Push-ups', 'Explosive Liegestütze', 'Clap Push-ups', 'Liegestütze mit Absprung'] }),
+  B({ id: 'plyo-liegestuetze-erhoehung', n: 'Plyometrische Liegestütze auf eine Erhöhung', sg: 'Push-ups', sub: 'Brust, Trizeps & Schnellkraft', eq: 'Körpergewicht, stabile Bank oder Step (niedrig)', typ: 'plyometrisch', lvl: 'Profi',
+    anim: null, prim: ['chest', 'triceps', 'frontDelt'], sec: ['abs'],
+    start: 'Liegestützposition am Boden direkt vor einer niedrigen, stabilen Erhöhung (Step oder Bank, die nicht verrutscht). Hände etwas breiter als schulterbreit.',
+    exec: ['Brust kontrolliert zum Boden senken.', 'Explosiv abdrücken und beide Hände auf die Erhöhung setzen.', 'Oben kurz stabilisieren, dann mit den Händen kontrolliert wieder auf den Boden zurück.', 'Erneut absenken und wiederholen.'],
+    dir: 'Hände springen vom Boden auf die Erhöhung und wieder zurück.',
+    tips: ['Mit sehr niedriger Höhe beginnen (z. B. Step, 10–15 cm)', 'Nur wenige, saubere Wiederholungen', 'Vorher die plyometrischen Liegestütze am Boden beherrschen'],
+    errs: ['Erhöhung zu hoch gewählt', 'Hände landen auf der Kante', 'Körperspannung geht verloren'],
+    breath: 'Beim Absenken einatmen, beim Absprung kräftig ausatmen.',
+    safety: 'Die Erhöhung muss rutschfest und stabil stehen (an die Wand stellen). Nicht im ermüdeten Zustand ausführen.',
+    alias: ['Plyo Push-ups auf Erhöhung', 'Box Plyo Push-ups', 'Liegestütze auf Bank springen'] }),
+  B({ id: 'tyson-liegestuetze', n: 'Mike Tyson Push-ups (Hindu-Liegestütze)', sg: 'Push-ups', sub: 'Brust, Schulter & Trizeps mit Beweglichkeit', eq: 'Körpergewicht, Matte', typ: 'dynamisch', lvl: 'Fortgeschritten',
+    anim: null, prim: ['chest', 'frontDelt', 'triceps'], sec: ['abs', 'lowerBack', 'hamstrings'],
+    start: 'Aus der Liegestützposition das Gesäß nach oben schieben: umgekehrtes „V“, Hände etwas breiter als schulterbreit, Füße etwas breiter als hüftbreit.',
+    exec: ['Ellbogen beugen und die Brust in einem flachen Bogen nah am Boden zwischen den Händen nach vorne führen.', 'Hüfte absenken und die Arme strecken – Brust geöffnet, Blick nach vorne.', 'Gesäß wieder nach oben schieben, zurück ins umgekehrte „V“.', 'Fließend wiederholen.'],
+    dir: 'Wellenförmige Bewegung: vom umgekehrten V tief nach vorne und wieder zurück.',
+    tips: ['Fließend und kontrolliert, nicht ruckartig', 'Die Brust gleitet knapp über dem Boden', 'Leichter: weniger tief unter den Händen durchtauchen'],
+    errs: ['Hohlkreuz in der oberen Position erzwingen', 'Arme bleiben gestreckt – keine Beugung', 'Zu schnell, ohne Kontrolle'],
+    breath: 'Beim Durchtauchen einatmen, beim Zurückschieben ausatmen.',
+    safety: 'Bei Rückenbeschwerden die obere, gestreckte Position nur leicht öffnen.',
+    alias: ['Mike Tyson Push-ups', 'Tyson Push-ups', 'Hindu Push-ups', 'Hindu Liegestütze'] }),
+  B({ id: 'burpees', n: 'Burpees', sg: 'Push-ups', sub: 'Ganzkörper & Kondition', eq: 'Körpergewicht', typ: 'plyometrisch', lvl: 'Mittel',
+    anim: null, prim: ['quads', 'chest', 'glutes'], sec: ['triceps', 'frontDelt', 'abs', 'calves'],
+    start: 'Hüftbreiter, aufrechter Stand.',
+    exec: ['In die Hocke gehen und die Hände vor den Füßen auf den Boden setzen.', 'Beide Beine nach hinten in die Liegestützposition springen.', 'Eine Liegestütze ausführen.', 'Füße zurück zu den Händen springen.', 'Explosiv nach oben springen, Arme über den Kopf.'],
+    dir: 'Hocke – Liegestütz – Hocke – Strecksprung nach oben.',
+    tips: ['Rhythmus vor Tempo', 'Bei der Liegestütze bleibt die Hüfte in einer Linie', 'Leichter: Beine nacheinander nach hinten setzen, ohne Sprung'],
+    errs: ['Hüfte hängt in der Liegestützposition durch', 'Harte Landung mit gestreckten Knien', 'Rücken rund beim Aufstehen'],
+    breath: 'Gleichmäßig weiteratmen – beim Sprung nach oben ausatmen.',
+    safety: 'Weich über die Fußballen landen. Bei Knie- oder Rückenbeschwerden die Variante ohne Sprung wählen.',
+    alias: ['Burpee', 'Burpees mit Liegestütz'] }),
+  B({ id: 'handstand-liegestuetze-wand', n: 'Handstand-Liegestütze an der Wand (Schulterdrücken)', sg: 'Schulter & Handstand', sub: 'Schulter & Trizeps', eq: 'Körpergewicht, Wand, Matte', typ: 'dynamisch', lvl: 'Profi',
+    anim: null, prim: ['frontDelt', 'triceps'], sec: ['sideDelt', 'traps', 'abs'],
+    start: 'Handstand mit dem Rücken zur Wand: Hände etwas breiter als schulterbreit, ca. 15–25 cm von der Wand entfernt, Fersen lehnen an der Wand, Arme gestreckt, Körper angespannt.',
+    exec: ['Ellbogen kontrolliert beugen und den Kopf Richtung Boden senken – Kopf und Hände bilden ein Dreieck.', 'Kopf berührt leicht die Matte (oder ein Kissen).', 'Kraftvoll nach oben drücken, bis die Arme gestreckt sind.'],
+    dir: 'Senkrecht nach unten und oben – wie Schulterdrücken, nur kopfüber.',
+    tips: ['Vorstufe: Pike-Liegestütze (Gesäß hoch, Füße am Boden)', 'Kissen oder gefaltete Matte unter den Kopf', 'Ellbogen zeigen schräg nach vorne, nicht weit nach außen'],
+    errs: ['Starkes Hohlkreuz', 'Kopf fällt ungebremst auf den Boden', 'Ellbogen klappen nach außen'],
+    breath: 'Beim Absenken einatmen, beim Hochdrücken ausatmen.',
+    safety: 'Nur mit sicherem Handstand an der Wand. Bei Nacken-, Schulter- oder Blutdruckproblemen nicht ausführen – vorher ärztlich abklären.',
+    alias: ['Handstand Push-ups', 'HSPU', 'Wall Handstand Push-ups', 'Schulterdrücken an der Wand'] }),
+  B({ id: 'liegestuetze-fuesse-wand', n: 'Liegestütze mit Füßen an der Wand (Wall-Supported Push-ups)', sg: 'Schulter & Handstand', sub: 'obere Brust, Schulter & Trizeps', eq: 'Körpergewicht, Wand, Matte', typ: 'dynamisch', lvl: 'Fortgeschritten',
+    anim: null, prim: ['chest', 'frontDelt', 'triceps'], sec: ['abs', 'glutes'],
+    start: 'Mit dem Rücken zur Wand in die Liegestützposition, dann die Füße an der Wand hochsetzen (Hüft- bis Schulterhöhe). Hände etwas breiter als schulterbreit, Körper in einer Linie, schräg nach unten zu den Händen.',
+    exec: ['Körperspannung aufbauen, Füße drücken leicht gegen die Wand.', 'Brust kontrolliert zum Boden senken.', 'Unten kurz umkehren.', 'Kraftvoll hochdrücken, bis die Arme gestreckt sind.'],
+    dir: 'Wie eine Liegestütze, nur mit erhöhten Füßen – mehr Last auf Schulter und oberer Brust.',
+    tips: ['Je höher die Füße, desto mehr Schulter', 'Mit Hüfthöhe beginnen', 'Hände weit genug von der Wand weg, damit der Körper gerade bleibt'],
+    errs: ['Hüfte knickt ein', 'Füße rutschen an der Wand', 'Kopf drückt nach vorne'],
+    breath: 'Beim Absenken einatmen, beim Hochdrücken ausatmen.',
+    safety: 'Rutschfeste Schuhe oder barfuß; nicht mit Socken an glatter Wand.',
+    alias: ['Wall-Supported Push-ups', 'Wall Push-ups Füße oben', 'Decline Push-ups an der Wand'] }),
+  B({ id: 'wandstuetz-halten', n: 'Wandstütz halten – Füße an der Wand (Wall-Supported Hold)', sg: 'Schulter & Handstand', sub: 'Rumpfspannung & Schulterstabilität', eq: 'Körpergewicht, Wand, Matte', typ: 'isometrisch', lvl: 'Mittel', unit: 's',
+    anim: null, prim: ['abs', 'frontDelt'], sec: ['triceps', 'glutes', 'upperBack'],
+    start: 'Wie bei den Liegestützen mit Füßen an der Wand: Hände unter den Schultern, Arme gestreckt, Füße an der Wand (Hüft- bis Schulterhöhe), Körper in einer Linie.',
+    exec: ['Arme gestreckt lassen, Schultern aktiv vom Boden wegdrücken.', 'Bauch und Gesäß fest anspannen – der Körper bleibt ein Brett.', 'Die Position ruhig halten (z. B. 20–40 Sek.).', 'Kontrolliert aus der Position gehen: Füße nacheinander von der Wand nehmen.'],
+    dir: 'Keine Bewegung – statisches Halten.',
+    tips: ['Statische Variante ohne Liegestützbewegung', 'Schultern über den Händen', 'Leichter: Füße tiefer an der Wand'],
+    errs: ['Hüfte hängt durch', 'Schultern sacken ein', 'Luft anhalten'],
+    breath: 'Ruhig und gleichmäßig weiteratmen.',
+    safety: 'Bei Schwindel oder Nacken- und Schulterbeschwerden abbrechen. Rutschfeste Füße.',
+    alias: ['Wall-Supported Hold', 'Wall Plank Hold', 'Wandstütz', 'Füße an der Wand halten'] }),
+  B({ id: 'muscle-ups', n: 'Muscle-ups', sg: 'Pull-ups & Calisthenics', sub: 'Latissimus, Trizeps & Brust', eq: 'Klimmzugstange oder Turnringe', typ: 'dynamisch', lvl: 'Profi',
+    anim: { t: 'latPull', v: 'pullup' }, animBase: 'Die 3D-Figur zeigt nur die Zugphase (Klimmzug). Übergang und Stütz sind in der Anleitung beschrieben.',
+    prim: ['lats', 'triceps', 'chest'], sec: ['biceps', 'frontDelt', 'abs', 'forearms'],
+    start: 'An der Stange hängen, Griff schulterbreit (Obergriff, Daumen auf der Seite der Finger möglich), Körper gespannt.',
+    exec: ['Explosiv hochziehen – die Stange Richtung untere Brust/Hüfte ziehen.', 'Oben schnell die Handgelenke über die Stange bringen und den Oberkörper nach vorne über die Stange kippen (Übergang).', 'Aus dem tiefen Stütz nach oben drücken, bis die Arme gestreckt sind.', 'Kontrolliert zurück in den Hang.'],
+    dir: 'Zug nach oben, Übergang über die Stange, Stütz nach oben – in einer flüssigen Bewegung.',
+    tips: ['Voraussetzung: ca. 8–10 saubere Klimmzüge und 10 Dips', 'Vorübungen: explosive Klimmzüge bis zur Brust, Dips an der Stange', 'Zum Lernen ein Widerstandsband nutzen'],
+    errs: ['Übergang nur mit einem Arm (ungleich)', 'Zu viel Schwung aus den Beinen', 'Zug zu niedrig'],
+    breath: 'Vor dem Zug einatmen, beim Hochdrücken ausatmen.',
+    safety: 'Nur mit ausreichender Grundkraft. Bei Schulter- oder Ellbogenbeschwerden nicht ausführen.',
+    alias: ['Muscle up', 'Muscleup', 'Muscle-up'] }),
+  B({ id: 'inverted-row', n: 'Rudern an der Stange (Low Row / Inverted Row)', sg: 'Pull-ups & Calisthenics', sub: 'oberer Rücken & Latissimus', eq: 'Körpergewicht, Turnstange oder Stange der Multipresse (Hüfthöhe)', typ: 'dynamisch', lvl: 'Einsteiger',
+    anim: null, prim: ['upperBack', 'lats'], sec: ['biceps', 'rearDelt', 'abs'],
+    start: 'Unter einer stabilen Stange auf Hüfthöhe liegen, Obergriff etwas breiter als schulterbreit. Arme gestreckt, Fersen am Boden, Körper in einer Linie.',
+    exec: ['Schulterblätter zusammenziehen.', 'Brust zur Stange ziehen – die Ellbogen gehen eng am Körper nach hinten.', 'Oben kurz halten.', 'Kontrolliert absenken, bis die Arme gestreckt sind.'],
+    dir: 'Der Körper zieht sich als Brett schräg nach oben zur Stange.',
+    tips: ['Leichter: Stange höher oder Knie gebeugt', 'Schwerer: Füße erhöht', 'Gute Vorstufe zu Klimmzügen'],
+    errs: ['Hüfte hängt durch', 'Nur mit den Armen ziehen, Schulterblätter bleiben passiv', 'Kinn schiebt nach vorne'],
+    breath: 'Beim Hochziehen ausatmen, beim Absenken einatmen.',
+    safety: 'Die Stange muss sicher eingehängt sein (Multipresse: Sicherung prüfen).',
+    alias: ['Inverted Row', 'Low Row', 'Australian Pull-ups', 'Körpergewicht-Rudern', 'Rudern an der Turnstange'] })
   ];
   // Halte-Übungen werden in Sekunden geplant (Plan & Training zeigen „Sek.“)
   const HOLD = new Set(['mob-hueftbeuger', 'mob-taube', 'mob-figur-4', 'mob-knie-brust', 'mob-kindhaltung', 'mob-beinbeuger-sitzend', 'mob-echse', 'mob-tiefe-hocke']);
   L.forEach(e => { if (HOLD.has(e.id)) e.unit = 's'; });
+  // Vorhandene Eigengewichtsübungen zusätzlich in der Rubrik „Bodyweight“ zeigen (ohne Duplikat, Texte unverändert)
+  const BW = {
+    'enge-liegestuetze': ['Push-ups', 'dynamisch', 'Mittel'], 'mountain-climbers': ['Push-ups', 'dynamisch', 'Einsteiger'],
+    'bankdips': ['Push-ups', 'dynamisch', 'Einsteiger'], 'klimmzuege': ['Pull-ups & Calisthenics', 'dynamisch', 'Fortgeschritten'],
+    'enge-klimmzuege-untergriff': ['Pull-ups & Calisthenics', 'dynamisch', 'Fortgeschritten'], 'dips': ['Pull-ups & Calisthenics', 'dynamisch', 'Fortgeschritten'],
+  };
+  L.forEach(e => { const b = BW[e.id]; if (!b) return; e.cats = { ...(e.cats || {}), Bodyweight: b[0] }; e.typ = e.typ || b[1]; e.lvl = e.lvl || b[2]; });
+  { const k = L.find(e => e.id === 'klimmzuege'); if (k) k.alias = [...k.alias, 'Klimmzüge Obergriff', 'Klimmzüge im Obergriff']; }
   window.SW_KATALOG = L;
 })();

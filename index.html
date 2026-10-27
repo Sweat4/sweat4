@@ -2028,6 +2028,7 @@ function render() {
   runAfterRender(p);
   if (!isClientMode()) { if (p[0] === 'session') for (const k of ['done:', 'run:']) if (S.events.has(k + p[1]) && !S.events.get(k + p[1]).read) markEvent(k + p[1], { read: true }); if (!p.length || p[0] === 'meldungen') setTimeout(() => careFetchAll(), 400); }
   hydratePhotos(app);
+  updateBadge();
 }
 const curSession = () => { const p = location.hash.slice(1).split('/').filter(Boolean); return p[0] === 'train' ? S.sessions.get(p[1]) : null; };
 
@@ -2703,7 +2704,8 @@ async function thumbWorker() {
     while (THUMB.queue.length) {
       const id = THUMB.queue.shift(); THUMB.queued.delete(id);
       if (THUMB.mem.has(id)) { paintThumb(id); continue; }
-      const [exId, fig] = id.split('|'), e = KAT().find(x => x.id === exId); if (!e) continue;
+      const [exId, fig] = id.split('|'), e = KAT().find(x => x.id === exId);
+      if (!e || !e.anim) { document.querySelectorAll(thumbSel(id)).forEach(el => el.classList.remove('is-loading')); continue; }   // keine 3D-Vorlage → Symbol bleibt
       try {
         v.setFigure(fig); v.load({ ...e, primary: e.prim, secondary: e.sec }); v.playing = false; v.setMuscles(true);
         if (v.tpl.custom) v.showAt(0, v.tpl.thumbT != null ? v.tpl.thumbT : .9); else v.showAt(.62); // Standbild nahe der Endposition (Vorlage kann den Zeitpunkt vorgeben)
@@ -2759,7 +2761,7 @@ function katHay(e) {
 }
 function katFiltered() {
   const g = UI.katGroup || 'Alle', eq = UI.katEq || 'Alle', n = normK(UI.katSearch || ''), sg = g !== 'Alle' && UI.katSub && UI.katSub !== 'Alle' ? UI.katSub : null;
-  return KAT().filter(e => (g === 'Alle' || e.g === g) && (!sg || e.sg === sg) && (eq === 'Alle' || eqCats(e).includes(eq))
+  return KAT().filter(e => (g === 'Alle' || inGroup(e, g)) && (!sg || subIn(e, g) === sg) && (eq === 'Alle' || eqCats(e).includes(eq))
     && (!n || n.split(' ').every(w => katHay(e).includes(w))));
 }
 function katResultsHtml() {
@@ -2772,18 +2774,21 @@ function katResultsHtml() {
   const groups = (window.SW_GRUPPEN || []).filter(x => L.some(e => e.g === x));
   const sectioned = g === 'Alle' && !q && groups.length > 1;
   const grid = items => `<div class="xgrid">${items.map(ExerciseCard).join('')}</div>`;
-  const subs = g !== 'Alle' && !subOn && !q ? [...new Set(L.map(e => e.sg).filter(Boolean))] : [];
+  const subs = g !== 'Alle' && !subOn && !q ? [...new Set(L.map(e => subIn(e, g)).filter(Boolean))] : [];
   const sec = (title, it) => `<section class="kat-sec">${SectionHeader(title, TN(it.length, '{n} Übung', '{n} Übungen'))}${grid(it)}</section>`;
   return bar + (sectioned
     ? groups.map(gr => sec(TG(gr), L.filter(e => e.g === gr))).join('')
-    : subs.length > 1 ? subs.map(x => sec(TG(x), L.filter(e => e.sg === x))).join('') + (L.some(e => !e.sg) ? sec(TG(g), L.filter(e => !e.sg)) : '')
+    : subs.length > 1 ? subs.map(x => sec(TG(x), L.filter(e => subIn(e, g) === x))).join('') + (L.some(e => !subIn(e, g)) ? sec(TG(g), L.filter(e => !subIn(e, g))) : '')
     : grid(L));
 }
-const katSubs = g => [...new Set(KAT().filter(e => e.g === g && e.sg).map(e => e.sg))];
+/* Eine Übung kann zusätzlich in weiteren Rubriken stehen (e.cats = { Rubrik: Untergruppe }) – ohne Duplikat */
+const inGroup = (e, g) => e.g === g || !!(e.cats && e.cats[g]);
+const subIn = (e, g) => e.g === g ? e.sg : (e.cats || {})[g] || null;
+const katSubs = g => [...new Set(KAT().filter(e => inGroup(e, g) && subIn(e, g)).map(e => subIn(e, g)))];
 function KatSubRow() {
   const g = UI.katGroup || 'Alle', subs = g === 'Alle' ? [] : katSubs(g); if (!subs.length) return '';
-  const cur = UI.katSub || 'Alle', cnt = x => KAT().filter(e => e.g === g && e.sg === x).length;
-  return `<div class="frow frow-sub" role="group" aria-label="${T('Muskel')}"><span class="frow-l">${T('Muskel')}</span>${FilterChip(T('Alle'), cur === 'Alle', 'kat-sub', 'Alle')}${subs.map(x => FilterChip(TG(x), x === cur, 'kat-sub', x, cnt(x))).join('')}</div>`;
+  const cur = UI.katSub || 'Alle', cnt = x => KAT().filter(e => inGroup(e, g) && subIn(e, g) === x).length, lab = g === 'Bodyweight' ? T('Bereich') : T('Muskel');
+  return `<div class="frow frow-sub" role="group" aria-label="${lab}"><span class="frow-l">${lab}</span>${FilterChip(T('Alle'), cur === 'Alle', 'kat-sub', 'Alle')}${subs.map(x => FilterChip(TG(x), x === cur, 'kat-sub', x, cnt(x))).join('')}</div>`;
 }
 function refreshKat() {
   const r = document.getElementById('kat-results'); if (!r) return;
@@ -2797,7 +2802,7 @@ function viewKatalog() {
   const L = KAT(), groups = window.SW_GRUPPEN || [];
   if (!L.length) return topbar({ back: '/', title: T('Übungskatalog') }) + `<main class="wrap view">${EmptyState(T('Katalog nicht gefunden'), T('Die Datei uebungen-katalog.js fehlt. Lade sie zusammen mit der App hoch.'))}</main>`;
   const g = UI.katGroup || 'Alle', eq = UI.katEq || 'Alle';
-  const cnt = gr => L.filter(e => e.g === gr).length;
+  const cnt = gr => L.filter(e => inGroup(e, gr)).length;
   const eqNames = EQ_CATS.map(([n]) => n).filter(n => L.some(e => eqCats(e).includes(n)));
   return topbar({ back: '/', title: T('Übungskatalog'), sub: `${TN(L.length, '{n} Übung', '{n} Übungen')} · ${videoMode() ? T('Videos') : T('3D-Ausführung')}` }) +
   `<main class="wrap view wrap-wide">
@@ -2820,6 +2825,7 @@ async function mountDetail3D(id) {
   const host = document.getElementById('ud-stage'); if (!host) return;
   const e = KAT().find(x => x.id === id); if (!e) return;
   const note = host.querySelector('.ud-load');
+  if (!e.anim) { if (note) note.innerHTML = T('Für diese Übung gibt es noch keine 3D-Animation. Die Ausführung steht unten.'); return; }
   if (!webglOk()) { if (note) note.innerHTML = T('3D wird auf diesem Gerät nicht unterstützt. Die Anleitung steht unten.'); return; }
   try {
     await load3D();
@@ -2860,12 +2866,13 @@ function ExerciseDetailView(e0) {
         : `<div class="ud-stage" id="ud-stage">${ExercisePreview(e.id, 'ud-poster')}<div class="ud-load">${LoadingState(T('3D-Bewegung wird geladen …'))}</div></div>`}
       <div class="ud-phase" id="ud-phase" aria-live="polite"></div>
       <div class="ud-ctrl"><button class="icon-btn glass" id="ud-play" data-action="ud-play" aria-label="${T('Anhalten')}">${ic('pause', 18)}</button>
-        ${(videoMode() || mediaFor(e.id, curFig())) ? '' : `<button class="icon-btn glass" data-action="open3d" data-id="${e.id}" aria-label="${T('Vollbild mit Ansichten, Tempo und Technik')}">${ic('expand', 18)}</button>`}</div>
+        ${(videoMode() || mediaFor(e.id, curFig()) || !e.anim) ? '' : `<button class="icon-btn glass" data-action="open3d" data-id="${e.id}" aria-label="${T('Vollbild mit Ansichten, Tempo und Technik')}">${ic('expand', 18)}</button>`}</div>
     </div>
     <div class="ud-head">
-      <div class="ud-tags"><span class="pill pill-gold">${esc(TG(e.g))}${e.sg ? ' · ' + esc(TG(e.sg)) : ''}</span><span class="pill">${esc(eqShort(e))}</span><span class="grow"></span>${FigureSwitch(curFig())}</div>
+      <div class="ud-tags"><span class="pill pill-gold">${esc(TG(e.g))}${e.sg ? ' · ' + esc(TG(e.sg)) : ''}</span><span class="pill">${esc(eqShort(e))}</span>${Object.keys(e.cats || {}).map(c => `<span class="pill pill-gold">${esc(TG(c))}</span>`).join('')}${e.typ ? `<span class="pill">${esc(T(TYP_L[e.typ] || e.typ))}</span>` : ''}${e.lvl ? `<span class="pill">${esc(T(e.lvl))}</span>` : ''}<span class="grow"></span>${FigureSwitch(curFig())}</div>
       <h1 class="ud-title">${esc(e.n)}</h1>
       <div class="ud-sub">${esc(e.sub)}</div>
+      ${e.animBase && !videoMode() ? `<div class="muted" style="font-size:13px;margin-top:6px">${ic('cube', 14)} ${esc(T(e.animBase))}</div>` : ''}
     </div>
     <div class="ud-grid">
       <section class="ud-card">${SectionHeader(T('Muskulatur'))}
@@ -2888,6 +2895,7 @@ function ExerciseDetailView(e0) {
     ${trainer ? `<div class="ud-cta"><button class="btn btn-primary btn-big" data-action="ud-add" data-id="${e.id}">${ic('plus', 20)} ${T('Zum Trainingsplan hinzufügen')}</button></div>` : ''}
   </div>`;
 }
+const TYP_L = { dynamisch: 'Dynamisch', plyometrisch: 'Plyometrisch', isometrisch: 'Isometrisch (Halten)' };
 function viewUebung(id) {
   const e = KAT().find(x => x.id === id); if (!e) return null;
   return topbar({ back: UI.uebBack || '/uebungen', title: esc(KL(e).n), sub: esc(TG(e.g)) }) + `<main class="wrap view wrap-wide">${ExerciseDetailView(e)}</main>`;
@@ -2908,7 +2916,7 @@ function addCatalogExercise(exId, dayId) {
   const e = KAT().find(x => x.id === exId), d = S.days.get(dayId); if (!e || !d) return;
   const list = exercisesOf(dayId); if (list.length >= CONFIG.MAX_EXERCISES) return toast(T('Dieser Tag ist voll'));
   put('exercises', { id: uid(), dayId, name: e.n, order: list.length, createdAt: Date.now(), targetSets: CONFIG.DEFAULT_SETS, sets: [], note: '', catalogId: e.id,
-    ss: null, amrap: false, unit: null, rest: null, step: null, autoSuggest: e.eq !== 'Körpergewicht', startWeight: null, goalWeight: null });
+    ss: null, amrap: false, unit: e.unit === 's' ? 's' : null, rest: null, step: null, autoSuggest: e.eq !== 'Körpergewicht', startWeight: null, goalWeight: null });
   const plan = S.plans.get(d.planId), c = plan && S.clients.get(plan.clientId);
   closeModal(null); toast(`Hinzugefügt: ${d.name}${c ? ' · ' + c.name : ''}`);
 }
@@ -3022,6 +3030,7 @@ async function open3D(id, fig) {
   document.body.appendChild(root); document.body.classList.add('modal-open');
   const loadEl = root.querySelector('#v3-load');
   if (!webglOk()) { loadEl.innerHTML = T('Dieses Gerät/Browser unterstützt keine 3D-Grafik (WebGL).<br>Die Technikbeschreibung findest du unter „Technik“.'); root.querySelector('#v3-info').classList.remove('hidden'); return; }
+  if (!e0.anim) { loadEl.innerHTML = T('Für diese Übung gibt es noch keine 3D-Animation. Die Ausführung steht unter „Technik“.'); root.querySelector('#v3-info').classList.remove('hidden'); return; }
   try {
     await load3D();
     if (document.getElementById('v3d') !== root) return;
@@ -4359,7 +4368,7 @@ function viewClientHome() {
   const tile = k => { const d = MEASURES.find(m => m.k === k), fl = firstLast(cl, k); if (!fl) return '';
     return `<a class="stat" href="#/client/${cid}/body"><div class="stat-l">${d.s}</div><div class="stat-v">${fmtNum(fl.cur)} <small style="font-size:14px">${d.u}</small></div><div class="stat-s">${fl.n > 1 ? `${sgn(fl.d)} ${d.u} ${T('seit Start')}` : T('Startwert')}</div></a>`; };
   const complete = cl.filter(isComplete);
-  return topbar({ title: 'SWEAT4', sub: days.length ? T('Mein Training') : T('Meine Ernährung'), right: `<a class="icon-btn" href="#/client/${cid}/food" aria-label="${T('Ernährung')}">${ic('food', 22)}</a><a class="icon-btn" href="#/uebungen" aria-label="${T('Übungen')}">${ic('book', 22)}</a><a class="icon-btn" href="#/data" aria-label="${T('Einstellungen')}">${ic('db', 22)}</a>` }) +
+  return topbar({ title: 'SWEAT4', sub: days.length ? T('Mein Training') : T('Meine Ernährung'), right: `<a class="icon-btn bell" href="#/mitteilungen" aria-label="${T('Mitteilungen')}">${ic('bell', 22)}${clientUnread() ? `<span class="bell-n">${clientUnread() > 99 ? '99+' : clientUnread()}</span>` : ''}</a><a class="icon-btn" href="#/client/${cid}/food" aria-label="${T('Ernährung')}">${ic('food', 22)}</a><a class="icon-btn" href="#/uebungen" aria-label="${T('Übungen')}">${ic('book', 22)}</a><a class="icon-btn" href="#/data" aria-label="${T('Einstellungen')}">${ic('db', 22)}</a>` }) +
   `<main class="wrap view">
     <div id="box-banner">${boxBanner()}</div>
     <div class="hero">${avatar(c, 'xl')}<div class="grow"><h1>${T('Willkommen zurück, {n}', { n: esc(first) })} 👋</h1>${c.goals ? `<div class="muted" style="margin-top:4px">🎯 ${esc(c.goals)}</div>` : ''}</div></div>
@@ -4608,11 +4617,11 @@ async function setupFromFile(file, code, opts = {}) {
   const meta = [{ id: 'role', value: 'client', clientId: pkg.clientId, since: Date.now() }, lock, { id: 'pkgInfo', exportedAt: pkg.exportedAt, boxV: opts.boxV || 0 }];
   if (boxU) meta.push({ id: 'box', url: boxU }); const upM = S.meta.get('boxUp'); if (upM) meta.push(upM);
   if (pkg.notify) meta.push({ id: 'notify', ch: pkg.notify });
-  for (const k of ['msgV', 'pushCh', 'pushOn', 'lang']) { const m = S.meta.get(k); if (m && role.value === 'client') meta.push(m); }
+  for (const k of ['msgV', 'pushCh', 'pushOn', 'lang', 'pushPrivate', 'pushSeen', 'badge']) { const m = S.meta.get(k); if (m && role.value === 'client') meta.push(m); }
   // Nachrichten zusammenführen (lokal noch nicht übertragene Nachrichten und Lesebestätigungen bleiben erhalten)
   const msgs = new Map((pkg.data.messages || []).filter(m => m.clientId === pkg.clientId).map(m => [m.id, m]));
   if (role.value === 'client') for (const m of all('messages')) { const o = msgs.get(m.id); if (m.clientId === pkg.clientId && (!o || (m.readAt && !o.readAt) || (m.updatedAt || 0) > (o.updatedAt || 0))) msgs.set(m.id, o ? { ...o, readAt: o.readAt || m.readAt } : m); }
-  await DB.replaceAll({ ...pkg.data, sessions: [...map.values()], messages: [...msgs.values()], events: [], meta, photos: pkg.photos });
+  await DB.replaceAll({ ...pkg.data, sessions: [...map.values()], messages: [...msgs.values()], events: role.value === 'client' ? all('events').filter(e => /^c-/.test(e.type) && e.clientId === pkg.clientId) : [], meta, photos: pkg.photos });
   PH.clear(); await loadAll(); LOCK.init = true; LOCK.locked = false; UI.open = {}; BOX.code = code; await sessionStart(code);
 }
 async function makeReturn(code) {
@@ -4622,7 +4631,7 @@ async function makeReturn(code) {
   const sessions = all('sessions').filter(s => s.clientId === cid && s.status === 'done');
   const pushOn = (S.meta.get('pushOn') || {}).on, ch = S.meta.get('pushCh');
   const text = await encryptPayload({ clientId: cid, sessions, meals: c.meals || null, mealCfg: c.mealCfg || null, mealsAt: c.mealsAt || 0, intake: c.intake || null, intakeAt: c.intakeAt || 0, exportedAt: new Date().toISOString(),
-    messages: msgsOf(cid), live: liveState(cid), lang: I18N.cur, notifyCh: pushOn && ch ? ch.ch : null }, code, { kind: 'client-return', v: 1, clientId: cid });
+    messages: msgsOf(cid), live: liveState(cid), lang: I18N.cur, notifyCh: pushOn && ch ? ch.ch : null, pushV: 2 }, code, { kind: 'client-return', v: 1, clientId: cid });
   return { name: `sweat4-trainings_${(c.name || 'kunde').replace(/[^\wäöüÄÖÜß-]+/g, '_')}_${today()}.json`, text, n: sessions.length };
 }
 async function importReturn(file, codeIn) {
@@ -4652,7 +4661,9 @@ async function importReturn(file, codeIn) {
   { const cc = S.clients.get(c.id), patch = {};
     if ('live' in p) patch.live = p.live && p.live.id ? { ...p.live, receivedAt: Date.now() } : null;
     if (p.lang === 'de' || p.lang === 'en') patch.lang = p.lang;
-    if ('notifyCh' in p) patch.notifyCh = /^[0-9a-f]{64}$/.test(p.notifyCh || '') ? p.notifyCh : null;
+    if ('notifyCh' in p) { const ok = /^[0-9a-f]{64}$/.test(p.notifyCh || '') ? p.notifyCh : null; patch.notifyCh = ok;
+      // Mehrere Geräte des Kunden: die letzten 3 Kanäle merken (abgemeldete Geräte entfernt der Briefkasten selbst)
+      if (ok) patch.notifyChs = [ok, ...(cc.notifyChs || []).filter(x => x !== ok)].slice(0, 3); else if (!p.pushV) patch.notifyChs = []; }
     if (Object.keys(patch).some(k => JSON.stringify(cc[k]) !== JSON.stringify(patch[k]))) put('clients', Object.assign(cc, patch)); }
   let meals = false;
   if (p.intakeAt && p.intakeAt > (S.clients.get(c.id).intakeAt || 0) && p.intake && typeof p.intake === 'object') { const cc = S.clients.get(c.id), was = (cc.intake || {}).submittedAt;
@@ -4706,7 +4717,11 @@ async function boxSendUpdate(cid) {
   const c = S.clients.get(cid); if (!c || !c.access || !c.access.code) throw new Error(T('Erst den Kunden einladen (Zugangscode festlegen).'));
   const r = await makePackage(cid, c.access.code);
   const v = await boxPut(cid, c.access.code, 'down', r.text);
-  const cc = S.clients.get(cid); cc.access = { ...cc.access, boxSent: v }; put('clients', cc);
+  const cc = S.clients.get(cid), cur = planSig(cid), prev = cc.access.sentPlan;
+  // „Neuer Trainingsplan“ = anderer Plan bzw. andere Vorlage oder komplett neue Trainingstage; sonst „aktualisiert“
+  const kind = (prev ? cur.plans.some(id => !prev.plans.includes(id)) || cur.tpl !== prev.tpl || (prev.days.length && cur.days.length && !cur.days.some(d => prev.days.includes(d))) : !cc.access.boxSent) ? 'plannew' : 'plan';
+  cc.access = { ...cc.access, boxSent: v, sentPlan: cur }; put('clients', cc);
+  pushClient(cc, kind);
   return r;
 }
 /* Kunde → Trainer (vom Trainer abgeholt) */
@@ -4738,26 +4753,33 @@ async function boxClientSync(force, quiet) {
   const t = Date.now(); if (!force && BOX.checked.client && t - BOX.checked.client < 60000) return; BOX.checked.client = t;
   const cid = roleInfo().clientId, c = S.clients.get(cid); if (!c) return;
   flushSave();
-  const lastDone = Math.max(0, ...all('sessions').filter(s => s.clientId === cid && s.status === 'done').map(s => s.updatedAt || 0));
+  const doneS = all('sessions').filter(s => s.clientId === cid && s.status === 'done'), lastDone = Math.max(0, ...doneS.map(s => s.updatedAt || 0));
+  const finOf = k => Math.max(0, ...doneS.filter(s => (s.kind === 'run') === k).map(s => s.finishedAt || s.updatedAt || 0)), lastStr = finOf(false), lastRun = finOf(true);
   const myMsgs = msgsOf(cid), lastMsg = Math.max(0, ...myMsgs.map(m => Math.max(m.from === 'client' ? m.at || 0 : 0, m.readAt || 0)));
   const live = liveState(cid), liveSig = live ? live.id + ':' + Math.floor((live.updatedAt || 0) / 180000) : '';   // Live-Status höchstens alle 3 Min.
   const pushCh = (S.meta.get('pushOn') || {}).on ? (S.meta.get('pushCh') || {}).ch || '' : '';
   const sig = [lastDone, c.mealsAt || 0, lastMsg, liveSig, pushCh, I18N.cur, c.intakeAt || 0].join('|');
   const up = S.meta.get('boxUp') || {};
-  if ((lastDone || c.mealsAt || lastMsg || live || c.intakeAt || up.sig) && sig !== up.sig) {
+  if ((lastDone || c.mealsAt || lastMsg || live || c.intakeAt || pushCh || up.sig) && sig !== up.sig) {   // auch ein neu eingeschalteter Push-Kanal wird gemeldet
     try {
       const r = await makeReturn(BOX.code); await boxPut(cid, BOX.code, 'up', r.text);
-      put('meta', { id: 'boxUp', at: Math.max(lastDone, c.mealsAt || 0), sig, sent: Date.now(), lastDone, lastClientMsg: lastMsg });
-      // Trainer per Push wecken (ohne Inhalt) – nur bei neuem Trainingsabschluss bzw. neuer Kundennachricht
-      const ch = (S.meta.get('notify') || {}).ch;
-      if (lastDone > (up.lastDone || 0)) pushPing(ch, 'done');
-      else if (myMsgs.some(m => m.from === 'client' && m.at > (up.lastClientMsg || up.sent || 0))) pushPing(ch, 'msg');
+      const intakeSub = (c.intake || {}).submittedAt || 0;
+      put('meta', { id: 'boxUp', at: Math.max(lastDone, c.mealsAt || 0), sig, sent: Date.now(), lastDone, lastClientMsg: lastMsg, lastStr, lastRun, intakeSub, pv: 2 });
+      // Trainer per Push wecken (ohne Inhalt) – erst NACHDEM die Daten im Briefkasten gespeichert sind; je Ereignis-Art genau ein Ping
+      const ch = (S.meta.get('notify') || {}).ch, old = up.pv === 2;
+      if (lastStr > (old ? up.lastStr || 0 : up.lastDone || 0)) pushPing(ch, 'done');
+      if (lastRun > (old ? up.lastRun || 0 : up.lastDone || 0)) pushPing(ch, 'run');
+      const newMsgs = myMsgs.filter(m => m.from === 'client' && m.at > (old ? up.lastClientMsg || 0 : up.lastClientMsg || up.sent || 0));
+      if (newMsgs.some(m => m.kind === 'issue')) pushPing(ch, 'issue');
+      if (newMsgs.some(m => m.kind !== 'issue')) pushPing(ch, 'msg');
+      if (intakeSub && intakeSub > (up.intakeSub || 0) && (old || intakeSub > (up.sent || 0))) pushPing(ch, 'intake');
     } catch (e) { if (force && !quiet) toast(e.message); }
   }
   try { if (await boxClientMessages(cid)) { toast(T('Neue Nachricht von deinem Trainer') + ' 💬'); render(); } } catch (e) {}
   const info = S.meta.get('pkgInfo') || {};
   const res = await boxGet(cid, BOX.code, 'down', info.boxV || 0).catch(e => { if (force) toast(e.message); return null; });
   BOX.pending = res && !res.missing ? res : null;
+  if (BOX.pending && clientNote('c-plan', BOX.pending.v)) setTimeout(updateBadge, 0);
   // Festlegung „nächster Trainingstag“ sofort übernehmen – auch bevor der Kunde den neuen Plan lädt
   if (BOX.pending && BOX.peeked !== BOX.pending.v) {
     try { const ch = await peekNextSel(cid, BOX.pending); BOX.peeked = BOX.pending.v; if (ch && !/^#\/(train|lauf)\//.test(location.hash)) render(); } catch (e) {}
@@ -4779,8 +4801,35 @@ async function peekNextSel(cid, res) {
   }
   // Laufplan/Lauftest vom Trainer sofort übernehmen (nur veröffentlichter Stand, kein „Jetzt laden“ nötig)
   const pc = pkg.data.clients[0], lc = S.clients.get(cid);
-  if (pc && lc && (pc.runPlanAt || 0) > (lc.runPlanAt || 0)) { lc.runPlan = pc.runPlan || null; lc.runPlanAt = pc.runPlanAt; put('clients', lc); ch = true; }
+  if (pc && lc && (pc.runPlanAt || 0) > (lc.runPlanAt || 0)) { lc.runPlan = pc.runPlan || null; lc.runPlanAt = pc.runPlanAt; put('clients', lc); ch = true; clientNote('c-week', pc.runPlanAt, pc.runPlanAt); }
   return ch;
+}
+/* Kunde: eigene Mitteilungen (neuer Plan, Wochenplan) – liegen nur auf diesem Gerät */
+function clientNote(type, key, at) { const cid = roleInfo().clientId; if (!cid) return; if (addEvent({ id: type + ':' + key, type, clientId: cid, at: at || Date.now() })) return true; }
+const clientNotes = () => all('events').filter(e => /^c-/.test(e.type)).sort((a, b) => (b.at || 0) - (a.at || 0));
+function clientUnread() { const cid = roleInfo().clientId; return (cid ? unreadFrom(cid, 'trainer').length : 0) + clientNotes().filter(e => !e.read).length; }
+function viewClientNotes() {
+  const cid = roleInfo().clientId, msgs = msgsOf(cid).filter(m => m.from === 'trainer').slice(-30);
+  const items = [...msgs.map(m => ({ at: m.at, unread: !m.readAt, icon: m.sessionId ? '📋' : '💬', title: m.sessionId ? T('Rückmeldung von deinem Trainer') : T('Nachricht von deinem Trainer'), sub: m.text.slice(0, 120), href: '#/nachrichten' })),
+    ...clientNotes().map(e => ({ at: e.at, unread: !e.read, icon: e.type === 'c-week' ? '📅' : '🏋️', title: e.type === 'c-week' ? T('Dein Wochenplan wurde aktualisiert') : T('Neuer Trainingsplan von deinem Trainer'),
+      sub: e.type === 'c-week' ? T('Laufen & Training dieser Woche') : BOX.pending ? T('Tippe auf „Jetzt laden“') : T('Ist geladen'), href: e.type === 'c-week' ? `#/client/${cid}/lauf` : '#/' }))].sort((a, b) => b.at - a.at);
+  const html = topbar({ back: '/', title: T('Mitteilungen'), sub: TN(clientUnread(), '{n} ungelesen', '{n} ungelesen') }) + `<main class="wrap view">
+    <div id="box-banner">${boxBanner()}</div>
+    ${items.length ? `<div class="card list-card">${items.map(x => `<a class="list-link ev ${x.unread ? 'unread' : ''}" href="${x.href}"><span class="care-ic">${x.icon}</span><div class="grow"><div style="font-weight:${x.unread ? 700 : 500}">${esc(x.title)}</div>${x.sub ? `<div class="muted" style="font-size:13px">${esc(x.sub)}</div>` : ''}<div class="muted" style="font-size:12px">${fmtDateTs(x.at)} ${fmtTime(x.at)}</div></div>${x.unread ? '<span class="dot-new"></span>' : ''}</a>`).join('')}</div>`
+      : `<div class="card empty">${T('Noch keine Mitteilungen. Nachrichten und neue Pläne deines Trainers erscheinen hier.')}</div>`}
+    ${boxUrl() ? `<section class="section"><div class="section-h"><h2>${T('Einstellungen')}</h2></div><div class="card stack">${PushCard('client')}</div></section>` : ''}
+  </main>`;
+  setTimeout(() => { for (const e of clientNotes()) if (!e.read) markEvent(e.id, { read: true }); updateBadge(); }, 1500);   // Plan-Mitteilungen gelten nach dem Ansehen als gelesen
+  return html;
+}
+/* Zahl am App-Symbol = ungelesene Meldungen (Trainer) bzw. ungelesene Nachrichten + Mitteilungen (Kunde) */
+function updateBadge() {
+  try {
+    const n = isClientMode() ? clientUnread() : unreadEvents();
+    if (S.meta.get('badge') ? S.meta.get('badge').n !== n : n) put('meta', { id: 'badge', n });
+    if (!document.hidden) { const ps = S.meta.get('pushSeen'); if (!ps || Date.now() - ps.at > 5000) put('meta', { id: 'pushSeen', at: Date.now() }); }
+    if ('setAppBadge' in navigator) (n ? navigator.setAppBadge(n) : navigator.clearAppBadge()).catch(() => {});
+  } catch (e) {}
 }
 const boxBanner = () => BOX.pending ? `<div class="box-banner"><div class="grow"><b>${T('Neuer Plan von deinem Trainer')}</b><div>${T('Training und Ernährung wurden aktualisiert.')}</div></div>
   <button class="btn btn-primary" data-action="box-apply">${T('Jetzt laden')}</button></div>` : '';
@@ -5138,14 +5187,14 @@ async function sendMessage(cid, text, opts = {}) {
   // Trainer: zugehörige offene Punkte gelten als beantwortet
   markEventsWhere(e => e.clientId === cid && !e.handled && ((e.type === 'msg' || e.type === 'issue') || (opts.sessionId && (e.type === 'done' || e.type === 'run') && e.sessionId === opts.sessionId)), { handled: true, read: true });
   let delivered = false;
-  try { delivered = await boxSendMessages(cid); } catch (e) { delivered = false; m.err = e.message; }
+  try { delivered = await boxSendMessages(cid, opts.sessionId ? 'feedback' : 'msg'); } catch (e) { delivered = false; m.err = e.message; }
   return { m, delivered };
 }
-async function boxSendMessages(cid) {
+async function boxSendMessages(cid, type = 'msg') {
   const c = S.clients.get(cid); if (!c || !c.access || !c.access.code || !boxUrl()) return false;
   const text = await encryptPayload({ clientId: cid, messages: msgsOf(cid), sentAt: Date.now() }, c.access.code, { kind: 'client-msgs', v: 1, clientId: cid });
   await boxPut(cid, c.access.code, 'msg', text);
-  pushPing(c.notifyCh, 'msg');
+  pushClient(c, type);
   return true;
 }
 /* Kunde: Nachrichten des Trainers abholen */
@@ -5168,6 +5217,12 @@ const pushSupported = () => 'serviceWorker' in navigator && 'PushManager' in win
 const b64u = buf => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 const unb64u = s => { s = s.replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; return Uint8Array.from(atob(s), ch => ch.charCodeAt(0)); };
 function pushPing(ch, type) { const u = boxUrl(); if (!u || !ch || !/^[0-9a-f]{64}$/.test(ch)) return; fetch(`${u}/push/ping/${ch}?t=${type}`, { method: 'POST' }).catch(() => {}); }
+// Kunde benachrichtigen – an alle bekannten Geräte dieses EINEN Kunden (Kanäle stammen nur aus seinen eigenen, verschlüsselten Rückmeldungen)
+function pushClient(c, type) { if (!c) return; const chs = [...new Set([c.notifyCh, ...(c.notifyChs || [])].filter(Boolean))]; chs.forEach(ch => pushPing(ch, type)); return chs.length; }
+function planSig(cid) { const ps = all('plans').filter(p => p.clientId === cid).sort((a, b) => a.id < b.id ? -1 : 1);
+  return { plans: ps.map(p => p.id), tpl: ps.map(p => p.templateId || '').join('|'), days: ps.flatMap(p => daysOf(p.id).map(d => d.id)) }; }
+const PUSH_V = 2;
+const pushTypes = role => { const cfg = careCfg(); return role === 'trainer' ? [...(cfg.pushDone ? ['done', 'run'] : []), ...(cfg.pushMsg ? ['msg', 'issue', 'intake'] : [])] : ['msg', 'feedback', 'plan', 'plannew']; };
 function pushChannel() { let m = S.meta.get('pushCh'); if (!m) { m = { id: 'pushCh', ch: hexOf(rnd(32)), token: hexOf(rnd(32)) }; put('meta', m); } return m; }
 async function pushEnable(role) {
   if (!pushSupported()) throw new Error(isIOS() && !isStandalone() ? T('Auf dem iPhone funktionieren Push-Mitteilungen nur in der App auf dem Home-Bildschirm (ab iOS 16.4).') : T('Dieses Gerät bzw. dieser Browser unterstützt keine Push-Mitteilungen.'));
@@ -5182,10 +5237,10 @@ async function pushEnable(role) {
   if (sub) { const cur = sub.options && sub.options.applicationServerKey && b64u(sub.options.applicationServerKey); if (cur && cur !== key) { await sub.unsubscribe(); sub = null; } }
   if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: unb64u(key) });
   const ch = pushChannel(), cfg = careCfg();
-  const types = role === 'trainer' ? [cfg.pushDone ? 'done' : null, cfg.pushMsg ? 'msg' : null].filter(Boolean) : ['msg'];
+  const types = pushTypes(role);
   const r = await fetch(`${u}/push/sub/${ch.ch}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: ch.token, sub: sub.toJSON(), types }) });
   if (!r.ok) throw new Error(T('Briefkasten-Fehler ({s}).', { s: r.status }));
-  put('meta', { id: 'pushOn', on: true, at: Date.now(), role });
+  put('meta', { id: 'pushOn', on: true, at: Date.now(), role, v: PUSH_V });
   if (role === 'client') boxClientSync(true, true).catch(() => {});   // Kanal an den Trainer melden
   return true;
 }
@@ -5200,11 +5255,12 @@ function PushCard(role) {
   const hint = !pushSupported() ? (isIOS() && !isStandalone() ? T('Auf dem iPhone funktionieren Push-Mitteilungen nur in der App auf dem Home-Bildschirm (ab iOS 16.4).') : T('Dieses Gerät bzw. dieser Browser unterstützt keine Push-Mitteilungen.'))
     : perm === 'denied' ? T('Mitteilungen sind für SWEAT4 blockiert. Erlaube sie in den Einstellungen des Handys.') : '';
   return `<div class="stack push-card"><b>${T('Push-Mitteilungen')}</b>
-    <div class="muted" style="font-size:13px">${role === 'trainer' ? T('Du bekommst eine Mitteilung aufs Handy, wenn ein Kunde ein Training abschließt oder dir schreibt – auch wenn SWEAT4 geschlossen ist. Die Mitteilung enthält keine Trainingsdaten; Details siehst du erst in der App.') : T('Du bekommst eine Mitteilung, wenn dein Trainer dir schreibt. Die Mitteilung enthält keinen Text – du liest die Nachricht in der App.')}</div>
+    <div class="muted" style="font-size:13px">${role === 'trainer' ? T('Du bekommst eine Mitteilung aufs Handy, wenn ein Kunde ein Training abschließt, dir schreibt oder den Fragebogen ausfüllt – auch wenn SWEAT4 geschlossen ist. Die Mitteilung enthält keine Namen und keine Trainingsdaten; Details siehst du erst in der App.') : T('Du bekommst eine Mitteilung, wenn dein Trainer dir schreibt, dir eine Rückmeldung gibt oder deinen Trainingsplan neu anlegt bzw. ändert. Die Mitteilung enthält keinen Nachrichtentext – du liest alles in der App.')}</div>
     ${role === 'trainer' ? `<label class="toggle"><input type="checkbox" data-care="pushDone" ${cfg.pushDone ? 'checked' : ''}><span class="tg"></span><span>${T('Bei Trainingsabschlüssen')}</span></label>
     <label class="toggle"><input type="checkbox" data-care="pushMsg" ${cfg.pushMsg ? 'checked' : ''}><span class="tg"></span><span>${T('Bei neuen Nachrichten')}</span></label>` : ''}
     ${hint ? `<div class="info" style="font-size:13px">${hint}</div>` : on ? `<div class="grid2"><button class="btn btn-ghost" data-action="push-test">${T('Test senden')}</button><button class="btn btn-ghost" data-action="push-off">${T('Ausschalten')}</button></div><div class="muted" style="font-size:12px">✓ ${T('Push-Mitteilungen sind auf diesem Gerät aktiv.')}</div>`
       : `<button class="btn btn-primary btn-block" data-action="push-on" data-role="${role}">${ic('bell', 18)} ${T('Push-Mitteilungen aktivieren')}</button>`}
+    ${on && !hint ? `<label class="toggle"><input type="checkbox" id="push-private" ${(S.meta.get('pushPrivate') || {}).on ? 'checked' : ''}><span class="tg"></span><span>${T('Inhalt der Mitteilung ausblenden')}<small>${T('Statt „Neue Nachricht von deinem Trainer“ steht dann nur „Neue Mitteilung“. Für den Sperrbildschirm: iPhone-Einstellungen → Mitteilungen → SWEAT4 → Vorschauen zeigen → „Wenn entsperrt“.')}</small></span></label>` : ''}
   </div>`;
 }
 
@@ -6246,7 +6302,11 @@ document.addEventListener('change', ev => {
 });
 document.addEventListener('submit', ev => {
   const f = ev.target; if (!f.dataset || f.dataset.form !== 'intake') return; ev.preventDefault();
-  const cid = f.dataset.cid; saveIntake(cid, f, true); UI.iqEdit = null;
+  const cid = f.dataset.cid, c0 = S.clients.get(cid);
+  if (!f.dataset.ok && Object.keys(readIntakeForm(f, c0).a).length < 3) {   // (fast) leer abgesendet? Erst nachfragen
+    confirmDialog(T('Fragebogen fast leer'), T('Du hast erst wenige Fragen beantwortet. Je mehr du ausfüllst, desto besser passt dein Plan. Trotzdem absenden?'), { ok: T('Trotzdem absenden'), cancel: T('Weiter ausfüllen') })
+      .then(ok => { if (ok) { f.dataset.ok = '1'; f.requestSubmit(); } }); return; }
+  saveIntake(cid, f, true); UI.iqEdit = null;
   if (isClientMode()) { toast(T('Danke! Dein Fragebogen ist bei deinem Trainer.')); try { BOX.checked = {}; boxClientSync(true, true); } catch (e) {} go('/'); }
   else { toast('Fragebogen gespeichert ✓'); render(); }
 }, true);
@@ -6255,7 +6315,7 @@ document.addEventListener('submit', ev => {
 function routeGuard(p) {
   if (!isClientMode()) return null;
   const cid = roleInfo().clientId;
-  if (p[0] === 'meldungen') return '/';
+  if (p[0] === 'meldungen') return '/mitteilungen';
   if (p[0] === 'client') { if (p[1] !== cid || !p[2] || p[2] === 'check') return '/'; if (p[2] === 'plan') return `/client/${cid}/planview`; if (p[2] === 'nachrichten') return '/nachrichten'; }
   if ((p[0] === 'train' || p[0] === 'session' || p[0] === 'lauf') && S.sessions.get(p[1]) && S.sessions.get(p[1]).clientId !== cid) return '/';
   if (p[0] === 'check' && (!S.checks.get(p[1]) || S.checks.get(p[1]).clientId !== cid || p[2] === 'edit')) return '/';
@@ -6267,6 +6327,7 @@ function routeExtra(p) {
   if (!p.length && isClientMode()) return viewClientHome();
   if (p[0] === 'meldungen' && !isClientMode()) return viewMeldungen();
   if (p[0] === 'nachrichten' && isClientMode()) return viewMessages(roleInfo().clientId);
+  if (p[0] === 'mitteilungen' && isClientMode()) return viewClientNotes();
   if (p[0] === 'client' && p[2] === 'nachrichten' && !isClientMode()) return viewMessages(p[1]) || null;
   if (p[0] === 'client' && p[2]) {
     const c = S.clients.get(p[1]); if (!c) return undefined;
@@ -6443,7 +6504,7 @@ document.addEventListener('submit', async ev => {
     if (k === 'pkg') {
       const code = String(fd.get('code') || '').trim(); if (code.length < 6) return toast(T('Mindestens 6 Zeichen'));
       busy(f, true); const r = await makePackage(f.dataset.cid, code); closeModal(null);
-      if (boxUrl()) { const v = await boxPut(f.dataset.cid, code, 'down', r.text); const cc = S.clients.get(f.dataset.cid); cc.access = { ...cc.access, boxSent: v }; put('clients', cc); inviteReady(f.dataset.cid); render(); return; }
+      if (boxUrl()) { const v = await boxPut(f.dataset.cid, code, 'down', r.text); const cc = S.clients.get(f.dataset.cid); cc.access = { ...cc.access, boxSent: v, sentPlan: planSig(cc.id) }; put('clients', cc); inviteReady(f.dataset.cid); render(); return; }
       fileReady(r.name, r.text, `Zugangsdatei für <b>${esc(S.clients.get(f.dataset.cid).name)}</b> erstellt (${r.n} Fotos, ${fmtNum(Math.round(r.text.length / 1024 / 1024 * 10) / 10)} MB, verschlüsselt). Schick sie an deinen Kunden und teile ihm den Code getrennt mit.`);
       return;
     }
@@ -6518,6 +6579,17 @@ document.addEventListener('change', ev => {
   if ((k === 'pushDone' || k === 'pushMsg') && (S.meta.get('pushOn') || {}).on) pushEnable('trainer').catch(e => toast(e.message));
   toast(T('Gespeichert'));
 });
+document.addEventListener('change', ev => { if (ev.target.id !== 'push-private') return; put('meta', { id: 'pushPrivate', on: ev.target.checked }); toast(T('Gespeichert')); });
+// Service Worker meldet eine Push-Mitteilung, während die App offen ist → sofort abgleichen (keine zweite Mitteilung nötig)
+if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', ev => {
+  if (!ev.data || ev.data.type !== 'sweat4-push' || LOCK.locked) return;
+  if (isClientMode()) { BOX.checked = {}; boxClientSync(true, true).then(() => render()).catch(() => {}); } else careFetchAll(0).then(() => render()).catch(() => {});
+});
+// Ältere Push-Anmeldungen (nur „Nachricht“) einmalig auf alle Ereignis-Arten erweitern – ohne Nachfrage, nur wenn bereits erlaubt
+async function pushUpgrade() {
+  const on = S.meta.get('pushOn'); if (!on || !on.on || (on.v || 1) >= PUSH_V || !pushSupported() || Notification.permission !== 'granted' || !boxUrl()) return;
+  try { await pushEnable(isClientMode() ? 'client' : 'trainer'); } catch (e) {}
+}
 document.addEventListener('click', ev => { const a = ev.target.closest('a[data-ev]'); if (a && !isClientMode()) markEvent(a.dataset.ev, { read: true }); });
 document.addEventListener('visibilitychange', () => { if (document.hidden || LOCK.locked) return; if (isClientMode()) boxClientSync(false, true).catch(() => {}); else careFetchAll(60000); });
 setInterval(() => { if (document.hidden || LOCK.locked) return; if (isClientMode()) boxClientSync(false, true).catch(() => {}); else careFetchAll(); }, 120000);
@@ -6525,7 +6597,7 @@ setInterval(() => { if (document.hidden || LOCK.locked) return; if (isClientMode
 (async function init() {
   // Offline-Fähigkeit, sobald die App über eine Web-Adresse geöffnet wird
   if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
-  try { await DB.open(); await loadAll(); if ((S.meta.get('lang') || {}).value !== I18N.cur) put('meta', { id: 'lang', value: I18N.cur }); /* Sprache für Push-Texte im Service Worker */ if (S.meta.get('lock')) { LOCK.init = true; LOCK.locked = !(await sessionRestore()); } render(); }
+  try { await DB.open(); await loadAll(); if ((S.meta.get('lang') || {}).value !== I18N.cur) put('meta', { id: 'lang', value: I18N.cur }); /* Sprache für Push-Texte im Service Worker */ if (S.meta.get('lock')) { LOCK.init = true; LOCK.locked = !(await sessionRestore()); } render(); setTimeout(pushUpgrade, 3000); }
   catch (e) {
     document.getElementById('app').innerHTML = `<main class="wrap"><div class="card" style="margin-top:30px"><h2>Speicher nicht verfügbar</h2>
       <p class="muted">Der Browser erlaubt keine lokale Datenbank (IndexedDB). Häufige Ursachen: privater/Inkognito-Modus oder eine Vorschau-Ansicht. Bitte öffne die Datei direkt in Chrome, Edge, Firefox oder Safari.</p>

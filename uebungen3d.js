@@ -1965,13 +1965,14 @@
       const A = V(0, .1, -.95), hz = .41;
       return {
         cam: { az: 72, el: 14, dist: 2.9, target: V(0, .3, -.1) },
-        timing: LBL.lower('Start – Hände unter den Schultern, enger als schulterbreit, Körper in einer Linie', 'Brust zum Boden senken – Ellbogen eng am Körper nach hinten', 'Unten – Brust knapp über dem Boden', 'kraftvoll nach oben drücken'),
+        timing: p.lbl ? LBL.lower(...p.lbl) : LBL.lower('Start – Hände unter den Schultern, enger als schulterbreit, Körper in einer Linie', 'Brust zum Boden senken – Ellbogen eng am Körper nach hinten', 'Unten – Brust knapp über dem Boden', 'kraftvoll nach oben drücken'),
         setup(kit) { kit.floorMat(-1.15, .75); },
         pose(s) {
           const a = lerp(22, 7, s) * D2R, dir = V(0, Math.sin(a), Math.cos(a));
           const pel = A.clone().addScaledVector(dir, LEG + .03);
           const o = { pelvis: pel, pitch: 90 - a / D2R, head: -10, ankle: sides(sg => V(sg * .08, A.y, A.z)), foot: sides(() => V(0, -1, .35)), knee: sides(() => V(0, -1, 0)) };
-          o.hand = sides(sg => V(sg * .11, .03, hz)); o.elbow = sides(sg => V(sg * .25, .55, -1));
+          const hw = p.w || .11; // Handabstand (Standard: eng); breitere Hände → Ellbogen etwa 45° zur Seite
+          o.hand = sides(sg => V(sg * hw, .03, hz)); o.elbow = sides(sg => V(sg * (hw > .15 ? .8 : .25), .55, -1));
           return o;
         }
       };
