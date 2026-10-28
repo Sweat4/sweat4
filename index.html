@@ -700,6 +700,14 @@ img.ld{opacity:1!important}
 .nut-m-v{font:800 22px/1.2 var(--font-display);font-variant-numeric:tabular-nums}.nut-m-v small{font-size:12px;color:var(--muted)}
 .nut-m-k{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
 .nut-foot{font-size:12px;color:var(--muted);line-height:1.5}
+/* Körpertyp (Zusatzebene) */
+.nut-bt{display:grid;gap:6px;padding:10px 12px;border-radius:var(--r-md);background:var(--surface-2);border:1px solid var(--border)}
+.nut-bt-h{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.nut-bt-h b{font-size:14px}.nut-bt-l{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.nut-bt-calc{display:grid;grid-template-columns:1fr auto;gap:2px 10px;font-size:13px;font-variant-numeric:tabular-nums}
+.nut-bt-calc b{text-align:right}
+.nut-bt-n{font-size:12px;color:var(--muted);line-height:1.45}
+.iq-chips.bt-chips{display:grid}.bt-chips span{width:100%;border-radius:14px;line-height:1.35;padding:9px 14px}
 
 /* Mahlzeiten */
 .food-sum{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:12px}
@@ -3342,6 +3350,56 @@ const NUTRITION = {
 const nutGoalOf = c => (NUTRITION.goals[c.nutGoal] && c.nutGoal) || (((planOf(c.id) || {}).templateId || '').includes('mass') ? 'mass' : 'def');
 const clientWeight = c => { const cl = checksOf(c.id); for (let i = cl.length - 1; i >= 0; i--) { const w = valOf(cl[i], 'weight'); if (w != null) return { kg: w, src: T('Check vom {d}', { d: fmtDate(cl[i].date) }) }; } return c.weightKg ? { kg: c.weightKg, src: T('Profil') } : null; };
 function bmr(sex, kg, cm, age) { return 10 * kg + 6.25 * cm - 5 * age + (sex === 'm' ? 5 : -161); } // Mifflin-St Jeor
+/* =====================================================================
+   KÖRPERTYP – zusätzliche Berechnungsebene (grobe Orientierung, keine medizinische Klassifikation)
+   Ermittlung: 5 Fragen im bestehenden Fragebogen (Antwort A = Ektomorph, B = Mesomorph, C = Endomorph, je 1 Punkt).
+   Gleichstand → „gemischt“, keine Anpassung. Unvollständig → keine Anpassung. Manuelle Festlegung geht vor.
+   Anwendung: in nutritionFor() NACH der bestehenden Berechnung (Ziel, Phase, Sicherheitsgrenzen), genau einmal,
+   immer auf den frisch berechneten Ausgangswert. Eiweiß und Fett bleiben gleich, die Differenz geht in die Kohlenhydrate.
+   Multiplikatoren = Produktregel (kein gemessener Mehr-/Minderbedarf) – hier zentral anpassbar.
+   Gespeichert im bestehenden Profil: c.intake.a.bt1–bt5 (Antworten) und
+   c.intake.bt = { auto, mixed, scores, answered, at, manual, manualAt, manualBy } – Abgleich wie der Fragebogen (intakeAt).
+   ===================================================================== */
+const BODYTYPE = {
+  enabled: true,
+  order: ['ecto', 'meso', 'endo'],   // Antwort A / B / C
+  types: {
+    ecto: { f: 1.15, get label() { return T('Ektomorph'); }, get nick() { return T('Hardgainer'); }, get info() { return T('Eher schmaler Körperbau – nach eigener Einschätzung fällt Zunehmen schwer.'); } },
+    meso: { f: 1.00, get label() { return T('Mesomorph'); }, get nick() { return T('athletischer Körperbau'); }, get info() { return T('Eher athletischer Körperbau – nach eigener Einschätzung reagiert das Gewicht ausgeglichen.'); } },
+    endo: { f: 0.875, get label() { return T('Endomorph'); }, get nick() { return T('Softgainer'); }, get info() { return T('Eher kräftiger Körperbau – nach eigener Einschätzung fällt Zunehmen leicht.'); } },
+  },
+};
+const BT_Q = () => [
+  { k: 'bt1', l: T('Wie würdest du deinen natürlichen Körperbau beschreiben?'), o: ['Eher schmal, dünne Hand- und Fußgelenke, schlanke Gliedmaßen.', 'Eher athletisch, relativ breite Schultern und gut erkennbare Muskulatur.', 'Eher kräftig, mit einer Neigung, Körperfett anzusetzen.'] },
+  { k: 'bt2', l: T('Wie verändert sich dein Gewicht normalerweise?'), o: ['Ich nehme nur schwer zu, selbst wenn ich mehr esse.', 'Mein Gewicht verändert sich bei einer Anpassung meiner Ernährung relativ ausgeglichen.', 'Ich nehme vergleichsweise leicht zu.'] },
+  { k: 'bt3', l: T('Wie reagiert dein Körper auf Krafttraining?'), o: ['Muskelaufbau fällt mir eher schwer und benötigt viel Zeit.', 'Ich baue bei regelmäßigem Training relativ gut Muskeln auf.', 'Ich kann Kraft und Muskelmasse aufbauen, muss aber besonders auf eine übermäßige Fettzunahme achten.'] },
+  { k: 'bt4', l: T('Wie würdest du deine natürliche Körperzusammensetzung beschreiben?'), o: ['Eher schlank mit wenig Körperfett und wenig natürlicher Muskelmasse.', 'Eher ausgewogen mit einer relativ ausgeprägten Muskulatur.', 'Eher kräftig oder mit einer höheren Neigung zur Fetteinlagerung.'] },
+  { k: 'bt5', l: T('Welche Erfahrung hast du mit einer Erhöhung deiner Kalorienzufuhr?'), o: ['Selbst bei einer deutlichen Erhöhung fällt mir eine Gewichtszunahme schwer.', 'Ich nehme bei einem moderaten Kalorienüberschuss allmählich zu.', 'Ich nehme bereits bei relativ kleinen Kalorienüberschüssen zu.'] },
+];
+const BT_L = k => BODYTYPE.types[k] ? BODYTYPE.types[k].label : '';
+/* Punkte aus den Antworten – rein, ohne Seiteneffekte */
+function bodyTypeScore(a) {
+  const scores = { ecto: 0, meso: 0, endo: 0 }; let answered = 0;
+  for (const q of BT_Q()) { const i = q.o.indexOf((a || {})[q.k]); if (i >= 0) { scores[BODYTYPE.order[i]]++; answered++; } }
+  const complete = answered === BT_Q().length, max = Math.max(...Object.values(scores)), top = BODYTYPE.order.filter(k => scores[k] === max);
+  return { scores, answered, complete, auto: complete && top.length === 1 ? top[0] : null, mixed: complete && top.length > 1 ? top : null };
+}
+/* Wirksamer Körpertyp eines Kunden: manuelle Festlegung vor Fragebogen-Ergebnis; sonst null (= keine Anpassung) */
+function bodyTypeOf(c) {
+  const it = intakeOf(c), rec = it.bt || {}, s = bodyTypeScore(it.a), manual = BODYTYPE.types[rec.manual] ? rec.manual : null;
+  const type = BODYTYPE.enabled ? (manual || s.auto) : null;
+  return { ...s, manual, type, source: !type ? null : manual ? (manual === s.auto ? 'confirmed' : 'manual') : 'quiz', at: rec.at || null, manualAt: rec.manualAt || null };
+}
+const bodyTypeFactor = type => { const t = BODYTYPE.enabled && BODYTYPE.types[type]; return t && t.f > 0 ? t.f : 1; };
+const applyBodyType = (kcal, type) => Math.round(kcal * bodyTypeFactor(type));
+/* Ergebnis im bestehenden Profil festhalten (kein eigener Datensatz, keine Dubletten) */
+function stampBodyType(c, oldBt, patch) {
+  const it = c.intake, o = oldBt || {}, s = bodyTypeScore(it.a), ans = BT_Q().map(q => it.a[q.k] || '').join('|');
+  const rec = { ...o, ...(patch || {}) };
+  if (!s.answered && !rec.manual) { delete it.bt; return; }
+  it.bt = { auto: s.auto, mixed: s.mixed, scores: s.scores, answered: s.answered, ans, at: o.ans === ans && o.at ? o.at : (s.answered ? Date.now() : null),
+    manual: BODYTYPE.types[rec.manual] ? rec.manual : null, manualAt: rec.manual ? rec.manualAt || null : null, manualBy: rec.manual ? rec.manualBy || null : null };
+}
 function nutritionFor(c, date = today()) {
   const G = NUTRITION.goals[nutGoalOf(c)], miss = [];
   if (!G || !G.ready) return { pending: true, goal: G ? G.label : '' };
@@ -3362,11 +3420,68 @@ function nutritionFor(c, date = today()) {
   if (cb < minC) cb = minC;
   kcal = p * 4 + cb * 4 + f * 9;
   if (kcal < minK) { cb += (minK - kcal) / 4; kcal = minK; }
+  // ---- Körpertyp-Ebene (neu): erst jetzt, einmal, auf den eindeutig definierten bisherigen Ausgangswert ----
+  const bt = bodyTypeOf(c), btFactor = bodyTypeFactor(bt.type), kcalBase = Math.round(kcal); let btCapped = false;
+  if (btFactor !== 1) {
+    const kcalTarget = kcal * btFactor;
+    cb += (kcalTarget - kcal) / 4;                       // Eiweiß und Fett unverändert, Differenz über Kohlenhydrate
+    if (cb < minC) { cb = minC; btCapped = true; }       // bestehende Sicherheitsgrenzen gelten weiter
+    kcal = p * 4 + cb * 4 + f * 9;
+    if (kcal < minK) { cb += (minK - kcal) / 4; kcal = minK; btCapped = true; }
+  }
   const water = Math.round(G.water[phase] * kg / 100) / 10;
   return { goal: G.label, sex, week, phase, done: week > NUTRITION.weeks, kg, wSrc: W.src, need, act: act.label,
     kcal: Math.round(kcal), deficit: need ? need - Math.round(kcal) : null, water,
-    p: Math.round(p), c: Math.round(cb), f: Math.round(f), pk: p / kg, ck: cb / kg, fk: f / kg };
+    p: Math.round(p), c: Math.round(cb), f: Math.round(f), pk: p / kg, ck: cb / kg, fk: f / kg,
+    bt, btFactor, kcalBase, btCapped };
 }
+function BodyTypeBox(c, n, own) {
+  if (!BODYTYPE.enabled || !n.bt) return '';
+  const bt = n.bt, btn = l => `<button class="btn btn-sm btn-ghost" data-action="bt-open" data-cid="${c.id}">${l}</button>`;
+  const head = (v, l) => `<div class="nut-bt-h"><div><div class="nut-bt-l">${own ? T('Dein Körpertyp') : T('Körpertyp')}</div><b>${v}</b></div>${btn(l)}</div>`;
+  if (!bt.type) {
+    if (bt.mixed) return `<div class="nut-bt" data-bt="mixed">${head(T('Gemischt ({x})', { x: bt.mixed.map(k => esc(BT_L(k))).join(' / ') }), T('Prüfen'))}<div class="nut-bt-n">${T('Kein eindeutiges Ergebnis – es wird keine Körpertyp-Anpassung angewendet. Prüfe die Antworten oder lege den Körpertyp selbst fest.')}</div></div>`;
+    if (bt.answered) return `<div class="nut-bt" data-bt="partial">${head(T('Noch unvollständig ({a} von {b} Fragen)', { a: bt.answered, b: BT_Q().length }), T('Weiter'))}<div class="nut-bt-n">${T('Erst wenn alle Fragen beantwortet sind, gibt es eine Einordnung. Bis dahin bleibt das Kalorienziel unverändert.')}</div></div>`;
+    return `<div class="nut-bt" data-bt="none">${head(T('Noch nicht bestimmt'), T('Bestimmen'))}<div class="nut-bt-n">${T('Optional: 5 kurze Fragen zum Körperbau. Ohne Körpertyp bleibt das Kalorienziel unverändert.')}</div></div>`;
+  }
+  const t = BODYTYPE.types[bt.type], pct = Math.round((n.btFactor - 1) * 1000) / 10;
+  const src = bt.source === 'quiz' ? T('aus den Fragen vom {d}', { d: fmtDateTs(bt.at) }) : bt.source === 'confirmed' ? T('aus den Fragen, bestätigt') : T('manuell festgelegt');
+  const fin = n.kcalBase !== n.kcal || n.btFactor !== 1;
+  return `<div class="nut-bt" data-bt="${bt.type}">${head(`${esc(t.label)} <span class="muted" style="font-weight:600">· ${esc(t.nick)}</span>`, T('Ändern'))}
+    <div class="nut-bt-n">${esc(t.info)} <i>(${src})</i></div>
+    <div class="nut-bt-calc"><span>${T('Bisheriges Kalorienziel')}</span><b>${n.kcalBase.toLocaleString(LOC())} kcal</b>
+      <span>${T('Körpertyp-Anpassung')}</span><b>${pct > 0 ? '+' : pct < 0 ? '−' : '±'}${fmtNum(Math.abs(pct))} %</b>
+      <span>${T('Neues Kalorienziel')}</span><b>${n.kcal.toLocaleString(LOC())} kcal</b></div>
+    ${n.btCapped ? `<div class="nut-bt-n warn-t">${T('Die Sicherheitsgrenze greift – die Anpassung wurde begrenzt. Bitte das Kalorienziel individuell fachlich abklären, statt weiter zu reduzieren.')}</div>` : ''}
+    <div class="nut-bt-n">${fin && n.btFactor !== 1 ? T('Die App verwendet hier eine zusätzliche, konfigurierbare Startanpassung je Körpertyp – eine Produktregel, kein gemessener Stoffwechselwert. Eiweiß und Fett bleiben gleich, die Differenz wird über die Kohlenhydrate ausgeglichen.') : T('Für diesen Körpertyp ist keine zusätzliche Anpassung vorgesehen.')}</div></div>`;
+}
+function openBodyType(cid) {
+  const c = S.clients.get(cid); if (!c) return;
+  const a = intakeOf(c).a || {}, bt = bodyTypeOf(c);
+  modal(T('Körpertyp bestimmen'), `<form data-form="bodytype" data-cid="${cid}">
+    <p class="muted" style="margin:0 0 12px;font-size:13.5px">${T('5 kurze Fragen. Das Ergebnis ist eine grobe Orientierung, keine medizinische oder wissenschaftlich gesicherte Einordnung.')}</p>
+    ${BT_Q().map((q, i) => `<div class="field"><span>${i + 1}. ${esc(q.l)}</span><div class="iq-chips bt-chips">${q.o.map(o => `<label><input type="radio" name="${q.k}" value="${esc(o)}" ${a[q.k] === o ? 'checked' : ''}><span>${esc(T(o))}</span></label>`).join('')}</div></div>`).join('')}
+    <label class="field"><span>${T('Körpertyp festlegen (optional)')}</span><select class="input" name="manual"><option value="">${T('Ergebnis aus den Fragen verwenden')}</option>${BODYTYPE.order.map(k => `<option value="${k}" ${bt.manual === k ? 'selected' : ''}>${esc(BT_L(k))} – ${esc(BODYTYPE.types[k].nick)}</option>`).join('')}</select></label>
+    <div class="sheet-actions"><button type="button" class="btn btn-ghost" data-action="modal-close">${T('Abbrechen')}</button><button class="btn btn-primary">${T('Speichern')}</button></div></form>`);
+}
+function saveBodyType(cid, answers, manual) {
+  const c = S.clients.get(cid); if (!c) return null;
+  const old = intakeOf(c), a = { ...(old.a || {}) };
+  for (const q of BT_Q()) { if (q.o.includes(answers[q.k])) a[q.k] = answers[q.k]; else delete a[q.k]; }
+  const m = BODYTYPE.types[manual] ? manual : null, ob = old.bt || {};
+  c.intake = { ...old, a, consent: old.consent || null, submittedAt: old.submittedAt || null, by: old.by || null };
+  stampBodyType(c, ob, { manual: m, manualAt: m ? (m === ob.manual ? ob.manualAt : Date.now()) : null, manualBy: m ? (m === ob.manual ? ob.manualBy : (isClientMode() ? 'client' : 'trainer')) : null });
+  c.intakeAt = Date.now(); put('clients', c);
+  return bodyTypeOf(c);
+}
+Object.assign(A, { 'bt-open': el => openBodyType(el.dataset.cid) });
+document.addEventListener('submit', ev => {
+  const f = ev.target; if (!f.dataset || f.dataset.form !== 'bodytype') return; ev.preventDefault();
+  const fd = new FormData(f), ans = {}; BT_Q().forEach(q => { ans[q.k] = fd.get(q.k) || ''; });
+  const bt = saveBodyType(f.dataset.cid, ans, fd.get('manual') || ''); closeModal(null); render();
+  toast(!bt ? T('Gespeichert') : bt.type ? T('Körpertyp: {t}', { t: BT_L(bt.type) }) : bt.mixed ? T('Gemischtes Ergebnis – keine Anpassung') : T('Gespeichert'));
+  if (isClientMode()) { try { boxClientSync(true, true); } catch (e) {} }
+}, true);
 function NutritionCard(c, own) {
   const n = nutritionFor(c);
   const head = `<div class="section-h"><h2>${own ? T('Deine Ernährung') : T('Ernährung')}</h2>${own ? '' : `<button class="btn btn-sm btn-ghost" data-action="edit-client" data-id="${c.id}">${ic('edit', 16)} ${T('Profil')}</button>`}</div>`;
@@ -3380,6 +3495,7 @@ function NutritionCard(c, own) {
       ${n.need ? `<div class="nut-sub">${T('Bedarf ca. {k} kcal', { k: n.need.toLocaleString(LOC()) })}${n.deficit > 0 ? ' · ' + T('Defizit {k} kcal', { k: n.deficit }) : n.deficit < 0 ? ' · ' + T('Überschuss {k} kcal', { k: -n.deficit }) : ''}</div>` : ''}</div>
       <div class="nut-water"><span class="nut-drop" aria-hidden="true"></span><b>${fmtNum(n.water)} l</b><small>${T('Wasser')}</small></div></div>
     <div class="nut-phases">${ph}</div>
+    ${BodyTypeBox(c, n, own)}
     <div class="nut-macros">${mac(T('Eiweiß'), n.p, n.pk, 'p')}${mac(T('Kohlenhydrate'), n.c, n.ck, 'c')}${mac(T('Fett'), n.f, n.fk, 'f')}</div>
     <a class="btn btn-primary btn-block" href="#/client/${c.id}/food">${ic('list', 18)} ${T('Mahlzeiten planen')}</a>
     <div class="nut-foot">${T('Berechnet mit {k} kg ({s})', { k: fmtNum(n.kg), s: esc(n.wSrc) })}${own ? '' : ` · ${esc(n.act)}`}.${n.done ? ' ' + T('Für einen neuen Zyklus das Startdatum neu setzen.') : ''}<br>${T('Orientierungswerte, keine medizinische Beratung.')}</div>
@@ -6207,6 +6323,7 @@ const IQ = () => [
     { k: 'water', t: 'one', l: T('Wie viel trinkst du am Tag (Wasser, Tee)?'), o: ['unter 1 Liter', '1–2 Liter', 'über 2 Liter'] },
     { k: 'alcohol', t: 'one', l: T('Wie oft trinkst du Alkohol?'), o: ['nie', 'selten', 'wöchentlich', 'mehrmals pro Woche'] },
   ] },
+  { id: 'koerperbau', bt: true, title: T('Dein Körperbau'), note: T('Optional · grobe Orientierung für die Ernährung, keine medizinische Einordnung.'), q: BT_Q().map(q => ({ ...q, t: 'one', wide: true })) },
   { id: 'sonst', title: T('Zum Schluss'), q: [
     { k: 'other', t: 'area', l: T('Was sollte ich noch über dich wissen?') },
   ] },
@@ -6229,7 +6346,7 @@ function viewIntake(c) {
     const v = a[q.k], name = `iq_${q.k}`;
     if (q.t === 'text') return `<label class="field"><span>${esc(q.l)}</span><input class="input" name="${name}" value="${esc(v || '')}" maxlength="300"></label>`;
     if (q.t === 'area') return `<label class="field"><span>${esc(q.l)}</span><textarea class="input" name="${name}" rows="3" maxlength="1000" placeholder="${esc(q.ph || '')}">${esc(v || '')}</textarea></label>`;
-    if (q.t === 'one') return `<div class="field"><span>${esc(q.l)}</span><div class="iq-chips">${q.o.map(o => `<label><input type="radio" name="${name}" value="${esc(o)}" ${v === o ? 'checked' : ''}><span>${esc(T(o))}</span></label>`).join('')}</div></div>`;
+    if (q.t === 'one') return `<div class="field"><span>${esc(q.l)}</span><div class="iq-chips${q.wide ? ' bt-chips' : ''}">${q.o.map(o => `<label><input type="radio" name="${name}" value="${esc(o)}" ${v === o ? 'checked' : ''}><span>${esc(T(o))}</span></label>`).join('')}</div></div>`;
     if (q.t === 'multi') return `<div class="field"><span>${esc(q.l)} <small class="muted">${T('(mehrere möglich)')}</small></span><div class="iq-chips">${q.o.map(o => `<label><input type="checkbox" name="${name}" value="${esc(o)}" ${(v || []).includes(o) ? 'checked' : ''}><span>${esc(T(o))}</span></label>`).join('')}</div></div>`;
     if (q.t === 'scale') return `<div class="field"><span>${esc(q.l)}</span><div class="iq-chips iq-scale">${Array.from({ length: 10 }, (_, i) => `<label><input type="radio" name="${name}" value="${i + 1}" ${String(v) === String(i + 1) ? 'checked' : ''}><span>${i + 1}</span></label>`).join('')}</div></div>`;
     if (q.t === 'yn') { const y = yn(v); return `<div class="field iq-yn"><span>${esc(q.l)}</span><div class="iq-chips">${[['nein', T('Nein')], ['ja', T('Ja')]].map(([val, l]) => `<label><input type="radio" name="${name}" value="${val}" ${y.v === val ? 'checked' : ''} data-iqyn="${q.k}"><span>${l}</span></label>`).join('')}</div>
@@ -6240,7 +6357,7 @@ function viewIntake(c) {
     if (s.health) return `<section class="card stack iq-sec"><h3>${esc(s.title)}</h3>
       <label class="toggle" style="margin:0"><input type="checkbox" name="iq_consent" ${it.consent ? 'checked' : ''} data-iqconsent="1"><span class="tg"></span><span>${T('Ich willige ein, dass meine Gesundheitsangaben gespeichert und von meinem Trainer ausschließlich für meine Trainingsplanung verwendet werden.')}<small>${T('Freiwillig und jederzeit widerrufbar. Ohne Einwilligung bleibt dieser Teil leer – sprich gesundheitliche Themen dann bitte im Gespräch an.')}</small></span></label>
       <div class="iq-health stack" ${it.consent ? '' : 'hidden'}>${s.q.map(field).join('')}</div></section>`;
-    return `<section class="card stack iq-sec"><h3>${esc(s.title)}</h3>${s.q.map(field).join('')}</section>`;
+    return `<section class="card stack iq-sec"><h3>${esc(s.title)}</h3>${s.note ? `<div class="muted" style="font-size:13px;margin-top:-6px">${esc(s.note)}</div>` : ''}${s.q.map(field).join('')}</section>`;
   };
   return topbar({ back: cm ? '/' : `/client/${cid}`, title: T('Fragebogen'), sub: cm ? T('Damit dein Plan wirklich zu dir passt') : esc(c.name) }) + `<main class="wrap view">
     <div class="info">${cm ? T('Nimm dir 5–10 Minuten. Je ehrlicher deine Antworten, desto besser passt dein Plan. Alles ist freiwillig – lass weg, was du nicht beantworten möchtest.') : 'Ausfüllen im Erstgespräch oder Antworten des Kunden prüfen und ergänzen.'}</div>
@@ -6255,7 +6372,8 @@ function viewIntakeRO(c) {
   const sec = s => {
     if (s.health && !it.consent) return `<section class="card iq-sec"><h3>${esc(s.title)}</h3><div class="muted" style="font-size:14px">${T('Keine Einwilligung – keine Gesundheitsangaben gespeichert.')}</div></section>`;
     const rows = s.q.filter(q => !(q.female && c.sex === 'm')).map(q => `<div class="iq-row"><div class="muted">${esc(q.l)}</div><div>${esc(val(q)) || '<span class="muted">–</span>'}</div></div>`).join('');
-    return `<section class="card iq-sec"><h3>${esc(s.title)}</h3>${rows}</section>`;
+    const btr = s.bt ? (b => `<div class="iq-row"><div class="muted">${T('Ergebnis')}</div><div>${b.type ? esc(BT_L(b.type)) + (b.manual ? ' (' + T('manuell festgelegt') + ')' : '') : b.mixed ? T('Gemischt ({x})', { x: b.mixed.map(k => esc(BT_L(k))).join(' / ') }) : '<span class="muted">–</span>'}</div></div>`)(bodyTypeOf(c)) : '';
+    return `<section class="card iq-sec"><h3>${esc(s.title)}</h3>${rows}${btr}</section>`;
   };
   return topbar({ back: cm ? '/' : `/client/${cid}`, title: T('Fragebogen'), sub: `${esc(c.name)} · ${T('ausgefüllt am {d}', { d: fmtDateTs(it.submittedAt) })}` }) + `<main class="wrap view">
     ${!cm && flags.length ? `<div class="info warn-info"><b>Bitte vor Trainingsbeginn ärztlich abklären lassen:</b> ${flags.map(q => esc(q.l)).join(' · ')}</div>` : ''}
@@ -6289,6 +6407,7 @@ function readIntakeForm(f, c) {
 function saveIntake(cid, f, submit) {
   const c = S.clients.get(cid), { a, consent } = readIntakeForm(f, c), old = intakeOf(c);
   c.intake = { a, consent: consent ? (old.consent || Date.now()) : null, submittedAt: submit ? Date.now() : old.submittedAt || null, by: submit ? (isClientMode() ? 'client' : 'trainer') : old.by || null };
+  stampBodyType(c, old.bt);   // Körpertyp: Punktestand/Datum festhalten, manuelle Festlegung bleibt erhalten
   c.intakeAt = Date.now(); put('clients', c);
 }
 Object.assign(A, {
