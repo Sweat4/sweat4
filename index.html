@@ -708,6 +708,34 @@ img.ld{opacity:1!important}
 .nut-bt-calc b{text-align:right}
 .nut-bt-n{font-size:12px;color:var(--muted);line-height:1.45}
 .iq-chips.bt-chips{display:grid}.bt-chips span{width:100%;border-radius:14px;line-height:1.35;padding:9px 14px}
+/* Zyklus & Tagesform (zyklus.js) */
+.zy-chips span{min-width:44px;justify-content:center;padding:6px 10px}
+.zy-sc{margin-bottom:10px}.zy-sc>span small{font-weight:500}
+.zy-more summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted)}
+.zy-exh{font-size:13px;color:var(--gold);margin:2px 0 8px}
+.zy-banner{margin-bottom:12px}
+.zy-hint{font-size:13.5px;margin-bottom:10px}
+.zy-lv{display:grid;gap:2px;padding:10px 12px;border-radius:var(--r-md);background:var(--surface-2);border:1px solid var(--border)}
+.zy-lv small{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}.zy-lv b{font-size:18px}
+.zy-lv-reduced b,.zy-lv-light b{color:var(--gold)}
+.zy-tbl td:nth-child(n+2),.zy-tbl th:nth-child(n+2){text-align:center;width:56px}
+.zy-pred{margin-top:12px}.zy-pred-v{font:800 20px/1.25 var(--font-display);margin:4px 0}
+.zy-cal-card{margin-top:12px}.zy-cal-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.zy-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.zy-wd{font-size:11px;text-align:center;color:var(--muted);font-weight:700}
+.zy-d{position:relative;aspect-ratio:1;border-radius:10px;border:1px solid var(--border);background:var(--surface-2);color:inherit;font:600 14px/1 var(--font-body,inherit);display:grid;place-items:center;cursor:pointer;padding:0}
+.zy-d.zy-pad{border:0;background:none;cursor:default}
+.zy-d.zy-per{background:#9b3b4a;border-color:#9b3b4a;color:#fff}
+.zy-d.zy-est{border:1.5px dashed #c9707f;background:transparent}
+.zy-d.zy-today{outline:2px solid var(--gold);outline-offset:1px}
+.zy-d.zy-fut{opacity:.75}
+.zy-dot{position:absolute;bottom:4px;left:50%;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:var(--gold)}
+.zy-legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;font-size:12px;color:var(--muted)}
+.zy-legend i{display:inline-block;width:12px;height:12px;border-radius:4px;margin-right:5px;vertical-align:-2px}
+.zy-legend i.zy-per{background:#9b3b4a}.zy-legend i.zy-est{border:1.5px dashed #c9707f}.zy-legend i.zy-dotl{width:6px;height:6px;border-radius:50%;background:var(--gold);vertical-align:1px}
+.zy-list{margin:0;padding-left:20px;display:grid;gap:6px;font-size:14px}
+.zy-pat{margin:0 0 6px;padding-left:20px;display:grid;gap:6px;font-size:14px}
+.zy-nut{margin-top:-2px}
 
 /* Mahlzeiten */
 .food-sum{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:12px}
@@ -1022,6 +1050,7 @@ const DB = {
 
 /* ---------------- State ---------------- */
 const S = {}; STORES.forEach(s => S[s] = new Map());
+const ZYM = () => typeof ZY !== 'undefined' ? ZY : null;   // optionales Modul Zyklus & Tagesform (zyklus.js)
 const UI = { search: '', sort: 'recent', open: {}, xp: { q: '', g: 'Alle' }, metric: 'weight', exName: {}, lastRoute: '' };
 const all = s => [...S[s].values()];
 function dbError(e) { console.error(e); toast(T('Speichern fehlgeschlagen: ') + (e && e.message || e)); }
@@ -1226,14 +1255,18 @@ function setNextDay(cid, dayId) {
   p.nextSel = { id: uid(), dayId: dayId || null, at: Date.now() }; put('plans', p);
   return p.nextSel;
 }
-function lastResult(cid, exerciseId, name, excludeId) {
+function lastResult(cid, exerciseId, name, excludeId, forProg) {
   const n = norm(name);
-  for (const s of sessionsOf(cid, true)) {
-    if (s.id === excludeId) continue;
-    const e = (exerciseId && s.exercises.find(x => x.exerciseId === exerciseId)) || s.exercises.find(x => norm(x.name) === n);
-    if (e) { const sets = e.sets.filter(isPerformed); if (sets.length) return { session: s, sets, name: e.name, note: e.note }; }
-  }
-  return null;
+  const find = skipAdj => {
+    for (const s of sessionsOf(cid, true)) {
+      if (s.id === excludeId) continue;
+      if (skipAdj && s.adj && s.adj.skipProg) continue;   // an die Tagesform angepasste Einheiten sind kein Progressionsbezug
+      const e = (exerciseId && s.exercises.find(x => x.exerciseId === exerciseId)) || s.exercises.find(x => norm(x.name) === n);
+      if (e) { const sets = e.sets.filter(isPerformed); if (sets.length) return { session: s, sets, name: e.name, note: e.note }; }
+    }
+    return null;
+  };
+  return (forProg && find(true)) || find(false);
 }
 function volumeTrend(cid) {
   const done = sessionsOf(cid, true).filter(s => sessionVolume(s) > 0); if (done.length < 2) return null;
@@ -1758,7 +1791,8 @@ function viewTrain(sess) {
     const lastHtml = last ? `<div class="last"><div class="last-h">${T('Letztes Training')} · ${fmtDate(last.session.date)}${norm(last.name) !== norm(e.name) ? ` (${T('als')} „${esc(exName(last.name))}“)` : ''}</div>
         <div class="chips">${last.sets.map((s, i) => `<span class="chip">${i + 1}: ${fmtSet(s)}${hasVal(s.rpe) ? ' @' + esc(s.rpe) : ''}</span>`).join('')}</div>${last.note ? `<div class="last-note">„${esc(last.note)}“</div>` : ''}</div>`
       : `<div class="last empty">${T('Noch kein vorheriges Training für diese Übung.')}</div>`;
-    const pg = progOf(e), sug = editing ? null : suggestFor(e, last, pg);
+    const lastP = lastResult(sess.clientId, e.exerciseId, e.name, sess.id, true);   // = last, außer das letzte Training war an die Tagesform angepasst
+    const pg = progOf(e); let sug = editing ? null : suggestFor(e, lastP, pg); if (!editing && sess.adj && ZYM()) sug = ZYM().adjSug(sess, e, sug, lastP, pg);
     const sugHtml = sug ? `<div class="prog prog-${sug.kind}">
         <div class="prog-main"><span class="prog-l">${T('Vorschlag')}</span> <b>${fmtNum(sug.weight)} kg</b>${sug.delta > 0 ? ` <span class="prog-d">+${fmtNum(sug.delta)} kg</span>` : sug.kind === 'hold' ? ` <span class="prog-d hold">${T('halten')}</span>` : ''}</div>
         <button class="btn btn-sm btn-ghost" data-action="sug-apply" data-ei="${ei}" data-w="${sug.weight}">${T('Übernehmen')}</button>
@@ -1776,11 +1810,12 @@ function viewTrain(sess) {
         <span class="ex-count" id="exc-${ei}">${e.sets.filter(s => s.done).length}/${e.sets.length}</span><span class="chev">${ic('down')}</span>
       </button>
       <div class="ex-body">
+        ${ZYM() ? ZYM().exHint(sess, ei) : ''}
         ${planHtml}
         ${lastHtml}
         ${sugHtml}${goalHtml}
         ${e.planNote ? `<div class="plan-note">📝 ${esc(TD(e.planNote))}</div>` : ''}
-        <div id="sets-${ei}">${e.sets.map((_, si) => setRowHtml(e, ei, si, last, sug)).join('')}</div>
+        <div id="sets-${ei}">${e.sets.map((_, si) => setRowHtml(e, ei, si, lastP, sug)).join('')}</div>
         <div class="ex-actions">
           <button class="btn btn-sm btn-ghost" data-action="add-set" data-ei="${ei}" ${e.sets.length >= CONFIG.MAX_SETS ? 'disabled' : ''}>${ic('plus', 16)} ${T('Satz')}</button>
           <button class="btn btn-sm btn-ghost" data-action="rm-set" data-ei="${ei}" ${e.sets.length <= 1 ? 'disabled' : ''}>– ${T('Satz')}</button>
@@ -1796,6 +1831,7 @@ function viewTrain(sess) {
     back: editing ? '/session/' + sess.id : '/client/' + sess.clientId, title: `${esc(c ? c.name : '')}`, sub: esc(sessLabel(sess)) + (editing ? ' · ' + T('Bearbeiten') : ''),
     extra: `<div class="tb-extra"><div class="tbar"><span id="tbar" style="width:${pct}%"></span></div><span class="tcount" id="tcount">${doneN}/${total} ${T('Sätze')}</span></div>`
   }) + `<main class="wrap view">
+    ${ZYM() ? ZYM().sessBanner(sess) : ''}
     <label class="row" style="margin-bottom:12px"><span class="muted" style="font-size:14px">${T('Datum')}</span><input type="date" class="input" data-tf="date" value="${esc(sess.date)}" style="width:auto;padding:8px 12px;font-size:16px"></label>
     ${cards || `<div class="card empty">${T('Dieser Trainingstag hat keine Übungen.')}</div>`}
     <button class="btn btn-ghost btn-block" data-action="add-adhoc">${ic('plus')} ${T('Übung nur für dieses Training hinzufügen')}</button>
@@ -1826,6 +1862,7 @@ function viewSession(s) {
   return topbar({ back: '/client/' + s.clientId + '/history', title: esc(sessLabel(s)), sub: `${fmtDate(s.date)} · ${esc(c ? c.name : '')}` }) +
   `<main class="wrap view">
     ${s.status === 'active' ? `<div class="banner"><div><b>${T('Training läuft noch')}</b></div><a class="btn btn-sm btn-primary" href="#/train/${s.id}">${T('Fortsetzen')}</a></div>` : ''}
+    ${s.adj && s.adj.level && s.adj.level !== 'normal' && ZYM() ? `<div class="info zy-banner" style="margin-bottom:12px">🌿 ${T('An die Tagesform angepasst')}: <b>${esc(ZYM().levelLabel(s.adj.level))}</b> · ${T('zählt nicht als Bezug für die Gewichtssteigerung')}</div>` : ''}
     ${s.status === 'done' ? SessionSummary(s) + `<div class="care-h">${T('Übungen & Sätze')}</div><div class="stack">${SessionExercises(s)}</div>` : `<div class="stats four">
       <div class="stat"><div class="stat-l">${T('Datum')}</div><div class="stat-v">${fmtDate(s.date)}</div></div>
       <div class="stat"><div class="stat-l">${T('Sätze')}</div><div class="stat-v">${sessionSets(s)}</div></div>
@@ -2314,7 +2351,9 @@ const A = {
       if (await confirmDialog(T('Training läuft bereits'), T('Für diesen Kunden läuft noch {x} vom {d}. Bitte zuerst abschließen oder verwerfen.', { x: `<b>${esc(sessLabel(act))}</b>`, d: fmtDate(act.date) }), { ok: T('Zum laufenden Training') })) go('/train/' + act.id);
       return;
     }
-    const s = createSession(cid, el.dataset.did); go('/train/' + s.id);
+    const pre = ZYM() ? await ZYM().beforeStart(cid, el.dataset.did) : null;   // optional: Tagesform-Check-in (nur Kundin mit aktivem Modul)
+    if (pre && pre.cancel) return;
+    const s = createSession(cid, el.dataset.did); if (pre && pre.adj) ZYM().afterCreate(s, pre); go('/train/' + s.id);
   },
   'add-day': async el => {
     const pid = el.dataset.pid, days = daysOf(pid); if (days.length >= CONFIG.MAX_DAYS) return;
@@ -3497,6 +3536,7 @@ function NutritionCard(c, own) {
     <div class="nut-phases">${ph}</div>
     ${BodyTypeBox(c, n, own)}
     <div class="nut-macros">${mac(T('Eiweiß'), n.p, n.pk, 'p')}${mac(T('Kohlenhydrate'), n.c, n.ck, 'c')}${mac(T('Fett'), n.f, n.fk, 'f')}</div>
+    ${own && ZYM() ? ZYM().nutHint(c) : ''}
     <a class="btn btn-primary btn-block" href="#/client/${c.id}/food">${ic('list', 18)} ${T('Mahlzeiten planen')}</a>
     <div class="nut-foot">${T('Berechnet mit {k} kg ({s})', { k: fmtNum(n.kg), s: esc(n.wSrc) })}${own ? '' : ` · ${esc(n.act)}`}.${n.done ? ' ' + T('Für einen neuen Zyklus das Startdatum neu setzen.') : ''}<br>${T('Orientierungswerte, keine medizinische Beratung.')}</div>
   </div></section>`;
@@ -4490,6 +4530,7 @@ function viewClientHome() {
     <div class="hero">${avatar(c, 'xl')}<div class="grow"><h1>${T('Willkommen zurück, {n}', { n: esc(first) })} 👋</h1>${c.goals ? `<div class="muted" style="margin-top:4px">🎯 ${esc(c.goals)}</div>` : ''}</div></div>
     ${ClientMsgCard(cid)}
     ${IntakeCard(c)}
+    ${ZYM() ? ZYM().homeCard(c) : ''}
     ${MyWeekCard(c)}
     <div class="section-h" style="margin-top:6px"><h2>${T('Dein Fortschritt')}</h2></div>
     <div class="stats">${tile('weight')}${tile('waist')}${tile('chest')}
@@ -4733,7 +4774,7 @@ async function setupFromFile(file, code, opts = {}) {
   const meta = [{ id: 'role', value: 'client', clientId: pkg.clientId, since: Date.now() }, lock, { id: 'pkgInfo', exportedAt: pkg.exportedAt, boxV: opts.boxV || 0 }];
   if (boxU) meta.push({ id: 'box', url: boxU }); const upM = S.meta.get('boxUp'); if (upM) meta.push(upM);
   if (pkg.notify) meta.push({ id: 'notify', ch: pkg.notify });
-  for (const k of ['msgV', 'pushCh', 'pushOn', 'lang', 'pushPrivate', 'pushSeen', 'badge']) { const m = S.meta.get(k); if (m && role.value === 'client') meta.push(m); }
+  for (const k of ['msgV', 'pushCh', 'pushOn', 'lang', 'pushPrivate', 'pushSeen', 'badge', 'cycle', 'cycleHide']) { const m = S.meta.get(k); if (m && role.value === 'client') meta.push(m); }
   // Nachrichten zusammenführen (lokal noch nicht übertragene Nachrichten und Lesebestätigungen bleiben erhalten)
   const msgs = new Map((pkg.data.messages || []).filter(m => m.clientId === pkg.clientId).map(m => [m.id, m]));
   if (role.value === 'client') for (const m of all('messages')) { const o = msgs.get(m.id); if (m.clientId === pkg.clientId && (!o || (m.readAt && !o.readAt) || (m.updatedAt || 0) > (o.updatedAt || 0))) msgs.set(m.id, o ? { ...o, readAt: o.readAt || m.readAt } : m); }
@@ -4744,7 +4785,7 @@ async function makeReturn(code) {
   if (!(await verifyLock(code))) throw new Error(T('Falscher Zugangscode.'));
   flushSave();
   const cid = roleInfo().clientId, c = S.clients.get(cid);
-  const sessions = all('sessions').filter(s => s.clientId === cid && s.status === 'done');
+  const sessions = all('sessions').filter(s => s.clientId === cid && s.status === 'done').map(s => ZYM() ? ZYM().sessionOut(s) : s);   // nie Zyklus-/Symptomdaten
   const pushOn = (S.meta.get('pushOn') || {}).on, ch = S.meta.get('pushCh');
   const text = await encryptPayload({ clientId: cid, sessions, meals: c.meals || null, mealCfg: c.mealCfg || null, mealsAt: c.mealsAt || 0, intake: c.intake || null, intakeAt: c.intakeAt || 0, exportedAt: new Date().toISOString(),
     messages: msgsOf(cid), live: liveState(cid), lang: I18N.cur, notifyCh: pushOn && ch ? ch.ch : null, pushV: 2 }, code, { kind: 'client-return', v: 1, clientId: cid });
@@ -6447,6 +6488,7 @@ function routeExtra(p) {
   if (p[0] === 'meldungen' && !isClientMode()) return viewMeldungen();
   if (p[0] === 'nachrichten' && isClientMode()) return viewMessages(roleInfo().clientId);
   if (p[0] === 'mitteilungen' && isClientMode()) return viewClientNotes();
+  if (p[0] === 'zyklus' && isClientMode() && ZYM()) return ZYM().view(p[1]);
   if (p[0] === 'client' && p[2] === 'nachrichten' && !isClientMode()) return viewMessages(p[1]) || null;
   if (p[0] === 'client' && p[2]) {
     const c = S.clients.get(p[1]); if (!c) return undefined;
@@ -6724,5 +6766,6 @@ setInterval(() => { if (document.hidden || LOCK.locked) return; if (isClientMode
   }
 })();
 </script>
+<script src="zyklus.js"></script>
 </body>
 </html>
