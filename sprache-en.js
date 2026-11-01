@@ -1564,7 +1564,21 @@ window.SW_I18N.en = {
     "Längere Strecke bei {x}: {b} m statt {a} m.": "Longer distance on {x}: {b} m instead of {a} m.",
     "längere Strecke": "longer distance",
     "Längere Strecke bei {x}: {b} m statt {a} m mit {w} kg.": "Longer distance on {x}: {b} m instead of {a} m with {w} kg.",
-    "Längere Zeit bei {x}: {b} Sek. statt {a} Sek. mit {w} kg.": "Longer time on {x}: {b} sec instead of {a} sec with {w} kg."
+    "Längere Zeit bei {x}: {b} Sek. statt {a} Sek. mit {w} kg.": "Longer time on {x}: {b} sec instead of {a} sec with {w} kg.",
+    "{n} Kunden": "{n} clients",
+    "{n} neue Nachrichten": "{n} new messages",
+    "Neue Nachricht": "New message",
+    "Neue Mitteilung": "New notification",
+    "Du hast eine neue Nachricht von deinem Trainer.": "You have a new message from your trainer.",
+    "{n} neue Nachrichten von deinen Kunden.": "{n} new messages from your clients.",
+    "Ein Kunde hat dir geschrieben.": "A client sent you a message.",
+    "{n} ungelesene Nachrichten": "{n} unread messages",
+    "Ton bei neuen Nachrichten": "Sound for new messages",
+    "Kurzer Hinweiston, solange SWEAT4 geöffnet ist. Ist die App geschlossen, kommt der Ton von der Push-Mitteilung.": "Short alert sound while SWEAT4 is open. When the app is closed, the sound comes from the push notification.",
+    "Ton testen": "Test sound",
+    "Keine Nachricht mehr verpassen": "Never miss a message",
+    "Aktiviere Push-Mitteilungen, dann meldet sich dein Handy auch, wenn SWEAT4 geschlossen ist.": "Turn on push notifications and your phone will alert you even when SWEAT4 is closed.",
+    "Ton ist auf diesem Gerät gerade nicht möglich – Lautstärke bzw. Stummschalter prüfen.": "Sound isn't possible on this device right now – check the volume or mute switch."
   },
   /* Übungskatalog: id → [Name, Zielmuskel, Equipment, Ausgangsposition, Ausführung, Bewegungsrichtung, [Hinweise], [Fehler]] */
   kat: {

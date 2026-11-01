@@ -927,6 +927,18 @@ img.ld{opacity:1!important}
 .run-track{width:100%;max-width:360px;margin:12px auto 0;display:block}.run-track text{fill:var(--muted);font-size:11px}
 
 .bell{position:relative}
+.msg-n{position:absolute;top:4px;right:2px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#e5322d;color:#fff;font-size:10.5px;font-weight:800;display:grid;place-items:center;box-shadow:0 0 0 2px var(--bg)}
+.msg-ind{color:var(--text);animation:msgPop .35s ease-out}
+.badge.badge-msg{background:#e5322d;color:#fff}.badge[hidden]{display:none}
+@keyframes msgPop{0%{transform:scale(.6)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
+#msg-note{position:fixed;left:50%;top:calc(8px + env(safe-area-inset-top));transform:translate(-50%,-140%);width:min(560px,calc(100vw - 16px));z-index:95;display:flex;align-items:stretch;background:var(--surface-2);border:1px solid var(--border);border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,.5);transition:transform .32s cubic-bezier(.2,.9,.3,1.2);pointer-events:none}
+#msg-note.show{transform:translate(-50%,0);pointer-events:auto}
+#msg-note .mn-in{flex:1;min-width:0;display:flex;align-items:center;gap:12px;padding:12px 6px 12px 14px;color:var(--text);text-decoration:none}
+#msg-note .mn-av{flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:var(--accent-ink);font-weight:800;font-size:17px}
+#msg-note .grow{min-width:0;display:flex;flex-direction:column}
+#msg-note .mn-who{font-size:15px}#msg-note .mn-t{font-size:12px;color:#e5322d;font-weight:700}
+#msg-note .mn-x{font-size:14px;color:var(--muted);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+#msg-note .mn-close{flex:none;width:44px;background:none;border:0;color:var(--muted);font-size:24px;cursor:pointer}
 .bell-n{position:absolute;top:4px;right:2px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-size:10.5px;font-weight:800;display:grid;place-items:center}
 .care-todo{gap:10px}
 .care-todo-a{display:flex;align-items:flex-start;gap:10px;min-width:0;color:inherit}
@@ -2374,6 +2386,7 @@ function render() {
   if (!isClientMode()) { if (p[0] === 'session') for (const k of ['done:', 'run:']) if (S.events.has(k + p[1]) && !S.events.get(k + p[1]).read) markEvent(k + p[1], { read: true }); if (!p.length || p[0] === 'meldungen') setTimeout(() => careFetchAll(), 400); }
   hydratePhotos(app);
   updateBadge();
+  if (typeof MSGN !== 'undefined') MSGN.refresh();
 }
 const curSession = () => { const p = location.hash.slice(1).split('/').filter(Boolean); return p[0] === 'train' ? S.sessions.get(p[1]) : null; };
 
@@ -5087,7 +5100,7 @@ async function setupFromFile(file, code, opts = {}) {
   const meta = [{ id: 'role', value: 'client', clientId: pkg.clientId, since: Date.now() }, lock, { id: 'pkgInfo', exportedAt: pkg.exportedAt, boxV: opts.boxV || 0 }];
   if (boxU) meta.push({ id: 'box', url: boxU }); const upM = S.meta.get('boxUp'); if (upM) meta.push(upM);
   if (pkg.notify) meta.push({ id: 'notify', ch: pkg.notify });
-  for (const k of ['msgV', 'pushCh', 'pushOn', 'lang', 'pushPrivate', 'pushSeen', 'badge', 'cycle', 'cycleHide']) { const m = S.meta.get(k); if (m && role.value === 'client') meta.push(m); }
+  for (const k of ['msgV', 'pushCh', 'pushOn', 'lang', 'pushPrivate', 'pushSeen', 'badge', 'cycle', 'cycleHide', 'msgNotify', 'msgNotified']) { const m = S.meta.get(k); if (m && role.value === 'client') meta.push(m); }
   // Nachrichten zusammenführen (lokal noch nicht übertragene Nachrichten und Lesebestätigungen bleiben erhalten)
   const msgs = new Map((pkg.data.messages || []).filter(m => m.clientId === pkg.clientId).map(m => [m.id, m]));
   if (role.value === 'client') for (const m of all('messages')) { const o = msgs.get(m.id); if (m.clientId === pkg.clientId && (!o || (m.readAt && !o.readAt) || (m.updatedAt || 0) > (o.updatedAt || 0))) msgs.set(m.id, o ? { ...o, readAt: o.readAt || m.readAt } : m); }
@@ -5203,7 +5216,7 @@ async function boxFetchReturn(cid, silent) {
   const cc = S.clients.get(cid); cc.access = { ...cc.access, boxGot: res.v }; put('clients', cc);
   const first = c.name.split(' ')[0];
   if (r.doneNew.length) toast(T('{n} hat ein Training abgeschlossen', { n: first }) + ' 🏋️');
-  else if (r.msgNew.length) toast(T('Neue Nachricht von {n}', { n: first }) + ' 💬');
+  else if (r.msgNew.length) { /* Ton + Hinweis kommen von MSGN */ }
   else if (!silent) toast(T('{n}: {a} neue, {b} aktualisierte Trainings', { n: c.name, a: r.neu, b: r.upd }) + (r.meals ? ' · ' + T('Mahlzeiten aktualisiert') : ''));
   render();
 }
@@ -5245,7 +5258,7 @@ async function boxClientSync(force, quiet) {
       if (intakeSub && intakeSub > (up.intakeSub || 0) && (old || intakeSub > (up.sent || 0))) pushPing(ch, 'intake');
     } catch (e) { if (force && !quiet) toast(e.message); }
   }
-  try { if (await boxClientMessages(cid)) { toast(T('Neue Nachricht von deinem Trainer') + ' 💬'); render(); } } catch (e) {}
+  try { if (await boxClientMessages(cid)) { if (!MSGN.openChatCid()) render(); } } catch (e) {}   // Ton + Hinweis kommen von MSGN
   const info = S.meta.get('pkgInfo') || {};
   const res = await boxGet(cid, BOX.code, 'down', info.boxV || 0).catch(e => { if (force) toast(e.message); return null; });
   BOX.pending = res && !res.missing ? res : null;
@@ -5376,9 +5389,136 @@ function mergeMessages(list, cid, author) {
     if (!ex) { if (m.from !== author) continue; const n = { id: m.id, clientId: cid, from: m.from, text: m.text.slice(0, 4000), at: m.at || Date.now(), kind: m.kind || null, sessionId: m.sessionId || null, readAt: null }; put('messages', n); neu.push(n); }
     else if (ex.clientId === cid && ex.from !== author && m.readAt && !ex.readAt) put('messages', { ...ex, readAt: m.readAt });
   }
+  if (neu.length) try { MSGN.incoming(neu); } catch (e) {}
   return neu;
 }
 function markThreadRead(cid, from) { let n = 0; for (const m of unreadFrom(cid, from)) { put('messages', { ...m, readAt: Date.now() }); n++; } return n; }
+
+/* ---------- Benachrichtigungen bei neuen Nachrichten (v49) ----------
+   Auslöser ist ausschließlich mergeMessages(): Dort entstehen nur Nachrichten der GEGENSEITE, die es auf
+   diesem Gerät noch nicht gab (eindeutige id). Eigene Nachrichten, Neuladen der Seite und erneutes Abholen
+   lösen daher nie einen Ton aus. Zusätzlich merkt sich MSGN die bereits gemeldeten ids (auch über Neustarts).
+   Wege der Zustellung: Push-Ping (Service Worker weckt die offene App sofort) · schnelle Abfrage alle 20 s,
+   solange die App sichtbar ist · im Hintergrund (Desktop-Tab) alle 60 s mit System-Mitteilung, falls erlaubt. */
+const MSGN = {
+  FAST: 20000, HIDDEN: 60000, KEEP: 400, queue: [], t: 0, ctx: null, lastSound: 0,
+  cfg() { return { sound: true, banner: true, ...(S.meta.get('msgNotify') || {}) }; },
+  seen() { return new Set(((S.meta.get('msgNotified') || {}).ids) || []); },
+  remember(ids) { const ids2 = [...this.seen(), ...ids]; put('meta', { id: 'msgNotified', ids: ids2.slice(-this.KEEP) }); },
+  /* von mergeMessages: nur echte neue Nachrichten der Gegenseite */
+  incoming(list) {
+    const seen = this.seen(), me = isClientMode() ? 'client' : 'trainer';
+    const fresh = (list || []).filter(m => m && m.id && m.from !== me && !m.readAt && !seen.has(m.id));
+    if (!fresh.length) return;
+    this.remember(fresh.map(m => m.id)); this.queue.push(...fresh);
+    clearTimeout(this.t); this.t = setTimeout(() => this.flush(), 60);   // mehrere Nachrichten eines Abgleichs = eine Meldung
+  },
+  route() { return location.hash.slice(1).split('/').filter(Boolean); },
+  openChatCid() { const p = this.route(); return isClientMode() ? (p[0] === 'nachrichten' ? roleInfo().clientId : null) : (p[0] === 'client' && p[2] === 'nachrichten' ? p[1] : null); },
+  flush() {
+    const q = this.queue.splice(0); if (!q.length) return;
+    const open = !document.hidden && this.openChatCid(), inChat = q.filter(m => m.clientId === open), other = q.filter(m => m.clientId !== open);
+    try { if (inChat.length) this.showInChat(open); } catch (e) {}
+    try { if (this.cfg().sound && !document.hidden) this.sound(other.length ? 1 : .55); } catch (e) {}
+    try { if ('vibrate' in navigator && !document.hidden && other.length) navigator.vibrate([70, 50, 70]); } catch (e) {}
+    try { if (other.length && !document.hidden && this.cfg().banner) this.banner(other); } catch (e) {}
+    try { if (document.hidden) this.systemNote(q); } catch (e) {}
+    this.refresh();
+  },
+  /* Chat ist gerade offen: Verlauf aktualisieren (Eingabefeld bleibt unberührt) und als gelesen markieren */
+  showInChat(cid) {
+    const cm = isClientMode();
+    markThreadRead(cid, cm ? 'trainer' : 'client');
+    if (!cm) markEventsWhere(e => (e.type === 'msg' || e.type === 'issue') && e.clientId === cid && !e.read, { read: true });
+    const th = document.getElementById('thread');
+    if (th) { th.outerHTML = MsgThread(cid); const n = document.getElementById('thread'); if (n && n.lastElementChild) n.lastElementChild.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+    if (cm) setTimeout(() => boxClientSync(false, true).catch(() => {}), 300);   // Lesebestätigung an den Trainer
+  },
+  total() {
+    if (isClientMode()) { const cid = roleInfo().clientId; return cid ? unreadFrom(cid, 'trainer').length : 0; }
+    return all('messages').filter(m => m.from === 'client' && !m.readAt && S.clients.has(m.clientId)).length;
+  },
+  /* Ziel beim Antippen: der Chat mit der neuesten ungelesenen Nachricht */
+  target() {
+    if (isClientMode()) return '#/nachrichten';
+    const un = all('messages').filter(m => m.from === 'client' && !m.readAt && S.clients.has(m.clientId)).sort((a, b) => (b.at || 0) - (a.at || 0));
+    return un.length ? `#/client/${un[0].clientId}/nachrichten` : '#/meldungen';
+  },
+  /* Zähler überall aktualisieren, ohne die aktuelle Seite neu aufzubauen */
+  refresh() {
+    const n = this.total();
+    try {
+      document.querySelectorAll('.topbar .msg-ind').forEach(x => x.remove());
+      const tb = document.querySelector('.topbar .tb-title');
+      if (tb && n && !this.openChatCid()) tb.insertAdjacentHTML('afterend', MsgInd(n));
+      document.querySelectorAll('[data-msg-badge]').forEach(x => { const c = x.dataset.msgBadge, k = c === '*' ? n : (isClientMode() ? unreadFrom(c, 'trainer') : unreadFrom(c, 'client')).length; x.textContent = k > 99 ? '99+' : k; x.hidden = !k; });
+      const base = document.title.replace(/^\(\d+\+?\)\s*/, ''); document.title = n ? `(${n > 99 ? '99+' : n}) ${base}` : base;
+    } catch (e) {}
+    updateBadge();
+  },
+  /* WhatsApp-ähnlicher Hinweis oben – Antippen öffnet den Chat */
+  banner(list) {
+    const last = list[list.length - 1], cm = isClientMode(), clients = new Set(list.map(m => m.clientId));
+    const who = cm ? T('Dein Trainer') : clients.size > 1 ? T('{n} Kunden', { n: clients.size }) : ((S.clients.get(last.clientId) || {}).name || T('Kunde'));
+    const href = cm ? '#/nachrichten' : clients.size > 1 ? this.target() : `#/client/${last.clientId}/nachrichten`;
+    const n = list.length, title = n > 1 ? T('{n} neue Nachrichten', { n }) : last.kind === 'issue' ? T('Meldet eine Schwierigkeit') : T('Neue Nachricht');
+    let el = document.getElementById('msg-note');
+    if (!el) { el = document.createElement('div'); el.id = 'msg-note'; el.setAttribute('role', 'alert'); document.body.appendChild(el); }
+    el.innerHTML = `<a class="mn-in" href="${href}"><span class="mn-av">${esc((who || '?').trim().charAt(0).toUpperCase())}</span><span class="grow"><b class="mn-who">${esc(who)}</b><span class="mn-t">${esc(title)}</span><span class="mn-x">${esc(last.text.slice(0, 140))}</span></span>${ic('chat', 20)}</a><button class="mn-close" aria-label="${T('Schließen')}">×</button>`;
+    el.className = 'show';
+    const hide = () => { el.className = ''; };
+    el.querySelector('.mn-in').onclick = hide; el.querySelector('.mn-close').onclick = hide;
+    clearTimeout(el._t); el._t = setTimeout(hide, 6000);
+  },
+  /* App liegt im Hintergrund (z. B. anderer Browser-Tab): System-Mitteilung – gleiches Kennzeichen wie die Push-Mitteilung,
+     damit nie zwei Mitteilungen für dieselbe Nachricht erscheinen */
+  async systemNote(list) {
+    if (!('Notification' in window) || Notification.permission !== 'granted' || !('serviceWorker' in navigator)) return;
+    const reg = await navigator.serviceWorker.getRegistration(); if (!reg) return;
+    const cm = isClientMode(), priv = (S.meta.get('pushPrivate') || {}).on, n = this.total();
+    const body = priv ? T('Neue Mitteilung') : cm ? T('Du hast eine neue Nachricht von deinem Trainer.') : n > 1 ? T('{n} neue Nachrichten von deinen Kunden.', { n }) : T('Ein Kunde hat dir geschrieben.');
+    await reg.showNotification('SWEAT4', { body, icon: 'icon-192.png', badge: 'icon-192.png', tag: 'sweat4-' + (cm ? 'client' : 'trainer'), renotify: true, data: { url: this.target() } });
+  },
+  /* Eigener, kurzer Zwei-Ton (Web Audio, keine Audiodatei) – Browser erlauben Ton erst nach einer ersten Berührung */
+  unlock() {
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+      if (!this.ctx) this.ctx = new AC();
+      if (this.ctx.state === 'suspended') this.ctx.resume().catch(() => {});
+    } catch (e) {}
+  },
+  sound(vol = 1) {
+    const now = Date.now(); if (now - this.lastSound < 1200) return; this.lastSound = now;
+    this.unlock(); const c = this.ctx; if (!c || c.state !== 'running') return false;
+    const t0 = c.currentTime + .01, out = c.createGain(); out.gain.value = .35 * vol; out.connect(c.destination);
+    [[988, 0], [1319, .11]].forEach(([f, d]) => {
+      const o = c.createOscillator(), g = c.createGain(), o2 = c.createOscillator(), g2 = c.createGain();
+      o.type = 'sine'; o.frequency.setValueAtTime(f, t0 + d); o2.type = 'sine'; o2.frequency.setValueAtTime(f * 2, t0 + d);
+      g.gain.setValueAtTime(0, t0 + d); g.gain.linearRampToValueAtTime(1, t0 + d + .008); g.gain.exponentialRampToValueAtTime(.001, t0 + d + .22);
+      g2.gain.setValueAtTime(0, t0 + d); g2.gain.linearRampToValueAtTime(.18, t0 + d + .006); g2.gain.exponentialRampToValueAtTime(.001, t0 + d + .09);
+      o.connect(g).connect(out); o2.connect(g2).connect(out); o.start(t0 + d); o2.start(t0 + d); o.stop(t0 + d + .25); o2.stop(t0 + d + .12);
+    });
+    return true;
+  },
+  /* Schnelle Abfrage nur der Nachrichten (der Briefkasten antwortet ohne Änderung mit „nichts Neues“) */
+  async poll() {
+    if (!boxUrl() || LOCK.locked || this.busy) return;
+    this.busy = true;
+    try {
+      if (isClientMode()) { const cid = roleInfo().clientId; if (!cid || !BOX.code) return; if (await boxClientMessages(cid)) { if (!/^#\/(train|lauf)\//.test(location.hash) && !this.openChatCid()) render(); } }
+      else for (const c of all('clients')) if (c.access && c.access.code && c.access.boxSent && c.status !== 'inactive') {   // je Kunde eine kleine Abfrage; ohne Neuigkeiten antwortet der Briefkasten leer
+        BOX.checked['up' + c.id] = Date.now(); await boxFetchReturn(c.id, true).catch(() => {}); }
+    } catch (e) {} finally { this.busy = false; }
+  },
+};
+/* Nachrichten-Symbol mit rotem Zähler (erscheint in der Kopfzeile, sobald etwas ungelesen ist) */
+const MsgInd = n => `<a class="icon-btn bell msg-ind" href="${MSGN.target()}" aria-label="${T('{n} ungelesene Nachrichten', { n })}">${ic('chat', 22)}<span class="msg-n">${n > 99 ? '99+' : n}</span></a>`;
+['pointerdown', 'keydown', 'touchend'].forEach(t => document.addEventListener(t, () => MSGN.unlock(), { passive: true, capture: true }));
+setInterval(() => { if (!document.hidden) MSGN.poll(); }, MSGN.FAST);
+setInterval(() => { if (document.hidden && 'Notification' in window && Notification.permission === 'granted') MSGN.poll(); }, MSGN.HIDDEN);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) setTimeout(() => MSGN.refresh(), 50); });
+/* Entwurf im Eingabefeld überlebt jedes Neuzeichnen der Seite */
+document.addEventListener('input', ev => { if (ev.target.id === 'msg-text') { UI.msgDraft = UI.msgDraft || {}; UI.msgDraft[location.hash] = ev.target.value; } });
 
 /* ---------- Analyse einer Trainingseinheit ----------
    Verglichen wird pro Übung mit der letzten FRÜHEREN abgeschlossenen Einheit desselben Kunden, die dieselbe
@@ -5606,13 +5746,21 @@ function viewMessages(cid) {
   if (!cm) markEventsWhere(e => (e.type === 'msg' || e.type === 'issue') && e.clientId === cid && !e.read, { read: true });
   return topbar({ back: cm ? '/' : '/client/' + cid, title: cm ? T('Nachrichten') : esc(c.name), sub: cm ? T('mit deinem Trainer') : T('Nachrichten') }) + `<main class="wrap view">
     ${MsgThread(cid)}
+    ${MsgPushHint()}
     <div class="card stack composer">
       ${cm ? '' : QuickReplies(cid, null)}
-      <textarea id="msg-text" class="input" rows="3" maxlength="2000" placeholder="${cm ? T('Nachricht an deinen Trainer …') : T('Nachricht an {n} …', { n: esc(c.name.split(' ')[0]) })}"></textarea>
+      <textarea id="msg-text" class="input" rows="3" maxlength="2000" placeholder="${cm ? T('Nachricht an deinen Trainer …') : T('Nachricht an {n} …', { n: esc(c.name.split(' ')[0]) })}">${esc((UI.msgDraft || {})[location.hash] || '')}</textarea>
       ${cm ? `<label class="toggle"><input type="checkbox" id="msg-issue"><span class="tg"></span><span>${T('Ich habe eine Schwierigkeit / brauche Unterstützung')}</span></label>` : ''}
       <button class="btn btn-primary btn-block" data-action="msg-send" data-cid="${cid}">${ic('chat', 18)} ${T('Senden')}</button>
       <div class="muted" style="font-size:12px">${cm ? T('Nur du und dein Trainer sehen diese Nachrichten. Sie werden verschlüsselt übertragen.') : T('Die Nachricht wird verschlüsselt an die App von {n} geschickt.', { n: esc(c.name.split(' ')[0]) })}</div>
     </div></main>`;
+}
+/* Hinweis im Chat: ohne Push-Mitteilungen kommen Nachrichten nur an, solange die App offen ist */
+function MsgPushHint() {
+  if (!boxUrl() || (S.meta.get('pushOn') || {}).on || !pushSupported() || Notification.permission === 'denied') return '';
+  return `<div class="card stack" style="margin:12px 0"><div class="row" style="gap:8px;align-items:center">${ic('bell', 18)}<b>${T('Keine Nachricht mehr verpassen')}</b></div>
+    <div class="muted" style="font-size:13px">${T('Aktiviere Push-Mitteilungen, dann meldet sich dein Handy auch, wenn SWEAT4 geschlossen ist.')}</div>
+    <button class="btn btn-primary btn-block" data-action="push-on" data-role="${isClientMode() ? 'client' : 'trainer'}">${ic('bell', 18)} ${T('Push-Mitteilungen aktivieren')}</button></div>`;
 }
 /* Schnellantworten: Texte in der Sprache des Kunden (falls bekannt), Leistungsdaten nur aus echten Trainingsdaten */
 function TL(lang, s, v) { const d = lang === 'de' ? null : ((window.SW_I18N || {})[lang] || {}).ui; let r = (d && d[s]) || s; if (v) r = String(r).replace(/\{(\w+)\}/g, (m, k) => v[k] != null ? v[k] : m); return r; }
@@ -5640,7 +5788,7 @@ function QuickReplies(cid, sid) {
 }
 function MsgSection(c) {
   const list = msgsOf(c.id), unread = unreadFrom(c.id, 'client').length, last = list[list.length - 1];
-  return `<section class="section"><div class="section-h"><h2>${T('Nachrichten')}</h2>${unread ? `<span class="badge">${unread}</span>` : ''}</div>
+  return `<section class="section"><div class="section-h"><h2>${T('Nachrichten')}</h2><span class="badge badge-msg" data-msg-badge="${c.id}" ${unread ? '' : 'hidden'}>${unread}</span></div>
     <a class="card list-link" href="#/client/${c.id}/nachrichten">${ic('chat')}<div class="grow"><div style="font-weight:600">${last ? esc((last.from === 'trainer' ? T('Du') + ': ' : '') + last.text.slice(0, 80)) : T('Noch keine Nachrichten')}</div>
       <div class="muted" style="font-size:13px">${last ? fmtDateTs(last.at) + ' ' + fmtTime(last.at) : T('Persönliche Rückmeldung schreiben')}</div></div>${ic('back', 18).replace('M15 18l-6-6 6-6', 'M9 6l6 6-6 6')}</a></section>`;
 }
@@ -5648,7 +5796,7 @@ function MsgSection(c) {
 function ClientMsgCard(cid) {
   const un = unreadFrom(cid, 'trainer'), last = msgsOf(cid).filter(m => m.from === 'trainer').pop();
   if (!last) return `<a class="card list-link" href="#/nachrichten" style="margin-top:12px">${ic('chat')}<div class="grow"><div style="font-weight:600">${T('Nachrichten')}</div><div class="muted" style="font-size:13px">${T('Schreib deinem Trainer')}</div></div></a>`;
-  return `<a class="card msg-card ${un.length ? 'new' : ''}" href="#/nachrichten"><div class="row" style="gap:8px;align-items:center">${ic('chat', 18)}<b>${un.length ? T('Neue Nachricht von deinem Trainer') : T('Nachricht von deinem Trainer')}</b>${un.length ? `<span class="badge">${un.length}</span>` : ''}</div>
+  return `<a class="card msg-card ${un.length ? 'new' : ''}" href="#/nachrichten"><div class="row" style="gap:8px;align-items:center">${ic('chat', 18)}<b>${un.length ? T('Neue Nachricht von deinem Trainer') : T('Nachricht von deinem Trainer')}</b><span class="badge badge-msg" data-msg-badge="${cid}" ${un.length ? '' : 'hidden'}>${un.length}</span></div>
     <div style="margin-top:6px">${esc(last.text.slice(0, 160))}${last.text.length > 160 ? '…' : ''}</div><div class="muted" style="font-size:12px;margin-top:4px">${fmtDateTs(last.at)} ${fmtTime(last.at)}</div></a>`;
 }
 
@@ -5732,6 +5880,8 @@ function PushCard(role) {
     <div class="muted" style="font-size:13px">${role === 'trainer' ? T('Du bekommst eine Mitteilung aufs Handy, wenn ein Kunde ein Training abschließt, dir schreibt oder den Fragebogen ausfüllt – auch wenn SWEAT4 geschlossen ist. Die Mitteilung enthält keine Namen und keine Trainingsdaten; Details siehst du erst in der App.') : T('Du bekommst eine Mitteilung, wenn dein Trainer dir schreibt, dir eine Rückmeldung gibt oder deinen Trainingsplan neu anlegt bzw. ändert. Die Mitteilung enthält keinen Nachrichtentext – du liest alles in der App.')}</div>
     ${role === 'trainer' ? `<label class="toggle"><input type="checkbox" data-care="pushDone" ${cfg.pushDone ? 'checked' : ''}><span class="tg"></span><span>${T('Bei Trainingsabschlüssen')}</span></label>
     <label class="toggle"><input type="checkbox" data-care="pushMsg" ${cfg.pushMsg ? 'checked' : ''}><span class="tg"></span><span>${T('Bei neuen Nachrichten')}</span></label>` : ''}
+    <label class="toggle"><input type="checkbox" data-mn="sound" ${MSGN.cfg().sound ? 'checked' : ''}><span class="tg"></span><span>${T('Ton bei neuen Nachrichten')}<small>${T('Kurzer Hinweiston, solange SWEAT4 geöffnet ist. Ist die App geschlossen, kommt der Ton von der Push-Mitteilung.')}</small></span></label>
+    <button type="button" class="btn btn-ghost btn-sm" data-action="mn-test">${ic('chat', 16)} ${T('Ton testen')}</button>
     ${hint ? `<div class="info" style="font-size:13px">${hint}</div>` : on ? `<div class="grid2"><button class="btn btn-ghost" data-action="push-test">${T('Test senden')}</button><button class="btn btn-ghost" data-action="push-off">${T('Ausschalten')}</button></div><div class="muted" style="font-size:12px">✓ ${T('Push-Mitteilungen sind auf diesem Gerät aktiv.')}</div>`
       : `<button class="btn btn-primary btn-block" data-action="push-on" data-role="${role}">${ic('bell', 18)} ${T('Push-Mitteilungen aktivieren')}</button>`}
     ${on && !hint ? `<label class="toggle"><input type="checkbox" id="push-private" ${(S.meta.get('pushPrivate') || {}).on ? 'checked' : ''}><span class="tg"></span><span>${T('Inhalt der Mitteilung ausblenden')}<small>${T('Statt „Neue Nachricht von deinem Trainer“ steht dann nur „Neue Mitteilung“. Für den Sperrbildschirm: iPhone-Einstellungen → Mitteilungen → SWEAT4 → Vorschauen zeigen → „Wenn entsperrt“.')}</small></span></label>` : ''}
@@ -6869,10 +7019,11 @@ Object.assign(A, {
       const r = await sendMessage(cid, ta.value, { sessionId: sid, issue });
       if (document.querySelector('.overlay')) closeModal(null);
       toast(isClientMode() ? T('Nachricht gesendet ✓') : r.delivered ? T('Nachricht gesendet ✓') : T('Gespeichert – wird mit dem nächsten Update zugestellt.'));
-      ta.value = ''; render();
+      ta.value = ''; if (UI.msgDraft) delete UI.msgDraft[location.hash]; render();
     } catch (e) { toast(e.message); } finally { el.disabled = false; }
   },
   'push-on': async el => { try { await pushEnable(el.dataset.role || (isClientMode() ? 'client' : 'trainer')); toast(T('Push-Mitteilungen aktiviert ✓')); } catch (e) { toast(e.message); } render(); },
+  'mn-test': () => { MSGN.lastSound = 0; MSGN.unlock(); setTimeout(() => { if (!MSGN.sound()) toast(T('Ton ist auf diesem Gerät gerade nicht möglich – Lautstärke bzw. Stummschalter prüfen.')); }, 60); },
   'push-off': async () => { await pushDisable(); toast(T('Push-Mitteilungen ausgeschaltet')); render(); },
   'push-test': async () => { const ch = S.meta.get('pushCh'); if (!ch || !boxUrl()) return; try { const r = await fetch(`${boxUrl()}/push/ping/${ch.ch}?t=test`, { method: 'POST' }); const j = await r.json().catch(() => ({})); toast(j.sent ? T('Test gesendet – die Mitteilung sollte gleich erscheinen.') : T('Kein Gerät erreicht. Bitte Push erneut aktivieren.')); } catch (e) { toast(T('Briefkasten nicht erreichbar. Bist du online?')); } },
   'body-metric': el => { UI.bodyMetric = el.dataset.v; render(); },
@@ -7057,6 +7208,7 @@ document.addEventListener('change', ev => {
   if ((k === 'pushDone' || k === 'pushMsg') && (S.meta.get('pushOn') || {}).on) pushEnable('trainer').catch(e => toast(e.message));
   toast(T('Gespeichert'));
 });
+document.addEventListener('change', ev => { const k = ev.target.dataset && ev.target.dataset.mn; if (!k) return; put('meta', { id: 'msgNotify', ...MSGN.cfg(), [k]: ev.target.checked }); toast(T('Gespeichert')); });
 document.addEventListener('change', ev => { if (ev.target.id !== 'push-private') return; put('meta', { id: 'pushPrivate', on: ev.target.checked }); toast(T('Gespeichert')); });
 // Service Worker meldet eine Push-Mitteilung, während die App offen ist → sofort abgleichen (keine zweite Mitteilung nötig)
 if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', ev => {
