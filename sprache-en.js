@@ -1496,7 +1496,10 @@ window.SW_I18N.en = {
     "Unruhe": "Restlessness",
     "Schlechter Schlaf": "Poor sleep",
     "An die Tagesform angepasst": "Adjusted to daily form",
-    "zählt nicht als Bezug für die Gewichtssteigerung": "doesn't count as reference for the weight increase"
+    "zählt nicht als Bezug für die Gewichtssteigerung": "doesn't count as reference for the weight increase",
+    "Kraft-Trend": "Strength trend",
+    "vs. letzte vergleichbare Leistung": "vs. last comparable performance",
+    "Gewicht und Wiederholungen gegenläufig – keine eindeutige Veränderung": "Weight and reps moved in opposite directions – no clear change"
   },
   /* Übungskatalog: id → [Name, Zielmuskel, Equipment, Ausgangsposition, Ausführung, Bewegungsrichtung, [Hinweise], [Fehler]] */
   kat: {

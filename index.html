@@ -1262,7 +1262,7 @@ function lastResult(cid, exerciseId, name, excludeId, forProg) {
       if (s.id === excludeId) continue;
       if (skipAdj && s.adj && s.adj.skipProg) continue;   // an die Tagesform angepasste Einheiten sind kein Progressionsbezug
       const e = (exerciseId && s.exercises.find(x => x.exerciseId === exerciseId)) || s.exercises.find(x => norm(x.name) === n);
-      if (e) { const sets = e.sets.filter(isPerformed); if (sets.length) return { session: s, sets, name: e.name, note: e.note }; }
+      if (e) { const sets = e.sets.filter(isPerformed); if (sets.length && (!skipAdj || sets.some(hasData))) return { session: s, sets, name: e.name, note: e.note }; }   // Progression: nur Einheiten mit eingetragenen Werten
     }
     return null;
   };
@@ -1275,6 +1275,60 @@ function volumeTrend(cid) {
   const v1 = sessionVolume(last), v0 = sessionVolume(prev);
   return { pct: (v1 - v0) / v0 * 100, last, prev };
 }
+/* ---------------- Kraftprogression (nur tatsächliche Leistung) ----------------
+   Verglichen wird je Übung die letzte DOKUMENTIERTE Leistung mit der vorherigen dokumentierten Leistung derselben Übung –
+   egal, wie viel Zeit dazwischen liegt. Pausen, ausgelassene Trainings/Übungen und Einheiten ohne eingetragene Werte
+   sind fehlende Messungen: Sie verändern die Kraftprogression nicht. Trainingshäufigkeit („Letzte 30 Tage“) bleibt eine
+   eigene Anzeige und fließt hier nicht ein. An die Tagesform angepasste Einheiten (adj.skipProg) sind nicht vergleichbar.
+   Leistung: geschätztes 1RM nach Epley (Gewicht × (1 + Wdh./30)) – so werden unterschiedliche Wiederholungszahlen
+   vergleichbar; ohne Gewicht zählen Wiederholungen bzw. Sekunden. Toleranz = Produktregel, keine Messgenauigkeit. */
+const PROG = { tol: 0.01 };   // ±1 % geschätztes 1RM gilt als „gleich“
+const hasData = x => !!x && !x.warmup && hasVal(x.reps) && x.reps > 0;   // nur Sätze mit eingetragenen Wiederholungen zählen als Messung
+function perfOf(sets) {
+  const D = (sets || []).filter(hasData); if (!D.length) return null;
+  const L = D.filter(x => hasVal(x.weight) && x.weight > 0);
+  if (L.length) { let top = null; for (const x of L) if (!top || x.weight > top.weight || (x.weight === top.weight && x.reps > top.reps)) top = x;
+    return { kind: 'load', w: top.weight, r: top.reps, v: Math.max(...L.map(x => x.weight * (1 + x.reps / 30))) }; }
+  return { kind: 'reps', w: null, r: Math.max(...D.map(x => x.reps)), v: Math.max(...D.map(x => x.reps)) };
+}
+function comparePerf(cur, prev) {
+  if (!cur || !prev || cur.kind !== prev.kind || !(prev.v > 0)) return null;
+  const pct = (cur.v - prev.v) / prev.v * 100, d = pct / 100;
+  let dir;
+  if (cur.kind === 'reps') dir = cur.r > prev.r ? 'up' : cur.r < prev.r ? 'down' : 'same';
+  else if (cur.w > prev.w) dir = d >= -PROG.tol ? 'up' : 'mixed';          // mehr Gewicht, aber deutlich weniger Wdh. → keine eindeutige Steigerung
+  else if (cur.w < prev.w) dir = d <= PROG.tol ? 'down' : 'mixed';         // weniger Gewicht, aber deutlich mehr Wdh. → kein eindeutiger Rückgang
+  else dir = cur.r > prev.r ? 'up' : cur.r < prev.r ? 'down' : 'same';
+  return { dir, pct };
+}
+const exKey = e => norm(e.name);
+const progComparable = s => !(s.adj && s.adj.skipProg);
+/* Kraft-Trend: letzte Einheit MIT Daten vs. jeweils vorherige dokumentierte Leistung je Übung (Mittelwert der Änderungen) */
+function strengthTrend(cid) {
+  const S0 = sessionsOf(cid, true).filter(progComparable);   // neueste zuerst
+  const latest = S0.find(s => s.exercises.some(e => perfOf(e.sets))); if (!latest) return null;
+  const pairs = [];
+  for (const e of latest.exercises) {
+    const p1 = perfOf(e.sets); if (!p1) continue;
+    for (const o of S0) { if (sessKey(o) >= sessKey(latest)) continue;
+      const pe = (e.exerciseId && o.exercises.find(x => x.exerciseId === e.exerciseId)) || o.exercises.find(x => exKey(x) === exKey(e)); const p0 = pe && perfOf(pe.sets);
+      if (p0) { const c = comparePerf(p1, p0); if (c) pairs.push({ name: e.name, ...c, prevDate: o.date }); break; } }
+  }
+  if (!pairs.length) return null;
+  return { pct: pairs.reduce((a, x) => a + x.pct, 0) / pairs.length, n: pairs.length, last: latest, pairs,
+    up: pairs.filter(x => x.dir === 'up').length, down: pairs.filter(x => x.dir === 'down').length };
+}
+/* Verlauf für die kleine Kurve: Leistungsindex je Einheit mit Daten (letzter bekannter Wert je Übung bleibt bestehen) */
+function strengthIndexSeries(cid) {
+  const first = {}, cur = {}, out = [];
+  for (const s of sessionsOf(cid, true).filter(progComparable).slice().reverse()) {
+    let any = false;
+    for (const e of s.exercises) { const p = perfOf(e.sets); if (!p) continue; const k = exKey(e) + '|' + p.kind; if (!first[k]) first[k] = p.v; cur[k] = p.v; any = true; }
+    if (any) { const ks = Object.keys(cur); out.push(ks.reduce((a, k) => a + cur[k] / first[k], 0) / ks.length * 100); }
+  }
+  return out;
+}
+const trendHtmlOf = t => t ? `<span class="${t.pct > 0.5 ? 'up' : t.pct < -0.5 ? 'down' : ''}">${Math.abs(t.pct) < 0.5 ? '±0' : (t.pct > 0 ? '+' : '−') + fmtNum(Math.abs(Math.round(t.pct * 10) / 10))} %</span>` : '–';
 function exerciseSeries(cid, name) {
   const n = norm(name);
   return sessionsOf(cid, true).slice().reverse().map(s => {
@@ -1284,7 +1338,7 @@ function exerciseSeries(cid, name) {
     for (const st of sets) if (hasVal(st.weight) && (!top || st.weight > top.weight || (st.weight === top.weight && (st.reps || 0) > (top.reps || 0)))) top = st;
     if (!top) top = sets.reduce((a, b) => ((b.reps || 0) > (a.reps || 0) ? b : a));
     const e1 = Math.max(0, ...sets.map(st => hasVal(st.weight) && st.reps > 0 ? st.weight * (1 + st.reps / 30) : 0));
-    return { session: s, date: s.date, top, reps: sets.reduce((a, b) => a + (b.reps || 0), 0), vol: sets.reduce((a, b) => a + setVol(b), 0), e1rm: e1, sets: sets.length };
+    return { session: s, date: s.date, top, reps: sets.reduce((a, b) => a + (b.reps || 0), 0), vol: sets.reduce((a, b) => a + setVol(b), 0), e1rm: e1, sets: sets.length, setsList: sets };
   }).filter(Boolean);
 }
 function exerciseNames(cid) {
@@ -1662,10 +1716,10 @@ async function nextSetAndSync(cid, dayId, inform) {
   return { sel, sent };
 }
 function viewClient(c) {
-  const days = clientDays(c.id), done = sessionsOf(c.id, true), last = done[0], nxi = nextDayInfo(c.id), next = nxi.day, active = activeSession(c.id), trend = volumeTrend(c.id);
+  const days = clientDays(c.id), done = sessionsOf(c.id, true), last = done[0], nxi = nextDayInfo(c.id), next = nxi.day, active = activeSession(c.id), trend = strengthTrend(c.id);   // Kraft statt Volumen (Pausen/Auslassungen zählen nicht)
   const n30 = done.filter(s => daysBetween(s.date, today()) <= 30).length, recent = sessionsOf(c.id, true, true);
-  const vols = done.slice(0, 12).reverse().map(sessionVolume).filter(v => v > 0);
-  const trendHtml = trend ? `<span class="${trend.pct >= 0 ? 'up' : 'down'}">${trend.pct >= 0 ? '+' : ''}${fmtNum(Math.round(trend.pct))} %</span>` : '–';
+  const vols = strengthIndexSeries(c.id).slice(-12);
+  const trendHtml = trendHtmlOf(trend);
   return topbar({ back: '/', title: esc(c.name), sub: `${done.length} Trainings · ${n30} in den letzten 30 Tagen`, right: `<button class="icon-btn" data-action="edit-client" data-id="${c.id}" aria-label="Kunde bearbeiten">${ic('edit', 22)}</button>` }) +
   `<main class="wrap view">
     <div class="hero">${avatar(c, 'xl')}<div class="grow"><h1>${esc(c.name)}</h1>${c.goals ? `<div class="muted" style="margin-top:4px">🎯 ${esc(c.goals)}</div>` : ''}</div></div>
@@ -1673,7 +1727,7 @@ function viewClient(c) {
       <div class="stat"><div class="stat-l">Letztes Training</div><div class="stat-v">${last ? fmtDate(last.date) : '–'}</div><div class="stat-s">${last ? relDays(last.date) + ' · ' + esc(sessLabel(last)) : 'noch keins'}</div></div>
       <div class="stat"><div class="stat-l">Trainingsplan</div><div class="stat-v">${days.length} ${days.length === 1 ? 'Tag' : 'Tage'}</div><div class="stat-s">${esc(planOf(c.id)?.name || 'noch nicht angelegt')}</div></div>
       <div class="stat"><div class="stat-l">Nächstes Training</div><div class="stat-v">${next ? 'Tag ' + (days.indexOf(next) + 1) : '–'}</div><div class="stat-s">${next ? esc(next.name) + (nxi.manual ? ' · festgelegt' : '') : 'kein Plan'}</div></div>
-      <div class="stat"><div class="stat-l">Fortschritt</div><div class="stat-v">${trendHtml}</div><div class="stat-s">${trend ? 'Volumen vs. letztes Mal' : 'noch zu wenig Daten'}</div>${sparkline(vols)}</div>
+      <div class="stat"><div class="stat-l">Fortschritt</div><div class="stat-v">${trendHtml}</div><div class="stat-s">${trend ? 'Kraft vs. letzte Leistung' : 'noch zu wenig Daten'}</div>${sparkline(vols)}</div>
     </div>
     <div style="margin-top:16px">
       ${active ? `<a class="btn btn-primary btn-big" href="#/train/${active.id}">${ic('play', 22)} Laufendes Training fortsetzen</a><div class="muted" style="text-align:center;font-size:14px;margin-top:6px">${esc(sessLabel(active))} · begonnen ${fmtDate(active.date)}</div>`
@@ -1938,7 +1992,7 @@ function viewProgress(c) {
   const series = sel ? exerciseSeries(c.id, sel) : [];
   const pts = series.map(p => ({ label: fmtDate(p.date).slice(0, 6), y: M.get(p) })).filter(p => p.y != null);
   const volPts = done.slice().reverse().map(s => ({ label: fmtDate(s.date).slice(0, 6), y: sessionVolume(s) })).filter(p => p.y > 0);
-  const trend = volumeTrend(c.id), totalVol = done.reduce((t, s) => t + sessionVolume(s), 0);
+  const trend = strengthTrend(c.id), totalVol = done.reduce((t, s) => t + sessionVolume(s), 0);
   const prs = names.map(n => {
     const ser = exerciseSeries(c.id, n.name); let bw = null, be = null;
     for (const p of ser) { if (hasVal(p.top.weight) && (!bw || p.top.weight > bw.top.weight)) bw = p; if (p.e1rm && (!be || p.e1rm > be.e1rm)) be = p; }
@@ -1951,7 +2005,7 @@ function viewProgress(c) {
       <div class="stat"><div class="stat-l">${T('Trainings')}</div><div class="stat-v">${done.length}</div><div class="stat-s">${T('seit')} ${fmtDate(done[done.length - 1].date)}</div></div>
       <div class="stat"><div class="stat-l">${T('Letzte 30 Tage')}</div><div class="stat-v">${done.filter(s => daysBetween(s.date, today()) <= 30).length}</div><div class="stat-s">${T('Trainings')}</div></div>
       <div class="stat"><div class="stat-l">${T('Gesamtvolumen')}</div><div class="stat-v">${fmtNum(Math.round(totalVol / 1000 * 10) / 10)} t</div><div class="stat-s">${T('bewegtes Gewicht')}</div></div>
-      <div class="stat"><div class="stat-l">${T('Volumen-Trend')}</div><div class="stat-v">${trend ? `<span class="${trend.pct >= 0 ? 'up' : 'down'}">${trend.pct >= 0 ? '+' : ''}${fmtNum(Math.round(trend.pct))} %</span>` : '–'}</div><div class="stat-s">${T('vs. letztes Mal')}</div></div>
+      <div class="stat"><div class="stat-l">${T('Kraft-Trend')}</div><div class="stat-v">${trendHtmlOf(trend)}</div><div class="stat-s">${T('vs. letzte vergleichbare Leistung')}</div></div>
     </div>
 
     <section class="section">
@@ -1965,8 +2019,10 @@ ${(pe => { if (!pe) return ''; const pg = progOfPlan(pe); if (!hasVal(pg.goal) &
         <div class="muted" style="font-size:13px;margin-bottom:6px">${M.title}</div>
         ${lineChart(pts, M.unit)}
         ${series.length ? `<table class="table" style="margin-top:10px"><thead><tr><th>${T('Datum')}</th><th>${T('Bester Satz')}</th><th class="r">${T('Sätze')}</th><th class="r">${T('Volumen')}</th></tr></thead><tbody>
-          ${series.slice().reverse().map((p, i, arr) => { const prev = arr[i + 1]; const tw = p.top.weight, pw = prev && prev.top.weight;
-            const arrow = prev && hasVal(tw) && hasVal(pw) ? (tw > pw ? ' <span class="up">▲</span>' : tw < pw ? ' <span class="down">▼</span>' : '') : '';
+          ${series.slice().reverse().map((p, i, arr) => {   // Vergleich mit der vorherigen DOKUMENTIERTEN, vergleichbaren Leistung (Lücken/Leereinträge überspringen)
+            const pc = progComparable(p.session) ? perfOf(p.setsList) : null, prev = pc && arr.slice(i + 1).find(q => progComparable(q.session) && perfOf(q.setsList));
+            const cmp = prev ? comparePerf(pc, perfOf(prev.setsList)) : null;
+            const arrow = cmp ? (cmp.dir === 'up' ? ' <span class="up">▲</span>' : cmp.dir === 'down' ? ' <span class="down">▼</span>' : '') : '';
             return `<tr><td><a href="#/session/${p.session.id}">${fmtDate(p.date)}</a></td><td>${fmtSet(p.top)}${arrow}</td><td class="r">${p.sets}</td><td class="r">${fmtVol(p.vol)}</td></tr>`; }).join('')}
         </tbody></table>` : ''}
       </div>
@@ -5082,7 +5138,7 @@ function prevComparable(s, e) {
   for (const o of sessionsOf(s.clientId, true)) {
     if (o.id === s.id || sessKey(o) >= key) continue;
     const pe = (e.exerciseId && o.exercises.find(x => x.exerciseId === e.exerciseId)) || o.exercises.find(x => norm(x.name) === n);
-    if (pe && workSets(pe).length) return { s: o, e: pe };
+    if (pe && workSets(pe).some(hasData) && progComparable(o)) return { s: o, e: pe };   // nur dokumentierte, vergleichbare Leistung
   }
   return null;
 }
@@ -5098,12 +5154,14 @@ function analyzeSession(s) {
     if (fromPlan) { A.planned++; A.setsPlanned += ps; if (!ws.length) A.skipped.push(nm); else if (ws.length < ps) A.partial.push({ name: nm, done: ws.length, planned: ps }); }
     if (ws.length) A.doneEx++;
     if (e.note) A.notes.push({ name: nm, text: e.note });
-    const pv = ws.length ? prevComparable(s, e) : null;
+    const pv = ws.some(hasData) && progComparable(s) ? prevComparable(s, e) : null;   // ohne Werte bzw. an Tagesform angepasst: kein Leistungsvergleich
     if (pv) {
       row.prev = pv; A.prevDate = A.prevDate || pv.s.date;
       const same = targetSig(e) === targetSig(pv.e) || !(e.target && e.target.length) || !(pv.e.target && pv.e.target.length);
       const t1 = topSet(e), t0 = topSet(pv.e), b1 = bestBwReps(e), b0 = bestBwReps(pv.e);
+      const pc = comparePerf(perfOf(workSets(e)), perfOf(workSets(pv.e)));
       if (!same) row.cmp = { kind: 'plan' };
+      else if (pc && pc.dir === 'mixed') row.cmp = { kind: 'mixed' };   // Gewicht und Wiederholungen gegenläufig → keine eindeutige Aussage
       else if (t1 && t0 && t1.weight > t0.weight) { row.cmp = { kind: 'weight', from: t0.weight, to: t1.weight, reps: t1.reps }; A.items.push({ kind: 'weight', name: nm, from: t0.weight, to: t1.weight }); }
       else if (t1 && t0 && t1.weight === t0.weight && t1.reps > t0.reps) { row.cmp = { kind: 'reps', w: t1.weight, from: t0.reps, to: t1.reps }; A.items.push({ kind: 'reps', name: nm, w: t1.weight, from: t0.reps, to: t1.reps }); }
       else if (!t1 && !t0 && b1 && b0 && b1.reps > b0.reps) { row.cmp = { kind: 'reps', w: null, from: b0.reps, to: b1.reps, unit: e.unit || null }; A.items.push({ kind: 'reps', name: nm, w: null, from: b0.reps, to: b1.reps, unit: e.unit || null }); }
@@ -5263,7 +5321,7 @@ function SessionExercises(s) {
   const fs = sets => sets.map(x => hasVal(x.weight) ? `${fmtNum(x.weight)}×${hasVal(x.reps) ? fmtNum(x.reps) : '–'}` : hasVal(x.reps) ? fmtNum(x.reps) : '✓').join(' · ');
   return A.ex.map(r => {
     const e = r.e, sets = workSets(e), missing = r.planned ? Math.max(0, r.planned - sets.length) : 0;
-    const cmp = r.cmp ? ({ weight: `📈 ${T('mehr Gewicht')} (${fmtNum(r.cmp.from)} → ${fmtNum(r.cmp.to)} kg)`, reps: r.cmp.unit === 's' && r.cmp.w == null ? `📈 ${T('längere Haltezeit')} (${fmtNum(r.cmp.from)} → ${fmtNum(r.cmp.to)} ${T('Sek.')})` : `📈 ${T('mehr Wiederholungen')} (${fmtNum(r.cmp.from)} → ${fmtNum(r.cmp.to)})`, less: T('weniger Gewicht als zuletzt'), same: T('wie beim letzten Mal'), plan: T('Vorgabe wurde geändert – kein direkter Vergleich') }[r.cmp.kind]) : '';
+    const cmp = r.cmp ? ({ weight: `📈 ${T('mehr Gewicht')} (${fmtNum(r.cmp.from)} → ${fmtNum(r.cmp.to)} kg)`, reps: r.cmp.unit === 's' && r.cmp.w == null ? `📈 ${T('längere Haltezeit')} (${fmtNum(r.cmp.from)} → ${fmtNum(r.cmp.to)} ${T('Sek.')})` : `📈 ${T('mehr Wiederholungen')} (${fmtNum(r.cmp.from)} → ${fmtNum(r.cmp.to)})`, less: T('weniger Gewicht als zuletzt'), same: T('wie beim letzten Mal'), mixed: T('Gewicht und Wiederholungen gegenläufig – keine eindeutige Veränderung'), plan: T('Vorgabe wurde geändert – kein direkter Vergleich') }[r.cmp.kind]) : '';
     return `<details class="card exd" ${sets.length ? '' : ''}><summary><div class="grow"><div style="font-weight:700">${esc(r.name)}</div>
       <div class="muted" style="font-size:13px">${sets.length ? `${r.planned ? `${sets.length}/${r.planned}` : sets.length} ${T('Sätze')}${cmp ? ' · ' + cmp : ''}` : T('nicht durchgeführt')}${missing && sets.length ? ' · ' + TN(missing, '{n} Satz fehlt', '{n} Sätze fehlen') : ''}</div></div>${ic('down', 18)}</summary>
       ${sets.length ? `<table class="table"><thead><tr><th>${T('Satz')}</th><th>${T('Gewicht')}</th><th>${T('Wdh.')}</th><th>RPE/RIR</th><th>${T('Notiz')}</th></tr></thead><tbody>
