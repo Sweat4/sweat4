@@ -1137,6 +1137,9 @@ window.i18nCheck = i18nCheck;
 
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const norm = s => String(s || '').trim().toLowerCase();
+/* Zählweise einer Übung: null = Wiederholungen, 's' = Sekunden (halten), 'm' = Strecke in Metern (z. B. Loaded Carries) */
+const UNIT_OK = u => u === 's' || u === 'm' ? u : null;
+const unitAbbr = u => u === 's' ? T('Sek.') : u === 'm' ? 'm' : T('Wdh.');
 const hasVal = v => v !== null && v !== undefined && v !== '';
 const byOrder = (a, b) => a.order - b.order;
 function parseNum(v) { v = String(v ?? '').trim().replace(',', '.'); if (v === '') return null; const n = parseFloat(v); return isFinite(n) ? n : null; }
@@ -1163,7 +1166,7 @@ function planSummary(e) {
   if (e.amrap) return `${n} × ${T('max. Wdh.')}`;
   const sets = (e.sets || []).slice(0, n);
   if (!sets.some(s => hasVal(s.weight) || hasVal(s.reps) || hasVal(s.repsMax))) return `${n} ${T('Sätze')}`;
-  const parts = sets.map(s => fmtTarget(s).replace(' ' + T('Wdh.'), '')), u = e.unit === 's' ? ' ' + T('Sek.') : '';
+  const parts = sets.map(s => fmtTarget(s).replace(' ' + T('Wdh.'), '')), u = e.unit === 's' || e.unit === 'm' ? ' ' + unitAbbr(e.unit) : '';
   return (new Set(parts).size === 1 ? `${n} × ${parts[0]}` : parts.join(' / ')) + u;
 }
 function fmtTarget(t, amrap) {
@@ -1313,9 +1316,10 @@ function rpeOf(x) {
 }
 const hasData = x => !!x && !x.warmup && hasVal(x.reps) && x.reps > 0;   // nur Sätze mit eingetragenen Wiederholungen zählen als Messung
 const e1rmOf = (w, r) => w * (1 + r / 30);
-function perfOf(sets) {   // beste gültige Leistung einer Übung in einer Einheit
+function perfOf(sets, unit) {   // beste gültige Leistung einer Übung in einer Einheit
   const D = (sets || []).filter(hasData); if (!D.length) return null;
   const L = D.filter(x => hasVal(x.weight) && x.weight > 0);
+  if (UNIT_OK(unit) && L.length) { let b = null; for (const x of L) { const v = x.weight * x.reps; if (!b || v > b.v) b = { kind: 'work', w: x.weight, r: x.reps, v, rpe: rpeOf(x) }; } return b; }   // Carries/Halten mit Gewicht: Gewicht × Strecke bzw. Zeit
   if (L.length) { let b = null; for (const x of L) { const v = e1rmOf(x.weight, x.reps); if (!b || v > b.v || (v === b.v && x.weight > b.w)) b = { kind: 'load', w: x.weight, r: x.reps, v, rpe: rpeOf(x) }; } return b; }
   const bx = D.reduce((a, x) => x.reps > a.reps ? x : a); return { kind: 'reps', w: null, r: bx.reps, v: bx.reps, rpe: rpeOf(bx) };
 }
@@ -1339,7 +1343,7 @@ function exerciseHistories(cid, uptoKey) {
     if (!progComparable(s) || (uptoKey && sessKey(s) > uptoKey)) continue;
     const per = new Map();
     for (const e of s.exercises) { const k = progKeyOf(e), sets = [...(per.get(k) ? per.get(k).sets : []), ...(e.sets || [])]; per.set(k, { name: e.name, sets, ex: e }); }
-    for (const [k, x] of per) { const m = perfOf(x.sets); if (!m) continue;
+    for (const [k, x] of per) { const m = perfOf(x.sets, x.ex && x.ex.unit); if (!m) continue;
       if (!H.has(k)) H.set(k, { key: k, name: x.name, list: [] }); const h = H.get(k); h.ex = x.ex; h.list.push({ s, date: s.date, m }); }
   }
   return H;
@@ -1542,7 +1546,7 @@ function exerciseSeries(cid, name) {
     for (const st of sets) if (hasVal(st.weight) && (!top || st.weight > top.weight || (st.weight === top.weight && (st.reps || 0) > (top.reps || 0)))) top = st;
     if (!top) top = sets.reduce((a, b) => ((b.reps || 0) > (a.reps || 0) ? b : a));
     const e1 = Math.max(0, ...sets.map(st => hasVal(st.weight) && st.reps > 0 ? st.weight * (1 + st.reps / 30) : 0));
-    return { session: s, date: s.date, top, reps: sets.reduce((a, b) => a + (b.reps || 0), 0), vol: sets.reduce((a, b) => a + setVol(b), 0), e1rm: e1, sets: sets.length, setsList: sets };
+    return { session: s, date: s.date, top, reps: sets.reduce((a, b) => a + (b.reps || 0), 0), vol: sets.reduce((a, b) => a + setVol(b), 0), e1rm: e1, sets: sets.length, setsList: sets, unit: e.unit || null };
   }).filter(Boolean);
 }
 function exerciseNames(cid) {
@@ -2023,7 +2027,7 @@ function phFor(e, i, last, sug) {
   return { w: hasVal(w) ? w : null, r: hasVal(r) ? r : null };
 }
 const exComplete = e => e.sets.length > 0 && e.sets.every(s => s.done);
-const exSummary = e => e.sets.filter(s => s.done).map(x => e.unit === 's' ? fmtSet(x).replace('Wdh.', 'Sek.') : fmtSet(x)).join(' · ');
+const exSummary = e => e.sets.filter(s => s.done).map(x => e.unit === 's' || e.unit === 'm' ? fmtSet(x).replace('Wdh.', unitAbbr(e.unit)) : fmtSet(x)).join(' · ');
 
 function setRowHtml(e, ei, si, last, sug) {
   const s = e.sets[si], ph = phFor(e, si, last, sug), extra = hasVal(s.rpe) || hasVal(s.note);
@@ -2032,7 +2036,7 @@ function setRowHtml(e, ei, si, last, sug) {
     <span class="set-n">${si + 1}</span>
     <label class="fld"><input data-tf="weight" data-ei="${ei}" data-si="${si}" inputmode="decimal" enterkeyhint="next" autocomplete="off" value="${fmtIn(s.weight)}" placeholder="${ph.w != null ? fmtIn(ph.w) : '–'}" data-ph="${ph.w ?? ''}" aria-label="${T('Gewicht Satz {n}', { n: si + 1 })}"><span class="unit">kg</span></label>
     <span class="x">×</span>
-    <label class="fld"><input data-tf="reps" data-ei="${ei}" data-si="${si}" inputmode="numeric" enterkeyhint="next" autocomplete="off" value="${fmtIn(s.reps)}" placeholder="${ph.r != null ? fmtIn(ph.r) : '–'}" data-ph="${ph.r ?? ''}" aria-label="${T('Wiederholungen Satz {n}', { n: si + 1 })}"><span class="unit">${e.unit === 's' ? T('Sek') : T('Wdh')}</span></label>
+    <label class="fld"><input data-tf="reps" data-ei="${ei}" data-si="${si}" inputmode="numeric" enterkeyhint="next" autocomplete="off" value="${fmtIn(s.reps)}" placeholder="${ph.r != null ? fmtIn(ph.r) : '–'}" data-ph="${ph.r ?? ''}" aria-label="${T('Wiederholungen Satz {n}', { n: si + 1 })}"><span class="unit">${e.unit === 's' ? T('Sek') : e.unit === 'm' ? 'm' : T('Wdh')}</span></label>
     <button class="icon-btn more ${extra ? 'has' : ''}" data-action="set-more" data-ei="${ei}" data-si="${si}" aria-label="${T('RPE und Notiz')}">${ic('more')}</button>
   </div>
   <div class="set-extra ${extra ? 'show' : ''}" id="sx-${ei}-${si}">
@@ -2060,7 +2064,7 @@ function viewTrain(sess) {
         <div class="prog-r">${esc(sug.reason)} · ${T('Schritt')} ${fmtNum(pg.step)} kg · ${T('frei änderbar')}</div></div>` : '';
     const goalHtml = hasVal(pg.goal) ? `<div class="goal-box">${goalBar(pg.start, pg.goal, last ? topWeight(last.sets) : null)}</div>` : '';
     const si = ssInfo(sess.exercises, ei);
-    const tg = e.amrap ? e.sets.map(() => T('max.')) : (e.target || []).map(t => repsLabel(t)).filter(Boolean), unitL = e.unit === 's' ? T('Sek.') : T('Wdh.');
+    const tg = e.amrap ? e.sets.map(() => T('max.')) : (e.target || []).map(t => repsLabel(t)).filter(Boolean), unitL = unitAbbr(e.unit);
     const restHtml = e.rest && !si ? `<div class="muted" style="font-size:13px;margin-top:6px">⏱ ${T('{t} Pause zwischen den Sätzen', { t: restTxt(e.rest) })}</div>` : '';
     const planHtml = (tg.length || si || restHtml) ? `<div class="s4-plan">${tg.length ? `<div><span class="prog-l">${T('Vorgabe')}</span> ${tg.map((r, i) => `<span class="chip">${i + 1}: ${esc(r)} ${unitL}</span>`).join('')}</div>` : ''}
         ${restHtml}${si ? `<div class="muted" style="font-size:13px;margin-top:6px">${si.circuit ? '🔁 ' + T('Zirkel – Station {p} von {n}. Danach: {next}. Zwischen den Stationen nur 30 Sek. Pause.', { p: si.pos, n: si.size, next: `<b>${esc(exName(si.next))}</b>` }) : '🔁 ' + T('Supersatz {l}: im Wechsel mit {x} – Satz hier, dann direkt rüber, danach kurze Pause.', { l: si.label, x: `<b>${si.partners.map(n => esc(exName(n))).join(', ')}</b>` })}</div>` : ''}</div>` : '';
@@ -2256,7 +2260,7 @@ ${(pe => { if (!pe) return ''; const pg = progOfPlan(pe); if (!hasVal(pg.goal) &
           ${(rated => series.slice().reverse().map(p => {   // Pfeile aus der übungsbasierten Bewertung (vorherige gültige Messung, Lücken egal)
             const rr = rated.get(p.session.id), st = rr && rr.st;
             const arrow = st === 'up' ? ' <span class="up">▲</span>' : st === 'down' ? ' <span class="down">▼</span>' : st === 'outlier' ? ' <span class="muted" title="unplausibel">?</span>' : '';
-            return `<tr><td><a href="#/session/${p.session.id}">${fmtDate(p.date)}</a></td><td>${fmtSet(p.top)}${arrow}</td><td class="r">${p.sets}</td><td class="r">${fmtVol(p.vol)}</td></tr>`; }).join(''))(new Map(rateHistory(series.filter(p => progComparable(p.session)).map(p => ({ s: p.session, date: p.date, m: perfOf(p.setsList) })).filter(x => x.m)).map(x => [x.s.id, x])))}
+            return `<tr><td><a href="#/session/${p.session.id}">${fmtDate(p.date)}</a></td><td>${fmtSet(p.top)}${arrow}</td><td class="r">${p.sets}</td><td class="r">${fmtVol(p.vol)}</td></tr>`; }).join(''))(new Map(rateHistory(series.filter(p => progComparable(p.session)).map(p => ({ s: p.session, date: p.date, m: perfOf(p.setsList, p.unit) })).filter(x => x.m)).map(x => [x.s.id, x])))}
         </tbody></table>` : ''}
       </div>
     </section>
@@ -2417,7 +2421,7 @@ function xpMark(f) {
 /* Name geändert (getippt oder im Raster gewählt): Zählweise und Steigerungsschritt passend vorschlagen, solange nicht selbst gesetzt */
 function exNameChanged(f) {
   const v = f.querySelector('[name=name]').value;
-  if (!f.dataset.unitTouched) { const k = katFind(v, f.dataset.cat), r = f.querySelector(`[name=unit][value="${k && k.unit === 's' ? 's' : ''}"]`); if (r) r.checked = true; }
+  if (!f.dataset.unitTouched) { const k = katFind(v, f.dataset.cat), r = f.querySelector(`[name=unit][value="${(k && UNIT_OK(k.unit)) || ''}"]`); if (r) r.checked = true; }
   if (!f.dataset.stepTouched) {
     const ex = f.dataset.id && S.exercises.get(f.dataset.id);
     if (!(ex && ex.step > 0)) { const r = f.querySelector(`[name=stepSel][value="${defaultStep(v)}"]`); if (r) { r.checked = true; f.querySelector('.step-custom').classList.add('hidden'); } }
@@ -2441,7 +2445,7 @@ function openExModal(dayId, exId) {
     <datalist id="ex-names">${own.sort((a, b) => a.localeCompare(b, 'de')).map(x => `<option value="${esc(x)}">`).join('')}</datalist>
     <div class="field"><span>Anzahl Sätze</span><div class="radio-seg">${Array.from({ length: CONFIG.MAX_SETS }, (_, i) => `<label><input type="radio" name="targetSets" value="${i + 1}" ${i + 1 === n ? 'checked' : ''}><span>${i + 1}</span></label>`).join('')}</div></div>
     ${(() => { const un = e ? e.unit : ((katFind(e ? e.name : '') || {}).unit || null);
-      return `<div class="field"><span>Zählweise</span><div class="radio-seg unit-seg"><label><input type="radio" name="unit" value="" ${un !== 's' ? 'checked' : ''}><span>Wiederholungen</span></label><label><input type="radio" name="unit" value="s" ${un === 's' ? 'checked' : ''}><span>Sekunden (halten)</span></label></div>
+      return `<div class="field"><span>Zählweise</span><div class="radio-seg unit-seg"><label><input type="radio" name="unit" value="" ${!UNIT_OK(un) ? 'checked' : ''}><span>Wiederholungen</span></label><label><input type="radio" name="unit" value="s" ${un === 's' ? 'checked' : ''}><span>Sekunden (halten)</span></label><label><input type="radio" name="unit" value="m" ${un === 'm' ? 'checked' : ''}><span>Strecke (m)</span></label></div>
       <div class="muted" style="font-size:12px;margin-top:6px">Bei „Sekunden“ trägst du unten statt der Wiederholungen die Haltezeit ein, z. B. 30.</div></div>`; })()}
     <div class="field"><span>Planwerte (optional – erscheinen im Training als Vorschlag)</span>
       ${Array.from({ length: CONFIG.MAX_SETS }, (_, i) => `<div class="target-row ${i >= n ? 'hidden' : ''}" data-tr="${i}"><span class="muted">Satz ${i + 1}</span>
@@ -2823,7 +2827,7 @@ document.addEventListener('submit', async ev => {
     const sets = Array.from({ length: n }, (_, i) => ({ weight: parseNum(fd.get('w' + i)), reps: parseNum(fd.get('r' + i)), repsMax: parseNum(fd.get('rm' + i)) }));
     let e = f.dataset.id ? S.exercises.get(f.dataset.id) : null;
     if (!e) { if (exercisesOf(did).length >= CONFIG.MAX_EXERCISES) return toast(T('Maximum erreicht')); e = { id: uid(), dayId: did, order: exercisesOf(did).length, createdAt: Date.now() }; }
-    Object.assign(e, { name, targetSets: n, sets, note: String(fd.get('note') || '').trim(), ss: String(fd.get('ss') || '') || null, amrap: fd.get('amrap') === 'on', unit: fd.get('unit') === 's' ? 's' : null, rest: (r => r > 0 && r <= 600 ? Math.round(r) : null)(parseNum(fd.get('rest'))) });
+    Object.assign(e, { name, targetSets: n, sets, note: String(fd.get('note') || '').trim(), ss: String(fd.get('ss') || '') || null, amrap: fd.get('amrap') === 'on', unit: UNIT_OK(fd.get('unit')), rest: (r => r > 0 && r <= 600 ? Math.round(r) : null)(parseNum(fd.get('rest'))) });
     // Katalog-Verknüpfung: die im Raster gewählte Übung (eindeutige ID), solange der Name nicht von Hand geändert wurde; sonst Suche über den Namen
     const kSel = f.dataset.cat && KAT().find(x => x.id === f.dataset.cat), k3 = kSel && normK(kSel.n) === normK(name) ? kSel : katFind(name);
     e.catalogId = k3 ? k3.id : null;
@@ -2927,7 +2931,7 @@ function katForSessionEx(e) { const pe = e.exerciseId && S.exercises.get(e.exerc
 function KL(e) {
   if (!e || !isEN()) return e;
   const x = ((L10N() || {}).kat || {})[e.id]; if (!x) return e;
-  return { ...e, n: x[0], sub: x[1], eq: x[2], start: x[3], exec: x[4], dir: x[5], tips: x[6], errs: x[7], breath: x[8] || e.breath, safety: x[9] || e.safety };
+  return { ...e, n: x[0], sub: x[1], eq: x[2], start: x[3], exec: x[4], dir: x[5], tips: x[6], errs: x[7], breath: x[8] || e.breath, safety: x[9] || e.safety, param: x[10] || e.param };
 }
 const TG = g => { const d = L10N(); return (d && d.groups && d.groups[g]) || g; };
 /* Anzeigename einer Plan-/Trainingsübung: Katalogname in der gewählten Sprache, sonst übersetzter bzw. eigener Name */
@@ -3139,7 +3143,7 @@ const subIn = (e, g) => e.g === g ? e.sg : (e.cats || {})[g] || null;
 const katSubs = g => [...new Set(KAT().filter(e => inGroup(e, g) && subIn(e, g)).map(e => subIn(e, g)))];
 function KatSubRow() {
   const g = UI.katGroup || 'Alle', subs = g === 'Alle' ? [] : katSubs(g); if (!subs.length) return '';
-  const cur = UI.katSub || 'Alle', cnt = x => KAT().filter(e => inGroup(e, g) && subIn(e, g) === x).length, lab = g === 'Bodyweight' ? T('Bereich') : T('Muskel');
+  const cur = UI.katSub || 'Alle', cnt = x => KAT().filter(e => inGroup(e, g) && subIn(e, g) === x).length, lab = g === 'Bodyweight' || g === 'Stabilisation' ? T('Bereich') : T('Muskel');
   return `<div class="frow frow-sub" role="group" aria-label="${lab}"><span class="frow-l">${lab}</span>${FilterChip(T('Alle'), cur === 'Alle', 'kat-sub', 'Alle')}${subs.map(x => FilterChip(TG(x), x === cur, 'kat-sub', x, cnt(x))).join('')}</div>`;
 }
 function refreshKat() {
@@ -3242,6 +3246,7 @@ function ExerciseDetailView(e0) {
       <section class="ud-card">${SectionHeader(T('Technik'))}${li(e.tips, 'ok', ic('check', 16))}</section>
       <section class="ud-card">${SectionHeader(T('Häufige Fehler'))}${li(e.errs, 'bad', ic('x', 16))}</section>
       ${e.breath ? `<section class="ud-card">${SectionHeader(T('Atmung'))}<p class="ud-p">${esc(e.breath)}</p></section>` : ''}
+      ${e.param ? `<section class="ud-card">${SectionHeader(T('Trainingsparameter'))}<p class="ud-p">${esc(e.param)}</p>${e.unit === 'm' ? `<p class="ud-p muted" style="font-size:13px">${T('Im Training wird die Strecke in Metern eingetragen (bei Bedarf im Plan auf Sekunden umstellen).')}</p>` : ''}</section>` : ''}
       ${e.safety ? `<section class="ud-card ud-safe">${SectionHeader(T('Sicherheit'))}<p class="ud-p">${esc(e.safety)}</p></section>` : ''}
     </div>
     ${trainer ? `<div class="ud-cta"><button class="btn btn-primary btn-big" data-action="ud-add" data-id="${e.id}">${ic('plus', 20)} ${T('Zum Trainingsplan hinzufügen')}</button></div>` : ''}
@@ -3268,7 +3273,7 @@ function addCatalogExercise(exId, dayId) {
   const e = KAT().find(x => x.id === exId), d = S.days.get(dayId); if (!e || !d) return;
   const list = exercisesOf(dayId); if (list.length >= CONFIG.MAX_EXERCISES) return toast(T('Dieser Tag ist voll'));
   put('exercises', { id: uid(), dayId, name: e.n, order: list.length, createdAt: Date.now(), targetSets: CONFIG.DEFAULT_SETS, sets: [], note: '', catalogId: e.id,
-    ss: null, amrap: false, unit: e.unit === 's' ? 's' : null, rest: null, step: null, autoSuggest: e.eq !== 'Körpergewicht', startWeight: null, goalWeight: null });
+    ss: null, amrap: false, unit: UNIT_OK(e.unit), rest: null, step: null, autoSuggest: e.eq !== 'Körpergewicht', startWeight: null, goalWeight: null });
   const plan = S.plans.get(d.planId), c = plan && S.clients.get(plan.clientId);
   closeModal(null); toast(`Hinzugefügt: ${d.name}${c ? ' · ' + c.name : ''}`);
 }
@@ -4877,7 +4882,7 @@ function viewClientHome() {
 /* ---------- Trainingsplan als Übungskarten (Kunde) ----------
    Gleiche Bausteine wie der Übungskatalog (Vorschaubild, Karten, Gold-Akzente), aber als Liste mit kompakten Satz-Chips. */
 function setChips(e) {
-  const n = e.targetSets || CONFIG.DEFAULT_SETS, u = e.unit === 's' ? ' ' + T('Sek.') : '';
+  const n = e.targetSets || CONFIG.DEFAULT_SETS, u = e.unit === 's' || e.unit === 'm' ? ' ' + unitAbbr(e.unit) : '';
   if (e.amrap) return [{ t: `${n} × ${T('max.')}`, all: true }];
   const sets = (e.sets || []).slice(0, n);
   if (!sets.some(x => hasVal(x.weight) || hasVal(x.reps) || hasVal(x.repsMax))) return [{ t: `${n} ${T('Sätze')}`, all: true }];
@@ -5411,11 +5416,11 @@ function analyzeSession(s) {
       row.prev = pv; A.prevDate = A.prevDate || pv.s.date;
       const same = targetSig(e) === targetSig(pv.e) || !(e.target && e.target.length) || !(pv.e.target && pv.e.target.length);
       const t1 = topSet(e), t0 = topSet(pv.e), b1 = bestBwReps(e), b0 = bestBwReps(pv.e);
-      const pc = comparePerf(perfOf(workSets(e)), perfOf(workSets(pv.e)));
+      const pc = comparePerf(perfOf(workSets(e), e.unit), perfOf(workSets(pv.e), pv.e.unit));
       if (!same) row.cmp = { kind: 'plan' };
       else if (pc && pc.opposite && !(t1 && t0 && t1.weight > t0.weight && pc.dir === 'up')) row.cmp = { kind: 'mixed' };   // Gewicht und Wdh. gegenläufig ohne klare Steigerung   // Gewicht und Wiederholungen gegenläufig → keine eindeutige Aussage
       else if (t1 && t0 && t1.weight > t0.weight) { row.cmp = { kind: 'weight', from: t0.weight, to: t1.weight, reps: t1.reps }; A.items.push({ kind: 'weight', name: nm, from: t0.weight, to: t1.weight }); }
-      else if (t1 && t0 && t1.weight === t0.weight && t1.reps > t0.reps) { row.cmp = { kind: 'reps', w: t1.weight, from: t0.reps, to: t1.reps }; A.items.push({ kind: 'reps', name: nm, w: t1.weight, from: t0.reps, to: t1.reps }); }
+      else if (t1 && t0 && t1.weight === t0.weight && t1.reps > t0.reps) { row.cmp = { kind: 'reps', w: t1.weight, from: t0.reps, to: t1.reps, unit: e.unit || null }; A.items.push({ kind: 'reps', name: nm, w: t1.weight, from: t0.reps, to: t1.reps, unit: e.unit || null }); }
       else if (!t1 && !t0 && b1 && b0 && b1.reps > b0.reps) { row.cmp = { kind: 'reps', w: null, from: b0.reps, to: b1.reps, unit: e.unit || null }; A.items.push({ kind: 'reps', name: nm, w: null, from: b0.reps, to: b1.reps, unit: e.unit || null }); }
       else if (t1 && t0 && t1.weight < t0.weight) row.cmp = { kind: 'less', from: t0.weight, to: t1.weight };
       else row.cmp = { kind: 'same' };
@@ -5431,6 +5436,8 @@ function analyzeSession(s) {
 function findingText(f) {
   if (f.kind === 'complete') return T('Trainingsplan vollständig absolviert.');
   if (f.kind === 'weight') return T('Leistungssteigerung erkannt: {x} – heute {b} kg statt {a} kg.', { x: f.name, a: fmtNum(f.from), b: fmtNum(f.to) });
+  if (f.kind === 'reps' && f.unit === 'm') return f.w != null ? T('Längere Strecke bei {x}: {b} m statt {a} m mit {w} kg.', { x: f.name, a: fmtNum(f.from), b: fmtNum(f.to), w: fmtNum(f.w) }) : T('Längere Strecke bei {x}: {b} m statt {a} m.', { x: f.name, a: fmtNum(f.from), b: fmtNum(f.to) });
+  if (f.kind === 'reps' && f.unit === 's' && f.w != null) return T('Längere Zeit bei {x}: {b} Sek. statt {a} Sek. mit {w} kg.', { x: f.name, a: fmtNum(f.from), b: fmtNum(f.to), w: fmtNum(f.w) });
   if (f.kind === 'reps' && f.unit === 's' && f.w == null) return T('Längere Haltezeit bei {x}: {b} Sek. statt {a} Sek.', { x: f.name, a: fmtNum(f.from), b: fmtNum(f.to) });
   if (f.kind === 'reps') return f.w != null ? T('Mehr Wiederholungen bei {x}: {b} statt {a} mit {w} kg.', { x: f.name, a: fmtNum(f.from), b: fmtNum(f.to), w: fmtNum(f.w) }) : T('Mehr Wiederholungen bei {x}: {b} statt {a}.', { x: f.name, a: fmtNum(f.from), b: fmtNum(f.to) });
   if (f.kind === 'skipped') return T('Ausgelassen: {x}', { x: f.names.join(', ') });
@@ -5573,7 +5580,7 @@ function SessionExercises(s) {
   const fs = sets => sets.map(x => hasVal(x.weight) ? `${fmtNum(x.weight)}×${hasVal(x.reps) ? fmtNum(x.reps) : '–'}` : hasVal(x.reps) ? fmtNum(x.reps) : '✓').join(' · ');
   return A.ex.map(r => {
     const e = r.e, sets = workSets(e), missing = r.planned ? Math.max(0, r.planned - sets.length) : 0;
-    const cmp = r.cmp ? ({ weight: `📈 ${T('mehr Gewicht')} (${fmtNum(r.cmp.from)} → ${fmtNum(r.cmp.to)} kg)`, reps: r.cmp.unit === 's' && r.cmp.w == null ? `📈 ${T('längere Haltezeit')} (${fmtNum(r.cmp.from)} → ${fmtNum(r.cmp.to)} ${T('Sek.')})` : `📈 ${T('mehr Wiederholungen')} (${fmtNum(r.cmp.from)} → ${fmtNum(r.cmp.to)})`, less: T('weniger Gewicht als zuletzt'), same: T('wie beim letzten Mal'), mixed: T('Gewicht und Wiederholungen gegenläufig – keine eindeutige Veränderung'), plan: T('Vorgabe wurde geändert – kein direkter Vergleich') }[r.cmp.kind]) : '';
+    const cmp = r.cmp ? ({ weight: `📈 ${T('mehr Gewicht')} (${fmtNum(r.cmp.from)} → ${fmtNum(r.cmp.to)} kg)`, reps: r.cmp.unit === 'm' ? `📈 ${T('längere Strecke')} (${fmtNum(r.cmp.from)} → ${fmtNum(r.cmp.to)} m)` : r.cmp.unit === 's' && r.cmp.w == null ? `📈 ${T('längere Haltezeit')} (${fmtNum(r.cmp.from)} → ${fmtNum(r.cmp.to)} ${T('Sek.')})` : `📈 ${T('mehr Wiederholungen')} (${fmtNum(r.cmp.from)} → ${fmtNum(r.cmp.to)})`, less: T('weniger Gewicht als zuletzt'), same: T('wie beim letzten Mal'), mixed: T('Gewicht und Wiederholungen gegenläufig – keine eindeutige Veränderung'), plan: T('Vorgabe wurde geändert – kein direkter Vergleich') }[r.cmp.kind]) : '';
     return `<details class="card exd" ${sets.length ? '' : ''}><summary><div class="grow"><div style="font-weight:700">${esc(r.name)}</div>
       <div class="muted" style="font-size:13px">${sets.length ? `${r.planned ? `${sets.length}/${r.planned}` : sets.length} ${T('Sätze')}${cmp ? ' · ' + cmp : ''}` : T('nicht durchgeführt')}${missing && sets.length ? ' · ' + TN(missing, '{n} Satz fehlt', '{n} Sätze fehlen') : ''}</div></div>${ic('down', 18)}</summary>
       ${sets.length ? `<table class="table"><thead><tr><th>${T('Satz')}</th><th>${T('Gewicht')}</th><th>${T('Wdh.')}</th><th>RPE/RIR</th><th>${T('Notiz')}</th></tr></thead><tbody>

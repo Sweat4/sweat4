@@ -1335,6 +1335,88 @@
   };
   function shiftPose(p, d) { p.pelvis.add(d); for (const sd of ['L', 'R']) { if (p.ankle && p.ankle[sd]) p.ankle[sd].add(d); if (p.hand && p.hand[sd]) p.hand[sd].add(d); } }
 
+  /* === GRUNDÜBUNGEN, LOADED CARRIES, PLYOMETRIE (v48) ======================== */
+  // Kreuzheben (konventionell): Stange startet am Boden über dem Mittelfuß, Rücken neutral (keine Wirbelsäulenbeugung),
+  // Bewegung aus Hüft- und Kniestreckung, Stange bleibt auf senkrechter Bahn nah am Körper.
+  TPL.deadlift = () => {
+    const props = {}, BAR_R = .225, BAR_Z = .06, W = .13;
+    const A0 = { pelvis: V(0, .58, -.3), pitch: 58, flex: 0, head: -16, ankle: { L: V(W, DIM.ank, 0), R: V(-W, DIM.ank, 0) }, foot: toeOut(8), knee: toeOut(10) };
+    const B0 = { pelvis: V(0, STAND_Y - .005, -.02), pitch: -2, flex: 0, head: 0, ankle: A0.ankle, foot: A0.foot, knee: A0.knee };
+    const poseAt = s => {
+      // erst Knie strecken (Beine drücken), dann Hüfte nach vorne – Rumpfwinkel ändert sich anfangs langsamer
+      const sp = Math.pow(s, 1.35), sy = 1 - Math.pow(1 - s, 1.6);
+      const o = mix(A0, B0, s); o.pitch = lerp(A0.pitch, B0.pitch, sp); o.pelvis = V(0, lerp(A0.pelvis.y, B0.pelvis.y, sy), lerp(A0.pelvis.z, B0.pelvis.z, sp)); o.head = lerp(A0.head, 0, sp);
+      const K = kin(o);
+      const hand = sg => { const sh = shoulder(K, sg), dz = sh.z - BAR_Z; const y = Math.max(BAR_R + .005, sh.y - Math.sqrt(Math.max(.01, .615 * .615 - dz * dz - .04 * .04))); return V(sg * .23, y, BAR_Z + .015 * s); };
+      o.hand = sides(sg => hand(sg)); o.elbow = sides(sg => K.f.clone().multiplyScalar(-1).addScaledVector(K.l, sg * .5));
+      return o;
+    };
+    return {
+      cam: { az: 50, el: 8, dist: 4.1, target: V(0, .82, 0) },
+      timing: { dur: [.6, 1.3, .5, 1.9], labels: ['Start – Hüfte hinten, Rücken neutral, Stange über dem Mittelfuß, Arme gestreckt', 'Konzentrisch: Beine in den Boden drücken, Hüfte nach vorne – Stange nah am Körper', 'Oben – aufrecht, Hüfte und Knie gestreckt, Schultern stabil', 'Exzentrisch: Hüfte zuerst nach hinten, Stange kontrolliert am Bein entlang ablegen'] },
+      setup(kit) { props.bar = kit.barbell(2.1); kit.floorMat(-.9, .7, 1.4); },
+      pose: poseAt,
+      props(J) { props.bar.set(bothHands(J), V(1, 0, 0)); }
+    };
+  };
+  // Loaded Carries: kontrolliertes Gehen geradeaus (Boden läuft mit). v: 'farmer' (zwei Gewichte) | 'suitcase' (rechts, Rumpf bleibt gerade)
+  TPL.carry = p => {
+    const props = {}, suit = p.v === 'suitcase', Tc = 1.3, S = .56, BETA = .62, SPEED = S / (BETA * Tc);
+    const footPos = (sg, ph) => {   // ph 0..1: Standphase (Fuß am Boden, wandert relativ nach hinten), dann Schwungphase
+      const x = sg * .11;
+      if (ph < BETA) { const u = ph / BETA; return { a: V(x, DIM.ank, S / 2 - S * u), f: V(0, lerp(.05, -.25, u * u), 1) }; }
+      const u = (ph - BETA) / (1 - BETA), e = ease(u); return { a: V(x, DIM.ank + .085 * Math.sin(Math.PI * u), -S / 2 + S * e), f: V(0, lerp(-.3, .2, e), 1) };
+    };
+    const custom = t => {
+      const ph = ((t % Tc) + Tc) % Tc / Tc, L = footPos(1, ph), R = footPos(-1, (ph + .5) % 1);
+      const bob = .018 * Math.cos(4 * Math.PI * ph), sway = .012 * Math.sin(2 * Math.PI * ph);
+      const o = { pelvis: V(sway, STAND_Y - .03 + bob, 0), pitch: 1, flex: 0, roll: 0, bend: 0, head: -2, shrug: suit ? 0 : .05,
+        ankle: { L: L.a, R: R.a }, foot: { L: L.f, R: R.f }, knee: { L: V(.05, 0, 1), R: V(-.05, 0, 1) }, yaw: 3 * Math.sin(2 * Math.PI * ph) };
+      const K = kin(o);
+      o.hand = sides((sg, sd) => {
+        if (!suit || sd === 'R') return shoulder(K, sg, o.shrug).addScaledVector(DOWN, .6).addScaledVector(K.l, sg * .07).addScaledVector(K.f, .02);
+        const sw = Math.sin(2 * Math.PI * ph) * .14;   // freier Arm schwingt locker mit
+        return shoulder(K, sg).addScaledVector(armDir(K, sw * 60), .58).addScaledVector(K.l, sg * .06);
+      });
+      o.elbow = sides(sg => K.f.clone().multiplyScalar(-1).addScaledVector(K.l, sg * .4));
+      const label = suit ? (ph < .5 ? 'Gewicht rechts – Oberkörper bleibt aufrecht, kippt nicht zur Seite' : 'Rumpf fest, Schultern auf gleicher Höhe, ruhige Schritte')
+        : (ph < .5 ? 'Zwei gleich schwere Gewichte seitlich – aufrecht gehen' : 'Schultern stabil, Rumpf fest, kontrollierte Schritte');
+      return { pose: o, label, drift: t * SPEED };
+    };
+    return {
+      cam: { az: 55, el: 10, dist: 4.0, target: V(0, .92, 0) }, thumbT: .4, custom,
+      setup(kit) { props.dR = kit.dumbbell(1.35); if (!suit) props.dL = kit.dumbbell(1.35); },
+      props(J) { props.dR.set(J.R.hand.clone().add(V(0, -.035, 0)), J.K.f); if (props.dL) props.dL.set(J.L.hand.clone().add(V(0, -.035, 0)), J.K.f); }
+    };
+  };
+  // Plyometrie: 'pogo' = kleine, schnelle Sprünge fast ohne Kniebeugung über den Vorfuß; 'cmj' = Countermovement Jump (Dehnungs-Verkürzungs-Zyklus)
+  TPL.plyo = p => {
+    const cam = { az: 62, el: 8, dist: 3.9, target: V(0, .95, 0) };
+    if (p.v === 'pogo') {
+      const P = .46, CT = .4;   // Anteil Bodenkontakt (kurz)
+      return { cam, thumbT: .3, custom(t) {
+        const x = ((t % P) + P) % P / P;
+        let air = 0, comp = 0, label;
+        if (x < CT) { comp = Math.sin(Math.PI * x / CT); label = 'Kurzer Bodenkontakt – über Vorfuß und Sprunggelenk abdrücken'; }
+        else { air = .1 * Math.sin(Math.PI * (x - CT) / (1 - CT)); label = 'Federnd in die Luft – Knie bleiben fast gestreckt'; }
+        const heel = .045 - .02 * comp;   // Ferse bleibt oben, senkt sich beim Kontakt nur leicht
+        const o = { pelvis: V(0, STAND_Y + heel - .012 - .035 * comp + air, -.01), pitch: 2, head: -2,
+          ankle: { L: V(.12, DIM.ank + heel + air, -.03), R: V(-.12, DIM.ank + heel + air, -.03) }, foot: { L: V(.05, -.55 - .2 * (air > 0), 1), R: V(-.05, -.55 - .2 * (air > 0), 1) }, knee: toeOut(8) };
+        const K = kin(o);
+        o.hand = sides(sg => shoulder(K, sg).addScaledVector(armDir(K, 25 + 10 * comp), .5).addScaledVector(K.l, sg * .05)); o.elbow = sides(sg => K.f.clone().multiplyScalar(-1).addScaledVector(K.l, sg * .3));
+        return { pose: o, label };
+      } };
+    }
+    // CMJ: aufrecht → schnelle Gegenbewegung (kurz absenken, Arme nach hinten) → ohne Pause explosiv senkrecht → Flug → weiche Landung
+    return { cam: { az: 62, el: 8, dist: 4.6, target: V(0, 1.12, 0) }, thumbT: .86, custom: keyAnim([
+      [0, { d: 0, arm: 15 }, 'Start – aufrecht, hüftbreit'],
+      [.45, { d: .5, arm: -50 }, 'Schnelle Gegenbewegung: kurz absenken, Arme nach hinten'],
+      [.62, { d: .02, arm: 165, arc: .34 }, 'Ohne Pause explosiv senkrecht abspringen – Arme schwingen hoch'],
+      [1.1, { d: .1, arm: 120 }, 'Flugphase – Körper gestreckt'],
+      [1.2, { d: .48, arm: 45 }, 'Weich landen: Fußballen zuerst, Knie und Hüfte federn ab'],
+      [1.75, { d: 0, arm: 15 }, 'Stabil aufrichten']], 2.5) };
+  };
+
   /* === MOBILITY (Boden-Übungen, Schlüsselposen mit weicher Überblendung) ===== */
   // Jede Pose wird vollständig beschrieben (Becken, Rumpf, Hände, Füße, Gelenk-Pole),
   // damit zwischen zwei Posen sauber interpoliert werden kann.

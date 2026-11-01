@@ -28,6 +28,7 @@ window.SW_GRUPPEN = ['Brust', 'Schulter', 'Rücken', 'Arme', 'Beine', 'Bauch', '
   const A = o => ({ g: 'Arme', sec: [], ...o, alias: o.alias || [] });
   // Bodyweight-Übungen: gleiche Felder wie Arme + typ (Übungstyp) und lvl (Schwierigkeit)
   const B = o => ({ g: 'Bodyweight', sec: [], ...o, alias: o.alias || [] });
+  const N = o => ({ sec: [], ...o, alias: o.alias || [] });   // neue Übungen (v48): Objekt-Schreibweise wie Arme/Bodyweight
   const L = [
   /* ---------------- BRUST ---------------- */
   E('schraegbank-kh', 'Schrägbankdrücken mit Kurzhanteln', 'Brust', 'obere Brust', 'Kurzhanteln, Schrägbank (30–45°)', { t: 'press', impl: 'db', incline: 30 }, ['chest', 'frontDelt'], ['triceps'],
@@ -961,6 +962,64 @@ window.SW_GRUPPEN = ['Brust', 'Schulter', 'Rücken', 'Arme', 'Beine', 'Bauch', '
     breath: 'Beim Hochziehen ausatmen, beim Absenken einatmen.',
     safety: 'Die Stange muss sicher eingehängt sein (Multipresse: Sicherung prüfen).',
     alias: ['Inverted Row', 'Low Row', 'Australian Pull-ups', 'Körpergewicht-Rudern', 'Rudern an der Turnstange'] })
+  ,
+  /* ---------------- GRUNDÜBUNG, LOADED CARRIES, PLYOMETRIE (v48) ----------------
+     param = empfohlene Trainingsparameter (Detailseite). unit 'm' = Strecke in Metern (statt Wiederholungen), 's' = Sekunden. */
+  N({ id: 'kreuzheben', n: 'Kreuzheben (Deadlift)', g: 'Rücken', sub: 'Rückenstrecker, Gesäß & Beinbeuger', eq: 'Langhantel', typ: 'dynamisch', lvl: 'Fortgeschritten',
+    anim: { t: 'deadlift' }, prim: ['lowerBack', 'glutes', 'hamstrings'], sec: ['quads', 'abs', 'traps', 'forearms'],
+    start: 'Hüftbreiter Stand, die Stange liegt über dem Mittelfuß (ca. 3 cm vor dem Schienbein). Hüfte nach hinten, Knie leicht gebeugt, Hände knapp außerhalb der Beine greifen die Stange. Rücken neutral, Brust offen, Schultern knapp vor der Stange, Arme gestreckt.',
+    exec: ['Rumpf fest anspannen und tief einatmen (Bauch fest).', 'Die Beine in den Boden drücken – die Stange löst sich vom Boden und bleibt nah am Schienbein.', 'Ab Kniehöhe die Hüfte kraftvoll nach vorne bringen, bis Hüfte und Knie gestreckt sind.', 'Oben aufrecht stehen – nicht nach hinten überstrecken.', 'Zurück: zuerst die Hüfte nach hinten schieben, die Stange gleitet am Oberschenkel entlang; ab Kniehöhe die Knie beugen und die Stange kontrolliert ablegen.'],
+    dir: 'Die Stange bewegt sich senkrecht über dem Mittelfuß nach oben und wieder nach unten – nah am Körper.',
+    tips: ['Wirbelsäule bleibt die ganze Zeit neutral – kein runder Rücken', 'Stange nah am Körper führen (Schienbein, Knie, Oberschenkel)', 'Erst die Beine drücken, dann die Hüfte strecken', 'Schultern stabil, Arme bleiben gestreckt – nicht mit den Armen ziehen'],
+    errs: ['Runder Rücken beim Anheben', 'Stange entfernt sich vom Körper', 'Hüfte schießt zuerst hoch (Beine gestreckt, Rücken hebt)', 'Oben nach hinten überstrecken', 'Ruckartiges Anreißen'],
+    breath: 'Vor dem Anheben tief einatmen und den Bauch fest machen; oben ausatmen, vor der nächsten Wiederholung neu einatmen.',
+    safety: 'Technik zuerst mit leichtem Gewicht lernen. Bei Rückenbeschwerden nur nach ärztlicher Rücksprache und unter Anleitung.',
+    param: '3–5 Sätze × 3–6 Wdh. (Kraft) oder 3–4 × 6–10 (Muskelaufbau), 2–3 Min. Pause.',
+    alias: ['Deadlift', 'Konventionelles Kreuzheben', 'Kreuzheben Langhantel', 'Conventional Deadlift'] }),
+  N({ id: 'suitcase-carry', n: 'Suitcase Carry', g: 'Stabilisation', sg: 'Loaded Carries', sub: 'schräge Bauchmuskeln, Rumpf & Griffkraft', eq: 'Kurzhantel oder Kettlebell', typ: 'isometrisch', lvl: 'Einsteiger', unit: 'm',
+    anim: { t: 'carry', v: 'suitcase' }, prim: ['obliques', 'abs', 'forearms'], sec: ['traps', 'glutes', 'quads'],
+    start: 'Aufrecht neben einer Kurzhantel oder Kettlebell stehen. Mit geradem Rücken in die Knie gehen und das Gewicht mit einer Hand fassen, dann aufrichten. Arm gestreckt, Schultern auf gleicher Höhe.',
+    exec: ['Rumpf anspannen, Schulter des Gewichtsarms nach unten-hinten ziehen.', 'Ruhig und kontrolliert geradeaus gehen.', 'Der Oberkörper bleibt aufrecht und kippt nicht zur Gewichtsseite.', 'Nach der Strecke das Gewicht kontrolliert absetzen und die Seite wechseln.'],
+    dir: 'Gehen geradeaus mit einseitiger Last – der Rumpf hält gegen die seitliche Kippbewegung.',
+    tips: ['Schultern bleiben waagerecht', 'Gewicht nicht am Bein schleifen lassen', 'Kurze, ruhige Schritte, Blick nach vorne', 'Beide Seiten gleich lang tragen'],
+    errs: ['Oberkörper kippt zur Gewichtsseite', 'Freie Seite zieht die Schulter hoch', 'Hohlkreuz', 'Zu schnelles Gehen'],
+    breath: 'Ruhig und gleichmäßig weiteratmen – nicht die Luft anhalten.',
+    safety: 'Gewicht mit geradem Rücken aufnehmen und absetzen. Ausreichend Platz und rutschfester Boden.',
+    param: '3–4 Durchgänge je Seite à 20–40 m (oder 30–45 Sek.), 60–90 Sek. Pause.',
+    alias: ['Suitcase Walk', 'Einarmiges Tragen', 'Koffer-Tragen', 'Single Arm Farmer Carry', 'Loaded Carry einseitig'] }),
+  N({ id: 'farmers-walk', n: 'Farmers Walk (Farmer’s Walk)', g: 'Stabilisation', sg: 'Loaded Carries', sub: 'Griffkraft, Trapezmuskel & Rumpf', eq: 'Zwei Kurzhanteln oder Kettlebells', typ: 'isometrisch', lvl: 'Einsteiger', unit: 'm',
+    anim: { t: 'carry', v: 'farmer' }, prim: ['forearms', 'traps', 'abs'], sec: ['obliques', 'glutes', 'quads', 'calves', 'upperBack'],
+    start: 'Zwischen zwei gleich schweren Kurzhanteln oder Kettlebells stehen. Mit geradem Rücken in die Knie gehen, beide Gewichte greifen und aufrichten. Arme gestreckt seitlich am Körper.',
+    exec: ['Rumpf anspannen, Brust offen, Schultern stabil (nicht hochziehen).', 'Mit kontrollierten, normalen Schritten geradeaus gehen.', 'Oberkörper bleibt aufrecht, die Gewichte pendeln nicht.', 'Nach der Strecke die Gewichte kontrolliert absetzen.'],
+    dir: 'Gehen geradeaus mit beidseitiger Last – aufrechte Haltung, ruhige Schritte.',
+    tips: ['Fest zugreifen – die Griffkraft ist Teil der Übung', 'Schultern nach unten-hinten', 'Blick nach vorne, Kopf in Verlängerung der Wirbelsäule', 'Schwerer: mehr Gewicht oder längere Strecke'],
+    errs: ['Schultern zu den Ohren gezogen', 'Rundrücken oder Hohlkreuz', 'Zu große, hastige Schritte', 'Gewichte schwingen'],
+    breath: 'Gleichmäßig weiteratmen, Rumpfspannung halten.',
+    safety: 'Gewichte mit geradem Rücken aufnehmen und absetzen. Bei nachlassender Griffkraft rechtzeitig absetzen.',
+    param: '3–5 Durchgänge à 20–40 m (oder 30–60 Sek.), 60–120 Sek. Pause.',
+    alias: ['Farmer’s Walk', "Farmer's Walk", 'Farmer Walk', 'Farmers Carry', 'Bauernlauf', 'Loaded Carry'] }),
+  N({ id: 'pogo-spruenge', n: 'Pogo Sprünge (Pogo Jumps)', g: 'Athletik', sub: 'Waden, Achillessehne & Fußmuskulatur', eq: 'Körpergewicht', typ: 'plyometrisch', lvl: 'Einsteiger',
+    anim: { t: 'plyo', v: 'pogo' }, prim: ['calves'], sec: ['quads', 'abs'],
+    start: 'Hüftbreiter Stand, Gewicht auf dem Vorfuß, Knie fast gestreckt (nicht durchgedrückt), Rumpf aufrecht und angespannt.',
+    exec: ['Aus den Sprunggelenken klein und schnell abspringen.', 'Kurzer Bodenkontakt über den Vorfuß – die Fersen berühren den Boden kaum.', 'Knie bleiben fast gestreckt, die Bewegung kommt aus Fuß und Wade.', 'Rhythmisch und federnd weiterspringen.'],
+    dir: 'Kleine, schnelle Sprünge senkrecht auf der Stelle.',
+    tips: ['So kurz wie möglich am Boden bleiben', 'Leise landen – federnd statt stampfend', 'Arme locker im Rhythmus mitnehmen', 'Erst Qualität, dann Tempo'],
+    errs: ['Zu viel Kniebeugung (wird zum normalen Sprung)', 'Landung auf den Fersen', 'Zu hohe, langsame Sprünge', 'Oberkörper fällt nach vorne'],
+    breath: 'Locker und rhythmisch atmen.',
+    safety: 'Bei Achillessehnen- oder Wadenbeschwerden nicht ausführen. Auf ebenem, gedämpftem Untergrund springen.',
+    param: '3–4 Sätze × 15–25 Sprünge (oder 15–20 Sek.), 60–90 Sek. Pause.',
+    alias: ['Pogo Jumps', 'Pogos', 'Pogo Hops', 'Fußgelenk-Sprünge', 'Ankle Hops'] }),
+  N({ id: 'cmj', n: 'Counter Movement Jumps (CMJ)', g: 'Athletik', sub: 'Quadrizeps, Gesäß & Waden – Sprungkraft', eq: 'Körpergewicht', typ: 'plyometrisch', lvl: 'Mittel',
+    anim: { t: 'plyo', v: 'cmj' }, prim: ['quads', 'glutes', 'calves'], sec: ['hamstrings', 'abs'],
+    start: 'Aufrechter, hüftbreiter Stand, Arme locker neben dem Körper, Blick nach vorne.',
+    exec: ['Schnelle Gegenbewegung: Hüfte und Knie kurz beugen (etwa Viertel- bis halbe Kniebeuge), Arme schwingen nach hinten.', 'Ohne Pause am tiefsten Punkt explosiv senkrecht abspringen, Arme schwingen nach oben.', 'In der Luft den Körper strecken.', 'Weich landen: zuerst Fußballen, dann Ferse, Knie und Hüfte federn ab.', 'Stabil aufrichten, kurz neu ausrichten, nächster Sprung.'],
+    dir: 'Kurz nach unten, dann maximal senkrecht nach oben – Dehnungs-Verkürzungs-Zyklus.',
+    tips: ['Der Übergang von unten nach oben ist schnell und ohne Pause', 'Knie zeigen in Zehenrichtung – auch bei der Landung', 'Jeden Sprung mit maximaler Absicht ausführen', 'Sprunghöhe optional notieren (z. B. in der Satz-Notiz)'],
+    errs: ['Zu tiefes oder zu langsames Absenken', 'Pause im tiefsten Punkt', 'Knie fallen nach innen', 'Harte Landung mit gestreckten Beinen'],
+    breath: 'Vor dem Absprung einatmen, in der Luft oder bei der Landung ausatmen.',
+    safety: 'Bei Knie-, Hüft- oder Rückenbeschwerden nicht ausführen. Weicher, rutschfester Untergrund.',
+    param: '3–5 Sätze × 3–6 Sprünge mit voller Erholung (60–120 Sek.). Sprunghöhe optional in cm notieren.',
+    alias: ['CMJ', 'Countermovement Jump', 'Counter Movement Jump', 'Strecksprung mit Ausholbewegung', 'Vertikalsprung'] })
   ];
   // Halte-Übungen werden in Sekunden geplant (Plan & Training zeigen „Sek.“)
   const HOLD = new Set(['mob-hueftbeuger', 'mob-taube', 'mob-figur-4', 'mob-knie-brust', 'mob-kindhaltung', 'mob-beinbeuger-sitzend', 'mob-echse', 'mob-tiefe-hocke']);
