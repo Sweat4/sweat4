@@ -1499,7 +1499,17 @@ window.SW_I18N.en = {
     "zählt nicht als Bezug für die Gewichtssteigerung": "doesn't count as reference for the weight increase",
     "Kraft-Trend": "Strength trend",
     "vs. letzte vergleichbare Leistung": "vs. last comparable performance",
-    "Gewicht und Wiederholungen gegenläufig – keine eindeutige Veränderung": "Weight and reps moved in opposite directions – no clear change"
+    "Gewicht und Wiederholungen gegenläufig – keine eindeutige Veränderung": "Weight and reps moved in opposite directions – no clear change",
+    "Kraft-Trend je Übung": "Strength trend per exercise",
+    "Änderung": "Change",
+    "erst 1 Messung": "only 1 measurement",
+    "letzter Wert unplausibel ({p}) – ignoriert": "last value implausible ({p}) – ignored",
+    "Mittelwert aus {n} Übungen": "Average of {n} exercises",
+    "{u} besser · {s} gleich · {d} schwächer": "{u} better · {s} same · {d} weaker",
+    "Je Übung: beste Satzleistung (geschätztes 1RM aus Gewicht und Wiederholungen) im Vergleich zur vorherigen Messung derselben Übung – egal, wie lange dazwischen nicht trainiert wurde. Jede Übung zählt gleich viel; Volumen und Satzanzahl zählen nicht.": "Per exercise: best set performance (estimated 1RM from weight and reps) compared with the previous measurement of the same exercise – no matter how long the break was. Every exercise counts equally; volume and number of sets don't count.",
+    "Sobald eine Übung zweimal mit Gewicht und Wiederholungen eingetragen ist, erscheint hier der Vergleich.": "As soon as an exercise has been logged twice with weight and reps, the comparison appears here.",
+    "Ø aus {n} Übungen": "avg. of {n} exercises",
+    "Werte: kg × Wiederholungen.": "Values: kg × reps."
   },
   /* Übungskatalog: id → [Name, Zielmuskel, Equipment, Ausgangsposition, Ausführung, Bewegungsrichtung, [Hinweise], [Fehler]] */
   kat: {

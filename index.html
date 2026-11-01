@@ -707,6 +707,7 @@ img.ld{opacity:1!important}
 .nut-bt-calc{display:grid;grid-template-columns:1fr auto;gap:2px 10px;font-size:13px;font-variant-numeric:tabular-nums}
 .nut-bt-calc b{text-align:right}
 .nut-bt-n{font-size:12px;color:var(--muted);line-height:1.45}
+.sbd{font-size:13.5px}.sbd td:nth-child(2),.sbd td:nth-child(3),.sbd td:nth-child(4){white-space:nowrap}.sbd th,.sbd td{padding-left:6px;padding-right:6px}
 .iq-chips.bt-chips{display:grid}.bt-chips span{width:100%;border-radius:14px;line-height:1.35;padding:9px 14px}
 /* Zyklus & Tagesform (zyklus.js) */
 .zy-chips span{min-width:44px;justify-content:center;padding:6px 10px}
@@ -1275,60 +1276,95 @@ function volumeTrend(cid) {
   const v1 = sessionVolume(last), v0 = sessionVolume(prev);
   return { pct: (v1 - v0) / v0 * 100, last, prev };
 }
-/* ---------------- Kraftprogression (nur tatsächliche Leistung) ----------------
-   Verglichen wird je Übung die letzte DOKUMENTIERTE Leistung mit der vorherigen dokumentierten Leistung derselben Übung –
-   egal, wie viel Zeit dazwischen liegt. Pausen, ausgelassene Trainings/Übungen und Einheiten ohne eingetragene Werte
-   sind fehlende Messungen: Sie verändern die Kraftprogression nicht. Trainingshäufigkeit („Letzte 30 Tage“) bleibt eine
-   eigene Anzeige und fließt hier nicht ein. An die Tagesform angepasste Einheiten (adj.skipProg) sind nicht vergleichbar.
-   Leistung: geschätztes 1RM nach Epley (Gewicht × (1 + Wdh./30)) – so werden unterschiedliche Wiederholungszahlen
-   vergleichbar; ohne Gewicht zählen Wiederholungen bzw. Sekunden. Toleranz = Produktregel, keine Messgenauigkeit. */
-const PROG = { tol: 0.01 };   // ±1 % geschätztes 1RM gilt als „gleich“
+/* ---------------- Kraftprogression – übungsbasiert (v45) ----------------
+   Grundlage ist die EINZELNE ÜBUNG. Jede Übung hat ihre eigene Leistungshistorie über alle Trainingstage und Pläne hinweg
+   (Schlüssel: Katalog-Übung, sonst Name). Je Einheit zählt der beste gültige Arbeitssatz nach geschätztem 1RM (Epley:
+   Gewicht × (1 + Wdh./30)); ohne Gewicht zählen Wiederholungen bzw. Sekunden. Aufwärmsätze, Sätze ohne Wiederholungen
+   und an die Tagesform angepasste Einheiten (adj.skipProg) zählen nicht.
+   Je Übung: letzte gültige Messung vs. vorherige gültige Messung (Abstand egal). Kein Training / keine Werte = keine Messung.
+   Gesamtprogression = arithmetischer Mittelwert der Übungsprogressionen (jede Übung gleich gewichtet).
+   Gesamtvolumen, Satzanzahl und Trainingshäufigkeit fließen NICHT ein (Volumenstatistik bleibt separat).
+   Alles wird bei jeder Anzeige aus der gespeicherten Historie neu berechnet – es werden keine Progressionswerte gespeichert. */
+const PROG = {          // Produktregeln (konfigurierbar, keine Messgenauigkeit)
+  tol: 1,               // ±1 % geschätztes 1RM gilt als „gleich“
+  maxRepGap: 8,         // anderes Gewicht UND Wiederholungen um mehr als 8 auseinander → anderer Wiederholungsbereich, nicht vergleichbar (neue Basis)
+  outHi: 2.5, outLo: 0.4,   // mehr als ×2,5 bzw. weniger als ×0,4 zur vorherigen Messung → vermutlich Tippfehler, wird ignoriert
+};
 const hasData = x => !!x && !x.warmup && hasVal(x.reps) && x.reps > 0;   // nur Sätze mit eingetragenen Wiederholungen zählen als Messung
-function perfOf(sets) {
+const e1rmOf = (w, r) => w * (1 + r / 30);
+function perfOf(sets) {   // beste gültige Leistung einer Übung in einer Einheit
   const D = (sets || []).filter(hasData); if (!D.length) return null;
   const L = D.filter(x => hasVal(x.weight) && x.weight > 0);
-  if (L.length) { let top = null; for (const x of L) if (!top || x.weight > top.weight || (x.weight === top.weight && x.reps > top.reps)) top = x;
-    return { kind: 'load', w: top.weight, r: top.reps, v: Math.max(...L.map(x => x.weight * (1 + x.reps / 30))) }; }
-  return { kind: 'reps', w: null, r: Math.max(...D.map(x => x.reps)), v: Math.max(...D.map(x => x.reps)) };
+  if (L.length) { let b = null; for (const x of L) { const v = e1rmOf(x.weight, x.reps); if (!b || v > b.v || (v === b.v && x.weight > b.w)) b = { kind: 'load', w: x.weight, r: x.reps, v }; } return b; }
+  const r = Math.max(...D.map(x => x.reps)); return { kind: 'reps', w: null, r, v: r };
 }
-function comparePerf(cur, prev) {
+function comparePerf(cur, prev) {   // null = nicht vergleichbar
   if (!cur || !prev || cur.kind !== prev.kind || !(prev.v > 0)) return null;
-  const pct = (cur.v - prev.v) / prev.v * 100, d = pct / 100;
-  let dir;
-  if (cur.kind === 'reps') dir = cur.r > prev.r ? 'up' : cur.r < prev.r ? 'down' : 'same';
-  else if (cur.w > prev.w) dir = d >= -PROG.tol ? 'up' : 'mixed';          // mehr Gewicht, aber deutlich weniger Wdh. → keine eindeutige Steigerung
-  else if (cur.w < prev.w) dir = d <= PROG.tol ? 'down' : 'mixed';         // weniger Gewicht, aber deutlich mehr Wdh. → kein eindeutiger Rückgang
-  else dir = cur.r > prev.r ? 'up' : cur.r < prev.r ? 'down' : 'same';
-  return { dir, pct };
+  const ratio = cur.v / prev.v;
+  if (ratio > PROG.outHi || ratio < PROG.outLo) return { outlier: true, pct: (ratio - 1) * 100 };
+  if (cur.kind === 'load' && cur.w !== prev.w && Math.abs(cur.r - prev.r) > PROG.maxRepGap) return null;
+  const pct = (ratio - 1) * 100;
+  return { pct, dir: pct > PROG.tol ? 'up' : pct < -PROG.tol ? 'down' : 'same', opposite: cur.kind === 'load' && Math.sign(cur.w - prev.w) * Math.sign(cur.r - prev.r) < 0 };
 }
-const exKey = e => norm(e.name);
 const progComparable = s => !(s.adj && s.adj.skipProg);
-/* Kraft-Trend: letzte Einheit MIT Daten vs. jeweils vorherige dokumentierte Leistung je Übung (Mittelwert der Änderungen) */
-function strengthTrend(cid) {
-  const S0 = sessionsOf(cid, true).filter(progComparable);   // neueste zuerst
-  const latest = S0.find(s => s.exercises.some(e => perfOf(e.sets))); if (!latest) return null;
-  const pairs = [];
-  for (const e of latest.exercises) {
-    const p1 = perfOf(e.sets); if (!p1) continue;
-    for (const o of S0) { if (sessKey(o) >= sessKey(latest)) continue;
-      const pe = (e.exerciseId && o.exercises.find(x => x.exerciseId === e.exerciseId)) || o.exercises.find(x => exKey(x) === exKey(e)); const p0 = pe && perfOf(pe.sets);
-      if (p0) { const c = comparePerf(p1, p0); if (c) pairs.push({ name: e.name, ...c, prevDate: o.date }); break; } }
+const progKeyOf = e => { const k = typeof katForSessionEx === 'function' ? katForSessionEx(e) : null; return k ? 'k:' + k.id : 'n:' + norm(e.name); };
+/* Leistungshistorie je Übung (chronologisch, je Einheit eine Messung – doppelte Einträge derselben Übung werden zusammengefasst) */
+function exerciseHistories(cid, uptoKey) {
+  const H = new Map();
+  for (const s of sessionsOf(cid, true).slice().reverse()) {
+    if (!progComparable(s) || (uptoKey && sessKey(s) > uptoKey)) continue;
+    const per = new Map();
+    for (const e of s.exercises) { const k = progKeyOf(e), sets = [...(per.get(k) ? per.get(k).sets : []), ...(e.sets || [])]; per.set(k, { name: e.name, sets }); }
+    for (const [k, x] of per) { const m = perfOf(x.sets); if (!m) continue;
+      if (!H.has(k)) H.set(k, { key: k, name: x.name, list: [] }); H.get(k).list.push({ s, date: s.date, m }); }
   }
-  if (!pairs.length) return null;
-  return { pct: pairs.reduce((a, x) => a + x.pct, 0) / pairs.length, n: pairs.length, last: latest, pairs,
-    up: pairs.filter(x => x.dir === 'up').length, down: pairs.filter(x => x.dir === 'down').length };
+  return H;
 }
-/* Verlauf für die kleine Kurve: Leistungsindex je Einheit mit Daten (letzter bekannter Wert je Übung bleibt bestehen) */
+/* Bewertung je Messung: Vergleich mit der letzten GÜLTIGEN Messung; Tippfehler ignoriert, anderer Wdh.-Bereich = neue Basis */
+function rateHistory(list) {
+  let ref = null; return list.map(x => {
+    if (!ref) { ref = x; return { ...x, st: 'base' }; }
+    const c = comparePerf(x.m, ref.m);
+    if (c && c.outlier) return { ...x, st: 'outlier', prev: ref, pct: c.pct };
+    if (!c) { ref = x; return { ...x, st: 'newbase', prev: null }; }
+    const out = { ...x, st: c.dir, prev: ref, pct: c.pct, opposite: c.opposite }; ref = x; return out;
+  });
+}
+/* Gesamtprogression: Mittelwert der aktuellen Übungsprogressionen (je Übung: letzte gültige vs. vorherige gültige Messung) */
+function strengthTrend(cid, uptoKey) {
+  const rows = [];
+  for (const h of exerciseHistories(cid, uptoKey).values()) {
+    const R = rateHistory(h.list), last = [...R].reverse().find(x => x.st !== 'outlier'), lastAny = R[R.length - 1];
+    const row = { key: h.key, name: h.name, n: h.list.length, last, outlier: lastAny.st === 'outlier' ? lastAny : null };
+    if (last && last.prev && last.pct != null) Object.assign(row, { pct: last.pct, dir: last.st, prev: last.prev, cur: last });
+    rows.push(row);
+  }
+  const valid = rows.filter(r => r.pct != null); if (!valid.length) return null;
+  return { pct: valid.reduce((a, r) => a + r.pct, 0) / valid.length, n: valid.length, rows, pairs: valid,
+    up: valid.filter(r => r.dir === 'up').length, same: valid.filter(r => r.dir === 'same').length, down: valid.filter(r => r.dir === 'down').length };
+}
+/* Verlauf der Gesamtprogression (nach jeder Einheit mit Messwerten neu berechnet) – für die kleine Kurve */
 function strengthIndexSeries(cid) {
-  const first = {}, cur = {}, out = [];
-  for (const s of sessionsOf(cid, true).filter(progComparable).slice().reverse()) {
-    let any = false;
-    for (const e of s.exercises) { const p = perfOf(e.sets); if (!p) continue; const k = exKey(e) + '|' + p.kind; if (!first[k]) first[k] = p.v; cur[k] = p.v; any = true; }
-    if (any) { const ks = Object.keys(cur); out.push(ks.reduce((a, k) => a + cur[k] / first[k], 0) / ks.length * 100); }
-  }
-  return out;
+  return sessionsOf(cid, true).filter(progComparable).filter(s => s.exercises.some(e => perfOf(e.sets))).slice(0, 12).reverse()
+    .map(s => strengthTrend(cid, sessKey(s))).filter(Boolean).map(t => t.pct);
 }
-const trendHtmlOf = t => t ? `<span class="${t.pct > 0.5 ? 'up' : t.pct < -0.5 ? 'down' : ''}">${Math.abs(t.pct) < 0.5 ? '±0' : (t.pct > 0 ? '+' : '−') + fmtNum(Math.abs(Math.round(t.pct * 10) / 10))} %</span>` : '–';
+const fmtPct = p => Math.abs(p) < 0.05 ? '±0' : (p > 0 ? '+' : '−') + fmtNum(Math.abs(Math.round(p * 10) / 10));
+const trendHtmlOf = t => t ? `<span class="${t.pct > PROG.tol ? 'up' : t.pct < -PROG.tol ? 'down' : ''}">${fmtPct(t.pct)} %</span>` : '–';
+const perfTxt = m => m.kind === 'load' ? `${fmtNum(m.w)}×${fmtNum(m.r)}` : `${fmtNum(m.r)} ${T('Wdh.')}`;
+/* Nachvollziehbare Aufschlüsselung: jede Übung einzeln + Mittelwert */
+function StrengthBreakdown(t) {
+  if (!t) return '';
+  const rows = t.rows.slice().sort((a, b) => (b.pct != null) - (a.pct != null) || (b.pct || 0) - (a.pct || 0));
+  return `<div class="card" style="overflow-x:auto"><table class="table sbd"><thead><tr><th>${T('Übung')}</th><th>${T('Vorher')}</th><th>${T('Aktuell')}</th><th class="r">%</th></tr></thead><tbody>
+    ${rows.map(r => `<tr><td style="font-weight:600">${esc(exName(r.name))}</td>
+      <td>${r.prev ? `${perfTxt(r.prev.m)}<div class="muted" style="font-size:12px">${fmtDate(r.prev.date)}</div>` : '–'}</td>
+      <td>${r.last ? `${perfTxt(r.last.m)}<div class="muted" style="font-size:12px">${fmtDate(r.last.date)}</div>` : '–'}</td>
+      <td class="r">${r.pct != null ? `<span class="${r.dir === 'up' ? 'up' : r.dir === 'down' ? 'down' : ''}">${fmtPct(r.pct)} %</span>` : `<span class="muted" style="font-size:12px">${r.n < 2 || !r.prev ? T('erst 1 Messung') : ''}</span>`}
+        ${r.outlier ? `<div class="muted" style="font-size:11px">${T('letzter Wert unplausibel ({p}) – ignoriert', { p: perfTxt(r.outlier.m) })}</div>` : ''}</td></tr>`).join('')}
+    <tr><td colspan="3"><b>${T('Mittelwert aus {n} Übungen', { n: t.n })}</b><div class="muted" style="font-size:12px">${T('{u} besser · {s} gleich · {d} schwächer', { u: t.up, s: t.same, d: t.down })}</div></td><td class="r"><b>${trendHtmlOf(t)}</b></td></tr>
+  </tbody></table>
+  <div class="muted" style="font-size:12px;margin-top:6px">${T('Werte: kg × Wiederholungen.')} ${T('Je Übung: beste Satzleistung (geschätztes 1RM aus Gewicht und Wiederholungen) im Vergleich zur vorherigen Messung derselben Übung – egal, wie lange dazwischen nicht trainiert wurde. Jede Übung zählt gleich viel; Volumen und Satzanzahl zählen nicht.')}</div></div>`;
+}
 function exerciseSeries(cid, name) {
   const n = norm(name);
   return sessionsOf(cid, true).slice().reverse().map(s => {
@@ -1727,7 +1763,7 @@ function viewClient(c) {
       <div class="stat"><div class="stat-l">Letztes Training</div><div class="stat-v">${last ? fmtDate(last.date) : '–'}</div><div class="stat-s">${last ? relDays(last.date) + ' · ' + esc(sessLabel(last)) : 'noch keins'}</div></div>
       <div class="stat"><div class="stat-l">Trainingsplan</div><div class="stat-v">${days.length} ${days.length === 1 ? 'Tag' : 'Tage'}</div><div class="stat-s">${esc(planOf(c.id)?.name || 'noch nicht angelegt')}</div></div>
       <div class="stat"><div class="stat-l">Nächstes Training</div><div class="stat-v">${next ? 'Tag ' + (days.indexOf(next) + 1) : '–'}</div><div class="stat-s">${next ? esc(next.name) + (nxi.manual ? ' · festgelegt' : '') : 'kein Plan'}</div></div>
-      <div class="stat"><div class="stat-l">Fortschritt</div><div class="stat-v">${trendHtml}</div><div class="stat-s">${trend ? 'Kraft vs. letzte Leistung' : 'noch zu wenig Daten'}</div>${sparkline(vols)}</div>
+      <div class="stat"><div class="stat-l">Fortschritt</div><div class="stat-v">${trendHtml}</div><div class="stat-s">${trend ? `Kraft · Ø ${trend.n} ${trend.n === 1 ? 'Übung' : 'Übungen'}` : 'noch zu wenig Daten'}</div>${sparkline(vols)}</div>
     </div>
     <div style="margin-top:16px">
       ${active ? `<a class="btn btn-primary btn-big" href="#/train/${active.id}">${ic('play', 22)} Laufendes Training fortsetzen</a><div class="muted" style="text-align:center;font-size:14px;margin-top:6px">${esc(sessLabel(active))} · begonnen ${fmtDate(active.date)}</div>`
@@ -2005,7 +2041,7 @@ function viewProgress(c) {
       <div class="stat"><div class="stat-l">${T('Trainings')}</div><div class="stat-v">${done.length}</div><div class="stat-s">${T('seit')} ${fmtDate(done[done.length - 1].date)}</div></div>
       <div class="stat"><div class="stat-l">${T('Letzte 30 Tage')}</div><div class="stat-v">${done.filter(s => daysBetween(s.date, today()) <= 30).length}</div><div class="stat-s">${T('Trainings')}</div></div>
       <div class="stat"><div class="stat-l">${T('Gesamtvolumen')}</div><div class="stat-v">${fmtNum(Math.round(totalVol / 1000 * 10) / 10)} t</div><div class="stat-s">${T('bewegtes Gewicht')}</div></div>
-      <div class="stat"><div class="stat-l">${T('Kraft-Trend')}</div><div class="stat-v">${trendHtmlOf(trend)}</div><div class="stat-s">${T('vs. letzte vergleichbare Leistung')}</div></div>
+      <div class="stat"><div class="stat-l">${T('Kraft-Trend')}</div><div class="stat-v">${trendHtmlOf(trend)}</div><div class="stat-s">${trend ? T('Ø aus {n} Übungen', { n: trend.n }) : T('vs. letzte vergleichbare Leistung')}</div></div>
     </div>
 
     <section class="section">
@@ -2019,13 +2055,17 @@ ${(pe => { if (!pe) return ''; const pg = progOfPlan(pe); if (!hasVal(pg.goal) &
         <div class="muted" style="font-size:13px;margin-bottom:6px">${M.title}</div>
         ${lineChart(pts, M.unit)}
         ${series.length ? `<table class="table" style="margin-top:10px"><thead><tr><th>${T('Datum')}</th><th>${T('Bester Satz')}</th><th class="r">${T('Sätze')}</th><th class="r">${T('Volumen')}</th></tr></thead><tbody>
-          ${series.slice().reverse().map((p, i, arr) => {   // Vergleich mit der vorherigen DOKUMENTIERTEN, vergleichbaren Leistung (Lücken/Leereinträge überspringen)
-            const pc = progComparable(p.session) ? perfOf(p.setsList) : null, prev = pc && arr.slice(i + 1).find(q => progComparable(q.session) && perfOf(q.setsList));
-            const cmp = prev ? comparePerf(pc, perfOf(prev.setsList)) : null;
-            const arrow = cmp ? (cmp.dir === 'up' ? ' <span class="up">▲</span>' : cmp.dir === 'down' ? ' <span class="down">▼</span>' : '') : '';
-            return `<tr><td><a href="#/session/${p.session.id}">${fmtDate(p.date)}</a></td><td>${fmtSet(p.top)}${arrow}</td><td class="r">${p.sets}</td><td class="r">${fmtVol(p.vol)}</td></tr>`; }).join('')}
+          ${(rated => series.slice().reverse().map(p => {   // Pfeile aus der übungsbasierten Bewertung (vorherige gültige Messung, Lücken egal)
+            const rr = rated.get(p.session.id), st = rr && rr.st;
+            const arrow = st === 'up' ? ' <span class="up">▲</span>' : st === 'down' ? ' <span class="down">▼</span>' : st === 'outlier' ? ' <span class="muted" title="unplausibel">?</span>' : '';
+            return `<tr><td><a href="#/session/${p.session.id}">${fmtDate(p.date)}</a></td><td>${fmtSet(p.top)}${arrow}</td><td class="r">${p.sets}</td><td class="r">${fmtVol(p.vol)}</td></tr>`; }).join(''))(new Map(rateHistory(series.filter(p => progComparable(p.session)).map(p => ({ s: p.session, date: p.date, m: perfOf(p.setsList) })).filter(x => x.m)).map(x => [x.s.id, x])))}
         </tbody></table>` : ''}
       </div>
+    </section>
+
+    <section class="section">
+      <div class="section-h"><h2>${T('Kraft-Trend je Übung')}</h2></div>
+      ${trend ? StrengthBreakdown(trend) : `<div class="card muted" style="font-size:14px">${T('Sobald eine Übung zweimal mit Gewicht und Wiederholungen eingetragen ist, erscheint hier der Vergleich.')}</div>`}
     </section>
 
     <section class="section">
@@ -5161,7 +5201,7 @@ function analyzeSession(s) {
       const t1 = topSet(e), t0 = topSet(pv.e), b1 = bestBwReps(e), b0 = bestBwReps(pv.e);
       const pc = comparePerf(perfOf(workSets(e)), perfOf(workSets(pv.e)));
       if (!same) row.cmp = { kind: 'plan' };
-      else if (pc && pc.dir === 'mixed') row.cmp = { kind: 'mixed' };   // Gewicht und Wiederholungen gegenläufig → keine eindeutige Aussage
+      else if (pc && pc.opposite && !(t1 && t0 && t1.weight > t0.weight && pc.dir === 'up')) row.cmp = { kind: 'mixed' };   // Gewicht und Wdh. gegenläufig ohne klare Steigerung   // Gewicht und Wiederholungen gegenläufig → keine eindeutige Aussage
       else if (t1 && t0 && t1.weight > t0.weight) { row.cmp = { kind: 'weight', from: t0.weight, to: t1.weight, reps: t1.reps }; A.items.push({ kind: 'weight', name: nm, from: t0.weight, to: t1.weight }); }
       else if (t1 && t0 && t1.weight === t0.weight && t1.reps > t0.reps) { row.cmp = { kind: 'reps', w: t1.weight, from: t0.reps, to: t1.reps }; A.items.push({ kind: 'reps', name: nm, w: t1.weight, from: t0.reps, to: t1.reps }); }
       else if (!t1 && !t0 && b1 && b0 && b1.reps > b0.reps) { row.cmp = { kind: 'reps', w: null, from: b0.reps, to: b1.reps, unit: e.unit || null }; A.items.push({ kind: 'reps', name: nm, w: null, from: b0.reps, to: b1.reps, unit: e.unit || null }); }
