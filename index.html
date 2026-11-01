@@ -707,7 +707,7 @@ img.ld{opacity:1!important}
 .nut-bt-calc{display:grid;grid-template-columns:1fr auto;gap:2px 10px;font-size:13px;font-variant-numeric:tabular-nums}
 .nut-bt-calc b{text-align:right}
 .nut-bt-n{font-size:12px;color:var(--muted);line-height:1.45}
-.sbd{font-size:13.5px}.sbd td:nth-child(2),.sbd td:nth-child(3),.sbd td:nth-child(4){white-space:nowrap}.sbd th,.sbd td{padding-left:6px;padding-right:6px}
+.sbd{font-size:13px}.sbd td:nth-child(2),.sbd td:nth-child(3),.sbd td:nth-child(4){white-space:nowrap}.sbd th,.sbd td{padding-left:6px;padding-right:6px}
 .iq-chips.bt-chips{display:grid}.bt-chips span{width:100%;border-radius:14px;line-height:1.35;padding:9px 14px}
 /* Zyklus & Tagesform (zyklus.js) */
 .zy-chips span{min-width:44px;justify-content:center;padding:6px 10px}
@@ -1289,14 +1289,23 @@ const PROG = {          // Produktregeln (konfigurierbar, keine Messgenauigkeit)
   tol: 1,               // ±1 % geschätztes 1RM gilt als „gleich“
   maxRepGap: 8,         // anderes Gewicht UND Wiederholungen um mehr als 8 auseinander → anderer Wiederholungsbereich, nicht vergleichbar (neue Basis)
   outHi: 2.5, outLo: 0.4,   // mehr als ×2,5 bzw. weniger als ×0,4 zur vorherigen Messung → vermutlich Tippfehler, wird ignoriert
+  rpeHarder: 2, rpeEasier: 1,   // Einordnung: Steigerung bei ≥ 2 RPE mehr = „deutlich anstrengender“; gleiche Leistung bei ≥ 1 RPE weniger = Verbesserung
+  plateauWeeks: 2,          // Plateau erst nach 2 aufeinanderfolgenden gemessenen Wochen ohne Verbesserung
+  broadShare: 0.6,          // ab 60 % der beurteilbaren Übungen im Plateau = breites Plateau
 };
+/* RPE aus dem Satzfeld „RPE / RIR“: „8“, „RPE 8“, „@8,5“ oder „RIR 2“ (= RPE 8). Zuordnung RIR 4/3/2/1/0 = RPE 6/7/8/9/10. */
+function rpeOf(x) {
+  const t = String((x && x.rpe) || '').replace(',', '.'); if (!t.trim()) return null;
+  let m = /rir\s*(\d+(?:\.5)?)/i.exec(t); if (m) { const v = 10 - parseFloat(m[1]); return v >= 5 && v <= 10 ? v : null; }
+  m = /(\d+(?:\.5)?)/.exec(t); if (!m) return null; const v = parseFloat(m[1]); return v >= 5 && v <= 10 ? v : null;
+}
 const hasData = x => !!x && !x.warmup && hasVal(x.reps) && x.reps > 0;   // nur Sätze mit eingetragenen Wiederholungen zählen als Messung
 const e1rmOf = (w, r) => w * (1 + r / 30);
 function perfOf(sets) {   // beste gültige Leistung einer Übung in einer Einheit
   const D = (sets || []).filter(hasData); if (!D.length) return null;
   const L = D.filter(x => hasVal(x.weight) && x.weight > 0);
-  if (L.length) { let b = null; for (const x of L) { const v = e1rmOf(x.weight, x.reps); if (!b || v > b.v || (v === b.v && x.weight > b.w)) b = { kind: 'load', w: x.weight, r: x.reps, v }; } return b; }
-  const r = Math.max(...D.map(x => x.reps)); return { kind: 'reps', w: null, r, v: r };
+  if (L.length) { let b = null; for (const x of L) { const v = e1rmOf(x.weight, x.reps); if (!b || v > b.v || (v === b.v && x.weight > b.w)) b = { kind: 'load', w: x.weight, r: x.reps, v, rpe: rpeOf(x) }; } return b; }
+  const bx = D.reduce((a, x) => x.reps > a.reps ? x : a); return { kind: 'reps', w: null, r: bx.reps, v: bx.reps, rpe: rpeOf(bx) };
 }
 function comparePerf(cur, prev) {   // null = nicht vergleichbar
   if (!cur || !prev || cur.kind !== prev.kind || !(prev.v > 0)) return null;
@@ -1304,9 +1313,12 @@ function comparePerf(cur, prev) {   // null = nicht vergleichbar
   if (ratio > PROG.outHi || ratio < PROG.outLo) return { outlier: true, pct: (ratio - 1) * 100 };
   if (cur.kind === 'load' && cur.w !== prev.w && Math.abs(cur.r - prev.r) > PROG.maxRepGap) return null;
   const pct = (ratio - 1) * 100;
-  return { pct, dir: pct > PROG.tol ? 'up' : pct < -PROG.tol ? 'down' : 'same', opposite: cur.kind === 'load' && Math.sign(cur.w - prev.w) * Math.sign(cur.r - prev.r) < 0 };
+  const dir = pct > PROG.tol ? 'up' : pct < -PROG.tol ? 'down' : 'same', dR = cur.rpe != null && prev.rpe != null ? cur.rpe - prev.rpe : null;
+  // RPE wird NICHT in die Prozentzahl gemischt – nur zur Einordnung: Steigerung mit deutlich höherer Anstrengung / gleiche Leistung bei weniger Anstrengung
+  const effort = dR == null ? null : dir === 'up' && dR >= PROG.rpeHarder ? 'harder' : dir !== 'down' && dR <= -PROG.rpeEasier && pct >= -PROG.tol ? 'easier' : null;
+  return { pct, dir, effort, opposite: cur.kind === 'load' && Math.sign(cur.w - prev.w) * Math.sign(cur.r - prev.r) < 0 };
 }
-const progComparable = s => !(s.adj && s.adj.skipProg);
+const progComparable = s => !(s.adj && s.adj.skipProg) && !s.deload;   // Tagesform-Anpassung und Deload sind keine vergleichbaren Messungen
 const progKeyOf = e => { const k = typeof katForSessionEx === 'function' ? katForSessionEx(e) : null; return k ? 'k:' + k.id : 'n:' + norm(e.name); };
 /* Leistungshistorie je Übung (chronologisch, je Einheit eine Messung – doppelte Einträge derselben Übung werden zusammengefasst) */
 function exerciseHistories(cid, uptoKey) {
@@ -1314,9 +1326,9 @@ function exerciseHistories(cid, uptoKey) {
   for (const s of sessionsOf(cid, true).slice().reverse()) {
     if (!progComparable(s) || (uptoKey && sessKey(s) > uptoKey)) continue;
     const per = new Map();
-    for (const e of s.exercises) { const k = progKeyOf(e), sets = [...(per.get(k) ? per.get(k).sets : []), ...(e.sets || [])]; per.set(k, { name: e.name, sets }); }
+    for (const e of s.exercises) { const k = progKeyOf(e), sets = [...(per.get(k) ? per.get(k).sets : []), ...(e.sets || [])]; per.set(k, { name: e.name, sets, ex: e }); }
     for (const [k, x] of per) { const m = perfOf(x.sets); if (!m) continue;
-      if (!H.has(k)) H.set(k, { key: k, name: x.name, list: [] }); H.get(k).list.push({ s, date: s.date, m }); }
+      if (!H.has(k)) H.set(k, { key: k, name: x.name, list: [] }); const h = H.get(k); h.ex = x.ex; h.list.push({ s, date: s.date, m }); }
   }
   return H;
 }
@@ -1327,7 +1339,7 @@ function rateHistory(list) {
     const c = comparePerf(x.m, ref.m);
     if (c && c.outlier) return { ...x, st: 'outlier', prev: ref, pct: c.pct };
     if (!c) { ref = x; return { ...x, st: 'newbase', prev: null }; }
-    const out = { ...x, st: c.dir, prev: ref, pct: c.pct, opposite: c.opposite }; ref = x; return out;
+    const out = { ...x, st: c.dir, prev: ref, pct: c.pct, opposite: c.opposite, effort: c.effort }; ref = x; return out;
   });
 }
 /* Gesamtprogression: Mittelwert der aktuellen Übungsprogressionen (je Übung: letzte gültige vs. vorherige gültige Messung) */
@@ -1335,8 +1347,8 @@ function strengthTrend(cid, uptoKey) {
   const rows = [];
   for (const h of exerciseHistories(cid, uptoKey).values()) {
     const R = rateHistory(h.list), last = [...R].reverse().find(x => x.st !== 'outlier'), lastAny = R[R.length - 1];
-    const row = { key: h.key, name: h.name, n: h.list.length, last, outlier: lastAny.st === 'outlier' ? lastAny : null };
-    if (last && last.prev && last.pct != null) Object.assign(row, { pct: last.pct, dir: last.st, prev: last.prev, cur: last });
+    const row = { key: h.key, name: h.name, ex: h.ex, n: h.list.length, last, outlier: lastAny.st === 'outlier' ? lastAny : null };
+    if (last && last.prev && last.pct != null) Object.assign(row, { pct: last.pct, dir: last.st, prev: last.prev, cur: last, effort: last.effort || null });
     rows.push(row);
   }
   const valid = rows.filter(r => r.pct != null); if (!valid.length) return null;
@@ -1352,18 +1364,162 @@ const fmtPct = p => Math.abs(p) < 0.05 ? '±0' : (p > 0 ? '+' : '−') + fmtNum(
 const trendHtmlOf = t => t ? `<span class="${t.pct > PROG.tol ? 'up' : t.pct < -PROG.tol ? 'down' : ''}">${fmtPct(t.pct)} %</span>` : '–';
 const perfTxt = m => m.kind === 'load' ? `${fmtNum(m.w)}×${fmtNum(m.r)}` : `${fmtNum(m.r)} ${T('Wdh.')}`;
 /* Nachvollziehbare Aufschlüsselung: jede Übung einzeln + Mittelwert */
-function StrengthBreakdown(t) {
+function StrengthBreakdown(t, ps) {
   if (!t) return '';
+  const pl = k => ps && ps.plateau.get(k);
   const rows = t.rows.slice().sort((a, b) => (b.pct != null) - (a.pct != null) || (b.pct || 0) - (a.pct || 0));
   return `<div class="card" style="overflow-x:auto"><table class="table sbd"><thead><tr><th>${T('Übung')}</th><th>${T('Vorher')}</th><th>${T('Aktuell')}</th><th class="r">%</th></tr></thead><tbody>
-    ${rows.map(r => `<tr><td style="font-weight:600">${esc(exName(r.name))}</td>
+    ${rows.map(r => `<tr><td style="font-weight:600">${esc(exName(r.name))}<div class="muted" style="font-size:11.5px;font-weight:500">${esc(EX_CATS[exCatOf(r.ex)].label)}${pl(r.key) && pl(r.key).plateau ? ' · <span class="warn-t">' + T('Plateau') + '</span>' : ''}${r.effort === 'harder' ? ' · ' + T('deutlich anstrengender') : r.effort === 'easier' ? ' · ' + T('leichter gefallen') : ''}</div></td>
       <td>${r.prev ? `${perfTxt(r.prev.m)}<div class="muted" style="font-size:12px">${fmtDate(r.prev.date)}</div>` : '–'}</td>
       <td>${r.last ? `${perfTxt(r.last.m)}<div class="muted" style="font-size:12px">${fmtDate(r.last.date)}</div>` : '–'}</td>
-      <td class="r">${r.pct != null ? `<span class="${r.dir === 'up' ? 'up' : r.dir === 'down' ? 'down' : ''}">${fmtPct(r.pct)} %</span>` : `<span class="muted" style="font-size:12px">${r.n < 2 || !r.prev ? T('erst 1 Messung') : ''}</span>`}
+      <td class="r">${r.pct != null ? `<span class="${r.dir === 'up' ? 'up' : r.dir === 'down' ? 'down' : ''}">${fmtPct(r.pct)}</span>` : `<span class="muted" style="font-size:12px">${r.n < 2 || !r.prev ? T('erst 1 Messung') : ''}</span>`}
         ${r.outlier ? `<div class="muted" style="font-size:11px">${T('letzter Wert unplausibel ({p}) – ignoriert', { p: perfTxt(r.outlier.m) })}</div>` : ''}</td></tr>`).join('')}
-    <tr><td colspan="3"><b>${T('Mittelwert aus {n} Übungen', { n: t.n })}</b><div class="muted" style="font-size:12px">${T('{u} besser · {s} gleich · {d} schwächer', { u: t.up, s: t.same, d: t.down })}</div></td><td class="r"><b>${trendHtmlOf(t)}</b></td></tr>
+    <tr><td colspan="3"><b>${T('Mittelwert aus {n} Übungen', { n: t.n })}</b><div class="muted" style="font-size:12px">${T('{u} besser · {s} gleich · {d} schwächer', { u: t.up, s: t.same, d: t.down })}</div></td><td class="r"><b class="${t.pct > PROG.tol ? 'up' : t.pct < -PROG.tol ? 'down' : ''}">${fmtPct(t.pct)}</b></td></tr>
   </tbody></table>
   <div class="muted" style="font-size:12px;margin-top:6px">${T('Werte: kg × Wiederholungen.')} ${T('Je Übung: beste Satzleistung (geschätztes 1RM aus Gewicht und Wiederholungen) im Vergleich zur vorherigen Messung derselben Übung – egal, wie lange dazwischen nicht trainiert wurde. Jede Übung zählt gleich viel; Volumen und Satzanzahl zählen nicht.')}</div></div>`;
+}
+/* ---------------- Übungskategorien (Primär / Sekundär / Isolation) ----------------
+   Automatisch aus dem Übungsnamen, manuell korrigierbar im Übungsdialog (gespeichert als exCat an der Plan-Übung).
+   Kategorien steuern nur Ziel-Intensität und Einordnung – sie gewichten die Kraftprogression NICHT. */
+const EX_CATS = {
+  primary: { get label() { return T('Primärübung'); }, rpe: [8, 9] },
+  secondary: { get label() { return T('Sekundärübung'); }, rpe: [7, 8] },
+  isolation: { get label() { return T('Isolationsübung'); }, rpe: [8, 10] },
+};
+const CAT_ISO = /seitheb|frontheb|curl|trizeps|french press|skull|kickback|beinstreck|beinbeug|leg curl|leg extension|butterfly|fliegend|pec deck|wadenheb|face ?pull|shrug|hintere schulter|über kreuz|crossover|cable fly|reverse fly|pullover|adduktor|abduktor|crunch|plank|sit-?up|beinheb|russian twist|seitstütz|hyperextension/;
+const CAT_PRIM = /kniebeuge|back squat|front ?squat|^squat|bankdrücken|bench press|kreuzheben|deadlift|military press|overhead press|schulterdrücken|klimmz|pull-?up|chin-?up/;
+const CAT_NOT_PRIM = /schräg|incline|kurzhantel|dumbbell|split|bulgar|goblet|hack|einbein|maschine|smith|multipresse|sumo-?kniebeuge mit kurzhantel/;
+function autoCat(name) { const n = norm(name); if (CAT_ISO.test(n)) return 'isolation'; if (CAT_PRIM.test(n) && !CAT_NOT_PRIM.test(n)) return 'primary'; return 'secondary'; }
+function exCatOf(e) { const pe = e && e.exerciseId ? S.exercises.get(e.exerciseId) : (e && e.dayId ? e : null); return (pe && EX_CATS[pe.exCat] && pe.exCat) || autoCat(e && e.name); }
+/* ---------------- Wochen (Montag als Wochenbeginn, lokales Datum) ---------------- */
+function weekOf(iso) { const d = new Date(iso + 'T12:00:00'), wd = (d.getDay() + 6) % 7; d.setDate(d.getDate() - wd); return isoOf(d); }
+/* Wöchentliches Gesamtvolumen = Σ (Gewicht × Wiederholungen) aller absolvierten Arbeitssätze der Woche – reine Belastungskennzahl */
+function weeklyVolume(cid) {
+  const W = new Map();
+  for (const s of sessionsOf(cid, true)) { const k = weekOf(s.date), v = s.exercises.reduce((t, e) => t + workSets(e).reduce((a, x) => a + setVol(x), 0), 0);
+    const o = W.get(k) || { week: k, vol: 0, sessions: 0, deload: false }; o.vol += v; o.sessions++; o.deload = o.deload || !!s.deload; W.set(k, o); }
+  return [...W.values()].sort((a, b) => a.week.localeCompare(b.week));
+}
+/* Intensität: Ø RPE je Woche und je Kategorie (nur Sätze mit RPE/RIR-Angabe) */
+function weeklyIntensity(cid) {
+  const W = new Map(), C = { primary: [], secondary: [], isolation: [] };
+  for (const s of sessionsOf(cid, true)) for (const e of s.exercises) for (const x of workSets(e)) { const r = rpeOf(x); if (r == null) continue;
+    const k = weekOf(s.date); if (!W.has(k)) W.set(k, []); W.get(k).push(r); C[exCatOf(e)].push(r); }
+  const avg = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : null;
+  return { weeks: [...W.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([week, a]) => ({ week, rpe: avg(a), n: a.length })), cats: Object.fromEntries(Object.entries(C).map(([k, a]) => [k, { rpe: avg(a), n: a.length }])) };
+}
+/* ---------------- Plateau-Erkennung ----------------
+   Je Übung die beste Messung pro Woche (nur vergleichbare Einheiten). Verbesserung = besseres geschätztes 1RM als die bisher
+   beste Woche ODER gleiche Leistung bei spürbar weniger Anstrengung (RPE). Plateau = die letzten 2 gemessenen Wochen ohne Verbesserung.
+   Wochen ohne Training zählen nicht (keine Messung). */
+function exercisePlateau(list) {
+  const W = new Map(); for (const x of list) { const k = weekOf(x.date), o = W.get(k); if (!o || x.m.v > o.m.v) W.set(k, x); }
+  const weeks = [...W.values()].sort((a, b) => a.date.localeCompare(b.date));
+  let best = null, flat = 0; const marks = [];
+  for (const x of weeks) {
+    if (!best) { best = x; marks.push('base'); continue; }
+    const c = comparePerf(x.m, best.m);
+    if (c && c.outlier) { marks.push('outlier'); continue; }
+    if (!c) { best = x; flat = 0; marks.push('newbase'); continue; }
+    const better = c.dir === 'up' || c.effort === 'easier';
+    if (better) { flat = 0; best = x; } else flat++;
+    marks.push(better ? 'up' : 'flat');
+  }
+  return { weeks: weeks.length, flat, plateau: flat >= PROG.plateauWeeks, marks };
+}
+/* Gesamtbewertung: Kraftprogression (Mosaik), Plateaus je Übung, Status in Worten. Volumen und Intensität bleiben getrennt. */
+function progressStatus(cid) {
+  const t = strengthTrend(cid), H = exerciseHistories(cid), pl = new Map();
+  for (const [k, h] of H) pl.set(k, exercisePlateau(h.list));
+  const judged = [...pl.values()].filter(x => x.weeks >= PROG.plateauWeeks + 1), plats = [...pl.entries()].filter(([, x]) => x.plateau).map(([k]) => k);
+  let status = null;
+  if (t) {
+    if (t.pct < -PROG.tol && t.down > t.up) status = 'decline';
+    else if (judged.length >= 3 && plats.length / judged.length >= PROG.broadShare && t.pct <= PROG.tol) status = 'broad';
+    else if (t.pct > PROG.tol) status = 'positive';
+    else if (plats.length) status = 'partial';
+    else status = 'stable';
+  }
+  const lastDeload = sessionsOf(cid, true).find(s => s.deload);
+  const suggestDeload = (status === 'broad' || status === 'decline') && !(lastDeload && daysBetween(lastDeload.date, today()) < 28);
+  return { trend: t, plateau: pl, plats, judged: judged.length, status, suggestDeload };
+}
+const STATUS_TXT = {
+  get positive() { return T('Positive Gesamtentwicklung'); }, get stable() { return T('Stabile Gesamtentwicklung'); }, get partial() { return T('Teilweise Stagnation'); },
+  get broad() { return T('Breites Leistungsplateau'); }, get decline() { return T('Tatsächlicher Leistungsrückgang'); },
+};
+/* ---------------- Belastungszyklus & Deload (optional, je Plan) ----------------
+   plan.cycle = { weeks: 3–5 Belastungswochen, start: 'YYYY-MM-DD' } → danach 1 Entlastungswoche (Deload), dann von vorn.
+   Ziel-RPE je Woche (Steuerungsziel, keine Pflicht): Woche 1 7–8 · Woche 2 8 · ab Woche 3 8–9 (Isolation bis 9–10) · Deload 6–7.
+   Deload-Einheiten: ca. 40 % weniger Sätze; sie zählen nicht als Kraftmessung und überschreiben keine Historie. */
+const DELOAD = { setsFactor: 0.6, rpe: [6, 7] };
+function cycleWeekOf(plan, iso = today()) {
+  const cy = plan && plan.cycle; if (!cy || !(cy.weeks >= 3 && cy.weeks <= 5) || !cy.start) return null;
+  const d = daysBetween(weekOf(cy.start), weekOf(iso)); if (d < 0) return null;
+  const len = cy.weeks + 1, i = Math.floor(d / 7) % len + 1; return { i, len, deload: i === len, weeks: cy.weeks };
+}
+function rpeTarget(cw, cat) {
+  if (!cw) return EX_CATS[cat].rpe;
+  if (cw.deload) return DELOAD.rpe;
+  if (cw.i === 1) return [7, 8]; if (cw.i === 2) return [8, 8];
+  return cat === 'isolation' ? [9, 10] : [8, 9];
+}
+const rpeTxt = r => r[0] === r[1] ? `RPE ${fmtNum(r[0])}` : `RPE ${fmtNum(r[0])}–${fmtNum(r[1])}`;
+const rirTxt = r => { const a = 10 - r[1], b = 10 - r[0]; return a === b ? T('{n} Wdh. im Tank', { n: a }) : T('{a}–{b} Wdh. im Tank', { a, b }); };
+function applyDeload(s) {
+  s.deload = true; s.deloadOrig = s.exercises.map(e => e.sets.length);
+  s.exercises.forEach(e => { const n = Math.max(1, Math.round(e.sets.length * DELOAD.setsFactor)); e.sets = e.sets.slice(0, n); });
+}
+function DeloadBanner(sess) {
+  if (!sess.deload) return sess.status !== 'done' && !sess.adj ? `<div style="text-align:right;margin:-4px 0 8px"><button class="btn btn-sm btn-text" data-action="deload-toggle" data-sid="${sess.id}">${T('Als Deload-Einheit werten')}</button></div>` : '';
+  return `<div class="info zy-banner"><b>🔋 ${T('Deload – geplante Entlastung')}</b><div style="font-size:13.5px;margin-top:4px">${T('Weniger Sätze und leichter ({r}). Diese Einheit zählt nicht als Kraftmessung – dein Fortschritt bleibt unverändert.', { r: rpeTxt(DELOAD.rpe) })}</div>
+    ${sess.status !== 'done' ? `<button class="btn btn-sm btn-ghost" style="margin-top:8px" data-action="deload-toggle" data-sid="${sess.id}">${T('Doch normal trainieren')}</button>` : ''}</div>`;
+}
+function rpeHint(sess, e) {
+  const plan = sess.planId && S.plans.get(sess.planId), cw = cycleWeekOf(plan, sess.date); if (!cw && !sess.deload) return '';
+  const r = sess.deload ? DELOAD.rpe : rpeTarget(cw, exCatOf(e));
+  return `<div class="muted" style="font-size:12.5px;margin:0 0 8px">🎯 ${T('Ziel heute')}: <b>${rpeTxt(r)}</b> (${rirTxt(r)})${cw && !sess.deload ? ' · ' + T('Woche {i} von {n}', { i: cw.i, n: cw.len }) : ''}</div>`;
+}
+queueMicrotask(() => Object.assign(A, {   // A wird weiter unten definiert
+  'deload-toggle': el => { const s = S.sessions.get(el.dataset.sid); if (!s) return;
+    if (s.deload) { (s.deloadOrig || []).forEach((n, i) => { const e = s.exercises[i]; if (e) while (e.sets.length < n) e.sets.push(blankSet()); }); s.deload = false; delete s.deloadOrig; }
+    else applyDeload(s);
+    put('sessions', s); render(); },
+}));
+function CycleCard(plan) {
+  const cy = plan.cycle || {}, cw = cycleWeekOf(plan);
+  return `<div class="card stack" style="margin-bottom:12px"><div class="row" style="justify-content:space-between"><b>Belastungszyklus (optional)</b>${cw ? `<span class="tag">${cw.deload ? 'Diese Woche: Deload' : `Woche ${cw.i} von ${cw.len}`}</span>` : ''}</div>
+    <div class="grid2"><label class="field" style="margin:0"><span>Rhythmus</span><select class="input" data-cycle="${plan.id}" data-k="weeks"><option value="">aus</option>${[3, 4, 5].map(n => `<option value="${n}" ${cy.weeks === n ? 'selected' : ''}>${n} Wochen + 1 Deload</option>`).join('')}</select></label>
+      <label class="field" style="margin:0"><span>Start (Woche 1)</span><input type="date" class="input" data-cycle="${plan.id}" data-k="start" value="${esc(cy.start || '')}"></label></div>
+    <div class="muted" style="font-size:12.5px">Ziel-RPE: Woche 1 7–8 · Woche 2 8 · ab Woche 3 8–9 (Isolation bis 9–10) · Deload 6–7 mit ca. 40 % weniger Sätzen. Deload-Einheiten zählen nicht als Kraftmessung.</div></div>`;
+}
+document.addEventListener('change', ev => {
+  const t = ev.target; if (!t.dataset || !t.dataset.cycle) return; const p = S.plans.get(t.dataset.cycle); if (!p) return;
+  const cy = { ...(p.cycle || {}) };
+  if (t.dataset.k === 'weeks') cy.weeks = t.value ? +t.value : null; else cy.start = t.value || null;
+  if (cy.weeks && !cy.start) cy.start = weekOf(today());
+  p.cycle = cy.weeks ? cy : null; put('plans', p); render(); toast(p.cycle ? 'Belastungszyklus gespeichert' : 'Belastungszyklus aus');
+});
+function StatusLine(ps) {
+  if (!ps.status) return '';
+  const cls = { positive: 'up', decline: 'down' }[ps.status] || '';
+  return `<div class="card" style="margin-bottom:10px"><b class="${cls}">${esc(STATUS_TXT[ps.status])}</b>
+    <div class="muted" style="font-size:13px;margin-top:4px">${ps.plats.length ? T('{n} von {m} beurteilbaren Übungen ohne Verbesserung seit 2 gemessenen Wochen (Plateau).', { n: ps.plats.length, m: ps.judged }) : ps.judged ? T('Keine Übung im Plateau.') : T('Plateaus werden ab 3 gemessenen Wochen je Übung beurteilt.')}</div>
+    ${ps.suggestDeload ? `<div class="info" style="margin-top:8px;font-size:13.5px">💡 ${T('Vorschlag: Eine Entlastungswoche (Deload) könnte jetzt sinnvoll sein – im Trainingsplan unter „Belastungszyklus“ einplanen.')}</div>` : ''}</div>`;
+}
+function WeeklyLoadSections(cid) {
+  const V = weeklyVolume(cid).slice(-12), I = weeklyIntensity(cid), lw = I.weeks.slice(-8);
+  const wl = w => fmtDate(w).slice(0, 6);
+  return `<section class="section"><div class="section-h"><h2>${T('Wochenvolumen')}</h2></div>
+      <div class="card">${V.length ? lineChart(V.map(w => ({ label: wl(w.week), y: Math.round(w.vol) })), 'kg') : ''}
+      <div class="muted" style="font-size:12px;margin-top:6px">${T('Summe aus Gewicht × Wiederholungen aller Arbeitssätze je Woche – zeigt die Belastung, nicht die Kraft.')}${V.some(w => w.deload) ? ' ' + T('Wochen mit Deload sind bewusst niedriger.') : ''}</div></div></section>
+    <section class="section"><div class="section-h"><h2>${T('Intensität (RPE)')}</h2></div>
+      <div class="card">${lw.length ? `<table class="table sbd"><thead><tr><th>${T('Woche ab')}</th><th class="r">Ø RPE</th><th class="r">${T('Sätze mit RPE')}</th></tr></thead><tbody>
+        ${lw.slice().reverse().map(w => `<tr><td>${fmtDate(w.week)}</td><td class="r">${fmtNum(Math.round(w.rpe * 10) / 10)}</td><td class="r">${w.n}</td></tr>`).join('')}</tbody></table>
+        <table class="table sbd" style="margin-top:10px"><thead><tr><th>${T('Kategorie')}</th><th class="r">Ø RPE</th><th class="r">${T('Zielbereich')}</th></tr></thead><tbody>
+        ${Object.entries(EX_CATS).map(([k, c]) => `<tr><td>${esc(c.label)}</td><td class="r">${I.cats[k].rpe != null ? fmtNum(Math.round(I.cats[k].rpe * 10) / 10) : '–'}</td><td class="r">${rpeTxt(c.rpe)}</td></tr>`).join('')}</tbody></table>`
+        : `<div class="muted" style="font-size:14px">${T('Noch keine RPE-Angaben. Im Training über „⋯“ beim Satz z. B. „8“ oder „RIR 2“ eintragen.')}</div>`}
+      <div class="muted" style="font-size:12px;margin-top:6px">${T('RPE 6/7/8/9/10 = 4/3/2/1/0 Wiederholungen im Tank. Die Intensität wird getrennt angezeigt und nicht in die Kraftprogression eingerechnet.')}</div></div></section>`;
 }
 function exerciseSeries(cid, name) {
   const n = norm(name);
@@ -1816,6 +1972,7 @@ function viewPlan(c) {
   return topbar({ back: '/client/' + c.id, title: 'Trainingsplan', sub: esc(c.name) }) +
   `<main class="wrap view">
     ${ControlSystemCard(c, plan)}
+    ${CycleCard(plan)}
     <label class="field"><span>Name des Plans</span><input class="input" data-plan-name="${plan.id}" value="${esc(plan.name)}" maxlength="80"></label>
     <div class="stack">${days.map((d, i) => {
       const exs = exercisesOf(d.id);
@@ -1900,7 +2057,7 @@ function viewTrain(sess) {
         <span class="ex-count" id="exc-${ei}">${e.sets.filter(s => s.done).length}/${e.sets.length}</span><span class="chev">${ic('down')}</span>
       </button>
       <div class="ex-body">
-        ${ZYM() ? ZYM().exHint(sess, ei) : ''}
+        ${ZYM() ? ZYM().exHint(sess, ei) : ''}${rpeHint(sess, e)}
         ${planHtml}
         ${lastHtml}
         ${sugHtml}${goalHtml}
@@ -1921,7 +2078,7 @@ function viewTrain(sess) {
     back: editing ? '/session/' + sess.id : '/client/' + sess.clientId, title: `${esc(c ? c.name : '')}`, sub: esc(sessLabel(sess)) + (editing ? ' · ' + T('Bearbeiten') : ''),
     extra: `<div class="tb-extra"><div class="tbar"><span id="tbar" style="width:${pct}%"></span></div><span class="tcount" id="tcount">${doneN}/${total} ${T('Sätze')}</span></div>`
   }) + `<main class="wrap view">
-    ${ZYM() ? ZYM().sessBanner(sess) : ''}
+    ${ZYM() ? ZYM().sessBanner(sess) : ''}${DeloadBanner(sess)}
     <label class="row" style="margin-bottom:12px"><span class="muted" style="font-size:14px">${T('Datum')}</span><input type="date" class="input" data-tf="date" value="${esc(sess.date)}" style="width:auto;padding:8px 12px;font-size:16px"></label>
     ${cards || `<div class="card empty">${T('Dieser Trainingstag hat keine Übungen.')}</div>`}
     <button class="btn btn-ghost btn-block" data-action="add-adhoc">${ic('plus')} ${T('Übung nur für dieses Training hinzufügen')}</button>
@@ -2028,7 +2185,7 @@ function viewProgress(c) {
   const series = sel ? exerciseSeries(c.id, sel) : [];
   const pts = series.map(p => ({ label: fmtDate(p.date).slice(0, 6), y: M.get(p) })).filter(p => p.y != null);
   const volPts = done.slice().reverse().map(s => ({ label: fmtDate(s.date).slice(0, 6), y: sessionVolume(s) })).filter(p => p.y > 0);
-  const trend = strengthTrend(c.id), totalVol = done.reduce((t, s) => t + sessionVolume(s), 0);
+  const PSTAT = progressStatus(c.id), trend = PSTAT.trend, totalVol = done.reduce((t, s) => t + sessionVolume(s), 0);
   const prs = names.map(n => {
     const ser = exerciseSeries(c.id, n.name); let bw = null, be = null;
     for (const p of ser) { if (hasVal(p.top.weight) && (!bw || p.top.weight > bw.top.weight)) bw = p; if (p.e1rm && (!be || p.e1rm > be.e1rm)) be = p; }
@@ -2065,8 +2222,10 @@ ${(pe => { if (!pe) return ''; const pg = progOfPlan(pe); if (!hasVal(pg.goal) &
 
     <section class="section">
       <div class="section-h"><h2>${T('Kraft-Trend je Übung')}</h2></div>
-      ${trend ? StrengthBreakdown(trend) : `<div class="card muted" style="font-size:14px">${T('Sobald eine Übung zweimal mit Gewicht und Wiederholungen eingetragen ist, erscheint hier der Vergleich.')}</div>`}
+      ${(ps => StatusLine(ps))(PSTAT)}${trend ? StrengthBreakdown(trend, PSTAT) : `<div class="card muted" style="font-size:14px">${T('Sobald eine Übung zweimal mit Gewicht und Wiederholungen eingetragen ist, erscheint hier der Vergleich.')}</div>`}
     </section>
+
+    ${WeeklyLoadSections(c.id)}
 
     <section class="section">
       <div class="section-h"><h2>${T('Trainingsvolumen pro Training')}</h2></div>
@@ -2260,6 +2419,8 @@ function openExModal(dayId, exId) {
       <label class="toggle"><input type="checkbox" name="autoSuggest" ${pg.auto ? 'checked' : ''}><span class="tg"></span><span>Nächstes Gewicht automatisch vorschlagen<small>Wurden letztes Mal alle Sätze &amp; Wiederholungen geschafft, schlägt die App „+ Schritt“ vor. Nur ein Vorschlag – du entscheidest.</small></span></label>
       <div class="goal-in"><label><span class="muted">Startgewicht</span><input class="input" name="startWeight" inputmode="decimal" placeholder="kg" value="${fmtIn(pg.start)}" autocomplete="off"></label>
         <label><span class="muted">Ziel (optional)</span><input class="input" name="goalWeight" inputmode="decimal" placeholder="kg" value="${fmtIn(pg.goal)}" autocomplete="off"></label></div></div>`; })()}
+    <label class="field"><span>Übungskategorie</span><select class="input" name="exCat"><option value="">Automatisch (${esc(EX_CATS[autoCat(e ? e.name : '')].label)})</option>${Object.entries(EX_CATS).map(([k, c]) => `<option value="${k}" ${e && e.exCatManual && e.exCat === k ? 'selected' : ''}>${esc(c.label)}</option>`).join('')}</select>
+      <div class="muted" style="font-size:12px;margin-top:6px">Primär = große Grundübung, Sekundär = mehrgelenkige Unterstützung, Isolation = ein Gelenk. Steuert nur die Ziel-Intensität, nicht die Gewichtung im Fortschritt.</div></label>
     <label class="field"><span>Übungsnotiz</span><textarea name="note" rows="2" placeholder="z. B. Technik verbessern">${esc(e ? e.note : '')}</textarea></label>
     <div class="sheet-actions"><button type="button" class="btn btn-ghost" data-action="modal-close">Abbrechen</button><button class="btn btn-primary">Speichern</button></div></form>`,
     el => { const f = el.querySelector('form'); xpMark(f); hydrateThumbs(el);
@@ -2284,6 +2445,7 @@ function createSession(cid, dayId) {
   const s = { id: uid(), clientId: cid, planId: plan ? plan.id : null, dayId, dayName: day.name, dayIndex: days.findIndex(d => d.id === dayId),
     selId: plan && plan.nextSel && plan.nextSel.dayId ? plan.nextSel.id : null, // Festlegung, die beim Start galt (wird mit dem Abschluss verbraucht)
     date: today(), startedAt: Date.now(), finishedAt: null, status: 'active', note: '', exercises, createdAt: Date.now() };
+  const cw = cycleWeekOf(plan); if (cw) { s.cycleWeek = cw.i; if (cw.deload) applyDeload(s); }   // geplanter Deload laut Belastungszyklus
   put('sessions', s); return s;
 }
 const blankSet = () => ({ weight: null, reps: null, rpe: '', note: '', done: false });
@@ -2626,6 +2788,7 @@ document.addEventListener('submit', async ev => {
     if (!f.dataset.stepTouched && !(e.step > 0)) step = null; // unverändert → Standard je nach Übung (Kurzhantel 1,25 kg, sonst 2,5 kg)
     const sw = parseNum(fd.get('startWeight')), gw = parseNum(fd.get('goalWeight'));
     Object.assign(e, { step, autoSuggest: fd.get('autoSuggest') === 'on', startWeight: sw, goalWeight: gw });
+    const xc = String(fd.get('exCat') || ''); e.exCat = EX_CATS[xc] ? xc : autoCat(name); e.exCatManual = !!EX_CATS[xc];   // Kategorie gespeichert (automatisch oder manuell)
     put('exercises', e); closeModal(null); render();
   }
 });
