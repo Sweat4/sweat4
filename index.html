@@ -1219,6 +1219,18 @@ const sessCmp = (a, b) => sessKey(b).localeCompare(sessKey(a));
 // runs: false = nur Krafttrainings (Standard), true = alles, 'only' = nur Laufeinheiten (kind:'run')
 const sessionsOf = (cid, doneOnly = false, runs = false) => all('sessions').filter(s => s.clientId === cid && (!doneOnly || s.status === 'done') && (runs === true || (runs === 'only' ? s.kind === 'run' : s.kind !== 'run'))).sort(sessCmp);
 const activeSession = cid => all('sessions').find(s => s.clientId === cid && s.status === 'active' && s.kind !== 'run') || null;
+/* Trainingstage frei wählen – drei getrennte Zustände:
+   1 Empfohlen = nextDayInfo() (nur Anzeige, startet nie selbst) · 2 Ausgewählt = UI.selDay (Auswahl im Dialog, noch nichts gestartet) ·
+   3 Laufend = Session status 'active' (höchstens eine je Kunde). Beim Wechsel wird das laufende Training gespeichert und auf 'paused'
+   gesetzt – nie abgeschlossen, nie überschrieben; Fortsetzen setzt es wieder auf 'active'. Pausierte Einheiten zählen nirgends als
+   abgeschlossen (Historie, Progression, Abgleich nutzen nur 'done'). */
+const pausedSessions = cid => all('sessions').filter(s => s.clientId === cid && s.status === 'paused' && s.kind !== 'run').sort((a, b) => (b.pausedAt || 0) - (a.pausedAt || 0));
+function pauseSession(s) { if (!s) return; flushSave(); if (s.status === 'active') { s.status = 'paused'; s.pausedAt = Date.now(); put('sessions', s); } }
+function resumeSession(s) {
+  if (!s || s.status !== 'paused') return s; flushSave();
+  const act = activeSession(s.clientId); if (act && act.id !== s.id) pauseSession(act);
+  s.status = 'active'; s.resumedAt = Date.now(); delete s.pausedAt; put('sessions', s); return s;
+}
 const lastSession = cid => sessionsOf(cid, true)[0] || null;
 const isPerformed = s => s.done || hasVal(s.reps) || hasVal(s.weight);
 const setVol = s => (hasVal(s.weight) && hasVal(s.reps)) ? s.weight * s.reps : 0;
@@ -1924,6 +1936,8 @@ function viewClient(c) {
     <div style="margin-top:16px">
       ${active ? `<a class="btn btn-primary btn-big" href="#/train/${active.id}">${ic('play', 22)} Laufendes Training fortsetzen</a><div class="muted" style="text-align:center;font-size:14px;margin-top:6px">${esc(sessLabel(active))} · begonnen ${fmtDate(active.date)}</div>`
                : `<button class="btn btn-primary btn-big" data-action="start-training" data-cid="${c.id}">${ic('play', 22)} Training starten</button>`}
+      ${days.length ? `<button class="btn btn-ghost btn-block" style="margin-top:8px" data-action="day-pick" data-cid="${c.id}">${ic('reset', 18)} Training wechseln</button>` : ''}
+      ${PausedList(c.id)}
     </div>
     ${RunCoachEntry(c)}
     ${IntakeEntry(c)}
@@ -2089,6 +2103,7 @@ function viewTrain(sess) {
     <div style="margin-top:18px">
       ${editing ? `<a class="btn btn-primary btn-big" href="#/session/${sess.id}">${ic('check', 22)} ${T('Fertig')}</a>`
                 : `<button class="btn btn-primary btn-big" data-action="finish">${ic('check', 22)} ${T('Training abschließen')}</button>
+                   <button class="btn btn-ghost btn-block" style="margin-top:8px" data-action="day-pick" data-cid="${sess.clientId}">${ic('reset', 18)} ${T('Training wechseln')}</button>
                    <button class="btn btn-text btn-block" style="margin-top:8px" data-action="discard">${T('Training verwerfen')}</button>`}
     </div>
     <div class="muted" style="text-align:center;font-size:13px;margin-top:10px">${T('Eingaben werden automatisch gespeichert.')}</div>
@@ -2109,6 +2124,7 @@ function viewSession(s) {
   return topbar({ back: '/client/' + s.clientId + '/history', title: esc(sessLabel(s)), sub: `${fmtDate(s.date)} · ${esc(c ? c.name : '')}` }) +
   `<main class="wrap view">
     ${s.status === 'active' ? `<div class="banner"><div><b>${T('Training läuft noch')}</b></div><a class="btn btn-sm btn-primary" href="#/train/${s.id}">${T('Fortsetzen')}</a></div>` : ''}
+    ${s.status === 'paused' ? `<div class="banner"><div><b>${T('Training pausiert')}</b></div><button class="btn btn-sm btn-primary" data-action="sess-resume" data-sid="${s.id}">${T('Fortsetzen')}</button></div>` : ''}
     ${s.adj && s.adj.level && s.adj.level !== 'normal' && ZYM() ? `<div class="info zy-banner" style="margin-bottom:12px">🌿 ${T('An die Tagesform angepasst')}: <b>${esc(ZYM().levelLabel(s.adj.level))}</b> · ${T('zählt nicht als Bezug für die Gewichtssteigerung')}</div>` : ''}
     ${s.status === 'done' ? SessionSummary(s) + `<div class="care-h">${T('Übungen & Sätze')}</div><div class="stack">${SessionExercises(s)}</div>` : `<div class="stats four">
       <div class="stat"><div class="stat-l">${T('Datum')}</div><div class="stat-v">${fmtDate(s.date)}</div></div>
@@ -2125,11 +2141,36 @@ function viewSession(s) {
   </main>`;
 }
 
+/* „Training wechseln“: alle Trainingstage frei wählbar (empfohlen / läuft / pausiert gekennzeichnet) */
+function openDayPicker(cid) {
+  const days = clientDays(cid), nxi = nextDayInfo(cid), act = activeSession(cid), pz = pausedSessions(cid), last = sessionsOf(cid, true)[0];
+  if (!days.length) { toast(T('Lege zuerst einen Trainingstag an')); return; }
+  const tag = d => act && act.dayId === d.id ? `<span class="tag live">${T('läuft')}</span>` : pz.some(x => x.dayId === d.id) ? `<span class="tag warn">${T('pausiert')}</span>` : nxi.day && nxi.day.id === d.id ? `<span class="tag">${T('Empfohlen')}</span>` : '';
+  modal(T('Training wechseln'), `<p class="muted" style="margin:0 0 12px;font-size:13.5px">${nxi.day ? T('Empfohlen laut Plan: {d}', { d: `<b>${esc(TD(nxi.day.name))}</b>` }) : ''}${last ? ' · ' + T('Zuletzt: {d}', { d: esc(sessLabel(last)) }) : ''}<br>${act ? T('Dein laufendes Training wird beim Wechsel gespeichert und pausiert – nichts geht verloren.') : T('Du entscheidest – jeder Trainingstag ist frei wählbar.')}</p>
+    <div class="pick-list">${days.map((d, i) => `<button class="day-btn ${nxi.day && nxi.day.id === d.id ? 'next' : ''}" data-action="day-sel" data-cid="${cid}" data-did="${d.id}">
+      <span class="day-no">${i + 1}</span><span class="grow"><span class="day-name">${esc(TD(d.name))}</span><br><span class="muted" style="font-size:14px">${TN(exercisesOf(d.id).length, '{n} Übung', '{n} Übungen')}</span></span>${tag(d)}</button>`).join('')}</div>`);
+}
+/* Ausgewählter Tag: erst ansehen, dann bewusst starten bzw. fortsetzen */
+function openDaySel(cid, did) {
+  const d = S.days.get(did); if (!d) return; UI.selDay = { cid, did };
+  const act = activeSession(cid), pz = pausedSessions(cid).find(x => x.dayId === did), runs = act && act.dayId === did, exs = exercisesOf(did);
+  const st = pz ? pz.exercises.reduce((t, e) => t + e.sets.filter(isPerformed).length, 0) : 0;
+  modal(esc(TD(d.name)), `<div class="card list-card" style="margin-bottom:12px">${exs.map(e => `<div class="list-link"><div class="grow"><b>${esc(exName(e.name, e.catalogId))}</b><div class="muted" style="font-size:13px">${TN(e.targetSets || CONFIG.DEFAULT_SETS, '{n} Satz', '{n} Sätze')}</div></div></div>`).join('') || `<div class="list-link muted">${T('Dieser Trainingstag hat keine Übungen.')}</div>`}</div>
+    ${pz ? `<div class="info" style="margin-bottom:12px;font-size:13.5px">${T('Pausiert seit {t} · {n} Sätze bereits eingetragen.', { t: fmtDateTs(pz.pausedAt || pz.startedAt) + ' ' + fmtTime(pz.pausedAt || pz.startedAt), n: st })}</div>` : ''}
+    ${act && !runs ? `<div class="muted" style="margin-bottom:12px;font-size:13px">${T('{x} wird gespeichert und pausiert.', { x: esc(sessLabel(act)) })}</div>` : ''}
+    <div class="sheet-actions"><button type="button" class="btn btn-ghost" data-action="day-pick" data-cid="${cid}">${T('Anderer Tag')}</button>
+      <button class="btn btn-primary" data-action="start-day" data-cid="${cid}" data-did="${did}">${runs || pz ? T('Fortsetzen') : T('Training starten')}</button></div>`);
+}
+/* Pausierte Trainings (Startseite Kunde, Kundenprofil Trainer) */
+function PausedList(cid) {
+  const pz = pausedSessions(cid); if (!pz.length) return '';
+  return `<div class="card list-card" style="margin-top:12px">${pz.map(s => `<button class="list-link" data-action="sess-resume" data-sid="${s.id}">${ic('play')}<div class="grow" style="text-align:left"><b>${esc(sessLabel(s))}</b><div class="muted" style="font-size:13px">${T('pausiert · begonnen {d}', { d: fmtDate(s.date) })} · ${TN(s.exercises.reduce((t, e) => t + e.sets.filter(isPerformed).length, 0), '{n} Satz', '{n} Sätze')}</div></div><span class="tag warn">${T('Fortsetzen')}</span></button>`).join('')}</div>`;
+}
 function viewHistory(c) {
   const list = sessionsOf(c.id, false, true);
   return topbar({ back: '/client/' + c.id, title: T('Trainingshistorie'), sub: esc(c.name) }) +
   `<main class="wrap view">
-    ${list.length ? `<div class="card list-card">${list.map(s => s.status === 'active'
+    ${list.length ? `<div class="card list-card">${list.map(s => s.status === 'paused' ? `<button class="list-link" data-action="sess-resume" data-sid="${s.id}"><div class="grow" style="text-align:left"><div style="font-weight:600">${fmtDate(s.date)} – ${esc(sessLabel(s))}</div><div class="muted" style="font-size:13px">${T('pausiert – antippen zum Fortsetzen')}</div></div><span class="tag warn">${T('pausiert')}</span></button>` : s.status === 'active'
       ? `<a class="list-link" href="#/${s.kind === 'run' ? 'lauf' : 'train'}/${s.id}"><div class="grow"><div style="font-weight:600">${fmtDate(s.date)} – ${esc(sessLabel(s))}</div><div class="muted" style="font-size:13px">${T('läuft noch')}</div></div><span class="tag live">${T('läuft')}</span></a>`
       : sessionLink(s)).join('')}</div>
       <button class="btn btn-ghost btn-block" style="margin-top:14px" data-action="csv" data-cid="${c.id}">${ic('download')} ${T('Trainingsdaten als CSV exportieren')}</button>`
@@ -2604,15 +2645,20 @@ const A = {
       ${d === next ? `<span class="tag">${T('Als Nächstes')}</span>` : ''}</button>`).join('')}</div>`);
   },
   'start-day': async el => {
-    const cid = el.dataset.cid, act = activeSession(cid); closeModal(null);
-    if (act) {
-      if (await confirmDialog(T('Training läuft bereits'), T('Für diesen Kunden läuft noch {x} vom {d}. Bitte zuerst abschließen oder verwerfen.', { x: `<b>${esc(sessLabel(act))}</b>`, d: fmtDate(act.date) }), { ok: T('Zum laufenden Training') })) go('/train/' + act.id);
-      return;
-    }
-    const pre = ZYM() ? await ZYM().beforeStart(cid, el.dataset.did) : null;   // optional: Tagesform-Check-in (nur Kundin mit aktivem Modul)
+    const cid = el.dataset.cid, did = el.dataset.did, act = activeSession(cid); closeModal(null); UI.selDay = null;
+    if (act && act.dayId === did) return go('/train/' + act.id);                       // dieser Tag läuft bereits → öffnen
+    const pz = pausedSessions(cid).find(x => x.dayId === did);
+    if (pz) { resumeSession(pz); toast(act ? T('{x} pausiert – {y} fortgesetzt', { x: sessLabel(act), y: sessLabel(pz) }) : T('Training fortgesetzt')); return go('/train/' + pz.id); }   // keine doppelte Einheit
+    const pre = ZYM() ? await ZYM().beforeStart(cid, did) : null;   // optional: Tagesform-Check-in (nur Kundin mit aktivem Modul)
     if (pre && pre.cancel) return;
-    const s = createSession(cid, el.dataset.did); if (pre && pre.adj) ZYM().afterCreate(s, pre); go('/train/' + s.id);
+    const a2 = activeSession(cid); if (a2) pauseSession(a2);                           // laufendes Training sichern und pausieren – nicht abschließen
+    const s = createSession(cid, did); if (pre && pre.adj) ZYM().afterCreate(s, pre);
+    if (a2) toast(T('{x} pausiert – du kannst es später fortsetzen', { x: sessLabel(a2) }));
+    go('/train/' + s.id);
   },
+  'day-pick': el => openDayPicker(el.dataset.cid),
+  'day-sel': el => openDaySel(el.dataset.cid, el.dataset.did),
+  'sess-resume': el => { const s = S.sessions.get(el.dataset.sid); if (!s) return; closeModal(null); resumeSession(s); go('/train/' + s.id); },
   'add-day': async el => {
     const pid = el.dataset.pid, days = daysOf(pid); if (days.length >= CONFIG.MAX_DAYS) return;
     const name = await promptDialog(T('Neuer Trainingstag'), { label: T('Name'), value: '', placeholder: T('z. B. Oberkörper'), ok: T('Anlegen') });
@@ -4797,8 +4843,11 @@ function viewClientHome() {
 
     ${days.length ? '' : NutritionCard(c, true)}
     <section class="section"><div class="section-h"><h2>${T('Dein Training')}</h2></div>
+      ${next || last ? `<div class="muted" style="font-size:13px;margin:-4px 0 10px">${next ? T('Empfohlen laut Plan: {d}', { d: `<b>${esc(TD(next.name))}</b>` }) : ''}${last ? (next ? ' · ' : '') + T('Zuletzt: {d}', { d: esc(sessLabel(last)) }) : ''}</div>` : ''}
       ${active ? `<a class="btn btn-primary btn-big" href="#/train/${active.id}">${ic('play', 22)} ${T('Workout fortsetzen')}</a>`
         : next ? `<button class="btn btn-primary btn-big btn-next" data-action="start-day" data-cid="${cid}" data-did="${next.id}"><span class="nx-ic">${ic('play', 22)}</span><span class="nx-tx"><small>${T('Nächstes Workout')} · ${T('Tag')} ${days.indexOf(next) + 1}</small><b>${esc(TD(next.name) || T('Training'))}</b></span></button>` : `<div class="card empty">${T('Dein Trainer hat noch keinen Trainingsplan hinterlegt.')}</div>`}
+      ${days.length ? `<button class="btn btn-ghost btn-block" style="margin-top:8px" data-action="day-pick" data-cid="${cid}">${ic('reset', 18)} ${T('Training wechseln')}</button>` : ''}
+      ${PausedList(cid)}
       <div class="card list-card" style="margin-top:12px">
         <a class="list-link" href="#/client/${cid}/planview">${ic('list')}<div class="grow"><b>${T('Aktueller Trainingsplan')}</b><div class="muted" style="font-size:13px">${TN(days.length, '{n} Trainingstag', '{n} Trainingstage')}</div></div></a>
         ${last ? `<a class="list-link" href="#/session/${last.id}">${ic('check')}<div class="grow"><b>${T('Letztes Workout')}</b><div class="muted" style="font-size:13px">${fmtDate(last.date)} · ${esc(sessLabel(last))}</div></div></a>` : ''}

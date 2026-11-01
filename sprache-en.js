@@ -1542,7 +1542,23 @@ window.SW_I18N.en = {
     "RPE 6/7/8/9/10 = 4/3/2/1/0 Wiederholungen im Tank. Die Intensität wird getrennt angezeigt und nicht in die Kraftprogression eingerechnet.": "RPE 6/7/8/9/10 = 4/3/2/1/0 reps in reserve. Intensity is shown separately and not included in strength progression.",
     "Plateau": "Plateau",
     "deutlich anstrengender": "much harder",
-    "leichter gefallen": "felt easier"
+    "leichter gefallen": "felt easier",
+    "{x} pausiert – {y} fortgesetzt": "{x} paused – {y} resumed",
+    "Training fortgesetzt": "Workout resumed",
+    "{x} pausiert – du kannst es später fortsetzen": "{x} paused – you can resume it later",
+    "pausiert": "paused",
+    "Empfohlen": "Recommended",
+    "Training wechseln": "Switch workout",
+    "Empfohlen laut Plan: {d}": "Recommended by plan: {d}",
+    "Zuletzt: {d}": "Last: {d}",
+    "Dein laufendes Training wird beim Wechsel gespeichert und pausiert – nichts geht verloren.": "Your current workout is saved and paused when you switch – nothing gets lost.",
+    "Du entscheidest – jeder Trainingstag ist frei wählbar.": "You decide – every training day can be chosen.",
+    "Pausiert seit {t} · {n} Sätze bereits eingetragen.": "Paused since {t} · {n} sets already logged.",
+    "{x} wird gespeichert und pausiert.": "{x} will be saved and paused.",
+    "Anderer Tag": "Other day",
+    "pausiert · begonnen {d}": "paused · started {d}",
+    "pausiert – antippen zum Fortsetzen": "paused – tap to resume",
+    "Training pausiert": "Workout paused"
   },
   /* Übungskatalog: id → [Name, Zielmuskel, Equipment, Ausgangsposition, Ausführung, Bewegungsrichtung, [Hinweise], [Fehler]] */
   kat: {
