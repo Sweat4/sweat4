@@ -2166,5 +2166,117 @@
     }
   }
 
+
+  /* === NEUE VORLAGEN (v50) ====================================================
+     bss       – Bulgarische Split Squats: hinterer Fuß erhöht auf der Bank, je 2 Wdh. pro Seite, dann Seitenwechsel
+     hang      – Halten an der Klimmzugstange: v 'dead' (passiver Hang, Arme gestreckt) | 'top' (Kinn über der Stange, isometrisch)
+     cableLeg  – Kabelzug mit Fußmanschette: v 'curl' (Beinbeuger stehend) | 'ext' (Beinstrecker sitzend auf der Bank)  */
+  const BSS_BENCH = { z0: -1.22, z1: -.5, top: .44 };
+  function bssPose(s, front) {
+    const fs = front === 'L' ? 1 : -1, back = front === 'L' ? 'R' : 'L';
+    const o = { pelvis: V(0, lerp(.87, .56, s), lerp(-.08, -.14, s)), pitch: lerp(4, 13, s), head: lerp(-3, -8, s) };
+    o.ankle = { [front]: V(fs * .1, DIM.ank, .22), [back]: V(-fs * .1, BSS_BENCH.top + .035, BSS_BENCH.z1 - .08) };
+    o.knee = { [front]: V(fs * .12, 0, 1), [back]: V(0, -1, .2) };
+    o.foot = { [front]: V(fs * .08, 0, 1), [back]: V(0, -.12, -1) };
+    const K = kin(o);
+    o.hand = sides(sg => shoulder(K, sg).addScaledVector(DOWN, .61).addScaledVector(K.l, sg * .045));
+    o.elbow = sides(() => K.f.clone().multiplyScalar(-1));
+    return o;
+  }
+  function bssStand() {   // Zwischenschritt beim Seitenwechsel: beide Füße vorne am Boden
+    const o = { pelvis: V(0, STAND_Y - .01, .2), pitch: 2, head: -3, ankle: { L: V(.12, DIM.ank, .22), R: V(-.12, DIM.ank, .22) }, knee: toeOut(8), foot: toeOut(8) };
+    const K = kin(o);
+    o.hand = sides(sg => shoulder(K, sg).addScaledVector(DOWN, .61).addScaledVector(K.l, sg * .045));
+    o.elbow = sides(() => K.f.clone().multiplyScalar(-1));
+    return o;
+  }
+  TPL.bss = p => {
+    const props = {}, bw = p.v === 'bw';
+    const tm = LBL.lower('Start – hinterer Fuß mit dem Spann auf der Bank, Oberkörper aufrecht', 'kontrolliert senkrecht absenken', 'Unten – vorderer Oberschenkel etwa waagerecht, Knie über dem Fuß', 'über die Ferse des vorderen Beins hochdrücken');
+    const P = tm.dur.reduce((a, b) => a + b, 0), REPS = 2, SW = .9, HALF = REPS * P + 2 * SW;
+    const side = (lbl, front) => lbl.replace('Start –', front === 'L' ? 'Linkes Bein vorne –' : 'Rechtes Bein vorne –');
+    const custom = t => {
+      const tt = ((t % (2 * HALF)) + 2 * HALF) % (2 * HALF), k = tt < HALF ? 0 : 1, x = tt - k * HALF;
+      const front = k === 0 ? 'L' : 'R', next = k === 0 ? 'R' : 'L';
+      if (x < REPS * P) { const r = rep(x, tm.dur, tm.labels); return { pose: bssPose(r.s, front), label: r.phase === 0 ? side(r.label, front) : r.label, s: r.s }; }
+      const u = x - REPS * P;
+      if (u < SW) return { pose: poseLerp(bssPose(0, front), bssStand(), ease(u / SW)), label: 'Seitenwechsel – hinteren Fuß von der Bank nehmen', s: 0 };
+      return { pose: poseLerp(bssStand(), bssPose(0, next), ease((u - SW) / SW)), label: 'Anderen Fuß auf die Bank legen – beide Seiten gleich oft', s: 0 };
+    };
+    return {
+      cam: { az: 72, el: 12, dist: 3.5, target: V(0, .8, -.15) }, thumbT: tm.dur[0] + tm.dur[1] + .1, custom,
+      setup(kit) { flatBench(kit, BSS_BENCH.z0, BSS_BENCH.z1, BSS_BENCH.top); if (!bw) { props.dL = dbAt(kit); props.dR = dbAt(kit); } },
+      props(J) { if (props.dL) { props.dL.set(J.L.hand, J.K.f); props.dR.set(J.R.hand, J.K.f); } }
+    };
+  };
+
+  TPL.hang = p => {
+    const hy = 2.22, top = p.v === 'top', W = .27, BR = 4.2;   // Griffbreite ≈ schulterbreit, Atemzyklus 4,2 s
+    const labels = top
+      ? ['Halten – Kinn über der Stange, Ellbogen gebeugt', 'Schulterblätter nach unten, Brust Richtung Stange', 'Körper ruhig, Beine geschlossen – kein Schwingen', 'Ruhig weiteratmen und die Position halten']
+      : ['Hängen – beide Hände schulterbreit, Arme gestreckt', 'Füße ohne Bodenkontakt, Körper hängt ruhig', 'Passiver Hang – Griff fest, Schultern locker', 'Ruhig weiteratmen – kein Schwingen, kein Klimmzug'];
+    const custom = t => {
+      const b = Math.sin(2 * Math.PI * t / BR), sway = .006 * Math.sin(2 * Math.PI * t / 6.3);
+      const o = top
+        ? { pelvis: V(0, 1.585 + .004 * b, -.075 + sway * .5), pitch: -11, flex: -2 + .8 * b, head: 8, shrug: -.25 }
+        : { pelvis: V(0, 1.06 + .005 * b, .01 + sway), pitch: -2, flex: .8 * b, head: 0, shrug: .5 };
+      o.hand = sides(sg => V(sg * W, hy, 0));
+      const K = kin(o);
+      o.elbow = sides(sg => top ? DOWN.clone().addScaledVector(K.l, sg * .75).addScaledVector(K.f, .15) : K.l.clone().multiplyScalar(sg).addScaledVector(K.f, -.4));
+      o.ankle = sides(sg => o.pelvis.clone().add(V(sg * .07, -.845, top ? .1 : .05)));
+      o.knee = sides(sg => V(sg * .05, 0, 1)); o.foot = sides(() => V(0, -.75, .55));
+      return { pose: o, label: labels[Math.floor(((t % 8) + 8) % 8 / 2)] };
+    };
+    return {
+      cam: { az: 38, el: 6, dist: 3.9, target: V(0, 1.45, 0) }, thumbT: 1, custom,
+      setup(kit, MT) { kit.rod(V(-.75, hy, 0), V(.75, hy, 0), .018, MT.steel); for (const s of [-1, 1]) kit.rod(V(s * .75, 0, 0), V(s * .75, hy + .05, 0), .035); }
+    };
+  };
+
+  TPL.cableLeg = p => {
+    const props = {}, curl = p.v === 'curl';
+    if (curl) {
+      const pul = V(.12, .12, .5), postZ = pul.z + .14;
+      return {
+        cam: { az: 78, el: 10, dist: 3.3, target: V(0, .85, .2) },
+        timing: LBL.std('Start – aufrecht am Kabelturm, Manschette am linken Knöchel, Bein gestreckt', 'Ferse Richtung Gesäß beugen', 'Oben – Beinbeuger anspannen, Knie bleibt unter der Hüfte', 'Unterschenkel langsam strecken'),
+        setup(kit) { kit.tower(pul, V(0, 0, 1)); props.c = kit.line(); props.cuff = kit.movCyl(.05, .07, kit.MT.dark); },
+        pose(s) {
+          const th = lerp(4, 108, s) * D2R;
+          const o = { pelvis: V(-.025, STAND_Y - .02, 0), pitch: 9, head: -5, roll: -1.5 };
+          const K = kin(o);
+          const kn = hip(K, 1).add(V(.005, -DIM.thigh + .005, -.035));
+          o.ankle = { L: kn.clone().add(V(0, -Math.cos(th) * DIM.shin, -Math.sin(th) * DIM.shin)), R: V(-.13, DIM.ank, .03) };
+          o.knee = { L: V(0, 0, 1), R: V(-.06, 0, 1) };
+          o.foot = { L: V(0, -Math.sin(th), Math.cos(th) + .15), R: V(-.08, 0, 1) };
+          o.hand = { L: V(pul.x + .075, 1.12, postZ - .085), R: V(pul.x - .075, 1.06, postZ - .085) };
+          o.elbow = sides(sg => DOWN.clone().addScaledVector(K.l, sg * .6));
+          return o;
+        },
+        props(J) { const a = J.L.ankle.clone().add(V(0, .03, 0)); props.cuff.set(a, V(0, 1, 0)); props.c.set(pul, a.clone().add(V(0, -.01, .03))); }
+      };
+    }
+    const pul = V(.1, .1, -.95), BZ0 = -.62, BZ1 = .29, BT = .46;
+    const base = { pelvis: V(0, BT + .11, -.06), pitch: -4, head: -2, foot: toeOut(6) };
+    return {
+      cam: { az: 70, el: 12, dist: 3.4, target: V(0, .65, -.1) },
+      timing: LBL.std('Start – aufrecht auf der Bank, Manschette am linken Knöchel, Knie ca. 90°', 'Unterschenkel nach vorne strecken', 'Oben – Bein gestreckt, Oberschenkel anspannen', 'langsam beugen'),
+      setup(kit) { flatBench(kit, BZ0, BZ1, BT, 0, .3); kit.tower(pul, V(0, 0, -1)); props.c = kit.line(); props.cuff = kit.movCyl(.05, .07, kit.MT.dark); },
+      pose(s) {
+        const th = lerp(8, 84, s) * D2R, o = Object.assign({}, base); const K = kin(o);
+        const kn = hip(K, 1).add(V(.01, -.015, DIM.thigh));
+        o.ankle = { L: kn.clone().add(V(0, -Math.cos(th) * DIM.shin, Math.sin(th) * DIM.shin)), R: V(-.13, DIM.ank, .44) };
+        o.knee = { L: V(0, 1, .3), R: V(-.1, 1, .3) };
+        o.foot = { L: V(0, Math.sin(th) * .9, Math.cos(th) + .1), R: V(-.1, 0, 1) };
+        o.hand = sides(sg => relP(K, sg, .19, -.09, .1)); o.elbow = sides(sg => K.l.clone().multiplyScalar(sg).addScaledVector(K.f, -.3));
+        return o;
+      },
+      props(J) {
+        const a = J.L.ankle.clone().add(V(0, -.005, -.01)); props.cuff.set(a, V(1, 0, 0));
+        props.c.set(pul, a);
+      }
+    };
+  };
+
   window.SW3D = { Viewer, TPL, FIG_STYLES, solve, version: 3 };
 })();
