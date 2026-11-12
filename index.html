@@ -2691,7 +2691,8 @@ const A = {
     render();
   },
   'xp-pick': el => { const f = el.closest('form'), k = KAT().find(x => x.id === el.dataset.id); if (!f || !k) return;
-    f.dataset.cat = k.id; f.querySelector('[name=name]').value = k.n; xpMark(f); exNameChanged(f); },
+    f.dataset.cat = k.id; f.querySelector('[name=name]').value = k.n; xpMark(f); exNameChanged(f);
+    { const nt = f.querySelector('[name=note]'); if (nt && !nt.value.trim() && k.rir != null) nt.value = rirNote(k); } },
   'xp-group': el => { const f = el.closest('form'); UI.xp.g = el.dataset.v;
     f.querySelectorAll('[data-action="xp-group"]').forEach(b => { const on = b === el; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); }); xpRefresh(f); },
   'next-pick': el => openNextPick(el.dataset.cid),
@@ -3238,7 +3239,7 @@ function ExerciseDetailView(e0) {
         ${(videoMode() || mediaFor(e.id, curFig()) || !e.anim) ? '' : `<button class="icon-btn glass" data-action="open3d" data-id="${e.id}" aria-label="${T('Vollbild mit Ansichten, Tempo und Technik')}">${ic('expand', 18)}</button>`}</div>
     </div>
     <div class="ud-head">
-      <div class="ud-tags"><span class="pill pill-gold">${esc(TG(e.g))}${e.sg ? ' · ' + esc(TG(e.sg)) : ''}</span><span class="pill">${esc(eqShort(e))}</span>${Object.keys(e.cats || {}).map(c => `<span class="pill pill-gold">${esc(TG(c))}</span>`).join('')}${e.typ ? `<span class="pill">${esc(T(TYP_L[e.typ] || e.typ))}</span>` : ''}${e.lvl ? `<span class="pill">${esc(T(e.lvl))}</span>` : ''}<span class="grow"></span>${FigureSwitch(curFig())}</div>
+      <div class="ud-tags"><span class="pill pill-gold">${esc(TG(e.g))}${e.sg ? ' · ' + esc(TG(e.sg)) : ''}</span><span class="pill">${esc(eqShort(e))}</span>${e.rir != null ? `<span class="pill pill-gold" title="${T('Trainingsvorgabe')}">RIR ${e.rir}</span>` : ''}${Object.keys(e.cats || {}).map(c => `<span class="pill pill-gold">${esc(TG(c))}</span>`).join('')}${e.typ ? `<span class="pill">${esc(T(TYP_L[e.typ] || e.typ))}</span>` : ''}${e.lvl ? `<span class="pill">${esc(T(e.lvl))}</span>` : ''}<span class="grow"></span>${FigureSwitch(curFig())}</div>
       <h1 class="ud-title">${esc(e.n)}</h1>
       <div class="ud-sub">${esc(e.sub)}</div>
       ${e.animBase && !videoMode() ? `<div class="muted" style="font-size:13px;margin-top:6px">${ic('cube', 14)} ${esc(T(e.animBase))}</div>` : ''}
@@ -3282,10 +3283,12 @@ function openAddToPlan(exId, cid) {
   modal(T('Welcher Trainingstag?'), `<p class="muted" style="margin:0 0 12px">${esc(e.n)} → ${esc(c.name)}</p><div class="pick-list">${days.map((d, i) => { const n = exercisesOf(d.id).length, full = n >= CONFIG.MAX_EXERCISES, has = exercisesOf(d.id).some(x => x.catalogId === e.id || norm(x.name) === norm(e.n));
     return `<button class="day-btn tap" data-action="ud-add-day" data-id="${e.id}" data-did="${d.id}" ${full ? 'disabled' : ''}><span class="day-no">${i + 1}</span><span class="grow"><span class="day-name">${esc(d.name)}</span><br><span class="muted" style="font-size:13px">${n} Übungen${has ? ' · bereits enthalten' : ''}${full ? ' · voll' : ''}</span></span>${ic('plus', 20)}</button>`; }).join('')}</div>`);
 }
+/* Trainingsvorgabe aus dem Katalog (v51): z. B. RIR 2 bei Trap-Bar-Kreuzheben und Bankdrücken → Notiz „RIR 2“ in der Plan-Übung (im Training sichtbar, frei änderbar) */
+const rirNote = k => (k && k.rir != null ? 'RIR ' + k.rir : '');
 function addCatalogExercise(exId, dayId) {
   const e = KAT().find(x => x.id === exId), d = S.days.get(dayId); if (!e || !d) return;
   const list = exercisesOf(dayId); if (list.length >= CONFIG.MAX_EXERCISES) return toast(T('Dieser Tag ist voll'));
-  put('exercises', { id: uid(), dayId, name: e.n, order: list.length, createdAt: Date.now(), targetSets: CONFIG.DEFAULT_SETS, sets: [], note: '', catalogId: e.id,
+  put('exercises', { id: uid(), dayId, name: e.n, order: list.length, createdAt: Date.now(), targetSets: CONFIG.DEFAULT_SETS, sets: [], note: rirNote(e), catalogId: e.id,
     ss: null, amrap: false, unit: UNIT_OK(e.unit), rest: null, step: null, autoSuggest: e.eq !== 'Körpergewicht', startWeight: null, goalWeight: null });
   const plan = S.plans.get(d.planId), c = plan && S.clients.get(plan.clientId);
   closeModal(null); toast(`Hinzugefügt: ${d.name}${c ? ' · ' + c.name : ''}`);

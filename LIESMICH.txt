@@ -1,0 +1,20 @@
+SWEAT4 App – v51: 14 Übungen im Katalog (12 neu + 2 verknüpft)
+
+Hochladen (GitHub, App-Repo): diese 5 Dateien ersetzen
+  index.html, uebungen-katalog.js, uebungen3d.js, sprache-en.js, sw.js
+Diese Version enthält auch v49 (Nachrichten-Benachrichtigungen) und v50 (6 Übungen).
+Wer v49/v50 noch nicht hochgeladen hat, braucht nur dieses Paket.
+Nach dem Hochladen ca. 10 Minuten warten, App am Handy einmal ganz schließen und neu öffnen.
+
+Neu im Katalog (jeweils eigene 3D-Animation):
+  Athletik:  Reaktive Takedown-Entries auf Signal, Hang Power Clean, Medizinball-Brustwurf
+  Beine:     Trap-Bar-Kreuzheben (RIR 2), Hip Thrust explosiv, Nordic Hamstring Curl
+  Bauch:     Landmine-Rotation, Kabel-Rotation
+  Rücken:    Pendlay-Rudern, Klimmzug mit Zusatzgewicht, Handtuch-Rudern
+  Schulter:  Landmine Press einarmig
+Verknüpft (keine Duplikate):
+  Bankdrücken mit Langhantel – Trainingsvorgabe RIR 2 ergänzt
+  Plyometrische Liegestütze – neue 3D-Animation mit Absprung (Hände lösen sich vom Boden)
+
+RIR 2: Beim Hinzufügen von Trap-Bar-Kreuzheben oder Bankdrücken in einen Plan steht
+automatisch „RIR 2“ in der Übungsnotiz (im Training sichtbar, änderbar). Bestehende Pläne bleiben unverändert.
