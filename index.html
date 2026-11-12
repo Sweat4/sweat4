@@ -68,6 +68,7 @@ h1,h2,h3{margin:0;line-height:1.2}
 .icon-btn:active{background:var(--surface-3)}
 .icon-btn.sm{width:38px;height:38px;border-radius:10px}
 .icon-btn.danger{color:var(--danger)}
+.btn.danger-outline{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 45%,transparent)}
 .icon-btn:disabled{opacity:.25;pointer-events:none}
 
 /* Cards & layout */
@@ -1231,15 +1232,37 @@ const clientDays = cid => { const p = planOf(cid); return p ? daysOf(p.id) : [];
 const exercisesOf = did => all('exercises').filter(e => e.dayId === did).sort(byOrder);
 const sessKey = s => s.date + '|' + String(s.finishedAt || s.startedAt || 0).padStart(15, '0');
 const sessCmp = (a, b) => sessKey(b).localeCompare(sessKey(a));
+/* ---------------- Kunden-Reset: Trainingsdurchgänge (v52) ----------------
+   Der Trainer kann einen Kunden komplett auf den Anfang seines Programms zurücksetzen. Dabei wird NICHTS gelöscht und am Plan nichts
+   verändert: Es beginnt ein neuer Durchgang. Alle Fortschrittswerte (Historie, Kraft-/Übungsprogression, Plateaus, Deload-Woche,
+   Wochenvolumen, Diagramme, nächster Trainingstag, Laufprogression …) werden ausschließlich aus Einheiten des AKTUELLEN Durchgangs
+   berechnet – deshalb läuft alles über sessionsOf(). Frühere Durchgänge bleiben als Archiv lesbar und fließen in keine Berechnung ein.
+   c.restart  = { id, no, at, date, by }                aktueller Durchgang (fehlt = Durchgang 0, nie zurückgesetzt)
+   c.restarts = [{ id, no, at, date, by, prevNo, planId, planName, sessions, runs, first, last, open }]   Protokoll + Archiv-Kennzahlen
+   s.cycleNo  = Durchgang, in dem die Einheit begonnen wurde. Einheiten ohne Kennung (älter als v52 oder auf dem Kundengerät begonnen,
+   bevor der Reset dort ankam) werden über den Startzeitpunkt zugeordnet. */
+const curCycleNo = c => (c && c.restart ? c.restart.no : 0);
+function sessCycle(s, c) {
+  const R = (c && c.restarts) || []; if (!R.length) return 0;
+  const st = s.startedAt || s.createdAt || (s.date ? new Date(s.date + 'T12:00:00').getTime() : 0); let n = 0;
+  for (const r of R) if ((s.cycleNo || 0) >= r.no || st > r.at) n = Math.max(n, r.no);
+  return n;
+}
+const inCycle = (s, c, no) => sessCycle(s, c) === (no == null ? curCycleNo(c) : no);
 // runs: false = nur Krafttrainings (Standard), true = alles, 'only' = nur Laufeinheiten (kind:'run')
-const sessionsOf = (cid, doneOnly = false, runs = false) => all('sessions').filter(s => s.clientId === cid && (!doneOnly || s.status === 'done') && (runs === true || (runs === 'only' ? s.kind === 'run' : s.kind !== 'run'))).sort(sessCmp);
-const activeSession = cid => all('sessions').find(s => s.clientId === cid && s.status === 'active' && s.kind !== 'run') || null;
+// scope: undefined = nur aktueller Durchgang (Standard für alle Berechnungen), 'all' = inkl. Archiv, Zahl = bestimmter Durchgang
+const sessionsOf = (cid, doneOnly = false, runs = false, scope) => {
+  const c = S.clients.get(cid), R = c && c.restarts && c.restarts.length;
+  return all('sessions').filter(s => s.clientId === cid && (!doneOnly || s.status === 'done') && (runs === true || (runs === 'only' ? s.kind === 'run' : s.kind !== 'run'))
+    && (scope === 'all' || !R || inCycle(s, c, typeof scope === 'number' ? scope : null))).sort(sessCmp);
+};
+const activeSession = cid => sessionsOf(cid, false, false).find(s => s.status === 'active') || null;
 /* Trainingstage frei wählen – drei getrennte Zustände:
    1 Empfohlen = nextDayInfo() (nur Anzeige, startet nie selbst) · 2 Ausgewählt = UI.selDay (Auswahl im Dialog, noch nichts gestartet) ·
    3 Laufend = Session status 'active' (höchstens eine je Kunde). Beim Wechsel wird das laufende Training gespeichert und auf 'paused'
    gesetzt – nie abgeschlossen, nie überschrieben; Fortsetzen setzt es wieder auf 'active'. Pausierte Einheiten zählen nirgends als
    abgeschlossen (Historie, Progression, Abgleich nutzen nur 'done'). */
-const pausedSessions = cid => all('sessions').filter(s => s.clientId === cid && s.status === 'paused' && s.kind !== 'run').sort((a, b) => (b.pausedAt || 0) - (a.pausedAt || 0));
+const pausedSessions = cid => sessionsOf(cid, false, false).filter(s => s.status === 'paused').sort((a, b) => (b.pausedAt || 0) - (a.pausedAt || 0));
 function pauseSession(s) { if (!s) return; flushSave(); if (s.status === 'active') { s.status = 'paused'; s.pausedAt = Date.now(); put('sessions', s); } }
 function resumeSession(s) {
   if (!s || s.status !== 'paused') return s; flushSave();
@@ -1265,8 +1288,10 @@ function nextDayAuto(cid, days) {
   return i < 0 ? days[0] : days[(i + 1) % days.length];
 }
 const selUsed = (cid, sel) => sessionsOf(cid, true).some(s => s.selId ? s.selId === sel.id : (s.startedAt || 0) > (sel.at || 0));
+const validSel = (cid, p) => { const sel = p && p.nextSel, r = curRestart(cid); return sel && (!r || (sel.at || 0) > r.at) ? sel : null; };   // Festlegung vor einem Reset gilt nicht mehr
+const curRestart = cid => { const c = S.clients.get(cid); return (c && c.restart) || null; };
 function nextDayInfo(cid) {
-  const days = clientDays(cid), p = planOf(cid), sel = p && p.nextSel;
+  const days = clientDays(cid), p = planOf(cid), sel = validSel(cid, p);
   if (!days.length) return { day: null, manual: false, invalid: !!(sel && sel.dayId) };
   if (sel && sel.dayId) {
     const d = days.find(x => x.id === sel.dayId);
@@ -1483,7 +1508,8 @@ const STATUS_TXT = {
 const DELOAD = { setsFactor: 0.6, rpe: [6, 7] };
 function cycleWeekOf(plan, iso = today()) {
   const cy = plan && plan.cycle; if (!cy || !(cy.weeks >= 3 && cy.weeks <= 5) || !cy.start) return null;
-  const d = daysBetween(weekOf(cy.start), weekOf(iso)); if (d < 0) return null;
+  const rs = plan.clientId && curRestart(plan.clientId), start = rs && rs.date > cy.start && iso >= rs.date ? rs.date : cy.start;   // nach Reset: Woche 1 ab Reset-Woche
+  const d = daysBetween(weekOf(start), weekOf(iso)); if (d < 0) return null;
   const len = cy.weeks + 1, i = Math.floor(d / 7) % len + 1; return { i, len, deload: i === len, weeks: cy.weeks };
 }
 function rpeTarget(cw, cat) {
@@ -1989,6 +2015,7 @@ function viewClient(c) {
       ${recent.length ? `<div class="card list-card">${recent.slice(0, 5).map(sessionLink).join('')}</div>` : '<div class="card empty">Noch keine Trainings dokumentiert.</div>'}
     </section>
     ${clientExtraSections(c, 'bottom')}
+    ${RestartSection(c)}
   </main>`;
 }
 function sessionLink(s) {
@@ -2137,10 +2164,12 @@ function viewSession(s) {
       ${sets.map((st, i) => `<tr><td>${i + 1}${st.done ? ' <span class="accent">✓</span>' : ''}</td><td>${hasVal(st.weight) ? fmtNum(st.weight) + ' kg' : '–'}</td><td>${hasVal(st.reps) ? fmtNum(st.reps) : '–'}</td><td>${esc(st.rpe) || '–'}</td><td>${esc(st.note)}</td></tr>`).join('')}
       </tbody></table>${e.note ? `<div class="muted" style="margin-top:8px">📝 ${esc(e.note)}</div>` : ''}</div>`;
   }).join('');
+  const arch = c && !inCycle(s, c);   // Einheit aus einem früheren Durchgang (Archiv): nur lesen, nicht fortsetzen
   return topbar({ back: '/client/' + s.clientId + '/history', title: esc(sessLabel(s)), sub: `${fmtDate(s.date)} · ${esc(c ? c.name : '')}` }) +
   `<main class="wrap view">
-    ${s.status === 'active' ? `<div class="banner"><div><b>${T('Training läuft noch')}</b></div><a class="btn btn-sm btn-primary" href="#/train/${s.id}">${T('Fortsetzen')}</a></div>` : ''}
-    ${s.status === 'paused' ? `<div class="banner"><div><b>${T('Training pausiert')}</b></div><button class="btn btn-sm btn-primary" data-action="sess-resume" data-sid="${s.id}">${T('Fortsetzen')}</button></div>` : ''}
+    ${arch ? `<div class="info" style="margin-bottom:12px">🗄️ <b>${T('Archiv')}</b> · ${T('Durchgang {n}', { n: sessCycle(s, c) + 1 })} – ${T('vor dem Neustart am {d}. Zählt nicht zum aktuellen Fortschritt.', { d: fmtDate(c.restart.date) })}</div>` : ''}
+    ${arch ? '' : s.status === 'active' ? `<div class="banner"><div><b>${T('Training läuft noch')}</b></div><a class="btn btn-sm btn-primary" href="#/train/${s.id}">${T('Fortsetzen')}</a></div>` : ''}
+    ${s.status === 'paused' && !arch ? `<div class="banner"><div><b>${T('Training pausiert')}</b></div><button class="btn btn-sm btn-primary" data-action="sess-resume" data-sid="${s.id}">${T('Fortsetzen')}</button></div>` : ''}
     ${s.adj && s.adj.level && s.adj.level !== 'normal' && ZYM() ? `<div class="info zy-banner" style="margin-bottom:12px">🌿 ${T('An die Tagesform angepasst')}: <b>${esc(ZYM().levelLabel(s.adj.level))}</b> · ${T('zählt nicht als Bezug für die Gewichtssteigerung')}</div>` : ''}
     ${s.status === 'done' ? SessionSummary(s) + `<div class="care-h">${T('Übungen & Sätze')}</div><div class="stack">${SessionExercises(s)}</div>` : `<div class="stats four">
       <div class="stat"><div class="stat-l">${T('Datum')}</div><div class="stat-v">${fmtDate(s.date)}</div></div>
@@ -2191,6 +2220,7 @@ function viewHistory(c) {
       : sessionLink(s)).join('')}</div>
       <button class="btn btn-ghost btn-block" style="margin-top:14px" data-action="csv" data-cid="${c.id}">${ic('download')} ${T('Trainingsdaten als CSV exportieren')}</button>`
       : `<div class="card empty">${T('Noch keine Trainings dokumentiert.')}</div>`}
+    ${isClientMode() ? '' : ArchiveList(c)}
   </main>`;
 }
 
@@ -2501,8 +2531,8 @@ function createSession(cid, dayId) {
     sets: Array.from({ length: Math.max(1, Math.min(CONFIG.MAX_SETS, e.targetSets || CONFIG.DEFAULT_SETS)) }, blankSet),
   }));
   const s = { id: uid(), clientId: cid, planId: plan ? plan.id : null, dayId, dayName: day.name, dayIndex: days.findIndex(d => d.id === dayId),
-    selId: plan && plan.nextSel && plan.nextSel.dayId ? plan.nextSel.id : null, // Festlegung, die beim Start galt (wird mit dem Abschluss verbraucht)
-    date: today(), startedAt: Date.now(), finishedAt: null, status: 'active', note: '', exercises, createdAt: Date.now() };
+    selId: validSel(cid, plan) && plan.nextSel.dayId ? plan.nextSel.id : null, // Festlegung, die beim Start galt (wird mit dem Abschluss verbraucht)
+    date: today(), startedAt: Date.now(), finishedAt: null, status: 'active', note: '', exercises, createdAt: Date.now(), cycleNo: curCycleNo(S.clients.get(cid)) };
   const cw = cycleWeekOf(plan); if (cw) { s.cycleWeek = cw.i; if (cw.deload) applyDeload(s); }   // geplanter Deload laut Belastungszyklus
   put('sessions', s); return s;
 }
@@ -2552,12 +2582,12 @@ async function doImport(file) {
 }
 function csvExport(cid) {
   const q = v => { v = v == null ? '' : String(v); return /[";\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
-  const rows = [['Datum', 'Kunde', 'Trainingstag', 'Übung', 'Satz', 'Gewicht (kg)', 'Wiederholungen', 'RPE/RIR', 'Abgehakt', 'Satznotiz', 'Übungsnotiz', 'Trainingsnotiz'].map(h => T(h))];
+  const rows = [['Datum', 'Kunde', 'Trainingstag', 'Übung', 'Satz', 'Gewicht (kg)', 'Wiederholungen', 'RPE/RIR', 'Abgehakt', 'Satznotiz', 'Übungsnotiz', 'Trainingsnotiz', 'Durchgang'].map(h => T(h))];
   const sessions = all('sessions').filter(s => s.status === 'done' && (!cid || s.clientId === cid)).sort((a, b) => sessKey(a).localeCompare(sessKey(b)));
   for (const s of sessions) {
     const cn = S.clients.get(s.clientId)?.name || '';
     for (const e of s.exercises) e.sets.filter(isPerformed).forEach((st, i) =>
-      rows.push([fmtDate(s.date), cn, sessLabel(s), exNameS(e), i + 1, fmtIn(st.weight), fmtIn(st.reps), st.rpe, st.done ? T('ja') : T('nein'), st.note, e.note, s.note]));
+      rows.push([fmtDate(s.date), cn, sessLabel(s), exNameS(e), i + 1, fmtIn(st.weight), fmtIn(st.reps), st.rpe, st.done ? T('ja') : T('nein'), st.note, e.note, s.note, sessCycle(s, S.clients.get(s.clientId)) + 1]));
   }
   const name = cid ? `training_${(S.clients.get(cid)?.name || 'kunde').replace(/[^\wäöüÄÖÜß-]+/g, '_')}_${today()}.csv` : `training_export_${today()}.csv`;
   download(name, '﻿' + rows.map(r => r.map(q).join(';')).join('\r\n'), 'text/csv;charset=utf-8');
@@ -2647,10 +2677,10 @@ const A = {
   'photo-remove': () => { UI.photoDraft = null; const n = document.querySelector('[data-form=client] [name=name]').value; document.getElementById('photo-prev').innerHTML = avatar({ name: n || '?', photo: null }, 'xl'); },
   'del-client': async el => {
     const c = S.clients.get(el.dataset.id); closeModal(null);
-    const n = sessionsOf(c.id, false, true).length;
+    const n = sessionsOf(c.id, false, true, 'all').length;
     if (!await confirmDialog(T('Kunde löschen?'), `<b>${esc(c.name)}</b> und alle zugehörigen Daten (Trainingsplan und <b>${n}</b> Trainings) werden endgültig gelöscht.<br><br>Tipp: Erstelle vorher ein Backup.`, { ok: T('Endgültig löschen'), danger: true })) return;
     all('plans').filter(p => p.clientId === c.id).forEach(p => { daysOf(p.id).forEach(d => { exercisesOf(d.id).forEach(e => del('exercises', e.id)); del('days', d.id); }); del('plans', p.id); });
-    sessionsOf(c.id, false, true).forEach(s => del('sessions', s.id)); del('clients', c.id);
+    sessionsOf(c.id, false, true, 'all').forEach(s => del('sessions', s.id)); del('clients', c.id);
     toast(T('Kunde gelöscht')); go('/');
   },
   'start-training': async el => {
@@ -3661,7 +3691,7 @@ function coachDash(rows) {
   if (!rows.length) return '';
   const active = rows.filter(r => r.c.status !== 'inactive');
   const due = active.map(r => ({ c: r.c, d: checkDue(r.c) })).filter(x => x.d);
-  const n30 = all('sessions').filter(s => s.status === 'done' && daysBetween(s.date, today()) <= 30).length;
+  const n30 = all('sessions').filter(s => s.status === 'done' && daysBetween(s.date, today()) <= 30 && inCycle(s, S.clients.get(s.clientId))).length;
   const name = id => S.clients.get(id)?.name || '–';
   const acts = [
     ...all('sessions').filter(s => s.status === 'done').map(s => ({ ts: s.finishedAt || s.startedAt || 0, t: `${esc(name(s.clientId))} – Workout abgeschlossen`, h: '#/session/' + s.id, i: '🏋️' })),
@@ -4473,6 +4503,67 @@ Object.assign(A, {
     c.consentAt = Date.now(); put('clients', c); toast(T('Einwilligung vermerkt')); render(); },
 });
 
+/* ---------- Kunden-Reset (Trainer) ----------
+   Rechte: Die Funktion läuft nur auf dem Trainergerät. resetClient() prüft die Rolle selbst (nicht nur der Knopf ist ausgeblendet).
+   Kundengeräte bekommen den Durchgang ausschließlich über das verschlüsselte Trainer-Paket (Zugangscode); die Rückmeldung eines Kunden
+   enthält keine Kundendaten (nur Einheiten, Mahlzeiten, Fragebogen, Nachrichten) und kann c.restart daher nicht verändern. */
+const RESET_TXT = 'Möchtest du diesen Kunden wirklich vollständig auf den Anfang seines Trainingsprogramms zurücksetzen?';
+function resetClient(cid) {
+  if (isClientMode()) throw new Error(T('Nur der Trainer kann einen Kunden zurücksetzen.'));
+  const c = S.clients.get(cid); if (!c) throw new Error(T('Kunde nicht gefunden.'));
+  flushSave();
+  const cur = sessionsOf(cid, false, true), done = cur.filter(x => x.status === 'done'), plan = planOf(cid);
+  const prevNo = curCycleNo(c), no = prevNo + 1, now = Date.now();
+  const r = { id: uid(), no, at: now, date: today(), by: 'Trainer' };
+  const arch = { ...r, prevNo, planId: plan ? plan.id : null, planName: plan ? plan.name || '' : '', sessions: done.filter(x => x.kind !== 'run').length, runs: done.filter(x => x.kind === 'run').length,
+    first: done.length ? done[done.length - 1].date : null, last: done.length ? done[0].date : null, open: cur.filter(x => x.status === 'active' || x.status === 'paused').length,
+    since: prevNo ? (c.restart && c.restart.date) || null : c.startDate || null };
+  c.restarts = [...(c.restarts || []), arch]; c.restart = r; c.live = null; c.updatedAt = now;
+  put('clients', c);
+  return arch;
+}
+async function resetAndSync(cid) {
+  const arch = resetClient(cid), c = S.clients.get(cid);
+  if (!(c.access && c.access.code && boxUrl())) return { arch, sent: false };
+  try { await boxSendUpdate(cid); return { arch, sent: true }; } catch (e) { return { arch, sent: false, err: e.message }; }
+}
+function RestartSection(c) {
+  if (isClientMode()) return '';
+  const r = c.restart, list = (c.restarts || []).slice().reverse();
+  return `<section class="section" id="reset-sec"><div class="section-h"><h2>Trainingsdurchgang</h2>${r ? `<span class="tag">Durchgang ${r.no + 1}</span>` : ''}</div>
+    <div class="card stack">
+      <div class="muted" style="font-size:14px">${r ? `Neu gestartet am <b>${fmtDate(r.date)}</b> um ${new Date(r.at).toLocaleTimeString(LOC(), { hour: '2-digit', minute: '2-digit' })} (${esc(r.by)}). Fortschritt, Progression und Historie zählen ab diesem Tag.`
+        : 'Noch kein Neustart. Bei längerer Pause (Krankheit, Verletzung) kannst du den Kunden hier auf den Anfang seines Programms zurücksetzen – Plan und Kundendaten bleiben erhalten, die bisherigen Trainings wandern ins Archiv.'}</div>
+      <button class="btn btn-ghost btn-block danger-outline" data-action="client-reset" data-cid="${c.id}">${ic('reset', 18)} Kunden komplett zurücksetzen</button>
+      ${list.length ? `<details><summary class="muted" style="font-size:13.5px;cursor:pointer">Protokoll (${list.length} ${list.length === 1 ? 'Neustart' : 'Neustarts'})</summary>
+        <table class="table" style="margin-top:8px;font-size:13px"><thead><tr><th>Wann</th><th>Durchgang</th><th class="r">Archiviert</th></tr></thead><tbody>
+        ${list.map(a => `<tr><td>${fmtDate(a.date)} ${new Date(a.at).toLocaleTimeString(LOC(), { hour: '2-digit', minute: '2-digit' })}<div class="muted">${esc(a.by)}${a.planName ? ' · ' + esc(a.planName) : ''}</div></td>
+          <td>${a.prevNo + 1} → ${a.no + 1}<div class="muted">${a.first ? fmtDate(a.first) + ' – ' + fmtDate(a.last) : 'ohne Trainings'}</div></td>
+          <td class="r">${a.sessions} Training${a.sessions === 1 ? '' : 's'}${a.runs ? `<div class="muted">${a.runs} Lauf${a.runs === 1 ? '' : 'e'}</div>` : ''}</td></tr>`).join('')}</tbody></table></details>` : ''}
+    </div></section>`;
+}
+function ArchiveList(c) {
+  const R = c.restarts || []; if (!R.length) return '';
+  const groups = R.slice().reverse().map(a => ({ a, l: sessionsOf(c.id, false, true, a.prevNo) })).filter(g => g.l.length);
+  if (!groups.length) return '';
+  return `<section class="section"><div class="section-h"><h2>${T('Archiv – frühere Durchgänge')}</h2></div>
+    <div class="muted" style="font-size:13px;margin:-4px 0 8px">${T('Nur zum Nachlesen. Diese Trainings zählen nicht zum aktuellen Fortschritt.')}</div>
+    ${groups.map(g => `<details class="card" style="padding:12px 14px;margin-bottom:8px"><summary style="cursor:pointer;font-weight:600">${T('Durchgang {n}', { n: g.a.prevNo + 1 })} · ${g.l.length} ${T('Einheiten')} <span class="muted" style="font-weight:500">· ${T('beendet am {d}', { d: fmtDate(g.a.date) })}</span></summary>
+      <div class="list-card" style="margin-top:8px">${g.l.map(sessionLink).join('')}</div></details>`).join('')}
+  </section>`;
+}
+queueMicrotask(() => Object.assign(A, {
+  'client-reset': async el => {
+    const cid = el.dataset.cid, c = S.clients.get(cid); if (!c || isClientMode()) return;
+    const n = sessionsOf(cid, true, true).length;
+    const ok = await confirmDialog('Kunden komplett zurücksetzen?', `<b>${esc(c.name)}</b><br><br>${RESET_TXT}<br><br>Der gesamte Trainingsfortschritt und alle aktiven Progressionsdaten dieses Programmzyklus werden zurückgesetzt. Der Trainingsplan und die Kundendaten bleiben erhalten.<br><br>Dieser Vorgang kann nicht einfach rückgängig gemacht werden.<div class="muted" style="font-size:13px;margin-top:10px">${n} abgeschlossene Einheit${n === 1 ? '' : 'en'} dieses Durchgangs werden archiviert (nicht gelöscht).</div>`, { ok: 'Kunden jetzt zurücksetzen', danger: true });
+    if (!ok) return;
+    el.disabled = true;
+    const res = await resetAndSync(cid);
+    toast(res.sent ? `${c.name} ist zurückgesetzt – Update gesendet ✓` : res.err ? `${c.name} ist zurückgesetzt. Update nicht gesendet: ${res.err}` : `${c.name} ist zurückgesetzt ✓`);
+    render();
+  },
+}));
 function clientExtraSections(c, part) {
   const cl = checksOf(c.id), last = cl[cl.length - 1], due = checkDue(c), age = ageAt(c.birthDate);
   const vals = last ? MEASURES.map(m => { const fl = firstLast(cl, m.k); return fl ? `<div class="mini"><div class="mini-l">${m.s}</div><div class="mini-v">${fmtNum(fl.cur)} <small>${m.u}</small></div>${fl.n > 1 ? `<div class="mini-d">${sgn(fl.d)} ${m.u}</div>` : ''}</div>` : ''; }).join('') : '';
@@ -5534,8 +5625,8 @@ function bestBwReps(e) { let b = null; for (const x of workSets(e)) if (!hasVal(
 const targetSig = e => JSON.stringify((e.target || []).map(t => t ? [t.reps ?? null, t.repsMax ?? null] : null));
 const plannedSets = e => (e.target && e.target.length) || (e.sets || []).length;
 function prevComparable(s, e) {
-  const n = norm(e.name), key = sessKey(s);
-  for (const o of sessionsOf(s.clientId, true)) {
+  const n = norm(e.name), key = sessKey(s), c = S.clients.get(s.clientId);
+  for (const o of sessionsOf(s.clientId, true, false, sessCycle(s, c))) {
     if (o.id === s.id || sessKey(o) >= key) continue;
     const pe = (e.exerciseId && o.exercises.find(x => x.exerciseId === e.exerciseId)) || o.exercises.find(x => norm(x.name) === n);
     if (pe && workSets(pe).some(hasData) && progComparable(o)) return { s: o, e: pe };   // nur dokumentierte, vergleichbare Leistung
@@ -5946,7 +6037,7 @@ const HIGH_TYPES = new Set(['interval', 'ka', 'marker', 'sprint100', 'combo']);
 
 /* ---------- Daten ---------- */
 const runsOf = (cid, doneOnly = false) => sessionsOf(cid, doneOnly, 'only');
-const activeRun = cid => all('sessions').find(s => s.clientId === cid && s.kind === 'run' && s.status === 'active') || null;
+const activeRun = cid => sessionsOf(cid, false, 'only').find(s => s.status === 'active') || null;
 const runCfgOf = c => (c && c.run) || {};
 function runSetCfg(cid, patch) {
   const c = S.clients.get(cid); const r = { ...runCfgOf(c), ...patch };
@@ -6059,7 +6150,7 @@ function runSpecFor(cid, prog, opts = {}) {
 }
 function startRun(cid, spec, steps = null) {
   const s = { id: uid(), clientId: cid, kind: 'run', planId: null, dayId: null, dayIndex: null, dayName: RUN_NAME[spec.prog === 'athlete' && spec.type === 'combo' ? 'combo' : spec.prog] || spec.prog,
-    date: today(), startedAt: Date.now(), finishedAt: null, status: 'active', note: '', exercises: [], createdAt: Date.now(), updatedAt: Date.now(),
+    date: today(), startedAt: Date.now(), finishedAt: null, status: 'active', note: '', exercises: [], createdAt: Date.now(), updatedAt: Date.now(), cycleNo: curCycleNo(S.clients.get(cid)),
     run: { ...spec, steps: steps || buildSteps(spec), pos: { i: 0, t0: Date.now(), paused: 0, pausedAt: null }, log: { times: [], doneIdx: [] }, status: null } };
   put('sessions', s); return s;
 }
@@ -6357,7 +6448,7 @@ function rpSave(cid, fn, what) {
 const liveItems = (list, date) => (list || []).filter(i => !i.removed && (!date || i.date === date)).sort((a, b) => a.date.localeCompare(b.date) || (a.createdAt || 0) - (b.createdAt || 0));
 const sigItems = l => JSON.stringify(liveItems(l).map(i => [i.id, i.date, i.kind, i.mandatory, i.dayId || '', i.text || '', i.run ? JSON.stringify(i.run.spec) : '']));
 const rpDirty = c => { const r = rpOf(c); return sigItems(r.draft.items) !== sigItems(r.pub ? r.pub.items : []); };
-const itemSessions = (cid, id, type) => runsOf(cid).filter(s => s.run.asg === id && (!type || s.run.type === type)).sort((a, b) => (b.startedAt || 0) - (a.startedAt || 0));
+const itemSessions = (cid, id, type) => sessionsOf(cid, false, 'only', 'all').filter(s => s.run.asg === id && (!type || s.run.type === type)).sort((a, b) => (b.startedAt || 0) - (a.startedAt || 0));
 function itemStatus(cid, it) {
   if (it.kind === 'run') {
     const l = itemSessions(cid, it.id, it.run.spec.type), ok = l.find(s => s.run.status === 'completed');
@@ -6365,7 +6456,7 @@ function itemStatus(cid, it) {
     if (l[0]) return { st: l[0].run.status, s: l[0] };
     return { st: it.date < today() ? 'missed' : 'open' };
   }
-  if (it.kind === 'strength') { const s = sessionsOf(cid, true).find(x => x.date === it.date); return s ? { st: 'completed', s } : { st: it.date < today() ? 'missed' : 'open' }; }
+  if (it.kind === 'strength') { const s = sessionsOf(cid, true, false, 'all').find(x => x.date === it.date); return s ? { st: 'completed', s } : { st: it.date < today() ? 'missed' : 'open' }; }
   return { st: 'none' };
 }
 const IT_ST = { get open() { return T('offen'); }, get missed() { return T('offen – Termin vorbei'); }, get active() { return T('begonnen'); }, get completed() { return T('abgeschlossen'); }, get aborted() { return T('abgebrochen'); }, get skipped() { return T('übersprungen'); }, none: '' };

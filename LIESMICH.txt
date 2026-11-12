@@ -1,20 +1,16 @@
-SWEAT4 App – v51: 14 Übungen im Katalog (12 neu + 2 verknüpft)
+SWEAT4 App – v52: Kunden komplett zurücksetzen (neuer Trainingsdurchgang)
 
-Hochladen (GitHub, App-Repo): diese 5 Dateien ersetzen
-  index.html, uebungen-katalog.js, uebungen3d.js, sprache-en.js, sw.js
-Diese Version enthält auch v49 (Nachrichten-Benachrichtigungen) und v50 (6 Übungen).
-Wer v49/v50 noch nicht hochgeladen hat, braucht nur dieses Paket.
-Nach dem Hochladen ca. 10 Minuten warten, App am Handy einmal ganz schließen und neu öffnen.
+Hochladen (GitHub, App-Repo Sweat4/sweat4): 2 Dateien ersetzen
+  index.html, sw.js
+Setzt v51 voraus (ist bereits online). Danach ca. 10 Min. warten, App ganz schließen, öffnen, nochmal schließen und öffnen.
 
-Neu im Katalog (jeweils eigene 3D-Animation):
-  Athletik:  Reaktive Takedown-Entries auf Signal, Hang Power Clean, Medizinball-Brustwurf
-  Beine:     Trap-Bar-Kreuzheben (RIR 2), Hip Thrust explosiv, Nordic Hamstring Curl
-  Bauch:     Landmine-Rotation, Kabel-Rotation
-  Rücken:    Pendlay-Rudern, Klimmzug mit Zusatzgewicht, Handtuch-Rudern
-  Schulter:  Landmine Press einarmig
-Verknüpft (keine Duplikate):
-  Bankdrücken mit Langhantel – Trainingsvorgabe RIR 2 ergänzt
-  Plyometrische Liegestütze – neue 3D-Animation mit Absprung (Hände lösen sich vom Boden)
+Bedienung (Trainer):
+  Kunde öffnen → ganz unten „Trainingsdurchgang“ → „Kunden komplett zurücksetzen“ → Sicherheitsabfrage → „Kunden jetzt zurücksetzen“.
+  Ist der Kunde über den Briefkasten verbunden, geht das Update automatisch an seine App.
 
-RIR 2: Beim Hinzufügen von Trap-Bar-Kreuzheben oder Bankdrücken in einen Plan steht
-automatisch „RIR 2“ in der Übungsnotiz (im Training sichtbar, änderbar). Bestehende Pläne bleiben unverändert.
+Was passiert:
+  - Neuer Durchgang: Historie, Kraft-/Übungsprogression, Plateaus, Wochenvolumen, Diagramme, nächster Tag (Tag 1),
+    Belastungswoche (Woche 1), Laufergebnisse und Betreuungsstatus starten bei null.
+  - Plan, Tage, Übungen, Sätze/Wdh., Kundendaten, Zugang, Ernährung, Fragebogen, Körperdaten bleiben unverändert.
+  - Nichts wird gelöscht: frühere Trainings liegen im Archiv (Historie → „Archiv – frühere Durchgänge“) und zählen nicht mehr mit.
+  - Protokoll im Kundenprofil: wann, von wem, welcher Durchgang, wie viele Trainings archiviert.
