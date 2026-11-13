@@ -1,14 +1,18 @@
-SWEAT4 App – v53: 13 neue Übungen mit 3D (enthält v52 Kunden-Reset)
+SWEAT4 App – v54: „Meine Trainingspläne“ (persönlicher Vorlagen-Katalog des Trainers)
+Enthält auch v52 (Kunden-Reset) und v53 (13 neue Übungen).
 
 Hochladen (GitHub, App-Repo Sweat4/sweat4): diese 5 Dateien ersetzen
   index.html, uebungen-katalog.js, uebungen3d.js, sprache-en.js, sw.js
-Wer v52 (Kunden-Reset) noch nicht hochgeladen hat, braucht nur dieses Paket.
-Danach ca. 10 Min. warten, App ganz schließen, öffnen, nochmal schließen und öffnen. Katalog: 170 Übungen.
+Danach ca. 10 Min. warten, App ganz schließen, öffnen, nochmal schließen und öffnen.
+Hinweis: Die App legt beim ersten Start einen neuen Datenbereich für Vorlagen an – bestehende Daten bleiben erhalten.
+Tipp: vorher wie immer ein Backup machen.
 
-Neu (jeweils eigene 3D-Animation):
-  Athletik:      Scramble-Starts auf Signal, Drop Jump 30 cm, Skater-Sprünge, Schlitten schieben schwer (Meter), Medizinball-Rotationswurf
-  Beine:         Rumänisches Kreuzheben einbeinig, Copenhagen Plank kurzer Hebel, Adduktoren am Kabelzug
-  Schulter:      Push Press
-  Stabilisation: Nacken isometrisch in 4 Richtungen (Sekunden), Bear-Hug-Carry mit Sandsack (Meter)
-  Rücken + Bodyweight: Hängen am Handtuch (Sekunden), Isometrisches Halten im Klimmzug 90° (Sekunden)
-Schon vorhanden (nicht doppelt angelegt): Bulgarian Split Squat = „Bulgarische Split Squats“.
+So funktioniert es (nur Trainer):
+  - Startseite → „Meine Trainingspläne“: durchsuchbare Liste (Name, ursprünglicher Kunde, Erstellt am, Trainingstage, geändert am).
+  - Automatisch gespeichert wird ein Plan, sobald du ihn an den Kunden übergibst (Update senden / Kundendatei).
+    Oder im Plan des Kunden: „Im Katalog speichern“.
+  - Kundenplan später geändert? Die Vorlage bleibt, bis du „Vorlage aktualisieren“ tippst.
+  - Neuer Plan: Plan des Kunden öffnen → „Aus meinen Plänen“ → Vorlage wählen → Kopie anpassen.
+  - Einzelner Tag: „Trainingstag hinzufügen“ → „Aus vorhandenem Plan übernehmen“ (oder wie bisher „Neu erstellen“).
+  - Vorlage öffnen: umbenennen, für einen Kunden verwenden, aus dem Kundenplan aktualisieren, löschen (mit Sicherheitsabfrage).
+  - Vorlagen enthalten nur die Struktur – keine Gewichte, keine Historie, keine Kundendaten – und gehen nie an Kunden.
