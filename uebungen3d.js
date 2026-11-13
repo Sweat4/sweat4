@@ -2618,5 +2618,314 @@
     };
   };
 
+
+  /* === v53: WRESTLING-ATHLETIK, UNILATERAL, ADDUKTOREN, NACKEN & GRIFF ======== */
+  const lampKit = (kit, MT, P) => { kit.rod(V(P.x, 0, P.z), V(P.x, P.y - .06, P.z), .02); return kit.ball(P, .07, MT.dark); };
+  const lampSet = (lamp, MT, on) => { lamp.material = on ? MT.prim : MT.dark; lamp.scale.setScalar(on ? 1.35 : 1); };
+
+  // Scramble-Starts: Bauchlage → Signal → explosiv hochdrücken, Füße unter den Körper → Grundstellung → zwei schnelle Schritte → zurück
+  TPL.scramble = () => {
+    const props = {}, TOT = 5.2, SIG0 = 1.4, SIG1 = 1.85, LAMP = V(.75, 1.2, 1.7);
+    const P = (o, hands, elbow) => { const p = Object.assign({ head: -18, foot: { L: V(.08, 0, 1), R: V(-.4, 0, 1) }, knee: { L: V(.12, 0, 1), R: V(-.3, 0, 1) } }, o);
+      const K = kin(p); p.hand = sides(sg => hands(K, sg)); p.elbow = sides(sg => elbow(K, sg)); return p; };
+    const floorH = (K, sg) => V(sg * .26, .03, K.S.z - .02), elUp = (K, sg) => UP.clone().addScaledVector(K.l, sg * .6).addScaledVector(K.u, -.4);
+    const prone = P({ pelvis: V(0, .13, -.35), pitch: 90, head: -30, ankle: sides(sg => V(sg * .11, .07, -1.22)), foot: sides(() => V(0, -1, .35)), knee: sides(() => V(0, -1, 0)) }, floorH, elUp);
+    const press = P({ pelvis: V(0, .36, -.38), pitch: 76, head: -20, ankle: sides(sg => V(sg * .11, .08, -1.2)), foot: sides(() => V(0, -1, .4)), knee: sides(() => V(0, -1, 0)) },
+      (K, sg) => V(sg * .26, .03, .1), (K, sg) => V(sg * .6, .3, -1));
+    const tuck = P({ pelvis: V(0, .58, -.22), pitch: 52, head: -30, ankle: { L: V(.17, DIM.ank, .02), R: V(-.17, DIM.ank, -.28) } }, (K, sg) => V(sg * .26, .03, .2), (K, sg) => V(sg * .5, .2, -1));
+    const guard = (K, sg) => rel(K, sg, .15, -.1, .3), elIn = (K, sg) => DOWN.clone().addScaledVector(K.l, sg * .2).addScaledVector(K.f, -.2);
+    const stance = P({ pelvis: V(0, .79, -.05), pitch: 24, ankle: { L: V(.17, DIM.ank, .18), R: V(-.17, DIM.ank, -.3) } }, guard, elIn);
+    const step1 = P({ pelvis: V(0, .78, .3), pitch: 34, head: -26, ankle: { L: V(.16, DIM.ank, .2), R: V(-.15, DIM.ank + .12, .5) }, foot: { L: V(.05, -.4, 1), R: V(-.05, -.2, 1) }, knee: { L: V(.1, 0, 1), R: V(-.05, .3, 1) } },
+      (K, sg) => sg > 0 ? rel(K, sg, .12, -.05, .35) : rel(K, sg, .18, -.4, -.15), elIn);
+    const step2 = P({ pelvis: V(0, .8, .7), pitch: 30, head: -24, ankle: { L: V(.15, DIM.ank + .12, 1.0), R: V(-.15, DIM.ank, .62) }, foot: { L: V(.05, -.2, 1), R: V(-.05, -.4, 1) }, knee: { L: V(.05, .3, 1), R: V(-.1, 0, 1) } },
+      (K, sg) => sg < 0 ? rel(K, sg, .12, -.05, .35) : rel(K, sg, .18, -.4, -.15), elIn);
+    const custom = poseKeys([
+      [0, prone, 'Start – Bauchlage auf der Matte, Hände neben der Brust: auf das Signal warten'], [SIG0, prone, 'Signal! – sofort reagieren'],
+      [SIG0 + .2, press, 'Explosiv hochdrücken, Hüfte hoch'], [SIG0 + .45, tuck, 'Füße schnell unter den Körper ziehen'],
+      [SIG0 + .78, stance, 'Grundstellung – Hüfte tief, Hände vorne'], [SIG0 + 1.0, stance, 'Zwei schnelle Antrittsschritte nach vorne'],
+      [SIG0 + 1.28, step1, 'Zwei schnelle Antrittsschritte nach vorne'], [SIG0 + 1.56, step2, 'Abbremsen und zurück auf die Matte'],
+      [SIG0 + 2.3, stance, 'Abbremsen und zurück auf die Matte'], [SIG0 + 2.9, tuck, 'Abbremsen und zurück auf die Matte'], [SIG0 + 3.4, press, 'Abbremsen und zurück auf die Matte']], TOT);
+    return {
+      cam: { az: 70, el: 12, dist: 4.4, target: V(0, .55, .1) }, thumbT: SIG0 + .5, custom,
+      setup(kit, MT) { props.lamp = lampKit(kit, MT, LAMP); props.MT = MT; MAT(kit, -.8, .8, -1.5, 1.4); },
+      props(J, s, t) { const x = (((t || 0) % TOT) + TOT) % TOT; lampSet(props.lamp, props.MT, x >= SIG0 && x < SIG1); }
+    };
+  };
+
+  // Drop Jump: von der 30-cm-Box fallen lassen → kurzer Bodenkontakt → maximal hoch springen → landen → zurück auf die Box
+  TPL.dropJump = () => {
+    const BZ = -.5, BH = .3;
+    return {
+      cam: { az: 50, el: 10, dist: 4.4, target: V(0, 1.0, -.2) }, thumbT: 1.05,
+      custom: keyAnim([
+        [0, { d: 0, air: BH, z: BZ, arm: 15 }, 'Start – aufrecht auf der 30-cm-Box, Fußspitzen an der Kante'],
+        [.5, { d: .06, air: BH, z: BZ + .1, arm: 5, pitch: 6 }, 'Nach vorne von der Box fallen lassen – nicht abspringen'],
+        [.72, { d: .05, air: .08, z: -.08, arm: -25, lin: 1 }, 'Nach vorne von der Box fallen lassen – nicht abspringen'],
+        [.84, { d: .3, air: 0, z: 0, arm: -45 }, 'Kurzer Bodenkontakt – sofort abdrücken (so kurz wie möglich)'],
+        [.98, { d: .02, air: .02, z: 0, arm: 160, arc: .36 }, 'Maximal hoch springen – Arme schwingen mit'],
+        [1.48, { d: .1, air: .05, z: 0, arm: 120 }, 'Landen – Fußballen zuerst, Knie und Hüfte federn ab'],
+        [1.6, { d: .45, air: 0, z: 0, arm: 40 }, 'Landen – Fußballen zuerst, Knie und Hüfte federn ab'],
+        [2.2, { d: 0, air: 0, z: 0, arm: 15 }, 'Zurück auf die Box steigen'],
+        [2.9, { d: .15, air: .2, z: -.3, arm: 15, arc: .12 }, 'Zurück auf die Box steigen'], [3.3, { d: 0, air: BH, z: BZ, arm: 15 }, 'Zurück auf die Box steigen']], 3.8),
+      setup(kit, MT) { kit.box(.62, BH, .5, V(0, BH / 2, BZ - .05), null, MT.frame); kit.floorMat(-.9, .9, 1.2); }
+    };
+  };
+
+  // Skater-Sprünge: seitlich von einem Bein aufs andere springen, einbeinig weich landen, hinteres Bein kreuzt hinter dem Standbein
+  TPL.skater = () => {
+    const X = .48, TOT = 2.0;
+    const land = (side, d) => {   // side +1 = Landung auf dem linken Bein (Figur rechts im Bild → +x)
+      const x = side * X, o = { pelvis: V(x - side * .03, STAND_Y - .05 - .17 * d, -.04 - .06 * d), pitch: 14 + 22 * d, roll: -side * 6, head: -10 - 8 * d, yaw: side * 8 };
+      const st = side > 0 ? 'L' : 'R', fr = side > 0 ? 'R' : 'L';
+      o.ankle = { [st]: V(x + side * .08, DIM.ank, 0), [fr]: V(x - side * .14, DIM.ank + .1 + .06 * d, -.36) };
+      o.foot = { [st]: V(side * .1, 0, 1), [fr]: V(0, -.6, -.4) }; o.knee = { [st]: V(side * .1, 0, 1), [fr]: V(-side * .3, -.3, 1) };
+      const K = kin(o);
+      o.hand = { [fr]: shoulder(K, -side).addScaledVector(armDir(K, 60 + 20 * d), .55).addScaledVector(K.l, side * .15), [st]: shoulder(K, side).addScaledVector(armDir(K, -40), .55) };
+      o.elbow = sides(sg => K.f.clone().multiplyScalar(-1).addScaledVector(K.l, sg * .4));
+      return o;
+    };
+    const air = side => { const o = land(side, 0); o.pelvis = V(0, STAND_Y + .12, -.03); o.roll = 0; o.yaw = 0; o.pitch = 16;
+      o.ankle = { L: V(.15, DIM.ank + .2, -.1), R: V(-.15, DIM.ank + .2, -.1) }; o.foot = { L: V(.05, -.5, 1), R: V(-.05, -.5, 1) }; o.knee = toeOut(10);
+      const K = kin(o); o.hand = sides(sg => shoulder(K, sg).addScaledVector(armDir(K, 15), .56)); o.elbow = sides(sg => K.f.clone().multiplyScalar(-1).addScaledVector(K.l, sg * .3)); return o; };
+    return {
+      cam: { az: 20, el: 12, dist: 4.4, target: V(0, .85, 0) }, thumbT: .25,
+      custom: poseKeys([[0, land(1, 1), 'Einbeinig landen – Knie über dem Fuß, Hüfte zurück, hinteres Bein kreuzt'], [.3, land(1, .55), 'Kraftvoll seitlich abspringen'],
+        [.5, air(1), 'Flugphase – seitlich weit springen'], [.72, land(-1, 1), 'Einbeinig landen – Knie über dem Fuß, Hüfte zurück, hinteres Bein kreuzt'],
+        [1.02, land(-1, .55), 'Kraftvoll seitlich abspringen'], [1.22, air(-1), 'Flugphase – seitlich weit springen'], [1.44, land(1, 1), 'Einbeinig landen – Knie über dem Fuß, Hüfte zurück, hinteres Bein kreuzt']], 1.44),
+      setup(kit) { kit.floorMat(-.7, .7, 1.8); }
+    };
+  };
+
+  // Schlitten schieben (schwer): Körper ca. 45° nach vorne geneigt, Arme gestreckt an den Stangen, kraftvolle kurze Schritte (Boden läuft mit)
+  TPL.sled = () => {
+    const props = {}, Tc = 1.25, S = .42, BETA = .68, SPEED = S / (BETA * Tc), HZ = .62, HY = 1.0;
+    const footPos = (sg, ph) => { const x = sg * .12;
+      if (ph < BETA) { const u = ph / BETA; return { a: V(x, DIM.ank + .03, .02 - S * u), f: V(0, -.25 - .25 * u, 1), k: V(sg * .05, 0, 1) }; }
+      const u = (ph - BETA) / (1 - BETA), e = ease(u); return { a: V(x, DIM.ank + .03 + .16 * Math.sin(Math.PI * u), -S + .02 + (S) * e), f: V(0, -.4, 1), k: V(sg * .05, .2, 1) }; };
+    const custom = t => {
+      const ph = ((t % Tc) + Tc) % Tc / Tc, L = footPos(1, ph), R = footPos(-1, (ph + .5) % 1);
+      const o = { pelvis: V(0, .78 + .012 * Math.cos(4 * Math.PI * ph), -.32), pitch: 47, head: -32, roll: 0, ankle: { L: L.a, R: R.a }, foot: { L: L.f, R: R.f }, knee: { L: L.k, R: R.k } };
+      const K = kin(o);
+      o.hand = sides(sg => V(sg * .2, HY, HZ)); o.elbow = sides(sg => DOWN.clone().addScaledVector(K.l, sg * .5));
+      return { pose: o, label: ph < .5 ? 'Körper ca. 45° geneigt, Arme fest – Druck aus den Beinen' : 'Kurze, kraftvolle Schritte über den Vorfuß – Rumpf bleibt stabil', drift: t * SPEED };
+    };
+    return {
+      cam: { az: 70, el: 12, dist: 4.4, target: V(0, .7, .25) }, thumbT: .3, custom,
+      setup(kit, MT) {
+        kit.box(.7, .06, .9, V(0, .05, HZ + .55), null, MT.dark);                           // Kufen/Grundplatte
+        for (const s of [-1, 1]) { kit.rod(V(s * .2, .08, HZ + .2), V(s * .2, HY + .02, HZ), .022, MT.steel); kit.rod(V(s * .2, .08, HZ + .2), V(s * .2, .08, HZ + .5), .022, MT.steel); }
+        kit.rod(V(0, .08, HZ + .75), V(0, .5, HZ + .75), .025, MT.steel);                  // Scheibenhorn
+        for (let i = 0; i < 3; i++) { const m = kit.mesh(new T.CylinderGeometry(.225, .225, .05, 28), MT.dark); m.position.set(0, .12 + i * .055, HZ + .75); }
+        kit.floorMat(-1.2, 2.0, 1.2);
+      }
+    };
+  };
+
+  // Rumänisches Kreuzheben einbeinig: Stand auf rechts, Kurzhantel links; Hüfte beugt, freies Bein geht in Linie mit dem Oberkörper nach hinten
+  TPL.slRdl = () => {
+    const props = {};
+    const at = s => {
+      const th = lerp(0, 78, s), a = th * D2R;
+      const o = { pelvis: V(-.03, STAND_Y - .03 - .06 * s, -.02 - .2 * Math.sin(a)), pitch: th, head: -th * .45, roll: 0, yaw: -4 * s };
+      let K = kin(o);
+      const back = V(0, -Math.cos(a), -Math.sin(a)), hold = nz(lv(V(0, -1, -.1), back, smooth(.05, .6, s)));
+      o.ankle = { R: V(-.11, DIM.ank, 0), L: hip(K, 1).addScaledVector(hold, LEG - .03 - .07 * (1 - s)) };
+      o.knee = { R: V(-.06, 0, 1), L: V(.03, -1, .1) }; o.foot = { R: V(-.08, 0, 1), L: V(0, -1, -.15) };
+      o.hand = { L: (() => { const sh = shoulder(K, 1); return V(sh.x + .02, reachY(sh, sh.x + .02, sh.z + .04), sh.z + .04); })(), R: shoulder(K, -1).addScaledVector(armDir(K, -10), .5).addScaledVector(K.l, -.25) };
+      o.elbow = { L: K.l.clone().addScaledVector(K.f, -.6), R: K.f.clone().multiplyScalar(-1).addScaledVector(K.l, -.6) };
+      return o;
+    };
+    return {
+      cam: { az: 82, el: 8, dist: 3.6, target: V(0, .8, -.1) },
+      timing: LBL.lower('Start – Stand auf dem rechten Bein, Knie leicht gebeugt, Kurzhantel links', 'Hüfte nach hinten schieben – freies Bein geht in Linie mit dem Oberkörper nach hinten', 'Unten – Oberkörper fast waagerecht, Becken bleibt gerade (nicht aufdrehen)', 'Über das Gesäß des Standbeins wieder aufrichten'),
+      setup(kit) { props.db = kit.dumbbell(1.35); kit.floorMat(-1, .7, 1.1); },
+      pose: at,
+      props(J) { props.db.set(J.L.hand.clone().add(V(0, -.035, 0)), J.K.f); }
+    };
+  };
+
+  // Copenhagen Plank, kurzer Hebel: Seitstütz auf dem rechten Unterarm, oberes Knie auf der Bank, unteres Bein hebt zur Bank
+  TPL.copenhagen = () => {
+    const sh = V(-.62, .37, 0), KT = V(.36, .53, 0), BX = .55;
+    const at = s => {
+      const ang = lerp(-22, 0, s) * D2R, dirTop = nz(sh.clone().sub(KT));             // oben: Schulter–Knie eine Linie
+      const dir = V(dirTop.x * Math.cos(ang) - dirTop.y * Math.sin(ang), dirTop.x * Math.sin(ang) + dirTop.y * Math.cos(ang), 0);
+      const hipL = KT.clone().addScaledVector(dir, DIM.thigh);
+      let n = V(-dir.y, dir.x, 0); if (n.y < 0) n.negate();                              // oben liegende (linke) Hüfte
+      const pel = hipL.clone().addScaledVector(n, -DIM.hipW);
+      const ud = nz(sh.clone().sub(pel)), roll = Math.atan2(-ud.x, ud.y) / D2R;
+      const o = { pelvis: pel, roll, pitch: 0, head: 0 };
+      const K = kin(o);
+      o.ankle = { L: V(KT.x + .42, KT.y - .01, -.02), R: V(lerp(.78, .62, s), lerp(.08, .3, s), .1) };
+      o.knee = { L: V(0, .2, 1), R: V(.1, 0, 1) }; o.foot = { L: V(.4, 0, 1), R: V(.3, 0, 1) };
+      o.hand = { R: V(sh.x - .02, .03, .3), L: relP(K, 1, .16, -.12, .04) };   // obere Hand liegt locker auf der Hüfte/dem Oberschenkel
+      o.elbow = { R: V(0, -1, -.1), L: K.f.clone().multiplyScalar(-1).addScaledVector(K.P.l, .3) };
+      return o;
+    };
+    return {
+      cam: { az: 10, el: 14, dist: 3.3, target: V(.05, .4, 0) },
+      timing: LBL.std('Start – Seitstütz auf dem Unterarm, oberes Knie auf der Bank, Becken unten', 'Becken anheben, bis Schulter, Hüfte und Knie eine Linie bilden – unteres Bein zur Bank führen', 'Oben halten – Innenseite des oberen Beins drückt in die Bank', 'Becken kontrolliert absenken'),
+      setup(kit, MT) {
+        kit.box(.42, .06, .42, V(BX, .45, 0), null, MT.pad); for (const z of [-.16, .16]) for (const x of [-.16, .16]) kit.rod(V(BX + x, 0, z), V(BX + x, .42, z), .02, MT.frame);
+        kit.box(1.4, .012, .6, V(-.3, .006, 0), null, kit.MT.mat);
+      },
+      pose: at
+    };
+  };
+
+  // Adduktoren am Kabelzug: seitlich zum Turm, Manschette am turmnahen (linken) Bein, Bein vor dem Standbein vorbei nach innen ziehen
+  TPL.cableAdd = () => {
+    const props = {}, pul = V(.78, .12, .05);
+    const at = s => {
+      const phi = lerp(28, -16, s) * D2R;
+      const o = { pelvis: V(-.03, STAND_Y - .02, 0), pitch: 4, head: -4, roll: lerp(-3, 2, s) };
+      const K = kin(o), h = hip(K, 1), fwd = .1 * smooth(.4, 1, s);
+      o.ankle = { L: h.clone().add(V(Math.sin(phi) * (LEG - .02), -Math.cos(phi) * (LEG - .02), fwd)), R: V(-.13, DIM.ank, 0) };
+      o.knee = { L: V(0, 0, 1), R: V(-.06, 0, 1) }; o.foot = { L: V(.05, -.2, 1), R: V(-.08, 0, 1) };
+      o.hand = { L: V(.68, 1.08, .05), R: shoulder(K, -1).addScaledVector(DOWN, .55).addScaledVector(K.l, -.08) };
+      o.elbow = { L: DOWN.clone().addScaledVector(K.f, -.3), R: K.f.clone().multiplyScalar(-1).addScaledVector(K.l, -.4) };
+      return o;
+    };
+    return {
+      cam: { az: 6, el: 10, dist: 3.5, target: V(.2, .7, 0) },
+      timing: LBL.std('Start – seitlich zum Turm, Manschette am linken Knöchel, Bein leicht zur Seite gezogen', 'Bein vor dem Standbein vorbei nach innen ziehen', 'Innen – Adduktoren anspannen, Oberkörper bleibt aufrecht', 'Kontrolliert zurück nach außen lassen'),
+      setup(kit) { kit.tower(pul, V(1, 0, 0)); props.c = kit.line(); props.cuff = kit.movCyl(.05, .07, kit.MT.dark); kit.floorMat(-.6, .6, 1.4); },
+      pose: at,
+      props(J) { props.c.set(pul, J.L.ankle); props.cuff.set(J.L.ankle.clone().add(V(0, .06, 0)), V(0, 1, 0)); }
+    };
+  };
+
+  // Nacken isometrisch in 4 Richtungen: Hand drückt gegen den Kopf, der Kopf hält dagegen und bewegt sich nicht
+  TPL.neckIso = () => {
+    const SEG = 2.6, TOT = SEG * 4;
+    const base = { pelvis: V(0, STAND_Y - .01, 0), pitch: 0, head: 0, ankle: { L: V(.13, DIM.ank, 0), R: V(-.13, DIM.ank, 0) }, foot: toeOut(8), knee: toeOut(8) };
+    const head = K => K.S.clone().addScaledVector(K.u, .24).addScaledVector(K.f, .02);
+    const relax = (K, sg) => shoulder(K, sg).addScaledVector(DOWN, .58).addScaledVector(K.l, sg * .06);
+    const DIRS = [
+      { lab: 'Vorne: Hände an der Stirn – Kopf drückt nach vorne dagegen, bleibt aber still', h: (K, sg, H) => H.clone().addScaledVector(K.f, .14).addScaledVector(K.u, .04).addScaledVector(K.l, sg * .04), e: (K, sg) => K.f.clone().addScaledVector(K.l, sg * .8).addScaledVector(DOWN, .4), both: true },
+      { lab: 'Hinten: Hände am Hinterkopf – Kopf drückt nach hinten dagegen', h: (K, sg, H) => H.clone().addScaledVector(K.f, -.13).addScaledVector(K.u, .02).addScaledVector(K.l, sg * .03), e: (K, sg) => K.l.clone().multiplyScalar(sg).addScaledVector(K.f, .3), both: true },
+      { lab: 'Links: linke Hand an der Kopfseite – Kopf drückt nach links dagegen', h: (K, sg, H) => H.clone().addScaledVector(K.l, .12).addScaledVector(K.u, .02), e: (K, sg) => K.l.clone().addScaledVector(DOWN, .4), side: 1 },
+      { lab: 'Rechts: rechte Hand an der Kopfseite – Kopf drückt nach rechts dagegen', h: (K, sg, H) => H.clone().addScaledVector(K.l, -.12).addScaledVector(K.u, .02), e: (K, sg) => K.l.clone().multiplyScalar(-1).addScaledVector(DOWN, .4), side: -1 }];
+    const custom = t => {
+      const x = ((t % TOT) + TOT) % TOT, i = Math.floor(x / SEG), u = (x - i * SEG) / SEG, D = DIRS[i];
+      const w = smooth(0, .18, u) * (1 - smooth(.82, 1, u)), trem = .004 * Math.sin(t * 40) * w;   // Hand anlegen → halten (leichte Spannung) → lösen
+      const o = Object.assign({}, base, { head: trem * 20 }), K = kin(o), H = head(K);
+      o.hand = sides(sg => { const on = D.both || D.side === sg; return on ? lv(relax(K, sg), D.h(K, sg, H), w) : relax(K, sg); });
+      o.elbow = sides(sg => { const on = D.both || D.side === sg; return on ? lv(K.f.clone().multiplyScalar(-1).addScaledVector(K.l, sg * .3), D.e(K, sg), w) : K.f.clone().multiplyScalar(-1).addScaledVector(K.l, sg * .3); });
+      return { pose: o, label: D.lab };
+    };
+    return { cam: { az: 55, el: 4, dist: 2.3, target: V(0, 1.5, 0) }, thumbT: 1.3, custom, setup(kit) { kit.floorMat(-.5, .5, 1); } };
+  };
+
+  // Push Press: Front-Rack → kurzer Dip aus den Knien → explosiv strecken → Stange über Kopf drücken → zurück in die Front-Rack-Position
+  TPL.pushPress = () => {
+    const props = {}, ank = { L: V(.13, DIM.ank, 0), R: V(-.13, DIM.ank, 0) };
+    const rack = (K, sg) => shoulder(K, sg).addScaledVector(UP, .11).addScaledVector(horiz(K.f), .06).addScaledVector(K.l, sg * .035);
+    const elRack = (K, sg) => horiz(K.f).addScaledVector(DOWN, .3).addScaledVector(K.l, sg * .25);
+    const over = (K, sg) => shoulder(K, sg).addScaledVector(UP, .6).addScaledVector(K.l, sg * .07).addScaledVector(horiz(K.f), -.03);
+    const P = (o, hands, el) => { const p = Object.assign({ ankle: { L: ank.L.clone(), R: ank.R.clone() }, foot: toeOut(8), knee: toeOut(10), head: 0 }, o);
+      if (o.heel) { for (const sd of ['L', 'R']) p.ankle[sd].y += o.heel; p.foot = { L: V(.08, -.6, 1), R: V(-.08, -.6, 1) }; }
+      const K = kin(p); p.hand = sides(sg => hands(K, sg)); p.elbow = sides(sg => el(K, sg)); return p; };
+    const up = P({ pelvis: V(0, STAND_Y - .01, -.02), pitch: -1 }, rack, elRack);
+    const dip = P({ pelvis: V(0, STAND_Y - .12, -.045), pitch: 1 }, rack, elRack);
+    const drive = P({ pelvis: V(0, STAND_Y + .03, -.01), pitch: -3, heel: .06 }, (K, sg) => lv(rack(K, sg), over(K, sg), .35), (K, sg) => UP.clone().addScaledVector(K.l, sg).addScaledVector(K.f, .4));
+    const top = P({ pelvis: V(0, STAND_Y - .005, -.02), pitch: -2, head: 6, shrug: .5 }, over, (K, sg) => K.l.clone().multiplyScalar(sg).addScaledVector(K.f, -.2));
+    return {
+      cam: { az: 58, el: 6, dist: 4.0, target: V(0, 1.25, 0) }, thumbT: 1.3,
+      custom: poseKeys([[0, up, 'Start – Stange in der Front-Rack-Position, Ellbogen vorne, Rumpf fest'], [.6, up, 'Dip – kurz und senkrecht in die Knie, Oberkörper bleibt aufrecht'],
+        [.95, dip, 'Explosiv aus den Beinen strecken – der Schwung treibt die Stange hoch'], [1.12, drive, 'Mit den Armen über Kopf durchdrücken – Kopf geht durch die Arme'],
+        [1.42, top, 'Oben – Arme gestreckt, Stange über der Fußmitte'], [1.9, top, 'Stange kontrolliert auf die Schultern zurück, Knie federn leicht ab'],
+        [2.5, dip, 'Stange kontrolliert auf die Schultern zurück, Knie federn leicht ab'], [2.8, up, 'Aufrichten – nächste Wiederholung']], 3.3),
+      setup(kit) { props.bar = kit.barbell(2.0, .225); kit.floorMat(-.9, .8, 1.4); },
+      props(J) { const c = bothHands(J), rk = smooth(.02, .09, c.y - J.K.S.y) * (1 - smooth(.2, .35, c.y - J.K.S.y)); props.bar.set(c.addScaledVector(UP, -.05 * rk).addScaledVector(horiz(J.K.f), .015 * rk), V(1, 0, 0)); }
+    };
+  };
+
+  // Medizinball-Rotationswurf: seitlich zur Wand, Ball an der hinteren Hüfte → Rotation aus Hüfte und Rumpf → Wurf gegen die Wand → fangen
+  TPL.medRot = () => {
+    const props = {}, WX = 1.9, BR = .12, TOT = 3.4, T_REL = 1.12, T_WALL = 1.42, T_CATCH = 1.78;
+    const P = (k, o = {}) => Object.assign({ pelvis: V(-.04 * k, STAND_Y - .07, 0), pitch: 10, head: -4, yaw: 18 * k, twist: 40 * k,
+      ankle: { L: V(.22, DIM.ank, 0), R: V(-.22, DIM.ank + .045 * smooth(.2, 1, k), 0) }, foot: { L: V(.15, 0, 1), R: rotA(V(-.15, -.3 * smooth(.2, 1, k), 1), UP, 45 * smooth(.2, 1, k)) },
+      knee: { L: V(.15, 0, 1), R: rotA(V(-.15, 0, 1), UP, 40 * smooth(.2, 1, k)) } }, o);
+    const ballAt = (K, k) => K.S.clone().addScaledVector(horiz(K.f), .38).addScaledVector(UP, lerp(-.45, -.12, smooth(-1, .6, k)));
+    const keysK = [[0, -1], [.7, -1], [.85, -1.12], [T_REL, .95], [1.4, 1.0], [T_CATCH, .3], [2.2, -.7], [2.7, -1], [TOT, -1]];
+    const kAt = x => { let i = 0; while (i < keysK.length - 2 && keysK[i + 1][0] <= x) i++; const a = keysK[i], b = keysK[i + 1], u = clamp((x - a[0]) / (b[0] - a[0]), 0, 1); return lerp(a[1], b[1], i === 2 ? u * u : ease(u)); };
+    const LBLS = x => x < .7 ? 'Start – seitlich zur Wand, Ball an der hinteren Hüfte, Gewicht auf dem hinteren Bein' : x < .85 ? 'Ausholen – Hüfte und Rumpf vom Ziel wegdrehen'
+      : x < T_REL ? 'Explosiv rotieren: Hüfte zuerst, dann Rumpf und Arme – hinterer Fuß dreht mit' : x < T_CATCH ? 'Ball fliegt gegen die Wand – Hände bereit zum Fangen' : 'Fangen, abbremsen und wieder zur hinteren Hüfte ausholen';
+    const custom = t => {
+      const x = ((t % TOT) + TOT) % TOT, k = kAt(x), o = P(clamp(k, -1.2, 1)), K = kin(o), flying = x >= T_REL && x < T_CATCH;
+      const c = flying ? K.S.clone().addScaledVector(horiz(K.f), .45).addScaledVector(UP, -.12) : ballAt(K, k);
+      o.hand = sides(sg => c.clone().addScaledVector(horiz(K.l), sg * (BR + .015)).addScaledVector(horiz(K.f), -.02));
+      o.elbow = sides(sg => DOWN.clone().addScaledVector(K.l, sg * .5).addScaledVector(K.f, -.3));
+      let ball = null;
+      if (flying) { const rel = c.clone(), w = V(WX - BR, 1.3, rel.z * .5), cat = c.clone();
+        ball = x < T_WALL ? lv(rel, w, (x - T_REL) / (T_WALL - T_REL)).add(V(0, .06 * Math.sin(Math.PI * (x - T_REL) / (T_WALL - T_REL)), 0)) : lv(w, cat, (x - T_WALL) / (T_CATCH - T_WALL)).add(V(0, .08 * Math.sin(Math.PI * (x - T_WALL) / (T_CATCH - T_WALL)), 0)); }
+      return { pose: o, label: LBLS(x), ball };
+    };
+    return {
+      cam: { az: 14, el: 12, dist: 4.6, target: V(.7, 1.0, .2) }, thumbT: 1.0, custom,
+      setup(kit, MT) { kit.box(.12, 2.5, 1.8, V(WX + .06, 1.25, 0), null, MT.frame); props.ball = kit.ball(V(), BR, MT.dark); props.band = kit.mesh(new T.TorusGeometry(BR * .99, .012, 6, 24), MT.gold); kit.floorMat(-.7, .7, 1.6); },
+      props(J, s, t) { const r = custom(t), c = r.ball || bothHands(J).addScaledVector(horiz(J.K.f), .02); props.ball.position.copy(c); props.band.position.copy(c); props.band.rotation.set(Math.PI / 2, 0, (t || 0) * (r.ball ? 9 : 0)); }
+    };
+  };
+
+  // Hängen am Handtuch: zwei Handtücher über der Stange, Hände greifen die Handtuchenden (Griffkraft), Körper hängt ruhig
+  TPL.towelHang = () => {
+    const b = TPL.hang({ v: 'dead' }), hb = 2.22 + .34, props = {}, W = .27;
+    const L = ['Hängen – je ein Handtuch pro Hand, Handtuchenden fest umgreifen', 'Arme gestreckt, Füße ohne Bodenkontakt', 'Griff fest zudrücken – die Unterarme arbeiten', 'Ruhig weiteratmen – kein Schwingen'];
+    return {
+      cam: { az: 38, el: 6, dist: 4.1, target: V(0, 1.55, 0) }, thumbT: 1,
+      custom: t => { const r = b.custom(t); r.label = L[Math.floor(((t % 8) + 8) % 8 / 2)]; return r; },
+      setup(kit, MT) {
+        kit.rod(V(-.75, hb, 0), V(.75, hb, 0), .018, MT.steel); for (const s of [-1, 1]) kit.rod(V(s * .75, 0, 0), V(s * .75, hb + .05, 0), .035);
+        props.t = [[1, -1], [1, 1], [-1, -1], [-1, 1]].map(() => kit.line(MT.shoe, .02));
+        for (const s of [-1, 1]) kit.box(.12, .04, .07, V(s * W, hb + .02, 0), null, MT.shoe);
+      },
+      props(J) { let i = 0; for (const [sg, side] of [[1, -1], [1, 1], [-1, -1], [-1, 1]]) { const h = (sg > 0 ? J.L : J.R).hand; props.t[i++].set(V(sg * W + side * .035, hb, side * .02), h.clone().add(V(side * .02, .04, 0))); } }
+    };
+  };
+
+  // Bear-Hug-Carry mit Sandsack: Sandsack fest vor der Brust umarmt, aufrecht gehen (Boden läuft mit)
+  TPL.bearCarry = () => {
+    const props = {}, Tc = 1.25, S = .5, BETA = .62, SPEED = S / (BETA * Tc);
+    const footPos = (sg, ph) => { const x = sg * .12;
+      if (ph < BETA) { const u = ph / BETA; return { a: V(x, DIM.ank, S / 2 - S * u), f: V(0, lerp(.05, -.25, u * u), 1) }; }
+      const u = (ph - BETA) / (1 - BETA), e = ease(u); return { a: V(x, DIM.ank + .08 * Math.sin(Math.PI * u), -S / 2 + S * e), f: V(0, lerp(-.3, .2, e), 1) }; };
+    const bag = K => K.S.clone().addScaledVector(horiz(K.f), .26).addScaledVector(UP, -.3);
+    const custom = t => {
+      const ph = ((t % Tc) + Tc) % Tc / Tc, L = footPos(1, ph), R = footPos(-1, (ph + .5) % 1);
+      const o = { pelvis: V(.01 * Math.sin(2 * Math.PI * ph), STAND_Y - .04 + .016 * Math.cos(4 * Math.PI * ph), -.02), pitch: -5, flex: 0, head: 2, yaw: 2 * Math.sin(2 * Math.PI * ph),
+        ankle: { L: L.a, R: R.a }, foot: { L: L.f, R: R.f }, knee: { L: V(.06, 0, 1), R: V(-.06, 0, 1) } };
+      const K = kin(o), B = bag(K);
+      o.hand = sides(sg => B.clone().addScaledVector(horiz(K.f), .1).addScaledVector(K.l, -sg * .08).addScaledVector(UP, .05));   // Hände greifen vorne ineinander
+      o.elbow = sides(sg => K.l.clone().multiplyScalar(sg).addScaledVector(DOWN, .5));
+      return { pose: o, label: ph < .5 ? 'Sandsack fest vor der Brust umarmen – Ellbogen eng' : 'Aufrecht gehen, Rumpf fest, ruhig weiteratmen', drift: t * SPEED };
+    };
+    return {
+      cam: { az: 55, el: 10, dist: 4.0, target: V(0, .95, 0) }, thumbT: .4, custom,
+      setup(kit, MT) { props.bag = kit.mesh(new T.CylinderGeometry(.17, .17, .56, 18), MT.dark); },
+      props(J) { const B = bag(J.K); props.bag.position.copy(B); props.bag.quaternion.setFromUnitVectors(V(0, 1, 0), nz(horiz(J.K.l))); }
+    };
+  };
+
+  // Isometrisches Halten im Klimmzug bei 90° Ellbogenwinkel
+  TPL.hang90 = () => {
+    const hy = 2.22, W = .27, BR = 4.2;
+    const labels = ['Halten – Ellbogen im 90°-Winkel, Oberarme etwa waagerecht', 'Schulterblätter nach unten und hinten ziehen', 'Rumpf fest, Beine ruhig – kein Schwingen', 'Ruhig weiteratmen und die Position halten'];
+    const custom = t => {
+      const b = Math.sin(2 * Math.PI * t / BR);
+      const o = { pelvis: V(0, 1.375 + .004 * b, -.05), pitch: -8, flex: -1 + .8 * b, head: 4, shrug: -.15 };
+      o.hand = sides(sg => V(sg * W, hy, 0));
+      const K = kin(o);
+      o.elbow = sides(sg => K.l.clone().multiplyScalar(sg).addScaledVector(DOWN, .25).addScaledVector(K.f, .1));
+      o.ankle = sides(sg => o.pelvis.clone().add(V(sg * .07, -.83, .08))); o.knee = sides(sg => V(sg * .05, 0, 1)); o.foot = sides(() => V(0, -.75, .55));
+      return { pose: o, label: labels[Math.floor(((t % 8) + 8) % 8 / 2)] };
+    };
+    return {
+      cam: { az: 38, el: 6, dist: 3.9, target: V(0, 1.55, 0) }, thumbT: 1, custom,
+      setup(kit, MT) { kit.rod(V(-.75, hy, 0), V(.75, hy, 0), .018, MT.steel); for (const s of [-1, 1]) kit.rod(V(s * .75, 0, 0), V(s * .75, hy + .05, 0), .035); }
+    };
+  };
+
   window.SW3D = { Viewer, TPL, FIG_STYLES, solve, version: 3 };
 })();

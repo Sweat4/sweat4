@@ -1,16 +1,14 @@
-SWEAT4 App – v52: Kunden komplett zurücksetzen (neuer Trainingsdurchgang)
+SWEAT4 App – v53: 13 neue Übungen mit 3D (enthält v52 Kunden-Reset)
 
-Hochladen (GitHub, App-Repo Sweat4/sweat4): 2 Dateien ersetzen
-  index.html, sw.js
-Setzt v51 voraus (ist bereits online). Danach ca. 10 Min. warten, App ganz schließen, öffnen, nochmal schließen und öffnen.
+Hochladen (GitHub, App-Repo Sweat4/sweat4): diese 5 Dateien ersetzen
+  index.html, uebungen-katalog.js, uebungen3d.js, sprache-en.js, sw.js
+Wer v52 (Kunden-Reset) noch nicht hochgeladen hat, braucht nur dieses Paket.
+Danach ca. 10 Min. warten, App ganz schließen, öffnen, nochmal schließen und öffnen. Katalog: 170 Übungen.
 
-Bedienung (Trainer):
-  Kunde öffnen → ganz unten „Trainingsdurchgang“ → „Kunden komplett zurücksetzen“ → Sicherheitsabfrage → „Kunden jetzt zurücksetzen“.
-  Ist der Kunde über den Briefkasten verbunden, geht das Update automatisch an seine App.
-
-Was passiert:
-  - Neuer Durchgang: Historie, Kraft-/Übungsprogression, Plateaus, Wochenvolumen, Diagramme, nächster Tag (Tag 1),
-    Belastungswoche (Woche 1), Laufergebnisse und Betreuungsstatus starten bei null.
-  - Plan, Tage, Übungen, Sätze/Wdh., Kundendaten, Zugang, Ernährung, Fragebogen, Körperdaten bleiben unverändert.
-  - Nichts wird gelöscht: frühere Trainings liegen im Archiv (Historie → „Archiv – frühere Durchgänge“) und zählen nicht mehr mit.
-  - Protokoll im Kundenprofil: wann, von wem, welcher Durchgang, wie viele Trainings archiviert.
+Neu (jeweils eigene 3D-Animation):
+  Athletik:      Scramble-Starts auf Signal, Drop Jump 30 cm, Skater-Sprünge, Schlitten schieben schwer (Meter), Medizinball-Rotationswurf
+  Beine:         Rumänisches Kreuzheben einbeinig, Copenhagen Plank kurzer Hebel, Adduktoren am Kabelzug
+  Schulter:      Push Press
+  Stabilisation: Nacken isometrisch in 4 Richtungen (Sekunden), Bear-Hug-Carry mit Sandsack (Meter)
+  Rücken + Bodyweight: Hängen am Handtuch (Sekunden), Isometrisches Halten im Klimmzug 90° (Sekunden)
+Schon vorhanden (nicht doppelt angelegt): Bulgarian Split Squat = „Bulgarische Split Squats“.
