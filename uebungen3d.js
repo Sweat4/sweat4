@@ -2927,5 +2927,28 @@
     };
   };
 
+  /* === v55: KREUZHEBEN IM SITZEN ============================================ */
+  // Sitzend am Bankende, Füße auf einer niedrigen Stufe, Langhantel mit gestreckten Armen: Oberkörper beugt nach vorne,
+  // die Stange läuft vor den Knien/Schienbeinen bis knapp zum Boden und wieder hoch in den aufrechten Sitz (Rückenstrecker).
+  TPL.seatedDL = () => {
+    const props = {}, BY = .45, W = .27, STEP = .1;
+    const at = s => {
+      const sp = ease(s), o = { pelvis: V(0, BY + .075, -.04 + .03 * sp), pitch: lerp(4, 46, sp), flex: lerp(0, 30, smooth(.1, 1, s)), head: lerp(-4, -18, sp),
+        ankle: sides(sg => V(sg * .15, DIM.ank + STEP, .47)), foot: toeOut(10), knee: sides(sg => V(sg * .08, .4, 1)) };
+      const K = kin(o);
+      o.hand = sides(sg => { const sh = shoulder(K, sg), z = lerp(.36, .62, smooth(0, .45, s)), y = reachY(sh, sg * W, z);
+        return V(sg * W, Math.max(.235, z < .56 ? Math.max(y, .66) : y), z); });
+      o.elbow = sides(sg => K.l.clone().multiplyScalar(sg).addScaledVector(K.f, -.5).addScaledVector(DOWN, .3));
+      return o;
+    };
+    return {
+      cam: { az: 78, el: 8, dist: 3.5, target: V(0, .6, .2) },
+      timing: { dur: [.6, 1.8, .35, 1.3], labels: ['Start – aufrecht am Bankende sitzen, Füße auf der Stufe, Langhantel mit gestreckten Armen auf den Oberschenkeln', 'Exzentrisch: Oberkörper langsam nach vorne beugen – die Stange gleitet vor Knien und Schienbeinen nach unten', 'Unten – Stange knapp über dem Boden, Arme bleiben gestreckt', 'Konzentrisch: mit dem unteren Rücken zurück in den aufrechten Sitz'] },
+      setup(kit, MT) { kit.box(.32, BY, 1.1, V(0, BY / 2, -.5), null, MT.pad); kit.box(.62, STEP, .36, V(0, STEP / 2, .52), null, MT.frame); props.bar = kit.barbell(2.0, .225); kit.floorMat(-1.1, 1.0, 1.5); },
+      pose: at,
+      props(J) { props.bar.set(bothHands(J), V(1, 0, 0)); }
+    };
+  };
+
   window.SW3D = { Viewer, TPL, FIG_STYLES, solve, version: 3 };
 })();

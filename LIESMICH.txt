@@ -1,18 +1,6 @@
-SWEAT4 App – v54: „Meine Trainingspläne“ (persönlicher Vorlagen-Katalog des Trainers)
-Enthält auch v52 (Kunden-Reset) und v53 (13 neue Übungen).
+SWEAT4 App – v55: Kreuzheben im Sitzen (Rücken, mit 3D)
+Enthält auch v52 (Kunden-Reset), v53 (13 Übungen) und v54 (Meine Trainingspläne).
 
-Hochladen (GitHub, App-Repo Sweat4/sweat4): diese 5 Dateien ersetzen
+Hochladen: diese 5 Dateien im App-Repo Sweat4/sweat4 ersetzen
   index.html, uebungen-katalog.js, uebungen3d.js, sprache-en.js, sw.js
-Danach ca. 10 Min. warten, App ganz schließen, öffnen, nochmal schließen und öffnen.
-Hinweis: Die App legt beim ersten Start einen neuen Datenbereich für Vorlagen an – bestehende Daten bleiben erhalten.
-Tipp: vorher wie immer ein Backup machen.
-
-So funktioniert es (nur Trainer):
-  - Startseite → „Meine Trainingspläne“: durchsuchbare Liste (Name, ursprünglicher Kunde, Erstellt am, Trainingstage, geändert am).
-  - Automatisch gespeichert wird ein Plan, sobald du ihn an den Kunden übergibst (Update senden / Kundendatei).
-    Oder im Plan des Kunden: „Im Katalog speichern“.
-  - Kundenplan später geändert? Die Vorlage bleibt, bis du „Vorlage aktualisieren“ tippst.
-  - Neuer Plan: Plan des Kunden öffnen → „Aus meinen Plänen“ → Vorlage wählen → Kopie anpassen.
-  - Einzelner Tag: „Trainingstag hinzufügen“ → „Aus vorhandenem Plan übernehmen“ (oder wie bisher „Neu erstellen“).
-  - Vorlage öffnen: umbenennen, für einen Kunden verwenden, aus dem Kundenplan aktualisieren, löschen (mit Sicherheitsabfrage).
-  - Vorlagen enthalten nur die Struktur – keine Gewichte, keine Historie, keine Kundendaten – und gehen nie an Kunden.
+Danach ca. 10 Min. warten, App ganz schließen, öffnen, nochmal schließen und öffnen. Katalog: 171 Übungen.

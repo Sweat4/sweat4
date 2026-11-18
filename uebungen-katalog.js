@@ -1356,7 +1356,19 @@ window.SW_GRUPPEN = ['Brust', 'Schulter', 'Rücken', 'Arme', 'Beine', 'Bauch', '
     breath: 'Ruhig weiteratmen.',
     safety: 'Mit einer Erhöhung sicher auf- und absteigen. Bei Ellbogen- oder Schulterbeschwerden kürzer halten.',
     param: '3–4 Sätze × 10–30 Sek., 60–90 Sek. Pause. Zeit in Sekunden eintragen.',
-    alias: ['Iso-Halten Klimmzug 90°', 'Klimmzug 90 Grad halten', 'Pull-up Iso Hold 90°', 'Isometric Pull-up Hold', 'Halber Klimmzug halten', 'Mid Hold Klimmzug'] })
+    alias: ['Iso-Halten Klimmzug 90°', 'Klimmzug 90 Grad halten', 'Pull-up Iso Hold 90°', 'Isometric Pull-up Hold', 'Halber Klimmzug halten', 'Mid Hold Klimmzug'] }),
+  /* ---------------- v55 ---------------- */
+  N({ id: 'kreuzheben-sitzend', n: 'Kreuzheben im Sitzen', g: 'Rücken', sub: 'unterer Rücken / Rückenstrecker', eq: 'Langhantel, Hantelscheiben, Flachbank, niedrige Stufe', typ: 'dynamisch', lvl: 'Fortgeschritten',
+    anim: { t: 'seatedDL' }, prim: ['lowerBack'], sec: ['glutes', 'hamstrings', 'forearms', 'traps'],
+    start: 'Aufrecht am Ende einer Flachbank sitzen, die Füße stehen vor der Bank auf einer niedrigen Stufe. Die Langhantel im Obergriff etwa schulterbreit fassen, sie liegt mit gestreckten Armen auf den Oberschenkeln.',
+    exec: ['Rumpf anspannen, die Arme bleiben während der ganzen Bewegung gestreckt.', 'Den Oberkörper langsam nach vorne beugen – die Stange gleitet vor den Knien und Schienbeinen nach unten.', 'Absenken, bis die Hantelscheiben knapp über dem Boden sind.', 'Mit dem unteren Rücken kontrolliert zurück in den aufrechten Sitz kommen.', 'Das Gesäß bleibt die ganze Zeit auf der Bank.'],
+    dir: 'Oberkörper beugt nach vorne-unten und richtet sich wieder auf – die Stange bewegt sich vor den Beinen auf und ab.',
+    tips: ['Mit leichtem Gewicht beginnen und langsam steigern', 'Langsam absenken, kontrolliert aufrichten – kein Schwung', 'Die Stange nah an den Beinen führen', 'Trainiert gezielt den unteren Rücken und unterstützt die Phase beim Kreuzheben, in der der Rückenstrecker arbeitet'],
+    errs: ['Schwung holen oder ruckartig hochreißen', 'Gesäß hebt von der Bank ab', 'Arme beugen und mitziehen', 'Zu schweres Gewicht zu früh'],
+    breath: 'Beim Absenken einatmen, beim Aufrichten ausatmen.',
+    safety: 'Fortgeschrittene Übung für den unteren Rücken: nur schmerzfrei und mit kontrollierbarem Gewicht ausführen. Bei Bandscheibenproblemen oder akuten Rückenschmerzen vorher ärztlich abklären.',
+    param: '3–4 Sätze × 8–12 Wdh., langsames Absenken, 90 Sek. Pause.',
+    alias: ['Kreuzheben sitzend', 'Seated Deadlift', 'Sitzendes Kreuzheben', 'Seated Good Morning', 'Rückenstrecker Langhantel sitzend', 'Kreuzheben auf der Bank'] })
 
   ];
   // Halte-Übungen werden in Sekunden geplant (Plan & Training zeigen „Sek.“)
