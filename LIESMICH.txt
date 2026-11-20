@@ -1,6 +1,18 @@
-SWEAT4 App – v55: Kreuzheben im Sitzen (Rücken, mit 3D)
-Enthält auch v52 (Kunden-Reset), v53 (13 Übungen) und v54 (Meine Trainingspläne).
+SWEAT4 App v56 – Ernährungsziel „Gewichtserhalt & Athletik“
 
-Hochladen: diese 5 Dateien im App-Repo Sweat4/sweat4 ersetzen
-  index.html, uebungen-katalog.js, uebungen3d.js, sprache-en.js, sw.js
-Danach ca. 10 Min. warten, App ganz schließen, öffnen, nochmal schließen und öffnen. Katalog: 171 Übungen.
+Enthält ALLES seit v51 (v52 Kunden-Reset, v53 Übungen, v54 Meine Trainingspläne,
+v55 Kreuzheben im Sitzen, v56 dritte Ernährungsoption). Die Zip v55 muss NICHT
+zusätzlich hochgeladen werden.
+
+Hochladen (GitHub, Repo Sweat4/sweat4):
+1. Vorher Backup: Code -> Download ZIP.
+2. Diese 5 Dateien ersetzen: index.html, sprache-en.js, sw.js, uebungen-katalog.js, uebungen3d.js
+3. 1–2 Minuten warten, App auf dem iPhone zweimal komplett schließen und öffnen.
+
+Neu in v56:
+- Kunde -> Profil bearbeiten -> Ernährungsziel: drei Karten (Muskelaufbau, Körperdefinition,
+  Gewichtserhalt & Athletik).
+- Gewichtserhalt: Kalorienziel = berechneter Bedarf (Grundumsatz × Aktivitätsfaktor wie bisher),
+  kein Überschuss, kein Defizit, keine Phasen, keine Körpertyp-Anpassung.
+  Eiweiß 2,2 g/kg (Männer) bzw. 1,8 g/kg (Frauen), Fett 0,8 g/kg, Kohlenhydrate = Rest.
+- Muskelaufbau und Körperdefinition rechnen exakt wie vorher.

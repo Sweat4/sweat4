@@ -702,6 +702,11 @@ img.ld{opacity:1!important}
 .nut-m-k{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
 .nut-foot{font-size:12px;color:var(--muted);line-height:1.5}
 /* Körpertyp (Zusatzebene) */
+.goal-pick{display:grid;gap:8px}.goal-pick label{position:relative;display:block}.goal-pick input{position:absolute;opacity:0;width:1px;height:1px}
+.goal-pick span{display:grid;gap:2px;padding:11px 14px;border-radius:var(--r-md);border:1px solid var(--border);background:var(--surface-2);cursor:pointer}
+.goal-pick b{font-size:14.5px}.goal-pick i{font-style:normal;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--gold)}.goal-pick small{font-size:12.5px;color:var(--muted);line-height:1.35}
+.goal-pick input:checked+span{border-color:var(--gold-line);background:var(--accent-soft)}.goal-pick input:focus-visible+span{outline:2px solid var(--gold)}
+.nut-goalinfo{font-size:13px;color:var(--muted);line-height:1.4;padding:8px 2px}
 .nut-bt{display:grid;gap:6px;padding:10px 12px;border-radius:var(--r-md);background:var(--surface-2);border:1px solid var(--border)}
 .nut-bt-h{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .nut-bt-h b{font-size:14px}.nut-bt-l{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
@@ -3733,15 +3738,29 @@ const NUTRITION = {
   goals: {
     def: {
       get label() { return T('Körperdefinition & Abnehmen'); }, ready: true,
+      get tag() { return T('Kaloriendefizit'); }, get info() { return T('Reduzierung des Körperfettanteils bei möglichst gutem Muskelerhalt.'); },
       m: { p: [2.2, 2.5, 2.8], c: [3.1, 2.5, 1.9], f: [0.8, 0.6, 0.4] },
       w: { p: [1.8, 2.0, 2.2], f: [0.8, 0.6, 0.6], kcal: [0.93, 0.83, 0.73] },
       water: [40, 50, 60],   // ml pro kg Körpergewicht
     },
     mass: {   // sauberer Aufbau (natural): Fett bleibt stabil, Eiweiß und Kohlenhydrate steigen alle 4 Wochen
       get label() { return T('Muskelaufbau'); }, ready: true,
+      get tag() { return T('Kalorienüberschuss'); }, get info() { return T('Gezielter Aufbau von Muskelmasse.'); },
       m: { p: [2.2, 2.5, 2.8], c: [4, 5, 6], f: [0.8, 0.8, 0.8] },
       w: { p: [1.8, 2.0, 2.2], f: [0.8, 0.8, 0.8], kcal: [1.05, 1.21, 1.38] },
       water: [40, 45, 50],
+    },
+    /* Gewichtserhalt & Athletik (v56): Kalorienziel = Gesamtbedarf (Grundumsatz Mifflin-St Jeor × bestehender Aktivitätsfaktor,
+       der 3× Training pro Woche bereits enthält – kein zweiter Trainingszuschlag). Kein Überschuss, kein Defizit, keine Phasen.
+       Eiweiß und Fett pro kg wie Phase 1 der bestehenden Methode, Kohlenhydrate = Rest bis zum Kalorienziel.
+       Die Körpertyp-Anpassung wird hier bewusst NICHT angewendet (sie würde vom Bedarf abweichen). */
+    fit: {
+      get label() { return T('Gewichtserhalt & Athletik'); }, ready: true, maintain: true,
+      get tag() { return T('Erhaltungskalorien'); }, get info() { return T('Aktuelles Gewicht halten, Muskulatur unterstützen und athletische Leistungsfähigkeit fördern.'); },
+      get desc() { return T('Du möchtest dein aktuelles Gewicht halten, dich athletisch entwickeln und deinen Körper durch gezieltes Training stärken und definieren, ohne bewusst Gewicht zu verlieren oder zuzunehmen? Dieser Ernährungsplan versorgt deinen Körper mit genau der Energie und den Nährstoffen, die er benötigt.'); },
+      m: { p: 2.2, f: 0.8 },
+      w: { p: 1.8, f: 0.8 },
+      water: [40, 40, 40],
     },
   },
   floor: { kcal: { m: 1500, w: 1200 }, carbsPerKg: 1.0 }, // Sicherheitsgrenzen
@@ -3807,8 +3826,9 @@ function nutritionFor(c, date = today()) {
   const W = clientWeight(c); if (!W) miss.push(T('Gewicht'));
   const age = ageAt(c.birthDate, date), cm = c.heightCm;
   const canBmr = sex && W && age && cm;
-  if (sex === 'w' && !canBmr) { if (!age) miss.push(T('Geburtsdatum')); if (!cm) miss.push(T('Größe')); }
+  if ((sex === 'w' || G.maintain) && !canBmr) { if (!age) miss.push(T('Geburtsdatum')); if (!cm) miss.push(T('Größe')); }
   if (miss.length) return { missing: miss };
+  if (G.maintain) return nutritionMaintain(c, G, sex, W, age, cm, date);
   const start = c.startDate || today(), days = Math.max(0, daysBetween(start, date)), week = Math.floor(days / 7) + 1;
   const phase = Math.min(2, Math.floor((week - 1) / NUTRITION.phaseWeeks)), kg = W.kg;
   const act = NUTRITION.activity[c.activity || 'moderat'] || NUTRITION.activity.moderat;
@@ -3835,10 +3855,28 @@ function nutritionFor(c, date = today()) {
     p: Math.round(p), c: Math.round(cb), f: Math.round(f), pk: p / kg, ck: cb / kg, fk: f / kg,
     bt, btFactor, kcalBase, btCapped };
 }
+/* Gewichtserhalt & Athletik: Kalorienziel = Bedarf; Gramm ganzzahlig, Kohlenhydrate schließen die Lücke (Rest höchstens ±2 kcal durch 1-g-Rundung) */
+function nutritionMaintain(c, G, sex, W, age, cm, date) {
+  const start = c.startDate || today(), days = Math.max(0, daysBetween(start, date)), week = Math.floor(days / 7) + 1;
+  const phase = Math.min(2, Math.floor((week - 1) / NUTRITION.phaseWeeks)), kg = W.kg, S = G[sex];
+  const act = NUTRITION.activity[c.activity || 'moderat'] || NUTRITION.activity.moderat;
+  const need = Math.round(bmr(sex, kg, cm, age) * act.f);
+  const minC = NUTRITION.floor.carbsPerKg * kg, minK = NUTRITION.floor.kcal[sex];
+  let kcal = need, floorHit = false;
+  if (kcal < minK) { kcal = minK; floorHit = true; }
+  const p = Math.round(S.p * kg), f = Math.round(S.f * kg);
+  let cb = Math.round((kcal - p * 4 - f * 9) / 4);
+  if (cb < minC) { cb = Math.ceil(minC); kcal = p * 4 + cb * 4 + f * 9; floorHit = true; }
+  const bt = bodyTypeOf(c), water = Math.round(G.water[phase] * kg / 100) / 10;
+  return { goal: G.label, maintain: true, sex, week, phase, done: week > NUTRITION.weeks, kg, wSrc: W.src, need, act: act.label,
+    kcal, deficit: need - kcal, water, p, c: cb, f, pk: p / kg, ck: cb / kg, fk: f / kg,
+    macroKcal: p * 4 + cb * 4 + f * 9, floorHit, bt, btFactor: 1, kcalBase: kcal, btCapped: false };
+}
 function BodyTypeBox(c, n, own) {
   if (!BODYTYPE.enabled || !n.bt) return '';
   const bt = n.bt, btn = l => `<button class="btn btn-sm btn-ghost" data-action="bt-open" data-cid="${c.id}">${l}</button>`;
   const head = (v, l) => `<div class="nut-bt-h"><div><div class="nut-bt-l">${own ? T('Dein Körpertyp') : T('Körpertyp')}</div><b>${v}</b></div>${btn(l)}</div>`;
+  if (n.maintain) return `<div class="nut-bt" data-bt="maintain">${head(bt.type ? esc(BT_L(bt.type)) : bt.mixed ? T('Gemischt') : T('Noch nicht bestimmt'), bt.type ? T('Ändern') : T('Bestimmen'))}<div class="nut-bt-n">${T('Bei Gewichtserhalt & Athletik wird keine Körpertyp-Anpassung angewendet – das Kalorienziel entspricht genau dem berechneten Bedarf.')}</div></div>`;
   if (!bt.type) {
     if (bt.mixed) return `<div class="nut-bt" data-bt="mixed">${head(T('Gemischt ({x})', { x: bt.mixed.map(k => esc(BT_L(k))).join(' / ') }), T('Prüfen'))}<div class="nut-bt-n">${T('Kein eindeutiges Ergebnis – es wird keine Körpertyp-Anpassung angewendet. Prüfe die Antworten oder lege den Körpertyp selbst fest.')}</div></div>`;
     if (bt.answered) return `<div class="nut-bt" data-bt="partial">${head(T('Noch unvollständig ({a} von {b} Fragen)', { a: bt.answered, b: BT_Q().length }), T('Weiter'))}<div class="nut-bt-n">${T('Erst wenn alle Fragen beantwortet sind, gibt es eine Einordnung. Bis dahin bleibt das Kalorienziel unverändert.')}</div></div>`;
@@ -3892,9 +3930,10 @@ function NutritionCard(c, own) {
   return `<section class="section">${head}<div class="card nut">
     <div class="nut-top"><div><div class="nut-eyebrow">${esc(n.goal)} · ${n.done ? T('12 Wochen geschafft') : T('Woche {a} von {b}', { a: n.week, b: 12 })}</div>
       <div class="nut-kcal">${n.kcal.toLocaleString(LOC())}<small> ${T('kcal / Tag')}</small></div>
-      ${n.need ? `<div class="nut-sub">${T('Bedarf ca. {k} kcal', { k: n.need.toLocaleString(LOC()) })}${n.deficit > 0 ? ' · ' + T('Defizit {k} kcal', { k: n.deficit }) : n.deficit < 0 ? ' · ' + T('Überschuss {k} kcal', { k: -n.deficit }) : ''}</div>` : ''}</div>
+      ${n.maintain ? `<div class="nut-sub">${T('Erhaltungskalorien = dein Bedarf')}${n.deficit ? ' · ' + T('Bedarf ca. {k} kcal', { k: n.need.toLocaleString(LOC()) }) : ''}</div>` : n.need ? `<div class="nut-sub">${T('Bedarf ca. {k} kcal', { k: n.need.toLocaleString(LOC()) })}${n.deficit > 0 ? ' · ' + T('Defizit {k} kcal', { k: n.deficit }) : n.deficit < 0 ? ' · ' + T('Überschuss {k} kcal', { k: -n.deficit }) : ''}</div>` : ''}</div>
       <div class="nut-water"><span class="nut-drop" aria-hidden="true"></span><b>${fmtNum(n.water)} l</b><small>${T('Wasser')}</small></div></div>
-    <div class="nut-phases">${ph}</div>
+    ${n.maintain ? `<div class="nut-goalinfo">${esc(own ? NUTRITION.goals.fit.desc : NUTRITION.goals.fit.info)}</div>` : `<div class="nut-phases">${ph}</div>`}
+    ${n.floorHit ? `<div class="nut-bt-n warn-t">${T('Die Sicherheitsgrenze greift – das Kalorienziel liegt deshalb über dem berechneten Bedarf. Bitte individuell fachlich abklären.')}</div>` : ''}
     ${BodyTypeBox(c, n, own)}
     <div class="nut-macros">${mac(T('Eiweiß'), n.p, n.pk, 'p')}${mac(T('Kohlenhydrate'), n.c, n.ck, 'c')}${mac(T('Fett'), n.f, n.fk, 'f')}</div>
     ${own && ZYM() ? ZYM().nutHint(c) : ''}
@@ -4783,7 +4822,7 @@ function clientExtraFields(c) {
       <label class="field"><span>Status</span><select name="status" class="input"><option value="active">aktiv</option><option value="inactive" ${c && c.status === 'inactive' ? 'selected' : ''}>inaktiv</option></select></label>
       <label class="field"><span>Größe (cm)</span><input name="heightCm" class="input" inputmode="numeric" value="${c && c.heightCm ? c.heightCm : ''}" placeholder="z. B. 175"></label>
       <label class="field"><span>Gewicht (kg)</span><input name="weightKg" class="input" inputmode="decimal" value="${c && c.weightKg ? fmtIn(c.weightKg) : ''}" placeholder="bis zum 1. Check"></label>
-      <label class="field" style="grid-column:1/-1"><span>Ernährungsziel</span><select name="nutGoal" class="input">${Object.entries(NUTRITION.goals).map(([k, g]) => `<option value="${k}" ${(c ? nutGoalOf(c) : 'def') === k ? 'selected' : ''}>${esc(g.option || g.label)}</option>`).join('')}</select></label>
+      <div class="field" style="grid-column:1/-1"><span>Ernährungsziel</span><div class="goal-pick" role="radiogroup">${['mass', 'def', 'fit'].filter(k => NUTRITION.goals[k]).map(k => { const g = NUTRITION.goals[k]; return `<label><input type="radio" name="nutGoal" value="${k}" ${(c ? nutGoalOf(c) : 'def') === k ? 'checked' : ''}><span><b>${esc(g.label)}</b><i>${esc(g.tag)}</i><small>${esc(g.info)}</small></span></label>`; }).join('')}</div></div></label>
       <label class="field" style="grid-column:1/-1"><span>Alltag / Aktivität</span><select name="activity" class="input">${Object.entries(NUTRITION.activity).map(([k, a]) => `<option value="${k}" ${(c && c.activity || 'moderat') === k ? 'selected' : ''}>${esc(a.label)}</option>`).join('')}</select></label>
     </div>
     <label class="toggle" style="margin-bottom:12px"><input type="checkbox" name="consent" ${c && c.consentAt ? 'checked' : ''}><span class="tg"></span><span>Einwilligung liegt vor${c && c.consentAt ? ` (seit ${fmtDateTs(c.consentAt)})` : ''}<small>Gesundheitsdaten (Gewicht, Maße, Fotos) nur mit unterschriebener Einwilligung speichern. Text unter Rechtliches → Einwilligung.</small></span></label>
