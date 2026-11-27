@@ -4474,6 +4474,7 @@ function makeFigure(M, names, opts = {}) {
     return { E: A.clone().addScaledVector(n, a * ca).addScaledVector(pp, a * sa), T: A.clone().addScaledVector(n, d) };
   }
   const PONY = ['pony_01', 'pony_02', 'pony_03'].filter(n => B(n)), PREV = [];
+  const PLEN = PONY.map((n, i) => PONY[i + 1] ? R[PONY[i + 1]].distanceTo(R[n]) : (i ? R[n].distanceTo(R[PONY[i - 1]]) : .08));
   const PD = PONY.map((n, i) => (PONY[i + 1] ? R[PONY[i + 1]].clone().sub(R[n]) : R[n].clone().sub(R[PONY[i - 1]])).normalize());
   const legApp = .44 + .43, legMod = L.th + L.sh, SOLE = .009;
   const appAnk = SW3D.solve(SW3D.TPL.squat({ v: 'back' }).pose(0)).L.ankle.y;
@@ -4483,7 +4484,7 @@ function makeFigure(M, names, opts = {}) {
   function apply(J, ctx = {}) {
     const K = J.K, Pq = new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(cv(K.P.l), cv(K.P.u), cv(K.P.f)));
     const Cq = new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(cv(K.l), cv(K.u), cv(K.f)));
-    const pel = B('pelvis'), hipT = cv(K.pel).add(V(0, legMod - legApp + ankOff + (ctx.dy || 0), 0));
+    const pel = B('pelvis'), hipT = cv(K.pel).add(V(0, legMod - legApp + ankOff + (ctx.dy || 0), 0)); if (ctx.off) hipT.add(ctx.off);
     setWorldQ('pelvis', Pq); pel.position.copy(hipT.clone().sub(pelOff.clone().applyQuaternion(Pq)).sub(R.Root)); pel.updateMatrixWorld(true);
     setWorldQ('spine_01', Pq.clone().slerp(Cq, .35)); setWorldQ('spine_02', Pq.clone().slerp(Cq, .75)); setWorldQ('spine_03', Cq);
     const hq = new THREE.Quaternion().setFromAxisAngle(cv(K.l), (J.pose.head || 0) * Math.PI / 180).multiply(Cq);
@@ -4498,16 +4499,16 @@ function makeFigure(M, names, opts = {}) {
       setWorldQ('foot_' + s, basis(fh.multiplyScalar(footH).add(V(0, footY + fy * footH, 0)), V(0, 1, 0)).multiply(RQ['foot_' + s].clone().invert()));
       // Arme + Hand
       const gr = (ctx.grips && ctx.grips[A]) || { type: 'relaxed' };
-      const sp = B('upperarm_' + s).getWorldPosition(V()), G = cv(J.pose.hand && J.pose.hand[A] ? J.pose.hand[A] : j.hand).add(V(0, LL.arm || 0, 0));
+      const sp = B('upperarm_' + s).getWorldPosition(V()), G = cv(J.pose.hand && J.pose.hand[A] ? J.pose.hand[A] : j.hand).add(V(0, LL.arm || 0, 0)); if (ctx.gOff && ctx.gOff[A]) G.add(ctx.gOff[A]);
       let a2 = ik(sp, G, L.up, L.fo + PALM, cv(j.epole)); a2.T = a2.E.clone().add(a2.T.clone().sub(a2.E).multiplyScalar(L.fo / (L.fo + PALM)));
-      let hf = null;
+      let hf = null, wT0 = null;
       if (gr.type === 'bar') {
         const axb = gr.axis.clone().normalize();
         const frame = a => { const fore = G.clone().sub(a.E).normalize(); let fd = fore.clone().addScaledVector(axb, -fore.dot(axb)); if (fd.lengthSq() < 1e-6) fd = fore.clone(); fd.normalize();
           let pm = V().crossVectors(axb, fd).normalize(); if (pm.dot(gr.palm) < 0) pm.negate(); return { fd, pm }; };
         hf = frame(a2);
         for (let it = 0; it < 14; it++) { const wT = G.clone().addScaledVector(hf.fd, -.085).addScaledVector(hf.pm, -.032); a2 = ik(sp, wT, L.up, L.fo, cv(j.epole)); const nf = frame(a2); nf.fd.lerp(hf.fd, .5).normalize(); nf.pm = V().crossVectors(axb, nf.fd).normalize(); if (nf.pm.dot(gr.palm) < 0) nf.pm.negate(); hf = nf; }
-        { const wT = G.clone().addScaledVector(hf.fd, -.085).addScaledVector(hf.pm, -.032); a2 = ik(sp, wT, L.up, L.fo, cv(j.epole)); }
+        { const wT = G.clone().addScaledVector(hf.fd, -.085).addScaledVector(hf.pm, -.032); a2 = ik(sp, wT, L.up, L.fo, cv(j.epole)); wT0 = wT; }
       } else if (gr.type === 'flat' || gr.type === 'ball') {
         const nrm = gr.normal.clone().normalize();        // Fläche zeigt zur Hand → Handfläche dagegen
         const fore = a2.T.clone().sub(a2.E).normalize(); let fd = fore.clone().addScaledVector(nrm, -fore.dot(nrm)); if (fd.lengthSq() < 1e-6) fd = cv(K.f); fd.normalize();
@@ -4518,13 +4519,19 @@ function makeFigure(M, names, opts = {}) {
       setWorldQ('lowerarm_' + s, basis(a2.T.clone().sub(a2.E), cv(j.epole)).multiply(RQ['lowerarm_' + s].clone().invert()));
       if (hf) poseHand(s, hf.fd, hf.pm, gr.type === 'bar' ? 'bar' : gr.type);
       else { const Ql = B('lowerarm_' + s).getWorldQuaternion(new THREE.Quaternion()); poseHand(s, HR[s].dir.clone().applyQuaternion(Ql), HR[s].palm.clone().applyQuaternion(Ql), 'relaxed'); }
-      out[A] = { G, wrist: a2.T.clone(), gr };
+      let miss = wT0 ? a2.T.clone().sub(wT0) : null;
+      if (!wT0 && gr.type !== 'flat') { const fd = a2.T.clone().sub(a2.E).normalize(); miss = a2.T.clone().addScaledVector(fd, PALM).sub(G); }
+      out[A] = { G, wrist: a2.T.clone(), gr, miss };
     }
     for (let i = 0; i < PONY.length; i++) {
       const n = PONY[i], o = B(n), pq = o.parent.getWorldQuaternion(new THREE.Quaternion());
       const carried = PD[i].clone().applyQuaternion(pq).normalize(), hu = V(0, 1, 0).applyQuaternion(B('head').getWorldQuaternion(new THREE.Quaternion()));
       const desired = carried.clone().lerp(V(0, -1, 0), .7 * Math.max(0, hu.y)).normalize();
       PREV[i] = PREV[i] && !ctx.resetDyn ? PREV[i].lerp(desired, .35).normalize() : desired;
+      if (ctx.floorAt) {   // Zopf liegt auf Bank/Matte/Boden auf statt hindurchzugehen
+        const P0 = o.getWorldPosition(V()), tip = P0.clone().addScaledVector(PREV[i], PLEN[i]), fy = ctx.floorAt(tip.x, tip.z, P0.y) + .012;
+        if (tip.y < fy) { const d = PREV[i]; d.y = Math.max(-1, Math.min(1, (fy - P0.y) / PLEN[i])); const hz = Math.sqrt(Math.max(0, 1 - d.y * d.y)), hl = Math.hypot(d.x, d.z) || 1; d.x *= hz / hl; d.z *= hz / hl; d.normalize(); }
+      }
       setWorldQ(n, new THREE.Quaternion().setFromUnitVectors(PD[i], PREV[i]));
     }
     M.updateMatrixWorld(true);
@@ -4565,7 +4572,7 @@ function makeFigure(M, names, opts = {}) {
         const s = V().setFromMatrixScale(o.matrixWorld), h = p.height * s.y; if (h < .03) return;
         const c = V().setFromMatrixPosition(o.matrixWorld), ax = V(0, 1, 0).transformDirection(o.matrixWorld);
         const t = THREE.MathUtils.clamp(G.clone().sub(c).dot(ax), -h / 2, h / 2), d = G.distanceTo(c.clone().addScaledVector(ax, t));
-        if (d < .06 && (!best || d < best.d)) best = { type: 'bar', axis: ax, d };
+        if (d < .06 && (!best || d < best.d)) best = { type: 'bar', axis: ax, d, o };
       } else if (g.type === 'SphereGeometry' && p.radius >= .06) {
         const c = V().setFromMatrixPosition(o.matrixWorld), r = p.radius * V().setFromMatrixScale(o.matrixWorld).x, d = Math.abs(G.distanceTo(c) - r);
         if (d < .07 && (!best || d < best.d)) best = { type: 'ball', normal: G.clone().sub(c).normalize(), d };
@@ -4634,7 +4641,7 @@ function makeFigure(M, names, opts = {}) {
     v._nf = F; v._nfStyle = style; v.scene.add(F.M);
     if (v._nfEnv) F.M.traverse(o => { if (o.isMesh) { o.material.envMap = v._nfEnv; o.material.needsUpdate = true; } });
     const f = v.fig; f.g.visible = false;
-    if (!f._nfHook) { const up = f.update.bind(f); f.update = J => { up(J); v._J = J; }; f._nfHook = true; }
+    if (!f._nfHook) { const up = f.update.bind(f); f.update = J => { up(J); v._J = J; v._nfFrame = (v._nfFrame || 0) + 1; }; f._nfHook = true; }
   }
   function calib(v) {
     // pro Übung: Anheben, falls der Körper in einer Phase im Boden liegt (gleich bleibend über die ganze Bewegung)
@@ -4648,7 +4655,81 @@ function makeFigure(M, names, opts = {}) {
       } catch (e) {}
     }
     if (mn < -.01) v._nfDy = -mn + .004;
+    // Auflage: Polster/Matte als Fläche (auch schräg oder senkrecht, z. B. Rückenlehne). Pro Übung ein fester Versatz:
+    // erst aus Polstern herausschieben, dann – wenn der Körper darauf liegt/sitzt, aber schwebt – auf die Fläche legen.
+    v._nfOff = V(0, 0, 0); v._nfColl = false;
+    const frames = [0, .25, .5, .75].map(fr => { try { const t = fr * per, r = tpl.custom ? tpl.custom(t) : { pose: tpl.pose(fr) }; return { fr, t, J: SW3D.solve(r.pose) }; } catch (e) { return null; } }).filter(Boolean);
+    const run = (f, extra) => { tpl.props && tpl.props(f.J, f.fr, f.t); F.apply(f.J, Object.assign({ grips: grips(v, f.J), dy: v._nfDy, off: v._nfOff, resetDyn: true }, extra || {})); };
+    for (let it = 0; it < 2; it++) {
+      const maxPen = new Map();
+      for (const f of frames) { run(f); for (const r of padContacts(v, F)) { const m = maxPen.get(r.key); if (!m || r.pen > m.pen) maxPen.set(r.key, r); } }
+      let moved = false; for (const r of maxPen.values()) if (r.pen > .006) { v._nfOff.addScaledVector(r.n, r.pen + .002); moved = true; }
+      if (!moved) break;
+    }
+    if (v._nfOff.length() > .08) v._nfOff.set(0, 0, 0);   // Körper liegt bewusst über einem Polster (z. B. Rückenstrecker, Scottbank) → nicht verschieben
+    const gaps = [];
+    for (const f of frames) { run(f); let g = null; for (const r of padContacts(v, F)) if (r.n.y > .7 && r.cnt > 15 && (g === null || r.gap < g)) g = r.gap; if (g !== null) gaps.push(g); }
+    if (gaps.length >= 3) { gaps.sort((a, b) => a - b); const g = gaps[0]; if (g > .006 && g < .12) v._nfOff.y -= g - .002; }
+    // gehaltene Geräte, die in den Körper ragen? Dann wird pro Bild nachgeschoben
+    for (const f of frames) { run(f); if (heldHits(v, F, f.J).length) { v._nfColl = true; break; } }
     v._nfReset = true;
+  }
+  // Polster (MT.pad) und Matten (MT.mat) als Quader; liefert je Fläche: Normale, tiefstes Eindringen, kleinsten Abstand
+  function pads(v) {
+    const L = []; if (!v.kit) return L;
+    v.kit.g.traverse(o => { if (o.isMesh && o.visible && o.geometry.type === 'BoxGeometry' && (o.material === v.MT.pad || o.material === v.MT.mat)) { o.updateWorldMatrix(true, false); L.push({ o, inv: o.matrixWorld.clone().invert(), p: o.geometry.parameters, n: V(0, 1, 0).transformDirection(o.matrixWorld) }); } });
+    return L;
+  }
+  function eachBodyVert(F, step, re, cb) {
+    const p = V();
+    F.M.traverse(m => {
+      if (!m.isSkinnedMesh || /eye|lash|hair|ponytail|shoe/.test(m.material.name)) return;
+      const pa = m.geometry.attributes.position, si = m.geometry.attributes.skinIndex; m.updateMatrixWorld(true);
+      for (let k = 0; k < pa.count; k += step) { const bn = m.skeleton.bones[si.getX(k)].name; if (!re.test(bn)) continue; p.fromBufferAttribute(pa, k); m.boneTransform(k, p); p.applyMatrix4(m.matrixWorld); cb(p, bn); }
+    });
+  }
+  function padContacts(v, F) {
+    const P = pads(v); if (!P.length) return [];
+    const R = P.map((s, i) => ({ key: s.o.uuid, n: s.n, pen: 0, gap: 9, cnt: 0 })), lp = V();
+    eachBodyVert(F, 5, /pelvis|spine|thigh|calf|neck|head/, p => {
+      P.forEach((s, i) => { lp.copy(p).applyMatrix4(s.inv); if (Math.abs(lp.x) < s.p.width / 2 - .015 && Math.abs(lp.z) < s.p.depth / 2 - .015) { const d = lp.y - s.p.height / 2; if (d > -.08 && d < .12) { const r = R[i]; r.cnt++; if (d < r.gap) r.gap = d; if (-d > r.pen && d > -s.p.height) r.pen = -d; } } });
+    });
+    return R.filter(r => r.cnt > 0);
+  }
+  // Höhe der Auflagefläche (Polster/Matte) unter einem Punkt, sonst Boden 0
+  function floorAt(v, x, z, yRef) {
+    let top = 0; const up = V(0, 1, 0);
+    for (const s of v._nfPads || []) {
+      const lp = V(x, yRef, z).applyMatrix4(s.inv); if (Math.abs(lp.x) > s.p.width / 2 || Math.abs(lp.z) > s.p.depth / 2) continue;
+      const u = up.clone().transformDirection(s.inv); if (Math.abs(u.y) < .3) continue;
+      const sy = yRef + (s.p.height / 2 - lp.y) / u.y; if (sy < yRef - .01 && sy > top) top = sy;
+    }
+    return top;
+  }
+  // gehaltene Geräte (Hantel, Ball, Sandsack …) in Handnähe, die in Rumpf/Beine/Kopf ragen
+  function heldGroups(v, J) {
+    const L = []; if (!v.kit) return L;
+    for (const A of ['L', 'R']) { const G = handTarget(J, A); let best = null, bd = .12;
+      for (const c of v.kit.g.children) { if (!c.isGroup) continue; const bx = new THREE.Box3().setFromObject(c), sz = bx.getSize(V()).length(); if (sz > 2.4) continue; const d = bx.distanceToPoint(G); if (d < bd) { bd = d; best = c; } }
+      if (best && !L.includes(best)) L.push(best); }
+    return L;
+  }
+  function insideMesh(o, inv, p) {
+    const g = o.geometry, q = g.parameters || {}, lp = p.clone().applyMatrix4(inv), s = o.scale;
+    if (g.type === 'CylinderGeometry') { const r = Math.max(q.radiusTop, q.radiusBottom), rr = Math.hypot(lp.x, lp.z); return Math.abs(lp.y) < q.height / 2 && rr < r ? (r - rr) * s.x : 0; }
+    if (g.type === 'SphereGeometry') { const rr = lp.length(); return rr < q.radius ? (q.radius - rr) * s.x : 0; }
+    if (g.type === 'BoxGeometry') { const dx = q.width / 2 - Math.abs(lp.x), dy = q.height / 2 - Math.abs(lp.y), dz = q.depth / 2 - Math.abs(lp.z); return dx > 0 && dy > 0 && dz > 0 ? Math.min(dx, dy, dz) : 0; }
+    return 0;
+  }
+  function heldHits(v, F, J) {
+    const out = [];
+    for (const grp of heldGroups(v, J)) {
+      const ms = []; grp.updateWorldMatrix(true, true); grp.traverse(o => { if (o.isMesh && o.visible) ms.push({ o, inv: o.matrixWorld.clone().invert() }); });
+      const bx = new THREE.Box3().setFromObject(grp).expandByScalar(.01), c = bx.getCenter(V()); let n = 0, mx = 0; const cen = V();
+      eachBodyVert(F, 4, /pelvis|spine|thigh|calf|neck|head|clavicle/, p => { if (!bx.containsPoint(p)) return; for (const m of ms) { const d = insideMesh(m.o, m.inv, p); if (d > 0) { n++; cen.add(p); if (d > mx) mx = d; break; } } });
+      if (n > 3 && mx > .008) { cen.multiplyScalar(1 / n); const dir = c.clone().sub(cen); if (dir.lengthSq() < 1e-6) dir.copy(cv(J.K.f)); dir.normalize(); out.push({ grp, push: dir.multiplyScalar(Math.min(mx + .012, .2)) }); }
+    }
+    return out;
   }
   function grips(v, J) {
     const g = {};
@@ -4659,14 +4740,15 @@ function makeFigure(M, names, opts = {}) {
     const F = v._nf, J = v._J; if (!F || !J) return;
     const ex = v.ex; F.setMuscles(v.muscleOn && ex ? ex.primary || ex.prim || [] : [], v.muscleOn && ex ? ex.secondary || ex.sec || [] : []);
     const gr = grips(v, J), reset = !!v._nfReset; v._nfReset = false;
-    let dy = v._nfDy || 0, out = F.apply(J, { grips: gr, dy, resetDyn: reset });
+    v._nfPads = pads(v); const fl = (x, z, y) => floorAt(v, x, z, y), off = v._nfOff;
+    let dy = v._nfDy || 0, out = F.apply(J, { grips: gr, dy, off, floorAt: fl, resetDyn: reset });
     // Hängen an der Stange: reichen die Arme nicht, zieht sich der Körper hoch (statt Hände unter der Stange)
-    if (gr.L.type === 'bar' && gr.R.type === 'bar' && J.L.ankle.y > .08 && J.R.ankle.y > .08) {
+    if (gr.L.type === 'bar' && gr.R.type === 'bar' && J.L.ankle.y > .25 && J.R.ankle.y > .25 && J.K.u.y > .7) {   // nur echtes Hängen (Füße in der Luft, Oberkörper aufrecht)
       const headY = F.B('head').getWorldPosition(V()).y;
       if (out.L.G.y > headY && out.R.G.y > headY)
         for (let it = 0; it < 3; it++) {
           const def = Math.max(0, Math.min(out.L.G.y - F.B('middle_02_l').getWorldPosition(V()).y, out.R.G.y - F.B('middle_02_r').getWorldPosition(V()).y) - .01);
-          if (def < .01) break; dy += def; out = F.apply(J, { grips: gr, dy, resetDyn: reset });
+          if (def < .01) break; dy += def; out = F.apply(J, { grips: gr, dy, off, floorAt: fl, resetDyn: reset });
         }
     }
     if (dy > .03) {   // angehoben: aufliegende Arme/Beine mitnehmen
@@ -4674,9 +4756,38 @@ function makeFigure(M, names, opts = {}) {
       for (let it = 0; it < 2; it++) {
         const pl = F.probeLimbs();
         for (const A of ['L', 'R']) for (const k of ['arm', 'leg']) if (pl[A][k] < -.008) { limbLift[A][k] = (limbLift[A][k] || 0) - pl[A][k] + .003; any = true; }
-        if (!any) break; out = F.apply(J, { grips: gr, dy, limbLift, resetDyn: reset });
+        if (!any) break; out = F.apply(J, { grips: gr, dy, off, floorAt: fl, limbLift, resetDyn: reset });
       }
-      const p2 = F.probe(); if (p2.minY < -.01) { dy += -p2.minY + .004; F.apply(J, { grips: gr, dy, limbLift, resetDyn: reset }); }
+      const p2 = F.probe(); if (p2.minY < -.01) { dy += -p2.minY + .004; out = F.apply(J, { grips: gr, dy, off, floorAt: fl, limbLift, resetDyn: reset }); }
+    }
+    // Gerät ragt in den Körper (z. B. Kurzhantel im Oberschenkel, Hantel vor der Brust): Gerät und Hände ein Stück nach außen
+    if (v._nfColl) {
+      const hits = heldHits(v, F, J);
+      if (hits.length) {
+        const gOff = {};
+        for (const h of hits) { if (h.grp._nfFrame === v._nfFrame && h.grp._nfPush) h.grp.position.sub(h.grp._nfPush); h.grp.position.add(h.push); h.grp._nfPush = h.push; h.grp._nfFrame = v._nfFrame;
+          for (const A of ['L', 'R']) { const bx = new THREE.Box3().setFromObject(h.grp).expandByScalar(.12); if (bx.containsPoint(handTarget(J, A).add(h.push))) gOff[A] = h.push.clone(); } }
+        out = F.apply(J, { grips: gr, dy, off, floorAt: fl, gOff, resetDyn: false });
+      }
+    }
+    // Erreichen die Hände Stange/Hantel nicht ganz (andere Armlänge als die alte Figur), rückt das Gerät zur Hand –
+    // nur die Darstellung in diesem Bild, die Bewegungsvorlage bleibt unverändert
+    const groups = new Map();
+    for (const A of ['L', 'R']) {
+      const o = out[A], g = gr[A]; if (!o || !o.miss || o.miss.length() < .015) continue;
+      let grp = null;
+      if (g.o) { grp = g.o; while (grp.parent && grp.parent !== v.kit.g) grp = grp.parent; if (!grp.parent || grp === g.o) grp = null; }
+      else if (g.type !== 'flat') {   // Hand hält etwas ohne erkannten Griff (z. B. Hantelscheibe): nächstes bewegliches Gerät in Handnähe
+        let bd = .1; for (const c of v.kit.g.children) { if (!c.isGroup) continue; const bx = new THREE.Box3().setFromObject(c), sz = bx.getSize(V()).length(); if (sz > 2.4) continue; const d = bx.distanceToPoint(o.G); if (d < bd) { bd = d; grp = c; } }
+      }
+      if (!grp) continue;
+      if (!groups.has(grp)) groups.set(grp, []); groups.get(grp).push(o.miss);
+    }
+    for (const [grp, ms] of groups) {
+      if (grp._nfFF === v._nfFrame && grp._nfOff) grp.position.sub(grp._nfOff);   // gleiches Bild erneut gezeichnet
+      const d = V(); ms.forEach(m => d.add(m)); d.multiplyScalar(1 / ms.length);
+      if (d.length() < .015 || d.length() > .25) { if (grp._nfFF !== v._nfFrame) grp._nfOff = null; continue; }
+      grp.position.add(d); grp._nfOff = d; grp._nfFF = v._nfFrame;
     }
   }
   P.load = function (ex) {

@@ -3079,7 +3079,7 @@ const eqShort = e => String(e.eq || '').split(',')[0].replace(/\s*\(.*?\)\s*/g, 
 
 /* ---------- Vorschaubilder ---------- */
 const THUMB = { mem: new Map(), queue: [], queued: new Set(), busy: false, viewer: null, io: null, failed: false };
-const THUMB_CACHE = 'sweat4-thumbs-v5';   // v5: neue 3D-Figuren (v57) → Vorschaubilder neu erzeugen
+const THUMB_CACHE = 'sweat4-thumbs-v6';   // v6: neue 3D-Figuren (v57/v58) → Vorschaubilder neu erzeugen
 const thumbKey = key => new URL('thumb/' + key.replace('|', '-') + '.jpg', location.href).href;
 const tkey = (id, fig) => id + '|' + (fig || 'm');
 const thumbSel = key => { const [id, fig] = key.split('|'); return `[data-thumb="${id}"][data-fig="${fig}"]`; };
