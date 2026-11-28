@@ -302,9 +302,9 @@
       return { grp, set: (c, axis) => { grp.position.copy(c); orientY(grp, axis); } };
     }
     line(mat, r = .006) { const m = this.mesh(new T.CylinderGeometry(r, r, 1, 6), mat || this.MT.cable); return { set: (a, b) => { placeSeg(m, a, b, V(0, 0, 1), 1); m.scale.set(1, a.distanceTo(b), 1); } }; }
-    movBox(w, h, d, mat) { const m = this.mesh(new T.BoxGeometry(w, h, d), mat || this.MT.pad); return { m, set: (c, b) => { m.position.copy(c); if (b) { _m4.makeBasis(b.x, b.y, b.z); m.quaternion.setFromRotationMatrix(_m4); } } }; }
-    movCyl(r, len, mat) { const m = this.mesh(new T.CylinderGeometry(r, r, len, 14), mat || this.MT.pad); return { m, set: (c, axis) => { m.position.copy(c); orientY(m, axis); } }; }
-    movRod(r, mat) { const m = this.mesh(new T.CylinderGeometry(r, r, 1, 10), mat || this.MT.frame); return { set: (a, b) => { placeSeg(m, a, b, V(0, 0, 1), 1); m.scale.set(1, Math.max(.001, a.distanceTo(b)), 1); } }; }
+    movBox(w, h, d, mat) { const m = this.mesh(new T.BoxGeometry(w, h, d), mat || this.MT.pad); m.userData.mov = 'box'; return { m, set: (c, b) => { m.position.copy(c); if (b) { _m4.makeBasis(b.x, b.y, b.z); m.quaternion.setFromRotationMatrix(_m4); } } }; }
+    movCyl(r, len, mat) { const m = this.mesh(new T.CylinderGeometry(r, r, len, 14), mat || this.MT.pad); m.userData.mov = 'cyl'; return { m, set: (c, axis) => { m.position.copy(c); orientY(m, axis); } }; }
+    movRod(r, mat) { const m = this.mesh(new T.CylinderGeometry(r, r, 1, 10), mat || this.MT.frame); m.userData.mov = 'rod'; return { set: (a, b) => { placeSeg(m, a, b, V(0, 0, 1), 1); m.scale.set(1, Math.max(.001, a.distanceTo(b)), 1); } }; }
     // Kabelturm, Rolle bei p (Turm steht hinter p in Richtung 'back')
     tower(p, back) {
       back = back ? nz(back) : V(Math.sign(p.x) || 0, 0, p.x ? 0 : 1);
@@ -397,7 +397,7 @@
     const chestPt = K => K.pel.clone().addScaledVector(K.u, touch).addScaledVector(K.f, .17);
     const K0 = kin(base), cp0 = chestPt(K0);
     const close = p.grip === 'close'; // enges Bankdrücken: Hände ca. schulterbreit, Ellbogen eng am Körper
-    const w = p.impl === 'db' ? [.2, .13] : close ? [.15, .145] : [.3, .29];
+    const w = p.impl === 'db' ? [.27, .14] : close ? [.15, .145] : [.3, .29];   // [unten, oben]; KH unten seitlich der Brust (ExRx: "to sides of chest"), oben über den Schultern
     return {
       cam: { az: 38, el: 24, dist: 2.7, target: V(0, .75, base.pelvis.z - .25) },
       timing: LBL.lower('Startposition – Arme gestreckt über der Brust', 'Gewicht kontrolliert zur Brust senken', 'Umkehrpunkt – kurz vor/an der Brust', 'Gewicht kraftvoll nach oben drücken'),
@@ -412,7 +412,7 @@
       },
       pose(s) {
         const K = kin(base), cp = chestPt(K);
-        const top = cp.clone().add(V(0, close ? .43 : .47, 0)); if (inc) top.z = cp.z + .03;
+        const top = cp.clone().add(V(0, close ? .47 : inc ? .52 : .47, 0)); if (inc) top.z = cp.z + .03; else if (p.impl !== 'smith') top.z = cp.z - .09;   // Flachbank: Endposition über den Schultern (J-Bahn), unten Brust
         const hands = sides(sg => V(sg * lerp(w[1], w[0], s), lerp(top.y, cp.y + (p.impl === 'db' ? .06 : .03), s), lerp(top.z, cp.z + (p.impl === 'smith' ? 0 : .02), s)));
         if (p.impl === 'smith') { hands.L.z = cp.z; hands.R.z = cp.z; }
         return Object.assign({}, base, { hand: hands, elbow: sides(sg => close ? V(sg * .28, -1, .45) : V(sg * .9, -1, inc ? -.1 : .3)) });
@@ -431,7 +431,7 @@
         setup(kit) { benchFor(kit, base, inc); props.dL = dbAt(kit); props.dR = dbAt(kit); },
         pose(s) {
           const K = kin(base);
-          const hand = sides(sg => { const th = lerp(10, 76, s) * D2R; const d = nz(K.f.clone().multiplyScalar(Math.cos(th)).addScaledVector(K.l, sg * Math.sin(th)).addScaledVector(K.u, -.1)); return shoulder(K, sg).addScaledVector(d, .56); });
+          const hand = sides(sg => { const th = lerp(-11, 84, s) * D2R; const d = nz(K.f.clone().multiplyScalar(Math.cos(th)).addScaledVector(K.l, sg * Math.sin(th)).addScaledVector(K.u, -.1)); return shoulder(K, sg).addScaledVector(d, .585); });   // ExRx: oben "until dumbbells are nearly together", unten Schulterhöhe
           return Object.assign({}, base, { hand, elbow: sides(sg => K.l.clone().multiplyScalar(sg * .5).addScaledVector(K.f, -.6).addScaledVector(K.u, -.2)) });
         },
         props(J) { props.dL.set(J.L.hand, J.K.u); props.dR.set(J.R.hand, J.K.u); }
@@ -440,7 +440,7 @@
     if (v === 'cable') {
       const d = p.dir || 'mid';
       const py = { mid: 1.45, high: 2.1, low: .18 }[d];
-      const vo = { mid: .02, high: .5, low: -.55 }[d], vc = { mid: -.05, high: -.55, low: .18 }[d];
+      const vo = { mid: .02, high: .5, low: -.55 }[d], vc = { mid: -.05, high: -.55, low: .03 }[d];   // von unten: Griffe treffen sich vor der oberen Brust (Schulterhöhe), nicht vor dem Gesicht
       const base = stand({ w: .15, p: { pitch: 12 } });
       base.ankle = { L: V(.15, DIM.ank, .12), R: V(-.15, DIM.ank, -.18) };
       const pulL = V(.95, py, -.12), pulR = V(-.95, py, -.12);
@@ -467,7 +467,7 @@
           const K = kin(base);
           if (rev) kit.box(.32, .55, .08, K.S.clone().addScaledVector(K.f, .19).addScaledVector(K.u, -.25), { x: K.l, y: K.u, z: K.f });
           const top = K.S.clone().add(V(0, .35, rev ? .25 : -.1));
-          kit.box(.12, top.y, .12, V(0, top.y / 2, top.z + (rev ? .1 : -.18)), null, MT.frame);
+          kit.box(.12, top.y, .12, V(0, top.y / 2, top.z + (rev ? .22 : -.18)), null, MT.frame);
           props.armL = kit.movRod(.022); props.armR = kit.movRod(.022); props.top = top;
           props.pL = rev ? kit.shortBar(.16) : kit.movBox(.07, .3, .08); props.pR = rev ? kit.shortBar(.16) : kit.movBox(.07, .3, .08);
         },
@@ -476,10 +476,12 @@
           let hand, elbow;
           if (rev) {
             hand = sides(sg => shoulder(K, sg).addScaledVector(nz(lv(nz(K.f.clone().addScaledVector(K.l, -sg * .2)), nz(K.l.clone().multiplyScalar(sg).addScaledVector(K.f, -.08)), s)), .59).addScaledVector(K.u, -.03));
-            elbow = sides(sg => DOWN.clone().addScaledVector(K.l, sg * .5));
+            elbow = sides(sg => nz(lv(K.l.clone().multiplyScalar(sg), K.f.clone().multiplyScalar(-1), s)).addScaledVector(K.u, .1));   // Arme bewegen sich waagerecht, Ellbogen leicht gebeugt in der Bewegungsebene
           } else {
-            hand = sides(sg => { const ed = nz(lv(nz(K.l.clone().multiplyScalar(sg).addScaledVector(K.f, -.08)), nz(K.f.clone().addScaledVector(K.l, sg * .1)), s)); const el = shoulder(K, sg).addScaledVector(ed, .29).addScaledVector(K.u, -.03); return el.clone().addScaledVector(K.u, .29).addScaledVector(K.f, .02); });
-            elbow = sides(sg => nz(lv(nz(K.l.clone().multiplyScalar(sg).addScaledVector(K.f, -.08)), nz(K.f.clone().addScaledVector(K.l, sg * .1)), s)));
+            // Butterfly: Oberarme waagerecht, Unterarme senkrecht an den Polstern; Polster vor der Brust zusammenführen, bis sie sich berühren
+            const edOf = sg => { const a0 = Math.atan2(-.08, 1), a1 = Math.atan2(1, -.6), a = lerp(a0, a1, s); return nz(K.l.clone().multiplyScalar(sg * Math.cos(a)).addScaledVector(K.f, Math.sin(a))); };
+            hand = sides(sg => { const el = shoulder(K, sg).addScaledVector(edOf(sg), .29).addScaledVector(K.u, -.03); return el.clone().addScaledVector(K.u, .29).addScaledVector(K.f, .02); });
+            elbow = sides(sg => edOf(sg));
           }
           return Object.assign({}, base, { hand, elbow });
         },
@@ -512,14 +514,14 @@
     return {
       cam: { az: 70, el: 18, dist: 2.7, target: V(0, .75, -.35) },
       timing: LBL.lower('Start – Kurzhantel mit beiden Händen über der Brust', 'Hantel im Bogen hinter den Kopf senken', 'Dehnung – Arme hinter dem Kopf', 'Hantel im Bogen zurück über die Brust ziehen'),
-      setup(kit) { flatBench(kit, -.9, .4); props.d = kit.dumbbell(1.3); },
+      setup(kit) { flatBench(kit, -.56, .4); props.d = kit.dumbbell(1.3); },   // Kopf am Bankende: Hantel kann hinter dem Kopf unter Bankhöhe sinken
       pose(s) {
         const K = kin(base), a = lerp(8, 108, s) * D2R;
         const dir = nz(K.f.clone().multiplyScalar(Math.cos(a)).addScaledVector(K.u, Math.sin(a)));
         const c = K.S.clone().addScaledVector(K.u, -.015).addScaledVector(dir, .55);
         return Object.assign({}, base, { hand: sides(sg => c.clone().addScaledVector(K.l, sg * .045)), elbow: sides(sg => K.l.clone().multiplyScalar(sg)) });
       },
-      props(J) { const c = bothHands(J); props.d.set(c.addScaledVector(nz(c.clone().sub(J.K.S)), .07), c.clone().sub(J.K.S)); }
+      props(J) { const c = bothHands(J), out = nz(c.clone().sub(J.K.S)), ax = nz(DOWN.clone().addScaledVector(out, .6)); props.d.set(c.addScaledVector(ax, .075), ax); }   // Hände umfassen die obere Hantelscheibe; die Hantel hängt nach unten (oben über der Brust senkrecht, hinter dem Kopf schräg vom Kopf weg)
     };
   };
 
@@ -533,7 +535,7 @@
         for (const s of [-1, 1]) { kit.rod(V(s * bx, hy, -.35), V(s * bx, hy, .45), .022, MT.steel); kit.rod(V(s * bx, 0, -.3), V(s * bx, hy, -.3), .03); kit.rod(V(s * bx, 0, .4), V(s * bx, hy, .4), .03); }
       },
       pose(s) {
-        const pel = V(0, lerp(1.32, 1.02, s), lerp(-.04, tri ? -.12 : -.1, s)), pitch = tri ? lerp(4, 9, s) : lerp(12, 28, s);
+        const pel = V(0, lerp(1.45, tri ? 1.16 : 1.19, s), lerp(-.04, tri ? -.12 : -.1, s)), pitch = tri ? lerp(4, 9, s) : lerp(12, 28, s);   // oben Arme gestreckt, unten Oberarme etwa waagerecht (ExRx/NSCA)
         const o = { pelvis: pel, pitch, head: -pitch * .5, knee: { L: V(.05, -.2, 1), R: V(-.05, -.2, 1) } };
         o.ankle = { L: pel.clone().add(V(.05, -.55, -.32)), R: pel.clone().add(V(-.05, -.58, -.3)) };
         o.foot = { L: V(0, -.6, -.3), R: V(0, -.6, -.3) };
@@ -565,8 +567,8 @@
         const wb = impl === 'db' ? .27 : impl === 'machine' ? .3 : .28, wt = impl === 'db' ? .16 : .23;
         const zb = beh ? -.07 : impl === 'db' ? .04 : .12, zt = beh ? -.03 : .03;
         const yb = beh ? .1 : impl === 'db' ? .05 : .0;
-        let hand = sides(sg => rel(K, sg, lerp(wb, wt, s), lerp(yb, .58, s), lerp(zb, zt, s)));
-        if (impl === 'smith') { const zz = K.S.z + (beh ? -.07 : .12); hand = sides(sg => { const h = rel(K, sg, lerp(wb, wt, s), lerp(yb, .58, s), 0); h.z = zz; return h; }); }
+        let hand = sides(sg => rel(K, sg, lerp(wb, wt, s), lerp(yb, .625, s), lerp(zb, zt, s)));   // oben Arme (fast) gestreckt
+        if (impl === 'smith') { const zz = K.S.z + (beh ? -.07 : .12); hand = sides(sg => { const h = rel(K, sg, lerp(wb, wt, s), lerp(yb, .61, s), 0); h.z = zz; return h; }); }
         const elbow = sides(sg => beh || impl === 'db' || impl === 'machine' ? K.l.clone().multiplyScalar(sg).addScaledVector(DOWN, .6).addScaledVector(K.f, .1) : K.l.clone().multiplyScalar(sg * .5).addScaledVector(K.f, .6).add(DOWN));
         return Object.assign({}, base, { hand, elbow, head: beh ? 12 : 0 });
       },
@@ -599,11 +601,11 @@
         const hand = sides((sg, side) => {
           if (one && side === 'L') return cable ? relP(K, 1, .2, .02, .05) : V(.6, 1.1, 0);
           const sv = work.includes(side) ? s : 0;
-          if (machine) { const ang = lerp(12, 85, sv) * D2R; return shoulder(K, sg).addScaledVector(K.l, sg * Math.sin(ang) * .3).addScaledVector(K.u, -Math.cos(ang) * .3).addScaledVector(K.f, .25); }
+          if (machine) { const ang = lerp(10, 88, sv) * D2R; return shoulder(K, sg).addScaledVector(K.l, sg * Math.sin(ang) * .3).addScaledVector(K.u, -Math.cos(ang) * .3).addScaledVector(K.f, .29); }   // Ellbogen ~90°, Oberarm bis Schulterhöhe
           const ang = lerp(cable ? -14 : 10, 88, sv) * D2R, r = .6;
           return shoulder(K, sg).addScaledVector(K.l, sg * Math.sin(ang) * r).addScaledVector(K.u, -Math.cos(ang) * r).addScaledVector(K.f, .07);
         });
-        const elbow = sides(sg => machine ? DOWN.clone().addScaledVector(K.f, -1) : K.f.clone().multiplyScalar(-.7).addScaledVector(UP, .45).addScaledVector(K.l, sg * .3));
+        const elbow = sides((sg, side) => machine ? (() => { const a = lerp(10, 88, work.includes(side) ? s : 0) * D2R; return K.l.clone().multiplyScalar(sg * Math.sin(a)).addScaledVector(K.u, -Math.cos(a)).addScaledVector(K.f, -.25); })() : K.f.clone().multiplyScalar(-.7).addScaledVector(UP, .45).addScaledVector(K.l, sg * .3));
         if (one) elbow.L = cable ? V(.4, -.4, -.5) : V(0, -1, -.4);
         return Object.assign({}, base, { hand, elbow });
       },
@@ -703,7 +705,7 @@
         else { props.dL = dbAt(kit); props.dR = dbAt(kit); }
       },
       pose(s) {
-        const K = kin(base), a = lerp(seated ? 18 : 10, 90, s);
+        const K = kin(base), a = lerp(seated ? 18 : 10, 80, s);   // bis Schulterhöhe, nicht darüber
         const hand = sides(sg => shoulder(K, sg).addScaledVector(armDir(K, a), .6).addScaledVector(K.l, -sg * (impl === 'cable' ? .05 : 0)));
         return Object.assign({}, base, { hand, elbow: sides(sg => UP.clone().addScaledVector(K.l, sg * .4)) });
       },
@@ -763,7 +765,7 @@
       },
       pose(s) {
         const o = Object.assign({}, base, { pitch: lerp(-10, -18, s) }); const K = kin(o);
-        o.hand = sides(sg => lv(V(sg * .43, K.S.y + .58, K.S.z + .1), rel(K, sg, .37, .04, .14), s));
+        o.hand = sides(sg => lv(V(sg * .43, K.S.y + .58, K.S.z + .1), rel(K, sg, .37, -.07, .17), s));   // Endposition: Stange an der oberen Brust (nicht auf Kinnhöhe)
         o.elbow = sides(sg => DOWN.clone().addScaledVector(K.l, sg * .7).addScaledVector(K.f, -.3));
         o.head = lerp(8, 0, s);
         return o;
@@ -821,7 +823,7 @@
         },
         pose(s) {
           const K = kin(base), w = v === 'tbarMachine' ? .17 : .2;
-          const hand = sides(sg => lv(shoulder(K, sg).addScaledVector(DOWN, .6).addScaledVector(K.l, sg * (w - DIM.shW)), relP(K, sg, w + .02, .22, .14), s));
+          const hand = sides(sg => lv(shoulder(K, sg).addScaledVector(DOWN, .615).addScaledVector(K.l, sg * (w - DIM.shW)), relP(K, sg, w + .02, .22, .14), s));
           return Object.assign({}, base, { hand, elbow: sides(sg => UP.clone().addScaledVector(horiz(K.f), -.5).addScaledVector(K.l, sg * .3)) });
         },
         props(J) {
@@ -855,7 +857,7 @@
         setup(kit, MT) { kit.box(.3, .38, 1.1, V(0, .19, -.25), null, MT.pad); kit.box(.4, .3, .06, V(0, .3, .62), { x: V(1, 0, 0), y: nz(V(0, 1, -.5)), z: nz(V(0, .5, 1)) }, MT.frame); kit.tower(pul, V(0, 0, 1)); props.c = kit.line(); props.h = kit.shortBar(.12); },
         pose(s) {
           const o = Object.assign({}, base, { pitch: lerp(18, -4, s) }); const K = kin(o);
-          o.hand = sides(sg => lv(shoulder(K, sg).addScaledVector(horiz(K.f), .58).addScaledVector(DOWN, .14).addScaledVector(K.l, -sg * .14), relP(K, sg, .06, .2, .17), s));
+          o.hand = sides(sg => lv(shoulder(K, sg).addScaledVector(horiz(K.f), .58).addScaledVector(DOWN, .14).addScaledVector(K.l, -sg * .14), relP(K, sg, .07, .27, .23), s));   // Endposition: Griff am Oberbauch, Ellbogen hinter dem Rumpf
           o.elbow = sides(sg => K.f.clone().multiplyScalar(-1).addScaledVector(DOWN, .4).addScaledVector(K.l, sg * .2));
           return o;
         },
@@ -894,7 +896,7 @@
     const v = p.v || 'back', props = {};
     const stance = v === 'narrow' ? .1 : v === 'hack' ? .16 : .17, toe = v === 'narrow' ? 5 : 16;
     if (v === 'hack') {
-      const u = nz(V(0, .82, -.57)), p0 = V(0, 1.0, -.05), ankZ = p0.clone().addScaledVector(u, -(LEG - .04));
+      const u = nz(V(0, .82, -.57)), p0 = V(0, 1.0, -.05), ankZ = p0.clone().addScaledVector(u, -(LEG - .012));   // oben Beine fast gestreckt (Knie ~165°)
       const base = { pitch: -35, ankle: { L: V(stance, ankZ.y, ankZ.z), R: V(-stance, ankZ.y, ankZ.z) }, foot: { L: rotA(V(0, .35, 1), UP, 12), R: rotA(V(0, .35, 1), UP, -12) }, knee: toeOut(14) };
       return {
         cam: { az: 72, el: 10, dist: 3.3, target: V(0, .95, .15) },
@@ -986,6 +988,7 @@
     const base = { pelvis: pel, pitch: -55, head: 20, foot: { L: rotA(V(0, .71, -.7), UP, 0), R: V(0, .71, -.7) } };
     return {
       cam: { az: 75, el: 16, dist: 3.4, target: V(0, .85, .4) },
+      legNorm: true,
       timing: LBL.lower('Start – Beine fast gestreckt, Knie nicht durchgedrückt', 'Plattform kontrolliert Richtung Brust sinken lassen', 'Unten – Knie ca. 90°, Gesäß bleibt am Polster', 'über die ganze Fußsohle wegdrücken'),
       setup(kit, MT) {
         seatFor(kit, pel, -55, { seatY: .41, backLen: .8, seatZ: .02 });
@@ -993,7 +996,7 @@
         props.pf = kit.movBox(.62, .7, .05, MT.frame);
       },
       pose(s) {
-        const L = lerp(.82, .4, s);
+        const L = lerp(.855, .4, s);   // Start: Knie fast gestreckt (~160°), unten ~90°
         const o = Object.assign({}, base);
         o.ankle = sides(sg => pel.clone().add(V(sg * .17, 0, 0)).addScaledVector(dS, L));
         const K = kin(o); o.knee = sides(sg => K.f.clone().addScaledVector(K.l, sg * .35));
@@ -1008,6 +1011,7 @@
     const pel = V(0, .74, 0), props = {};
     return {
       cam: { az: 82, el: 18, dist: 3.1, target: V(0, .75, -.2) },
+      legNorm: true,
       timing: LBL.std('Start – Beine gestreckt, Polster über den Fersen', 'Fersen Richtung Gesäß beugen', 'Oben – Beinbeuger anspannen, Hüfte bleibt auf dem Polster', 'langsam strecken'),
       setup(kit, MT) {
         kit.box(.34, .08, 1.25, V(0, .6, .02), null, MT.pad); kit.rod(V(0, .55, .3), V(0, 0, .3), .04); kit.rod(V(0, .55, -.4), V(0, 0, -.4), .04);
@@ -1031,6 +1035,7 @@
     const base = seatedUpright(-10, -.05), props = {};
     return {
       cam: { az: 75, el: 12, dist: 3.0, target: V(0, .7, .25) },
+      legNorm: true,
       timing: LBL.std('Start – Knie ca. 90°, Polster vorne über dem Sprunggelenk', 'Unterschenkel nach vorne strecken', 'Oben – Beine gestreckt, Oberschenkel anspannen', 'langsam beugen'),
       setup(kit, MT) { seatFor(kit, base.pelvis, -10, { seatY: .46, backLen: .62 }); props.roll = kit.movCyl(.05, .34, MT.pad); props.arm = kit.movRod(.022); },
       pose(s) {
@@ -1053,9 +1058,9 @@
         : LBL.std('Start – Schulterblätter an der Bank, Gesäß unten', 'Hüfte nach oben strecken', 'Oben – Oberkörper & Oberschenkel bilden eine Linie', 'kontrolliert absenken'),
       setup(kit, MT) { kit.box(1.1, .42, .32, V(0, .21, -.42), null, MT.pad); props.bar = kit.barbell(2.0, .22); },
       pose(s) {
-        const a = lerp(38, -2, s) * D2R, len = DIM.lumbar + DIM.thor;
+        const a = lerp(38, -4, s) * D2R, len = DIM.lumbar + DIM.thor;   // oben Hüfte voll gestreckt
         const pel = Sp.clone().add(V(0, -Math.sin(a) * len, Math.cos(a) * len));
-        const o = { pelvis: pel, pitch: -(90 - a / D2R), head: lerp(25, 50, s), ankle: { L: V(.2, DIM.ank, .52), R: V(-.2, DIM.ank, .52) }, knee: { L: V(.15, 1, .2), R: V(-.15, 1, .2) }, foot: toeOut(8) };
+        const o = { pelvis: pel, pitch: -(90 - a / D2R), head: lerp(25, 50, s), ankle: { L: V(.2, DIM.ank, .63), R: V(-.2, DIM.ank, .63) }, knee: { L: V(.15, 1, .2), R: V(-.15, 1, .2) }, foot: toeOut(8) };   // oben: Unterschenkel senkrecht, Hüfte voll gestreckt
         const K = kin(o); o.hand = sides(sg => K.pel.clone().addScaledVector(K.P.f, .2).addScaledVector(K.P.l, sg * .33).addScaledVector(K.P.u, .02));
         o.elbow = sides(sg => K.P.l.clone().multiplyScalar(sg).add(DOWN));
         return o;
@@ -1149,7 +1154,7 @@
     if (v === 'lying') {
       const base = { pelvis: V(0, .12, 0), pitch: -90, head: 10 };
       return {
-        cam: { az: 75, el: 18, dist: 3.0, target: V(0, .35, .1) },
+        cam: { az: 75, el: 18, dist: 3.0, target: V(0, .35, .1) }, legNorm: true,
         timing: LBL.std('Start – Beine gestreckt knapp über dem Boden', 'Beine gestreckt bis zur Senkrechten heben', 'Oben – unterer Rücken am Boden', 'langsam absenken – Füße nicht ablegen'),
         setup(kit) { kit.floorMat(-1, 1.1); },
         pose(s) {
@@ -1163,7 +1168,7 @@
     }
     const straight = v === 'hangStraight';
     return {
-      cam: { az: 70, el: 8, dist: 3.6, target: V(0, 1.4, .1) },
+      cam: { az: 70, el: 8, dist: 3.6, target: V(0, 1.4, .1) }, legNorm: true,
       timing: straight ? LBL.std('Start – frei hängend, Körper ruhig', 'gestreckte Beine bis zur Waagerechten heben', 'Oben – Bauch anspannen, kein Schwung', 'langsam absenken') : LBL.std('Start – frei hängend, Körper ruhig', 'Knie zur Brust ziehen, Becken einrollen', 'Oben – Bauch anspannen', 'langsam absenken'),
       setup(kit, MT) { kit.rod(V(-.6, hy, 0), V(.6, hy, 0), .018, MT.steel); for (const s of [-1, 1]) kit.rod(V(s * .6, 0, 0), V(s * .6, hy + .05, 0), .035); },
       pose(s) {
@@ -1197,14 +1202,14 @@
   TPL.plank = p => {
     const props = {};
     if (p.v === 'side' || p.v === 'sideLeg') {
-      const sh = V(-.58, .4, 0), ft = V(.82, .1, 0);
+      const sh = V(-.58, .58, 0), ft = V(.82, .1, 0);   // Brustbein-Mitte; stützende Schulter ~.36 über dem Boden (Ellbogen unter der Schulter auf der Matte)
       const leg = p.v === 'sideLeg';
       return {
         cam: { az: 8, el: 12, dist: 3.1, target: V(.1, .35, 0) },
         timing: leg ? LBL.std('Start – Seitstütz, Körper in einer Linie', 'oberes Bein gestreckt anheben', 'Oben – Becken bleibt oben', 'Bein kontrolliert absenken') : LBL.lower('Start – Seitstütz, Körper in einer Linie', 'Becken kontrolliert Richtung Boden senken', 'Unten – kurz vor dem Boden', 'Becken wieder hochdrücken'),
         setup(kit) { kit.box(1.9, .012, .6, V(.1, .006, 0), null, kit.MT.mat); },
         pose(s) {
-          const sag = leg ? 0 : s * .15;
+          const sag = leg ? 0 : s * .1;   // Becken senken, ohne den Boden zu berühren
           // Becken liegt auf der Linie Schulter–Fuß (minus Absenkung)
           const lineP = sh.clone().lerp(ft, .37); const pel = lineP.add(V(0, -sag, 0));
           const ud = nz(sh.clone().add(V(0, -.0, 0)).sub(pel)); // Richtung Becken → Schulter
@@ -1603,7 +1608,7 @@
     /* Kindhaltung */
     if (v === 'child') {
       const base = quadruped();
-      const child = { pelvis: V(0, .22, -.13), pitch: 104, flex: 22, head: -25 };
+      const child = { pelvis: V(0, .24, -.13), pitch: 92, flex: 10, head: -20 };   // Gesäß auf den Fersen, Oberkörper auf den Oberschenkeln, Stirn am Boden (vorher Kopf unter dem Boden → Figur wurde 30 cm angehoben)
       child.ankle = sides(sg => V(sg * .1, .05, -.12)); child.knee = sides(sg => V(sg * .2, -.5, 1)); child.foot = sides(() => V(0, -.2, -1));
       child.hand = sides(sg => V(sg * .17, .025, .98)); child.elbow = sides(sg => V(sg * .2, 1, 0));
       return {
@@ -1652,7 +1657,7 @@
     /* Glute Bridge (Beckenheben) */
     if (v === 'bridge') {
       const low = supine({ pelvis: V(0, .1, -.02) }); low.hand = sides(sg => V(sg * .25, .025, -.12)); low.elbow = sides(sg => V(sg, 0, 0));
-      const high = supine({ pelvis: V(0, .38, -.06), pitch: -124 }); high.hand = low.hand; high.elbow = low.elbow;
+      const high = supine({ pelvis: V(0, .38, -.06), pitch: -124, head: 46 }); high.hand = low.hand; high.elbow = low.elbow;   // Schultern und Kopf bleiben auf der Matte (Kinn Richtung Brust), nur das Becken hebt sich
       return {
         thumbT: 2.7, cam: { az: 75, el: 12, dist: 2.8, target: V(0, .25, -.05) }, setup: floor(-.5, .5, -.9, .75),
         custom: poseKeys([[0, low, 'Rückenlage – Füße hüftbreit, Arme neben dem Körper'], [.6, low, 'Gesäß anspannen'], [1.6, high, 'Becken anheben, bis Knie–Hüfte–Schulter eine Linie bilden'],
@@ -1922,7 +1927,7 @@
           },
           pose(s) {
             const K = kin(base);
-            const hand = sides(sg => V(sg * .12, K.S.y + lerp(.57, .17, s), zb));
+            const hand = sides(sg => V(sg * .12, K.S.y + lerp(.6, .17, s), zb));   // oben Arme gestreckt
             return Object.assign({}, base, { hand, elbow: sides(sg => nz(UP.clone().addScaledVector(K.f, .55).addScaledVector(K.l, sg * .3))) });
           },
           props(J) { props.bar.set(bothHands(J), J.L.hand.clone().sub(J.R.hand)); }
@@ -2241,6 +2246,7 @@
       const pul = V(.12, .12, .5), postZ = pul.z + .14;
       return {
         cam: { az: 78, el: 10, dist: 3.3, target: V(0, .85, .2) },
+        legNorm: 'L',
         timing: LBL.std('Start – aufrecht am Kabelturm, Manschette am linken Knöchel, Bein gestreckt', 'Ferse Richtung Gesäß beugen', 'Oben – Beinbeuger anspannen, Knie bleibt unter der Hüfte', 'Unterschenkel langsam strecken'),
         setup(kit) { kit.tower(pul, V(0, 0, 1)); props.c = kit.line(); props.cuff = kit.movCyl(.05, .07, kit.MT.dark); },
         pose(s) {
@@ -2262,6 +2268,7 @@
     const base = { pelvis: V(0, BT + .11, -.06), pitch: -4, head: -2, foot: toeOut(6) };
     return {
       cam: { az: 70, el: 12, dist: 3.4, target: V(0, .65, -.1) },
+      legNorm: 'L',
       timing: LBL.std('Start – aufrecht auf der Bank, Manschette am linken Knöchel, Knie ca. 90°', 'Unterschenkel nach vorne strecken', 'Oben – Bein gestreckt, Oberschenkel anspannen', 'langsam beugen'),
       setup(kit) { flatBench(kit, BZ0, BZ1, BT, 0, .3); kit.tower(pul, V(0, 0, -1)); props.c = kit.line(); props.cuff = kit.movCyl(.05, .07, kit.MT.dark); },
       pose(s) {
@@ -2453,7 +2460,7 @@
   TPL.medball = () => {
     const props = {}, WZ = 2.35, BR = .12, TOT = 3.2, T_REL = 1.05, T_WALL = 1.32, T_CATCH = 1.62;
     const P = (o) => Object.assign({ pelvis: V(0, STAND_Y - .05, 0), pitch: 8, head: -3, ankle: { L: V(.16, DIM.ank, .04), R: V(-.16, DIM.ank, -.04) }, foot: toeOut(10), knee: toeOut(12) }, o);
-    const chest = K => K.S.clone().addScaledVector(horiz(K.f), .22).addScaledVector(UP, -.13);
+    const chest = K => K.S.clone().addScaledVector(horiz(K.f), .29).addScaledVector(UP, -.13);   // Ball liegt vor der Brust (Radius 12 cm), nicht in ihr
     const ext = K => K.S.clone().addScaledVector(horiz(K.f), .6).addScaledVector(UP, -.08);
     const ready = K => K.S.clone().addScaledVector(horiz(K.f), .48).addScaledVector(UP, -.08);
     const ballPath = x => {   // nur während des Flugs
@@ -2746,7 +2753,7 @@
 
   // Copenhagen Plank, kurzer Hebel: Seitstütz auf dem rechten Unterarm, oberes Knie auf der Bank, unteres Bein hebt zur Bank
   TPL.copenhagen = () => {
-    const sh = V(-.62, .37, 0), KT = V(.36, .53, 0), BX = .55;
+    const sh = V(-.62, .55, 0), KT = V(.36, .53, 0), BX = .55;   // sh = Brustbein-Mitte; untere Schulter ~.36 über dem Boden → Ellbogen auf der Matte, Unterarm liegt auf
     const at = s => {
       const ang = lerp(-22, 0, s) * D2R, dirTop = nz(sh.clone().sub(KT));             // oben: Schulter–Knie eine Linie
       const dir = V(dirTop.x * Math.cos(ang) - dirTop.y * Math.sin(ang), dirTop.x * Math.sin(ang) + dirTop.y * Math.cos(ang), 0);
@@ -2822,7 +2829,7 @@
     const props = {}, ank = { L: V(.13, DIM.ank, 0), R: V(-.13, DIM.ank, 0) };
     const rack = (K, sg) => shoulder(K, sg).addScaledVector(UP, .11).addScaledVector(horiz(K.f), .06).addScaledVector(K.l, sg * .035);
     const elRack = (K, sg) => horiz(K.f).addScaledVector(DOWN, .3).addScaledVector(K.l, sg * .25);
-    const over = (K, sg) => shoulder(K, sg).addScaledVector(UP, .6).addScaledVector(K.l, sg * .07).addScaledVector(horiz(K.f), -.03);
+    const over = (K, sg) => shoulder(K, sg).addScaledVector(UP, .62).addScaledVector(K.l, sg * .045).addScaledVector(horiz(K.f), -.03);   // oben Arme gestreckt (Lockout)
     const P = (o, hands, el) => { const p = Object.assign({ ankle: { L: ank.L.clone(), R: ank.R.clone() }, foot: toeOut(8), knee: toeOut(10), head: 0 }, o);
       if (o.heel) { for (const sd of ['L', 'R']) p.ankle[sd].y += o.heel; p.foot = { L: V(.08, -.6, 1), R: V(-.08, -.6, 1) }; }
       const K = kin(p); p.hand = sides(sg => hands(K, sg)); p.elbow = sides(sg => el(K, sg)); return p; };
@@ -2881,7 +2888,7 @@
         props.t = [[1, -1], [1, 1], [-1, -1], [-1, 1]].map(() => kit.line(MT.shoe, .02));
         for (const s of [-1, 1]) kit.box(.12, .04, .07, V(s * W, hb + .02, 0), null, MT.shoe);
       },
-      props(J) { let i = 0; for (const [sg, side] of [[1, -1], [1, 1], [-1, -1], [-1, 1]]) { const h = (sg > 0 ? J.L : J.R).hand; props.t[i++].set(V(sg * W + side * .035, hb, side * .02), h.clone().add(V(side * .02, .04, 0))); } }
+      props(J) { let i = 0; for (const [sg, side] of [[1, -1], [1, 1], [-1, -1], [-1, 1]]) { const h = (sg > 0 ? J.L : J.R).hand; props.t[i++].set(V(sg * W + side * .035, hb, side * .02), h.clone().add(V(side * .012, -.05, 0))); } }   // Handtuch läuft durch die Faust
     };
   };
 
@@ -2936,8 +2943,10 @@
       const sp = ease(s), o = { pelvis: V(0, BY + .075, -.04 + .03 * sp), pitch: lerp(4, 46, sp), flex: lerp(0, 30, smooth(.1, 1, s)), head: lerp(-4, -18, sp),
         ankle: sides(sg => V(sg * .15, DIM.ank + STEP, .47)), foot: toeOut(10), knee: sides(sg => V(sg * .08, .4, 1)) };
       const K = kin(o);
-      o.hand = sides(sg => { const sh = shoulder(K, sg), z = lerp(.36, .62, smooth(0, .45, s)), y = reachY(sh, sg * W, z);
-        return V(sg * W, Math.max(.235, z < .56 ? Math.max(y, .66) : y), z); });
+      o.hand = sides(sg => { const sh = shoulder(K, sg), dx = sh.x - sg * W, dy = sh.y - .66, zt = sh.z + Math.sqrt(Math.max(0, .62 * .62 - dx * dx - dy * dy));   // gestreckter Arm: Stange liegt auf den Oberschenkeln
+        if (zt < .6) return V(sg * W, .66, Math.max(.15, zt));
+        const y = reachY(sh, sg * W, .62, .62); if (y >= .235) return V(sg * W, y, .62);   // ab den Knien: Stange vor den Schienbeinen nach unten, Arme gestreckt
+        const dyf = sh.y - .235; return V(sg * W, .235, Math.min(1.0, sh.z + Math.sqrt(Math.max(0, .3844 - dx * dx - dyf * dyf)))); });   // am Boden: Stange rollt mit gestreckten Armen Richtung Füße
       o.elbow = sides(sg => K.l.clone().multiplyScalar(sg).addScaledVector(K.f, -.5).addScaledVector(DOWN, .3));
       return o;
     };
@@ -2947,6 +2956,35 @@
       setup(kit, MT) { kit.box(.32, BY, 1.1, V(0, BY / 2, -.5), null, MT.pad); kit.box(.62, STEP, .36, V(0, STEP / 2, .52), null, MT.frame); props.bar = kit.barbell(2.0, .225); kit.floorMat(-1.1, 1.0, 1.5); },
       pose: at,
       props(J) { props.bar.set(bothHands(J), V(1, 0, 0)); }
+    };
+  };
+
+  // Muscle-up an der Stange: Hang → explosiver Zug bis zur unteren Brust → Übergang (Oberkörper kippt über die Stange,
+  // Ellbogen wandern nach oben-hinten) → Stütz mit gestreckten Armen über der Stange → kontrolliert zurück in den Hang
+  TPL.muscleUp = () => {
+    const hy = 2.22, w = .3;
+    const P = (pel, pitch, o = {}) => {
+      const q = Object.assign({ pelvis: pel, pitch, head: o.head || 0 }, o.p || {});
+      const K = kin(q), legF = o.legF || 0;   // legF: Beine leicht vorne (Hohlkreuz vermeiden, Gegengewicht im Übergang)
+      q.hand = sides(sg => V(sg * w, hy + .005, 0));
+      q.elbow = sides(sg => o.el ? o.el(K, sg) : DOWN.clone().addScaledVector(K.l, sg * .8).addScaledVector(K.f, -.3));
+      q.knee = { L: V(.05, 0, 1), R: V(-.05, 0, 1) };
+      q.ankle = sides(sg => K.pel.clone().addScaledVector(K.P.l, sg * .07).addScaledVector(K.P.u, -(LEG - .04) * Math.cos(legF * D2R)).addScaledVector(K.P.f, (LEG - .04) * Math.sin(legF * D2R)));
+      q.foot = sides(() => V(0, -.8, .3));
+      return q;
+    };
+    const hang = P(V(0, 1.1, -.03), -4);
+    const pull = P(V(0, 1.6, -.12), -20, { legF: 18, head: 8 });
+    const trans = P(V(0, 1.98, -.2), 38, { legF: 28, head: -10, el: (K, sg) => UP.clone().addScaledVector(K.f, -.9).addScaledVector(K.l, sg * .4) });
+    const press = P(V(0, 2.28, -.12), 22, { legF: 12, head: -6, el: (K, sg) => K.f.clone().multiplyScalar(-1).addScaledVector(K.l, sg * .25) });
+    const top = P(V(0, 2.4, -.06), 8, { legF: 6, el: (K, sg) => K.f.clone().multiplyScalar(-1).addScaledVector(K.l, sg * .2) });
+    return {
+      cam: { az: 70, el: 6, dist: 4.3, target: V(0, 1.9, 0) }, thumbT: 2.2,
+      custom: poseKeys([[0, hang, 'Start – Hang mit gestreckten Armen, Körper gespannt'], [.5, hang, 'Explosiv hochziehen – Stange Richtung untere Brust'],
+        [1.2, pull, 'Zug bis zur unteren Brust, Beine leicht vorne'], [1.55, trans, 'Übergang – Handgelenke über die Stange, Oberkörper kippt nach vorne'],
+        [1.95, press, 'Aus dem tiefen Stütz nach oben drücken'], [2.4, top, 'Oben – Arme gestreckt, Stange auf Hüfthöhe'], [3.0, top, 'Oben – Arme gestreckt, Stange auf Hüfthöhe'],
+        [3.5, press, 'Kontrolliert in den Stütz absenken'], [3.95, trans, 'Zurück über die Stange'], [4.5, pull, 'Kontrolliert in den Hang ablassen']], 5.3),
+      setup(kit, MT) { kit.rod(V(-.75, hy, 0), V(.75, hy, 0), .018, MT.steel); for (const sg of [-1, 1]) kit.rod(V(sg * .75, 0, 0), V(sg * .75, hy + .05, 0), .035); }
     };
   };
 

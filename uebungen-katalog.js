@@ -943,7 +943,7 @@ window.SW_GRUPPEN = ['Brust', 'Schulter', 'Rücken', 'Arme', 'Beine', 'Bauch', '
     safety: 'Bei Schwindel oder Nacken- und Schulterbeschwerden abbrechen. Rutschfeste Füße.',
     alias: ['Wall-Supported Hold', 'Wall Plank Hold', 'Wandstütz', 'Füße an der Wand halten'] }),
   B({ id: 'muscle-ups', n: 'Muscle-ups', sg: 'Pull-ups & Calisthenics', sub: 'Latissimus, Trizeps & Brust', eq: 'Klimmzugstange oder Turnringe', typ: 'dynamisch', lvl: 'Profi',
-    anim: { t: 'latPull', v: 'pullup' }, animBase: 'Die 3D-Figur zeigt nur die Zugphase (Klimmzug). Übergang und Stütz sind in der Anleitung beschrieben.',
+    anim: { t: 'muscleUp' },
     prim: ['lats', 'triceps', 'chest'], sec: ['biceps', 'frontDelt', 'abs', 'forearms'],
     start: 'An der Stange hängen, Griff schulterbreit (Obergriff, Daumen auf der Seite der Finger möglich), Körper gespannt.',
     exec: ['Explosiv hochziehen – die Stange Richtung untere Brust/Hüfte ziehen.', 'Oben schnell die Handgelenke über die Stange bringen und den Oberkörper nach vorne über die Stange kippen (Übergang).', 'Aus dem tiefen Stütz nach oben drücken, bis die Arme gestreckt sind.', 'Kontrolliert zurück in den Hang.'],

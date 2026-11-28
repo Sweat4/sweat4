@@ -1,6 +1,6 @@
-/* SWEAT4 – neue 3D-Figuren (Mann/Frau) für den Übungskatalog (v57, überarbeitet v59 nach vollständiger Bewegungsprüfung)
-   Erweiterung zu uebungen3d.js: Die Bewegungsberechnung (63 Vorlagen), der Katalog (171 Einträge), Geräte, Kamera und Licht
-   bleiben unverändert. Diese Datei hängt nur die neuen Figuren (figur-m.glb / figur-w.glb) an den bestehenden Viewer:
+/* SWEAT4 – neue 3D-Figuren (Mann/Frau) für den Übungskatalog (v57, überarbeitet v59, v60: Bewegungsabläufe je Figur mit den Gelenkwinkeln der Vorlage)
+   Erweiterung zu uebungen3d.js: Bewegungsvorlagen (64, v60 fachlich korrigiert), Katalog (171 Einträge), Geräte, Kamera und Licht
+   kommen aus uebungen3d.js. Diese Datei hängt nur die neuen Figuren (figur-m.glb / figur-w.glb) an den bestehenden Viewer:
    - die App berechnet wie bisher die Gelenkpunkte (SW3D.solve); die neue Figur wird per IK auf dieselben Punkte gelegt
    - Griffe werden an den Geräten in Handnähe erkannt (Stange/Kurzhantel/Seil, Fläche, Ball)
    - Bodenkontakt: liegt die Figur im Boden, wird sie pro Übung angehoben
@@ -4482,7 +4482,7 @@ function makeFigure(M, names, opts = {}) {
   const appAnk = SW3D.solve(SW3D.TPL.squat({ v: 'back' }).pose(0)).L.ankle.y;
   const ankOff = R.foot_l.y - R.Root.y - appAnk + SOLE;
   const footRest = R.ball_l.clone().sub(R.foot_l), footH = Math.hypot(footRest.x, footRest.z), footY = footRest.y;
-  const PALM = .075;
+  const PALM = .075, TPL_ARM = .62, TPL_LEG = .87;   // Armlänge der Bewegungsvorlagen (Schulter → Griffpunkt)
   function apply(J, ctx = {}) {
     const K = J.K, Pq = new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(cv(K.P.l), cv(K.P.u), cv(K.P.f)));
     const Cq = new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(cv(K.l), cv(K.u), cv(K.f)));
@@ -4492,6 +4492,18 @@ function makeFigure(M, names, opts = {}) {
     const hq = new THREE.Quaternion().setFromAxisAngle(cv(K.l), (J.pose.head || 0) * Math.PI / 180).multiply(Cq);
     setWorldQ('neck_01', Cq.clone().slerp(hq, .5)); setWorldQ('head', hq);
     const out = {};
+    // Armlänge der Figur ≠ Vorlage: Zielpunkt so verschieben, dass die Gelenkwinkel der Vorlage entstehen (Gewicht 0…1, stetig);
+    // halten beide Hände dasselbe Gerät, bekommen beide dieselbe Verschiebung (Gerät bleibt starr, Griffabstand bleibt)
+    const NS = {};
+    if (ctx.norm) {
+      for (const [s, A] of [['l', 'L'], ['r', 'R']]) { const w = +ctx.norm[A] || 0; if (!w) continue; const j = J[A], gr = (ctx.grips && ctx.grips[A]) || {};
+        const sp = B('upperarm_' + s).getWorldPosition(V()), G = cv(J.pose.hand && J.pose.hand[A] ? J.pose.hand[A] : j.hand); if (gr.gp) G.copy(gr.gp);
+        const Lf = L.up + L.fo + PALM;
+        if (ctx.norm.rel && ctx.norm.rel[A]) { NS[A] = sp.clone().addScaledVector(G.clone().sub(cv(j.sh)), Lf / TPL_ARM).sub(G).multiplyScalar(w); continue; }   // freie Hand: Lage relativ zur eigenen Schulter (z. B. Hände an den Schulterpolstern)
+        const r = Math.min(1, G.distanceTo(cv(j.sh)) / TPL_ARM), dn = G.clone().sub(sp); if (dn.lengthSq() < 1e-6) continue;
+        NS[A] = sp.clone().addScaledVector(dn.normalize(), r * Lf).sub(G).multiplyScalar(w); }
+      if (ctx.norm.pair && NS.L && NS.R) { const m = NS.L.clone().add(NS.R).multiplyScalar(.5); NS.L = m; NS.R = m.clone(); }
+    }
     for (const [s, A] of [['l', 'L'], ['r', 'R']]) {
       const j = J[A];
       // Ellbogen-/Knie-Richtung zeitlich glätten: die Vorlage springt teils von Bild zu Bild (Gelenk klappt um)
@@ -4501,14 +4513,19 @@ function makeFigure(M, names, opts = {}) {
         else { if (newF) PSA[k + '0'] = PSA[k]; const pr = PSA[k + '0']; PSA[k] = pr.dot(c) < .97 ? pr.clone().lerp(c, .3).normalize() : c; } }
       PSA.f = ctx.fid;
       const EP = PSA.e.clone(), KP = PSA.k.clone();
-      const LL = (ctx.limbLift && ctx.limbLift[A]) || {}, hp = B('thigh_' + s).getWorldPosition(V()), ankT = cv(j.ankle).add(V(0, ankOff + (LL.leg || 0), 0)), g2 = ik(hp, ankT, L.th, L.sh, KP);
+      const LL = (ctx.limbLift && ctx.limbLift[A]) || {}, hp = B('thigh_' + s).getWorldPosition(V()), ankT = cv(j.ankle).add(V(0, ankOff + (LL.leg || 0), 0));
+      let ankShift = null;
+      if (ctx.legNorm === true || ctx.legNorm === A) {   // Bein frei bzw. an beweglichem Gerätepolster: gleicher Kniewinkel wie die Vorlage (Beinlänge der Figur ≠ Vorlage)
+        const r = Math.min(1, cv(j.ankle).distanceTo(cv(j.hip)) / TPL_LEG), dn = ankT.clone().sub(hp), a0 = ankT.clone(); if (dn.lengthSq() > 1e-6) ankT.copy(hp).addScaledVector(dn.normalize(), r * (L.th + L.sh)); ankShift = ankT.clone().sub(a0); }
+      const g2 = ik(hp, ankT, L.th, L.sh, KP);
       setWorldQ('thigh_' + s, basis(g2.E.clone().sub(hp), KP).multiply(RQ['thigh_' + s].clone().invert()));
       setWorldQ('calf_' + s, basis(g2.T.clone().sub(g2.E), KP).multiply(RQ['calf_' + s].clone().invert()));
       const fh = cv(j.foot); const fy = fh.y; fh.y = 0; if (fh.lengthSq() < 1e-6) fh.copy(cv(K.f)); fh.normalize();
       setWorldQ('foot_' + s, basis(fh.multiplyScalar(footH).add(V(0, footY + fy * footH, 0)), V(0, 1, 0)).multiply(RQ['foot_' + s].clone().invert()));
       // Arme + Hand
       const gr = (ctx.grips && ctx.grips[A]) || { type: 'relaxed' };
-      const sp = B('upperarm_' + s).getWorldPosition(V()), G = cv(J.pose.hand && J.pose.hand[A] ? J.pose.hand[A] : j.hand).add(V(0, LL.arm || 0, 0)); if (gr.gp) G.copy(gr.gp).add(V(0, LL.arm || 0, 0)); const G0 = G.clone(); if (ctx.gOff && ctx.gOff[A]) { const r0 = G.distanceTo(sp), rmax = Math.max(r0, (L.up + L.fo + PALM) * .97); G.add(ctx.gOff[A]); if (G.distanceTo(sp) > rmax) G.copy(sp.clone().add(G.clone().sub(sp).setLength(rmax))); }   // ausweichen; nur wenn außer Reichweite auf die Armlänge begrenzen
+      const sp = B('upperarm_' + s).getWorldPosition(V()), G = cv(J.pose.hand && J.pose.hand[A] ? J.pose.hand[A] : j.hand).add(V(0, LL.arm || 0, 0)); if (gr.gp) G.copy(gr.gp).add(V(0, LL.arm || 0, 0)); const G0 = G.clone();
+      if (NS[A]) G.add(NS[A]); if (ctx.gOff && ctx.gOff[A]) { const r0 = G.distanceTo(sp), rmax = Math.max(r0, (L.up + L.fo + PALM) * .97); G.add(ctx.gOff[A]); if (G.distanceTo(sp) > rmax) G.copy(sp.clone().add(G.clone().sub(sp).setLength(rmax))); }   // ausweichen; nur wenn außer Reichweite auf die Armlänge begrenzen
       let a2 = ik(sp, G, L.up, L.fo + PALM, EP, true); a2.T = a2.E.clone().add(a2.T.clone().sub(a2.E).multiplyScalar(L.fo / (L.fo + PALM)));
       let hf = null, wT0 = null, conv = 0;
       if (gr.type === 'bar') {
@@ -4528,10 +4545,10 @@ function makeFigure(M, names, opts = {}) {
       setWorldQ('upperarm_' + s, basis(a2.E.clone().sub(sp), EP).multiply(RQ['upperarm_' + s].clone().invert()));
       setWorldQ('lowerarm_' + s, basis(a2.T.clone().sub(a2.E), EP).multiply(RQ['lowerarm_' + s].clone().invert()));
       if (hf) poseHand(s, hf.fd, hf.pm, gr.type === 'bar' ? 'bar' : gr.type);
-      else { const Ql = B('lowerarm_' + s).getWorldQuaternion(new THREE.Quaternion()); poseHand(s, HR[s].dir.clone().applyQuaternion(Ql), HR[s].palm.clone().applyQuaternion(Ql), 'relaxed'); }
+      else { const Ql = B('lowerarm_' + s).getWorldQuaternion(new THREE.Quaternion()); poseHand(s, HR[s].dir.clone().applyQuaternion(Ql), HR[s].palm.clone().applyQuaternion(Ql), gr.type === 'fist' ? 'fist' : 'relaxed'); }   // Seil/Handtuch: Faust schließen
       let miss = wT0 ? a2.T.clone().sub(wT0) : null;
       if (!wT0 && gr.type !== 'flat') { const fd = a2.T.clone().sub(a2.E).normalize(); miss = a2.T.clone().addScaledVector(fd, PALM).sub(G); }
-      out[A] = { G, wrist: a2.T.clone(), gr, miss, pm: hf ? hf.pm.clone() : null, gShift: G.clone().sub(G0), conv, fd: hf ? hf.fd.clone() : null };
+      out[A] = { ankShift, G, wrist: a2.T.clone(), gr, miss, pm: hf ? hf.pm.clone() : null, gShift: G.clone().sub(G0), conv, fd: hf ? hf.fd.clone() : null };
     }
     for (let i = 0; i < PONY.length; i++) {
       const n = PONY[i], o = B(n), pq = o.parent.getWorldQuaternion(new THREE.Quaternion());
@@ -4584,7 +4601,7 @@ function makeFigure(M, names, opts = {}) {
     let minY = 9, under = 0; const v = V();
     for (const m of SURF) { const pa = m.geometry.attributes.position, si = m.geometry.attributes.skinIndex;
       for (let k = 0; k < pa.count; k += 4) {
-        const bn = m.skeleton.bones[si.getX(k)].name; if (!all && /hand|index|middle|ring|pinky|thumb|foot|ball/.test(bn)) continue;
+        const bn = m.skeleton.bones[si.getX(k)].name; if (!all && /hand|index|middle|ring|pinky|thumb|foot|ball|pony/.test(bn)) continue;   // Zopf legt sich selbst auf den Boden
         v.fromBufferAttribute(pa, k); m.boneTransform(k, v); v.applyMatrix4(m.matrixWorld); if (v.y < minY) minY = v.y; if (v.y < -.015) under++;
       } }
     return { minY, under };
@@ -4601,7 +4618,7 @@ function makeFigure(M, names, opts = {}) {
     return m;
   }
   const dispose = () => { matMap.forEach(m => m.dispose()); M.parent && M.parent.remove(M); };
-  return { M, apply, setMuscles, probe, probeLimbs, soleDepth, soleMin, B, L, mesh, U, dispose };
+  return { M, apply, armLen: () => L.up + L.fo + PALM, setMuscles, probe, probeLimbs, soleDepth, soleMin, B, L, mesh, U, dispose };
 }
 
 
@@ -4694,13 +4711,13 @@ function makeFigure(M, names, opts = {}) {
     const at = t => { v.t = Math.min(t, per - 1e-3); v._frame(0); return v._J; };   // Pose + Geräte genau wie im Ablauf (Zeit → Phase)
     for (const fr of [0, .125, .25, .375, .5, .625, .75, .875]) {
       try {
-        const t = fr * per, J = at(t); F.apply(J, { grips: grips(v, J), dy: 0, resetDyn: true }); mn = Math.min(mn, F.probe().minY);
+        const t = fr * per, J = at(t); (g0 => F.apply(J, { grips: g0, dy: 0, resetDyn: true, norm: normFlags(v, J, g0), legNorm: (v.tpl && v.tpl.legNorm) || false }))(grips(v, J)); mn = Math.min(mn, F.probe().minY);
       } catch (e) {}
     }
     if (mn < -.01) v._nfDy = -mn + .004;
     // Auflage: Polster/Matte als Fläche (auch schräg oder senkrecht, z. B. Rückenlehne). Pro Übung ein fester Versatz:
     // erst aus Polstern herausschieben, dann – wenn der Körper darauf liegt/sitzt, aber schwebt – auf die Fläche legen.
-    v._nfOff = V(0, 0, 0); v._nfColl = false;
+    v._nfOff = V(0, 0, 0); v._nfColl = false; v._nfPadLift = new Map();
     const frames = [0, .25, .5, .75].map(fr => ({ fr, t: fr * per }));
     const run = (f, extra) => { f.J = at(f.t); F.apply(f.J, Object.assign({ grips: grips(v, f.J), dy: v._nfDy, off: v._nfOff, resetDyn: true }, extra || {})); };
     for (let it = 0; it < 1; it++) {
@@ -4708,7 +4725,9 @@ function makeFigure(M, names, opts = {}) {
       for (const f of frames) { run(f); for (const r of padContacts(v, F)) { const m = maxPen.get(r.key); if (!m || r.pen > m.pen) maxPen.set(r.key, r); } }
       const pelY = F.B('pelvis').getWorldPosition(V()).y;
       // Polster über dem Körper (z. B. Schulterpolster Wadenmaschine): nach unten heraus, sonst nach oben/vorne
-      let moved = false; for (const r of maxPen.values()) if (r.pen > .006) { const down = r.n.y > .7 && r.cy > pelY + .4; v._nfOff.addScaledVector(r.n, down ? -(Math.min(r.pen, r.thick) + .002) : r.pen + .002); moved = true; }
+      let moved = false; for (const r of maxPen.values()) if (r.pen > .006) { const down = r.n.y > .7 && r.cy > pelY + .4;
+        if (down) { v._nfPadLift.set(r.key, r.n.clone().multiplyScalar(Math.min(r.pen, .12) + .004)); continue; }   // Polster über dem Körper (Schulterpolster): Polster liegt auf den Schultern auf, Körper wird nicht in die Knie gedrückt
+        v._nfOff.addScaledVector(r.n, r.pen + .002); moved = true; }
       if (!moved) break;
     }
     if (/^(backExt|nordic)$/.test(tpl === v.tpl ? v.ex.anim.t : '') || (v.ex.anim.t === 'arm' && v.ex.anim.v === 'preacher') ) v._nfOff.set(0, 0, 0); else if (v._nfOff.length() > .1) v._nfOff.setLength(.1);   // Körper liegt bewusst über einem Polster (Rückenstrecker, Scottbank, Nordic) → nicht verschieben
@@ -4722,7 +4741,8 @@ function makeFigure(M, names, opts = {}) {
           if (best.length() > push.length()) push.copy(best); }
         if (push.length() > .006) v._nfOff.add(push); } }
     const gaps = [];
-    for (const f of frames) { run(f); let g = null; for (const r of padContacts(v, F)) if (r.n.y > .7 && r.cnt > 15 && (g === null || r.gap < g)) g = r.gap; if (g !== null) gaps.push(g); }
+    for (const f of frames) { run(f); let g = null; const stands = ['L', 'R'].every(A => f.J[A].ankle.y < .13 && f.J[A].knee.y > .25);   // steht auf der Matte: Unterschenkel nahe der Matte sind kein „Schweben“
+      for (const r of padContacts(v, F)) { if (stands && r.cy < .05) continue; if (r.n.y > .7 && r.cnt > 15 && (g === null || r.gap < g)) g = r.gap; } if (g !== null) gaps.push(g); }
     if (gaps.length >= 3) { gaps.sort((a, b) => a - b); const g = gaps[0]; if (g > .006 && g < .12) v._nfOff.y -= g - .002; }
     // Füße, die laut Vorlage stehen, dürfen durch das Anheben nicht in der Luft hängen: Versatz nach oben wieder zurücknehmen
     if (v._nfOff.y > 0) { let fl = 0; v._nfPads = pads(v);
@@ -4736,7 +4756,7 @@ function makeFigure(M, names, opts = {}) {
       const K = 48, map = new Map();
       for (let k = 0; k < K; k++) {
         const fr = k / K, t = fr * per; const J = at(t); v._nfGS = {};
-        const gr = grips(v, J); let out = F.apply(J, { grips: gr, dy: v._nfDy, off: v._nfOff, resetDyn: true });
+        const gr = grips(v, J); let out = F.apply(J, { grips: gr, dy: v._nfDy, off: v._nfOff, resetDyn: true , norm: normFlags(v, J, gr), legNorm: (v.tpl && v.tpl.legNorm) || false });
         for (const h of heldList(v, J, gr, out)) {
           const key = v.kit.g.children.indexOf(h.grp); if (key < 0) continue; const base = h.grp.position.clone(), push = V(), gOff = {};
           for (let it = 0; it < 5; it++) {
@@ -4744,7 +4764,7 @@ function makeFigure(M, names, opts = {}) {
             const sh = V(); let ns = 0; for (const A of h.hands) if (out[A] && out[A].gShift) { sh.add(out[A].gShift); ns++; } if (ns) sh.multiplyScalar(1 / ns);
             h.grp.position.copy(base).add(sh).add(miss); h.grp.updateMatrixWorld(true);
             const bp = bodyPush(v, F, h.grp, J); if (bp.length() < .003) break;
-            push.add(bp); if (push.length() > .12) push.setLength(.12); for (const A of h.hands) gOff[A] = push.clone(); out = F.apply(J, { grips: gr, dy: v._nfDy, off: v._nfOff, gOff, resetDyn: true });
+            push.add(bp); if (push.length() > .12) push.setLength(.12); for (const A of h.hands) gOff[A] = push.clone(); out = F.apply(J, { grips: gr, dy: v._nfDy, off: v._nfOff, gOff, resetDyn: true , norm: normFlags(v, J, gr), legNorm: (v.tpl && v.tpl.legNorm) || false });
           }
           h.grp.position.copy(base);
           if (!map.has(key)) map.set(key, { hands: h.hands, c: Array.from({ length: K }, () => V()) }); map.get(key).c[k] = push.clone();
@@ -4762,7 +4782,7 @@ function makeFigure(M, names, opts = {}) {
           const fr = k / K, t = fr * per; const J = at(t); v._nfGS = {};
           const gr = grips(v, J), gOff = {}, list = heldList(v, J, gr, {});
           for (const h of list) { const e = map.get(v.kit.g.children.indexOf(h.grp)); if (e) for (const A of h.hands) gOff[A] = e.c[k].clone(); }
-          const out = F.apply(J, { grips: gr, dy: v._nfDy, off: v._nfOff, gOff, resetDyn: true });
+          const out = F.apply(J, { grips: gr, dy: v._nfDy, off: v._nfOff, gOff, resetDyn: true , norm: normFlags(v, J, gr), legNorm: (v.tpl && v.tpl.legNorm) || false });
           for (const h of list) { const e = map.get(v.kit.g.children.indexOf(h.grp)); if (!e) continue; const base = h.grp.position.clone(), miss = V(); let n = 0;
             for (const A of h.hands) if (out[A] && out[A].miss) { miss.add(out[A].miss); n++; } if (n) miss.multiplyScalar(1 / n);
             const sh = V(); let ns = 0; for (const A of h.hands) if (out[A] && out[A].gShift) { sh.add(out[A].gShift); ns++; } if (ns) sh.multiplyScalar(1 / ns);
@@ -4789,7 +4809,13 @@ function makeFigure(M, names, opts = {}) {
   // Polster (MT.pad) und Matten (MT.mat) als Quader; liefert je Fläche: Normale, tiefstes Eindringen, kleinsten Abstand
   function pads(v) {
     const L = []; if (!v.kit) return L;
-    v.kit.g.traverse(o => { if (o.isMesh && o.visible && o.geometry.type === 'BoxGeometry' && (o.material === v.MT.pad || o.material === v.MT.mat)) { o.updateWorldMatrix(true, false); L.push({ o, inv: o.matrixWorld.clone().invert(), p: o.geometry.parameters, n: V(0, 1, 0).transformDirection(o.matrixWorld) }); } });
+    v.kit.g.traverse(o => { if (o.isMesh && o.visible && o.geometry.type === 'BoxGeometry' && (o.material === v.MT.pad || o.material === v.MT.mat)) { o.updateWorldMatrix(true, false);
+      // Auflagefläche = Seite senkrecht zur dünnsten Abmessung (z. B. Rückenlehne: dünn in z), nicht immer die lokale y-Achse
+      const q = o.geometry.parameters, mw = o.matrixWorld.clone(), sc = V().setFromMatrixScale(mw), dims = [q.width * sc.x, q.height * sc.y, q.depth * sc.z]; let p = q;
+      const thin = dims.indexOf(Math.min(...dims));
+      if (thin === 2) { mw.multiply(new THREE.Matrix4().makeRotationX(Math.PI / 2)); p = { width: q.width, height: q.depth, depth: q.height }; }
+      else if (thin === 0) { mw.multiply(new THREE.Matrix4().makeRotationZ(-Math.PI / 2)); p = { width: q.height, height: q.width, depth: q.depth }; }
+      L.push({ o, inv: mw.clone().invert(), p, n: V(0, 1, 0).transformDirection(mw) }); } });
     return L;
   }
   function eachBodyVert(F, step, re, cb) {
@@ -4876,16 +4902,23 @@ function makeFigure(M, names, opts = {}) {
     const F = v._nf, J = v._J; if (!F || !J) return;
     const ex = v.ex; F.setMuscles(v.muscleOn && ex ? ex.primary || ex.prim || [] : [], v.muscleOn && ex ? ex.secondary || ex.sec || [] : []);
     const gr = grips(v, J), reset = !!v._nfReset; v._nfReset = false;
+    const norm = normFlags(v, J, gr);
+    if (v._nfPadLift && v._nfPadLift.size) for (const c of v.kit.g.children) { const lf = v._nfPadLift.get(c.uuid); if (!lf) continue;
+      if (c._nfPL && c._nfPL.f === v._nfFrame) c.position.copy(c._nfPL.p); else c._nfPL = { f: v._nfFrame, p: c.position.clone() }; c.position.add(lf); c.updateMatrixWorld(true); }
     v._nfPads = pads(v); const fl = (x, z, y) => floorAt(v, x, z, y), off = v._nfOff, padsL = v._nfPads;
-    let dy = v._nfDy || 0, out = F.apply(J, { grips: gr, dy, off, floorAt: fl, pads: padsL, fid: v._nfFrame, resetDyn: reset });
+    let dy = v._nfDy || 0, out = F.apply(J, { grips: gr, dy, off, floorAt: fl, pads: padsL, fid: v._nfFrame, resetDyn: reset, norm, legNorm: (v.tpl && v.tpl.legNorm) || false });
     // Hängen an der Stange: reichen die Arme nicht, zieht sich der Körper hoch (statt Hände unter der Stange)
     if (gr.L.type === 'bar' && gr.R.type === 'bar' && J.L.ankle.y > .06 && J.R.ankle.y > .06 && J.K.u.y > .7) {   // nur echtes Hängen (Füße in der Luft, Oberkörper aufrecht)
-      const headY = F.B('head').getWorldPosition(V()).y;
-      if (out.L.G.y > headY && out.R.G.y > headY)
-        for (let it = 0; it < 3; it++) {
-          const def = Math.max(0, Math.min(out.L.G.y - F.B('middle_02_l').getWorldPosition(V()).y, out.R.G.y - F.B('middle_02_r').getWorldPosition(V()).y) - .01);
-          dy += def; out = F.apply(J, { grips: gr, dy, off, floorAt: fl, pads: padsL, fid: v._nfFrame, resetDyn: reset });
-        }
+      if (!(norm.L > 0) && !(norm.R > 0)) {   // an fester Stange (Klimmzug, Hängen, Dips): nicht an einem gehaltenen Gerät
+        // Körperhöhe so, dass die Arme genauso gebeugt sind wie in der Vorlage (kürzere Arme → Körper höher, längere → tiefer)
+        let sum = 0, n = 0; const Lf = F.armLen();
+        for (const [A, s] of [['L', 'l'], ['R', 'r']]) { const r = Math.min(1, cv(J[A].hand).distanceTo(cv(J[A].sh)) / .62), d = r * Lf, w = out[A].G.clone().sub(F.B('upperarm_' + s).getWorldPosition(V())), h2 = w.x * w.x + w.z * w.z;
+          const above = J[A].hand.y > J[A].sh.y;   // hängend: Schulter unter der Stange; Stütz (Dips): Schulter über den Holmen
+          if (d * d > h2) { sum += w.y + (above ? -1 : 1) * Math.sqrt(d * d - h2); n++; } }
+        if (n) { let hd = sum / n; const HS = v._nfHang || (v._nfHang = { f: -1, v: hd, p: hd });   // weich nachführen (Übergänge ohne Sprung)
+          if (!reset && HS.f >= 0) { if (HS.f !== v._nfFrame) { HS.p = HS.v; HS.f = v._nfFrame; } hd = HS.p + THREE.MathUtils.clamp(hd - HS.p, -.02, .02); } else { HS.p = hd; HS.f = v._nfFrame; }
+          HS.v = hd; dy += hd; out = F.apply(J, { grips: gr, dy, off, floorAt: fl, pads: padsL, fid: v._nfFrame, resetDyn: reset, norm, legNorm: (v.tpl && v.tpl.legNorm) || false }); }
+      }
     }
     // aufliegende Arme/Beine (bei angehobenem Körper): fester Wert pro Übung → kein Springen von Bild zu Bild
     let limbLift = v._nfLimb || null;
@@ -4915,7 +4948,7 @@ function makeFigure(M, names, opts = {}) {
       for (const h of held) { const e = C.map.get(v.kit.g.children.indexOf(h.grp)); if (!e) continue; h.push = e.c[i0].clone().lerp(e.c[i1], w); for (const A of h.hands) gOff[A] = h.push.clone(); }
     }
     for (let it = 0; it < 4; it++) {
-      out = F.apply(J, { grips: gr, dy, off, floorAt: fl, pads: padsL, fid: v._nfFrame, limbLift, gOff, resetDyn: reset && it === 0 });
+      out = F.apply(J, { grips: gr, dy, off, floorAt: fl, pads: padsL, fid: v._nfFrame, limbLift, gOff, resetDyn: reset && it === 0, norm, legNorm: (v.tpl && v.tpl.legNorm) || false });
       if (!held.length) break;
       let changed = false;
       for (const h of held) {
@@ -4936,6 +4969,10 @@ function makeFigure(M, names, opts = {}) {
         if (hdl) { const c = V().setFromMatrixPosition(hdl.o.matrixWorld), ax = V(0, 1, 0).transformDirection(hdl.o.matrixWorld).normalize();
           const palm = F.B('hand_' + s).getWorldPosition(V()).lerp(F.B('middle_01_' + s).getWorldPosition(V()), .7); h.grp.position.addScaledVector(ax, palm.sub(c).dot(ax)); } }
     }
+    // Kabel und Gerätearme, die an einem gehaltenen Griff enden, folgen dem Griff (sonst endet das Kabel neben der Hand)
+    linkFollow(v, held);
+    ropeFollow(v, J, gr, out, norm);
+    if (v.tpl && v.tpl.legNorm) footFollow(v, J, out);
     // losgelassene Geräte (z. B. Ball beim Wurf): Versatz klingt weich aus statt zurückzuspringen
     const HO = v._nfHO || (v._nfHO = new Map());
     for (const h of held) HO.set(h.grp, h.grp.position.clone().sub(h.grp._nfBase));
@@ -4943,6 +4980,70 @@ function makeFigure(M, names, opts = {}) {
       if (g._nfF !== v._nfFrame) { g._nfBase = g.position.clone(); g._nfF = v._nfFrame; off.multiplyScalar(.82); } else g.position.copy(g._nfBase);
       g.position.add(off); if (off.length() < .001) HO.delete(g); }
     rememberGrips(v, gr, out);
+  }
+  // Reichweite anpassen? Ja für freie Hände und gehaltene Geräte (Hantel, Stange, Griff am Kabel); nein für feste Stangen,
+  // Hände auf Boden/Bank/Polster (dort zählt die Position, der Körper passt sich an)
+  function normFlags(v, J, gr) {
+    const out = {}; if (!v.kit) return out; const grp = {}, rel = {};
+    for (const A of ['L', 'R']) {
+      const g = gr[A]; let w = 0;
+      if (g.type === 'fist' && g.o && g.o.geometry.parameters.radialSegments === 6) w = 1;   // Seil/Handtuch: biegsam, das Ende folgt der Hand
+      else if (g.o) { let gp = g.o; while (gp.parent && gp.parent !== v.kit.g) gp = gp.parent; if (gp.parent && (gp !== g.o || carryable(g.o))) { w = 1; grp[A] = gp; } }   // Gruppe (Hantel, Stange, Griff) oder einzelner Ball/Sandsack
+      else { // freie Hand: je näher an Boden/Bank/Polster, desto mehr zählt die Position (stetig, kein Umschalten → kein Ruck)
+        // (bewegliche Polster wie Schulterpolster zählen nicht: sie sitzen am Körper und wandern mit)
+        const G = handTarget(J, A); let d = G.y;
+        v.kit.g.traverse(o => { if (!o.isMesh || !o.visible || o.geometry.type !== 'BoxGeometry' || o.userData.mov) return; o.updateWorldMatrix(true, false); d = Math.min(d, new THREE.Box3().setFromObject(o).distanceToPoint(G)); });
+        w = THREE.MathUtils.smoothstep(d, .1, .24); rel[A] = true; }   // aufgestützte Hand (flach auf Boden/Bank) bleibt, wo sie ist; beim Abheben weicher Übergang
+      out[A] = w;
+    }
+    out.pair = !!(grp.L && grp.L === grp.R); out.rel = rel;
+    return out;
+  }
+  // Gerätepolster/Plattform an den Füßen (Beinstrecker, Beinbeuger, Beinpresse, Kabel am Fuß) folgen dem Fuß der Figur
+  function footFollow(v, J, out) {
+    const F = v._nfFrame, sh = V(); let n = 0; for (const A of ['L', 'R']) if (out[A] && out[A].ankShift) { sh.add(out[A].ankShift); n++; } if (!n) return; sh.multiplyScalar(1 / n); if (sh.length() < .002) return;
+    const am = cv(J.L.ankle).add(cv(J.R.ankle)).multiplyScalar(.5);
+    for (const c of v.kit.g.children) { if (!c.isMesh || !c.userData.mov) continue;
+      if (c._nfFF && c._nfFF.f === F) { c.position.copy(c._nfFF.p); c.quaternion.copy(c._nfFF.q); c.scale.y = c._nfFF.sy; } else c._nfFF = { f: F, p: c.position.clone(), q: c.quaternion.clone(), sy: c.scale.y };
+      if (c.userData.mov === 'rod') { const ax = V(0, 1, 0).applyQuaternion(c.quaternion), hl = c.scale.y * c.geometry.parameters.height / 2;
+        const a = c.position.clone().addScaledVector(ax, -hl), b = c.position.clone().addScaledVector(ax, hl), da = a.distanceTo(am), db = b.distanceTo(am); if (Math.min(da, db) > .3) continue;
+        if (da < db) a.add(sh); else b.add(sh); const d = b.clone().sub(a), ln = d.length(); if (ln < 1e-4) continue;
+        c.position.copy(a).add(b).multiplyScalar(.5); c.quaternion.setFromUnitVectors(V(0, 1, 0), d.normalize()); c.scale.y = ln / c.geometry.parameters.height; }
+      else { if (c.position.distanceTo(am) > .25) continue; c.position.add(sh); }
+      c.updateMatrixWorld(true); }
+    for (const c of v.kit.g.children) { if (!c.isMesh || c.geometry.type !== 'CylinderGeometry' || c.userData.mov) continue; const q = c.geometry.parameters; if (q.radialSegments !== 6) continue;   // Kabel zur Fußschlaufe
+      const ax = V(0, 1, 0).applyQuaternion(c.quaternion), hl = c.scale.y * q.height / 2, a = c.position.clone().addScaledVector(ax, -hl), b = c.position.clone().addScaledVector(ax, hl);
+      for (const A of ['L', 'R']) { const ja = cv(J[A].ankle), s2 = out[A] && out[A].ankShift; if (!s2) continue; if (a.distanceTo(ja) < .06) a.add(s2); else if (b.distanceTo(ja) < .06) b.add(s2); else continue;
+        const d = b.clone().sub(a), ln = d.length(); c.position.copy(a).add(b).multiplyScalar(.5); c.quaternion.setFromUnitVectors(V(0, 1, 0), d.normalize()); c.scale.y = ln / q.height; c.updateMatrixWorld(true); break; } }
+  }
+  // Seil-/Handtuchende liegt in der Hand der Figur (Hand an anderer Stelle als in der Vorlage, weil die Figur andere Armlängen hat)
+  function ropeFollow(v, J, gr, out, norm) {
+    const F = v._nfFrame, lines = [];
+    for (const c of v.kit.g.children) { if (!c.isMesh || c.geometry.type !== 'CylinderGeometry' || c.geometry.parameters.radialSegments !== 6) continue;
+      if (c._nfR && c._nfR.f === F) { c.position.copy(c._nfR.p); c.quaternion.copy(c._nfR.q); c.scale.y = c._nfR.sy; } else c._nfR = { f: F, p: c.position.clone(), q: c.quaternion.clone(), sy: c.scale.y };
+      lines.push(c); }
+    for (const A of ['L', 'R']) { const g = gr[A]; if (!norm[A] || g.type !== 'fist' || !g.o || !out[A]) continue;
+      const T = handTarget(J, A), sh = out[A].G.clone().sub(T); if (sh.length() < .002) continue;
+      for (const c of lines) { const q = c.geometry.parameters, ax = V(0, 1, 0).applyQuaternion(c.quaternion), hl = c.scale.y * q.height / 2;
+        const a = c.position.clone().addScaledVector(ax, -hl), b = c.position.clone().addScaledVector(ax, hl), da = a.distanceTo(T), db = b.distanceTo(T); if (Math.min(da, db) > .09) continue;
+        if (da < db) a.add(sh); else b.add(sh); const d = b.clone().sub(a), ln = d.length(); if (ln < 1e-4) continue;
+        c.position.copy(a).add(b).multiplyScalar(.5); c.quaternion.setFromUnitVectors(V(0, 1, 0), d.normalize()); c.scale.y = ln / q.height; c.updateMatrixWorld(true); } }
+  }
+  function linkFollow(v, held) {
+    const F = v._nfFrame, links = [];
+    for (const c of v.kit.g.children) { if (!c.isMesh || c.geometry.type !== 'CylinderGeometry' || c.scale.y < .05) continue;
+      if (c._nfL && c._nfL.f === F) { c.position.copy(c._nfL.p); c.quaternion.copy(c._nfL.q); c.scale.y = c._nfL.sy; } else c._nfL = { f: F, p: c.position.clone(), q: c.quaternion.clone(), sy: c.scale.y };
+      links.push(c); }
+    for (const h of held) {
+      const base = h.grp._nfBase; if (!base) continue; const off = h.grp.position.clone().sub(base); if (off.length() < .003) continue;
+      for (const c of links) { if (c === h.grp) continue;
+        const ax = V(0, 1, 0).applyQuaternion(c.quaternion), hl = c.scale.y * c.geometry.parameters.height / 2;
+        const a = c.position.clone().addScaledVector(ax, -hl), b = c.position.clone().addScaledVector(ax, hl);
+        const da = a.distanceTo(base), db = b.distanceTo(base); if (Math.min(da, db) > .09) continue;
+        if (da < db) a.add(off); else b.add(off);
+        const d = b.clone().sub(a), ln = d.length(); if (ln < 1e-4) continue;
+        c.position.copy(a).add(b).multiplyScalar(.5); c.quaternion.setFromUnitVectors(V(0, 1, 0), d.normalize()); c.scale.y = ln / c.geometry.parameters.height; c.updateMatrixWorld(true); }
+    }
   }
   // tragbares Gerät: Gruppe (Hantel, Stange) oder einzelner Ball/Sandsack
   function carryable(c) { if (c.isGroup) return true; if (!c.isMesh || !c.visible) return false; const g = c.geometry; if (g.type === 'SphereGeometry') return true;
@@ -5010,5 +5111,5 @@ function makeFigure(M, names, opts = {}) {
   P.dispose = function () { if (this._nf) { this._nf.dispose(); this._nf = null; } if (this._nfEnv) { this._nfEnv.dispose(); this._nfEnv = null; } return orig.dispose.call(this); };
   SW3D.figReady = ready;
   SW3D._nfDebug = { heldHits, bodyPush, heldList, grips, padContacts, pads };   // nur für Prüfseiten
-  SW3D.figVersion = 2;   // v59: Qualitätsprüfung (Griffe, Kontakte, Glättung)
+  SW3D.figVersion = 3;   // v60: Bewegungsabläufe – Gelenkwinkel der Vorlage je Figur (Arm-/Beinlänge), Polster-Auflage, Schulterpolster
 })();
